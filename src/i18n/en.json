@@ -139,6 +139,17 @@
     "subtitle": "Our engineering team builds websites, apps, fully-offline software, and WhatsApp automations — own it, don't rent it. Mention it in your free trial.",
     "cta": "Start a free trial to discuss"
   },
+  "about": {
+    "kicker": "The human behind it",
+    "title": "Built by an engineer who answers your email",
+    "name": "Dushyant Kumar",
+    "role": "Founder & Lead Engineer · GoLuQ",
+    "bio": "I personally design, build, and stand behind every GoLuQ Digital Employee. No call-centre maze, no runaround — when you write in, it reaches me, and I make sure your business is taken care of.",
+    "linkedin": "Connect on LinkedIn",
+    "email": "Email me",
+    "emailValue": "dushyant@goluq.com",
+    "note": "Prefer email? Write to dushyant@goluq.com — a real inbox you'll reach a real person at."
+  },
   "plans": {
     "reception": "Digital Receptionist",
     "support": "Digital Customer Support",

@@ -19,15 +19,10 @@ export function HeroWordmark({ className = "" }: { className?: string }) {
         <span className="brand-luq brand-luq-scan ml-[0.06em]">LuQ</span>
       </div>
 
-      {/* Pronunciation / meaning guide */}
-      <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 font-deva text-[0.32em] font-medium text-muted">
-        <span>
-          <span className="text-fg">गो</span>
-          <span className="text-luq-glow">·लुक़</span>
-        </span>
-        <span className="text-faint">·</span>
-        <span className="font-sans uppercase tracking-[0.25em] text-faint">
-          {isHi ? "“गो लुक” — देखिए, यकीन कीजिए" : "“go-look” — see it, believe it"}
+      {/* Tagline */}
+      <div className="mt-3 font-display text-[0.28em] font-bold uppercase tracking-[0.32em]">
+        <span className="text-gradient-accent">
+          {isHi ? "देखिए · यकीन कीजिए" : "See it · Believe it"}
         </span>
       </div>
     </div>

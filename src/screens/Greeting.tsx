@@ -8,6 +8,7 @@ import { StatReadout } from "../components/StatReadout";
 import { PartnerCTA } from "../components/PartnerCTA";
 import { ProductsShowcase } from "../components/ProductsShowcase";
 import { HomeBuild } from "../components/HomeBuild";
+import { AboutSection } from "../components/AboutSection";
 import type { RoleId } from "../state/useAppState";
 
 /**
@@ -50,7 +51,7 @@ export function Greeting({ onPickRole }: { onPickRole: (id: RoleId) => void }) {
           style={{ textShadow: "0 2px 20px rgb(0 0 0 / 0.6)" }}
         >
           {t("greeting.headline")}{" "}
-          <span className="text-luq-glow">{t("greeting.headlineAccent")}</span>
+          <span className="text-gradient-accent">{t("greeting.headlineAccent")}</span>
         </motion.h1>
       </div>
 
@@ -95,6 +96,7 @@ export function Greeting({ onPickRole }: { onPickRole: (id: RoleId) => void }) {
       {/* Below-the-fold homepage sections */}
       <ProductsShowcase className="mt-20" />
       <HomeBuild className="mt-12" />
+      <AboutSection className="mt-16" />
     </div>
   );
 }

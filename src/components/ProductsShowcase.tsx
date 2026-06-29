@@ -2,10 +2,10 @@ import { motion } from "framer-motion";
 import { Eye, Compass, Activity, ExternalLink, Sparkles, type LucideIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-const PRODUCTS: { key: string; url: string; icon: LucideIcon }[] = [
-  { key: "eagleeye", url: "https://eagleeye.work", icon: Eye },
-  { key: "sarathi", url: "https://sarathi-ai.com", icon: Compass },
-  { key: "nidaan", url: "https://nidaanpartner.com", icon: Activity },
+const PRODUCTS: { key: string; url: string; icon: LucideIcon; glow: string; ring: string; tint: string }[] = [
+  { key: "eagleeye", url: "https://eagleeye.work", icon: Eye, glow: "glow-teal", ring: "ring-teal-glow/30", tint: "text-brand-luq bg-teal-glow/12" },
+  { key: "sarathi", url: "https://sarathi-ai.com", icon: Compass, glow: "glow-violet", ring: "ring-[#8b7cf6]/40", tint: "text-[#a78bfa] bg-[#8b7cf6]/12" },
+  { key: "nidaan", url: "https://nidaanpartner.com", icon: Activity, glow: "glow-blue", ring: "ring-[#3b82f6]/40", tint: "text-[#60a5fa] bg-[#3b82f6]/12" },
 ];
 
 /**
@@ -19,8 +19,8 @@ export function ProductsShowcase({ className = "" }: { className?: string }) {
       <p className="font-mono text-sm uppercase tracking-[0.28em] text-brand-luq">
         {t("products.kicker")}
       </p>
-      <h2 className="mt-2 text-balance font-display text-2xl font-bold text-fg sm:text-4xl">
-        {t("products.title")}
+      <h2 className="mt-2 text-balance font-display text-2xl font-bold sm:text-4xl">
+        <span className="text-gradient-accent">{t("products.title")}</span>
       </h2>
       <p className="mt-2 text-base text-muted sm:text-lg">{t("products.subtitle")}</p>
 
@@ -37,13 +37,13 @@ export function ProductsShowcase({ className = "" }: { className?: string }) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.08, duration: 0.5 }}
-              className="glass glass-interactive group flex flex-col rounded-2xl p-6"
+              className={`glass glass-interactive ${p.glow} group flex flex-col rounded-2xl p-6`}
             >
               <div className="flex items-center justify-between">
-                <span className="grid h-14 w-14 place-items-center rounded-xl bg-teal-glow/10 text-brand-luq ring-1 ring-teal-glow/25">
+                <span className={`grid h-14 w-14 place-items-center rounded-xl ring-1 ${p.tint} ${p.ring}`}>
                   <Icon size={28} strokeWidth={2} />
                 </span>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-teal-glow/10 px-3 py-1 text-xs font-semibold text-brand-luq ring-1 ring-teal-glow/20">
+                <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ring-1 ${p.tint} ${p.ring}`}>
                   <Sparkles size={12} /> {t("products.tag")}
                 </span>
               </div>

@@ -185,6 +185,44 @@
     text-shadow: 0 0 calc(18px * var(--glow-strength)) rgb(var(--c-teal-glow) / 0.6);
   }
 
+  /* Eye-catchy animated gradient text (cyan → violet → teal) for headings/taglines */
+  .text-gradient-accent {
+    background-image: linear-gradient(
+      100deg,
+      rgb(var(--c-teal-glow)) 0%,
+      #8b7cf6 48%,
+      rgb(var(--c-teal-neon)) 100%
+    );
+    background-size: 220% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 0 calc(16px * var(--glow-strength)) rgb(var(--c-teal-glow) / 0.35));
+    animation: chrome-flow 9s linear infinite;
+  }
+
+  /* Colored glow accents for cards (apply alongside .glass) */
+  .glow-teal { box-shadow: 0 10px 40px rgb(34 211 238 / 0.18), inset 0 1px 0 rgb(255 255 255 / 0.08); }
+  .glow-violet { box-shadow: 0 10px 40px rgb(139 124 246 / 0.22), inset 0 1px 0 rgb(255 255 255 / 0.08); }
+  .glow-blue { box-shadow: 0 10px 40px rgb(59 130 246 / 0.2), inset 0 1px 0 rgb(255 255 255 / 0.08); }
+
+  /* Gradient hairline border for emphasis cards */
+  .border-gradient {
+    position: relative;
+  }
+  .border-gradient::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(130deg, rgb(var(--c-teal-glow) / 0.7), #8b7cf6 50%, rgb(var(--c-teal-neon) / 0.6));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
   /* ── Brand textures (two physically different materials) ───────────────── */
   /* GO = carved / brushed matte stone. Fine directional grain + emboss. */
   .brand-go {

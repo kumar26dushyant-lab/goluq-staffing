@@ -20,8 +20,8 @@ export function HomeBuild({ className = "" }: { className?: string }) {
       <p className="font-mono text-sm uppercase tracking-[0.28em] text-brand-luq">
         {t("homeBuild.kicker")}
       </p>
-      <h2 className="mt-2 text-balance font-display text-2xl font-bold text-fg sm:text-4xl">
-        {t("homeBuild.title")}
+      <h2 className="mt-2 text-balance font-display text-2xl font-bold sm:text-4xl">
+        <span className="text-gradient-accent">{t("homeBuild.title")}</span>
       </h2>
       <p className="mt-2 max-w-2xl text-base text-muted sm:text-lg">{t("homeBuild.subtitle")}</p>
 

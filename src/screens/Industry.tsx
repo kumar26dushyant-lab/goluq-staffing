@@ -13,8 +13,8 @@ export function Industry({ onPick }: { onPick: (id: IndustryId) => void }) {
     <div className="mx-auto w-full max-w-4xl px-5 pb-24 pt-4 sm:px-8">
       <StageAssistant line={t("assist.industry")} className="mb-7" />
 
-      <h2 className="mb-7 text-balance text-3xl font-bold leading-tight text-fg sm:text-5xl">
-        {t("industries.prompt")}
+      <h2 className="mb-7 text-balance text-3xl font-bold leading-tight sm:text-5xl">
+        <span className="text-gradient-accent">{t("industries.prompt")}</span>
       </h2>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">

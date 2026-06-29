@@ -102,8 +102,8 @@ export function Simulation({
           <p className="font-mono text-sm uppercase tracking-[0.22em] text-brand-luq">
             {t("recap.doneIn")} <span className="text-fg">{elapsed.toFixed(1)}</span> {t("recap.seconds")}
           </p>
-          <h2 className="text-balance font-display text-2xl font-bold leading-tight text-fg sm:text-4xl">
-            {t("recap.heading")}
+          <h2 className="text-balance font-display text-2xl font-bold leading-tight sm:text-4xl">
+            <span className="text-gradient-accent">{t("recap.heading")}</span>
           </h2>
           <p className="max-w-md text-base text-muted sm:text-lg">{t("recap.subtitle")}</p>
         </motion.div>
