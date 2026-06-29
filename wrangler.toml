@@ -1,0 +1,13 @@
+name = "goluq-staffing"
+compatibility_date = "2024-11-01"
+pages_build_output_dir = "dist"
+
+# D1 binding — create with:  npx wrangler d1 create goluq-leads
+# then paste the returned database_id below (and bind DB in the Pages dashboard too).
+[[d1_databases]]
+binding = "DB"
+database_name = "goluq-leads"
+database_id = "<paste-from-wrangler-d1-create>"
+
+# ADMIN_SECRET (used by /api/affiliate/convert) is set in the Pages dashboard →
+# Settings → Environment variables (encrypted), not here.

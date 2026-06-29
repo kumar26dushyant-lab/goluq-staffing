@@ -1,0 +1,12 @@
+node_modules
+dist
+*.local
+.DS_Store
+.wrangler
+.dev.vars
+*.log
+_legacy
+mockup
+mockup-hud
+mockup-v2
+accent-compare

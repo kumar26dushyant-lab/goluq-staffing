@@ -1,0 +1,374 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================================
+   GoLuQ design tokens — every color flows through these CSS variables so the
+   light/dark themes share one component layer. Values are space-separated RGB
+   channels (no rgb() wrapper) so Tailwind can apply alpha: rgb(var(--c) / .4).
+   ============================================================================ */
+:root,
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* Surfaces — dark (default) */
+  --c-base: 5 7 13;          /* #05070D near-black floor */
+  --c-abyss: 10 15 30;       /* #0A0F1E deep azure-black */
+  --c-panel: 15 23 42;       /* slate-900-ish glass fill */
+  --c-hairline: 255 255 255; /* white, used at low alpha for borders */
+  --c-fg: 240 245 255;       /* primary text */
+  --c-muted: 184 197 224;    /* secondary text (brighter for pop + contrast) */
+  --c-faint: 140 156 188;    /* tertiary text */
+
+  /* Brand */
+  --c-go: 255 255 255;       /* "GO" pure white */
+  --c-luq: 34 211 238;       /* "LuQ" cyan */
+  --c-teal-glow: 34 211 238; /* #22D3EE */
+  --c-teal-neon: 45 212 191; /* #2DD4BF */
+  --c-indigo-glow: 79 70 229;/* #4F46E5 */
+  --c-indigo-deep: 30 27 75; /* #1E1B4B */
+
+  /* Status */
+  --c-success: 52 211 153;   /* emerald */
+  --c-danger: 248 113 113;   /* red */
+  --c-warn: 251 191 36;      /* amber */
+
+  /* Atmosphere strengths (dimmed in light mode) */
+  --glass-fill: 0.55;
+  --glass-blur: 18px;
+  --aurora-opacity: 0.55;
+  --particle-opacity: 0.65;
+  --glow-strength: 1;
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+
+  /* Surfaces — soft cool off-white */
+  --c-base: 244 247 251;     /* #F4F7FB */
+  --c-abyss: 233 238 246;    /* #E9EEF6 */
+  --c-panel: 255 255 255;    /* white glass fill */
+  --c-hairline: 11 16 32;    /* deep ink, low alpha borders */
+  --c-fg: 14 22 41;          /* deep readable text */
+  --c-muted: 71 85 119;
+  --c-faint: 120 134 163;
+
+  /* Brand */
+  --c-go: 11 16 32;          /* "GO" deep ink #0B1020 */
+  --c-luq: 14 154 174;       /* "LuQ" deepened teal #0E9AAE for contrast */
+  --c-teal-glow: 14 154 174;
+  --c-teal-neon: 13 148 136;
+  --c-indigo-glow: 99 102 241;
+  --c-indigo-deep: 79 70 229;
+
+  --c-success: 5 150 105;
+  --c-danger: 220 38 38;
+  --c-warn: 217 119 6;
+
+  --glass-fill: 0.62;
+  --glass-blur: 16px;
+  --aurora-opacity: 0.32;
+  --particle-opacity: 0.4;
+  --glow-strength: 0.6;
+}
+
+/* ----------------------------------------------------------------------- */
+@layer base {
+  * {
+    @apply border-hairline/10;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-base text-fg font-sans antialiased;
+    margin: 0;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    text-rendering: optimizeLegibility;
+    /* Larger, more readable base type across the whole app */
+    font-size: 17px;
+    line-height: 1.6;
+  }
+  @media (min-width: 640px) {
+    body {
+      font-size: 18px;
+    }
+  }
+
+  /* Hindi gets the Devanagari face for crisp small-size rendering */
+  :lang(hi) {
+    font-family: theme('fontFamily.deva');
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-display;
+    letter-spacing: -0.02em;
+  }
+
+  /* Visible focus rings everywhere (a11y) */
+  :focus-visible {
+    outline: 2px solid rgb(var(--c-teal-glow));
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  ::selection {
+    background: rgb(var(--c-teal-glow) / 0.3);
+  }
+}
+
+/* ----------------------------------------------------------------------- */
+@layer components {
+  /* Frosted glass — the workhorse surface */
+  .glass {
+    background: rgb(var(--c-panel) / var(--glass-fill));
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+    backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+    border: 1px solid rgb(var(--c-hairline) / 0.12);
+    box-shadow: var(--tw-shadow, 0 8px 32px rgba(0, 0, 0, 0.45)),
+      inset 0 1px 0 rgb(var(--c-hairline) / 0.08);
+    @apply rounded-2xl shadow-glass;
+  }
+
+  /* Brighter, cyan-edged glass for hero / emphasis panels */
+  .glass-bright {
+    background: rgb(var(--c-panel) / calc(var(--glass-fill) * 0.55));
+    -webkit-backdrop-filter: blur(calc(var(--glass-blur) + 6px)) saturate(160%);
+    backdrop-filter: blur(calc(var(--glass-blur) + 6px)) saturate(160%);
+    border: 1px solid rgb(var(--c-teal-glow) / 0.28);
+    @apply rounded-2xl shadow-neon;
+  }
+
+  /* Animated luminous border sweep on hover (teal) */
+  .glass-interactive {
+    position: relative;
+    transition: transform 0.4s theme('transitionTimingFunction.cinematic'),
+      border-color 0.4s ease, box-shadow 0.4s ease;
+  }
+  .glass-interactive::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(
+      120deg,
+      transparent 20%,
+      rgb(var(--c-teal-glow) / 0.7) 50%,
+      transparent 80%
+    );
+    background-size: 200% 100%;
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+  }
+  .glass-interactive:hover {
+    transform: translateY(-3px);
+    border-color: rgb(var(--c-teal-glow) / 0.4);
+  }
+  .glass-interactive:hover::after {
+    opacity: 1;
+    animation: shimmer 2.5s linear infinite;
+  }
+
+  /* Gradient text helper for "LuQ" cyan glow */
+  .text-luq-glow {
+    color: rgb(var(--c-luq));
+    text-shadow: 0 0 calc(18px * var(--glow-strength)) rgb(var(--c-teal-glow) / 0.6);
+  }
+
+  /* ── Brand textures (two physically different materials) ───────────────── */
+  /* GO = carved / brushed matte stone. Fine directional grain + emboss. */
+  .brand-go {
+    color: transparent;
+    background-image:
+      repeating-linear-gradient(
+        100deg,
+        rgb(var(--c-go)) 0px,
+        rgb(var(--c-go)) 2px,
+        rgb(var(--c-go) / 0.62) 3px,
+        rgb(var(--c-go)) 5px
+      ),
+      linear-gradient(180deg, rgb(var(--c-go)), rgb(var(--c-go) / 0.7));
+    background-blend-mode: multiply;
+    -webkit-background-clip: text;
+    background-clip: text;
+    filter: drop-shadow(0 2px 1px rgb(0 0 0 / 0.45))
+      drop-shadow(0 -1px 0 rgb(var(--c-go) / 0.25));
+  }
+
+  /* LuQ = liquid iridescent chrome. On-brand cyan→teal→indigo sheen that flows. */
+  .brand-luq {
+    color: transparent;
+    background-image: linear-gradient(
+      110deg,
+      rgb(var(--c-teal-neon)) 0%,
+      rgb(var(--c-teal-glow)) 22%,
+      #ffffff 38%,
+      rgb(var(--c-teal-glow)) 52%,
+      rgb(var(--c-indigo-glow)) 74%,
+      rgb(var(--c-teal-neon)) 100%
+    );
+    background-size: 240% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    filter: drop-shadow(0 0 calc(22px * var(--glow-strength)) rgb(var(--c-teal-glow) / 0.55));
+    animation: chrome-flow 6s linear infinite;
+  }
+}
+
+@keyframes chrome-flow {
+  0% { background-position: 0% 0; }
+  100% { background-position: 240% 0; }
+}
+
+/* ============================================================================
+   Holographic core — a rotating volumetric HUD (the "5D" centerpiece).
+   Pure CSS 3D (preserve-3d) so it's GPU-cheap and bundle-free. Pointer parallax
+   is fed in via --rx / --ry. All spins stop under prefers-reduced-motion below.
+   ============================================================================ */
+.holo-scene {
+  perspective: 1100px;
+  perspective-origin: 50% 45%;
+}
+.holo-stage {
+  position: relative;
+  transform-style: preserve-3d;
+  transform: rotateX(calc(18deg + var(--ry, 0deg))) rotateZ(0deg) rotateY(var(--rx, 0deg));
+  transition: transform 0.25s ease-out;
+}
+
+/* Glowing reactor core */
+.holo-core {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 42% 38%, #ffffff 0%, rgb(var(--c-teal-glow)) 18%, rgb(var(--c-teal-neon)) 42%, rgb(var(--c-indigo-glow) / 0.5) 70%, transparent 78%);
+  box-shadow:
+    0 0 60px rgb(var(--c-teal-glow) / 0.65),
+    0 0 140px rgb(var(--c-teal-glow) / 0.35),
+    inset 0 0 40px rgb(255 255 255 / 0.35);
+  animation: core-pulse 3.6s ease-in-out infinite;
+}
+@keyframes core-pulse {
+  0%, 100% { transform: scale(1); filter: brightness(1); }
+  50% { transform: scale(1.06); filter: brightness(1.18); }
+}
+
+/* Concentric gyro rings (different axes + speeds) */
+.holo-ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  border-radius: 50%;
+  border: 2px solid rgb(var(--c-teal-glow) / 0.55);
+  box-shadow: 0 0 22px rgb(var(--c-teal-glow) / 0.4), inset 0 0 22px rgb(var(--c-teal-glow) / 0.18);
+  transform-style: preserve-3d;
+}
+.holo-ring::before {
+  /* a bright node travelling the ring */
+  content: "";
+  position: absolute;
+  top: -5px;
+  left: 50%;
+  width: 9px;
+  height: 9px;
+  margin-left: -4px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 16px 4px rgb(var(--c-teal-glow));
+}
+.holo-ring.r1 { animation: spin-a 14s linear infinite; }
+.holo-ring.r2 { border-color: rgb(var(--c-indigo-glow) / 0.5); animation: spin-b 22s linear infinite reverse; }
+.holo-ring.r3 { border-style: dashed; border-color: rgb(var(--c-teal-neon) / 0.45); animation: spin-c 30s linear infinite; }
+
+@keyframes spin-a { to { transform: translate(-50%, -50%) rotateX(70deg) rotateZ(360deg); } }
+@keyframes spin-b { to { transform: translate(-50%, -50%) rotateY(72deg) rotateZ(360deg); } }
+@keyframes spin-c { to { transform: translate(-50%, -50%) rotateX(28deg) rotateY(28deg) rotateZ(360deg); } }
+.holo-ring.r1 { transform: translate(-50%, -50%) rotateX(70deg); }
+.holo-ring.r2 { transform: translate(-50%, -50%) rotateY(72deg); }
+.holo-ring.r3 { transform: translate(-50%, -50%) rotateX(28deg) rotateY(28deg); }
+
+/* Orbit of holographic data tiles */
+.holo-orbit {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform-style: preserve-3d;
+  animation: orbit-spin 26s linear infinite;
+}
+@keyframes orbit-spin { to { transform: rotateY(360deg); } }
+.holo-tile {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: rgb(var(--c-panel) / 0.45);
+  border: 1px solid rgb(var(--c-teal-glow) / 0.35);
+  box-shadow: 0 0 24px rgb(var(--c-teal-glow) / 0.25), inset 0 0 18px rgb(var(--c-teal-glow) / 0.1);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  color: rgb(var(--c-luq));
+}
+
+/* Brand "look" scan — a light bar that sweeps LuQ like a lens reading */
+.brand-luq-scan {
+  position: relative;
+}
+.brand-luq-scan::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 40%, rgb(255 255 255 / 0.85) 50%, transparent 60%);
+  background-size: 250% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  mix-blend-mode: screen;
+  animation: scan-sweep 4.5s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes scan-sweep {
+  0%, 100% { background-position: 200% 0; }
+  50% { background-position: -60% 0; }
+}
+
+/* ----------------------------------------------------------------------- */
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  /* fills the dynamic viewport, avoiding mobile URL-bar jump */
+  .min-h-dvh {
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+}
+
+/* ----------------------------------------------------------------------- */
+/* Respect reduced motion: kill atmospheric + entrance motion globally.    */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  /* Freeze the holo-core rings/orbit in a pleasant static pose */
+  .holo-stage { transform: rotateX(16deg); }
+}

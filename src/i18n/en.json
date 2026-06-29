@@ -1,0 +1,225 @@
+{
+  "common": {
+    "partner": "Become a Partner · Earn 35%",
+    "back": "Back",
+    "english": "English",
+    "hindi": "हिन्दी",
+    "deploy": "Deploy",
+    "armed": "Armed",
+    "selectRole": "Select a worker to arm",
+    "step": "Step"
+  },
+  "greeting": {
+    "kicker": "See it for yourself.",
+    "command": "Go Luq.",
+    "headline": "Meet a Digital Employee that quietly handles the busywork that slows you down —",
+    "headlineAccent": "and adds value you never imagined.",
+    "intro": "I'm your GoLuQ Digital Staffing Assistant. In under a minute I'll deploy a Digital Employee for your business — works 24×7, makes zero errors, takes zero salary, never takes leave. Pick a worker below and watch it work, live, for free.",
+    "tapToHear": "Tap to hear",
+    "mute": "Mute",
+    "assistant": "Digital Staffing Assistant",
+    "reassure": "Not technical? No problem. We train you in simple language so you can run your Digital Employee with full confidence — you're never left alone with something you don't understand.",
+    "pickPrompt": "Arm a worker →"
+  },
+  "readout": {
+    "title": "Why it changes everything",
+    "alwaysOn": "Always on",
+    "alwaysOnVal": "24 × 7",
+    "salary": "Monthly salary",
+    "salaryVal": "₹0",
+    "errors": "Mistakes made",
+    "errorsVal": "0",
+    "leave": "Days off taken",
+    "leaveVal": "Never"
+  },
+  "roles": {
+    "voice": { "label": "Digital Voice Calling Employee", "blurb": "Calls back every missed lead in their own language." },
+    "support": { "label": "Digital Customer Support Employee", "blurb": "Answers every customer, instantly, around the clock." },
+    "sales": { "label": "Digital Sales Employee", "blurb": "Chases, follows up, and closes — never forgets." },
+    "reception": { "label": "Digital Receptionist", "blurb": "Books, reminds, reschedules — your front desk that never sleeps." },
+    "workforce": { "label": "Complete Digital Workforce", "blurb": "A coordinated team of 3–5 digital workers, in sync." }
+  },
+  "industries": {
+    "prompt": "Which industry is your business in?",
+    "clinic": "Clinics & Hospitals",
+    "diagnostic": "Diagnostic Centers",
+    "coaching": "Coaching Institutes",
+    "ca": "CA & Accounting Firms",
+    "travel": "Tours, Travel & Cab Services"
+  },
+  "launch": {
+    "helper": "Watch your Digital Employee work — live.",
+    "ready": "Ready to deploy"
+  },
+  "booking": {
+    "scoreKicker": "The math",
+    "roiTitle": "A human vs your Digital Employee",
+    "humanLabel": "A human employee",
+    "digitalLabel": "Your Digital Employee",
+    "costSaved": "Cost saved: up to {{x}}",
+    "formKicker": "Book your free trial",
+    "formTitle": "Deploy your Digital Employee",
+    "name": "Full name",
+    "namePh": "Your name",
+    "phone": "Phone number",
+    "phonePh": "10-digit mobile",
+    "verify": "Verify",
+    "otpNote": "SMS verification is being enabled — for now we'll confirm on WhatsApp.",
+    "email": "Email (optional)",
+    "emailPh": "you@business.com",
+    "message": "Tell us about your business process or workflow…",
+    "training": "Yes — I'd like a free, simple-language training walkthrough",
+    "crossTitle": "Want our custom engineering team to build other software for your business?",
+    "cross": {
+      "website": "Custom Website Creation",
+      "app": "Custom Mobile App (team or customers)",
+      "local": "Zero-Internet Local Software",
+      "localDesc": "Runs 100% offline on your own office machines — no internet needed, for total data safety.",
+      "whatsapp": "Custom WhatsApp & Communication Automations"
+    },
+    "reassureTitle": "Worried it's too technical? Don't be.",
+    "reassureBody": "Every trial includes a free, simple-language walkthrough. We sit with you until you're comfortable running it yourself — no tech knowledge needed.",
+    "cta": "Book Your Free Digital Employee Trial",
+    "submitting": "Sending…",
+    "successTitle": "You're all set!",
+    "successBody": "We'll reach out on WhatsApp shortly.",
+    "errorTitle": "Couldn't send that",
+    "errorBody": "Please try again, or reach us on WhatsApp.",
+    "retry": "Try again",
+    "whatsapp": "Reach us on WhatsApp",
+    "startOver": "Start over",
+    "errName": "Please enter your name.",
+    "errPhone": "Enter a valid 10-digit mobile number.",
+    "errEmail": "Enter a valid email or leave it blank."
+  },
+  "trust": {
+    "encrypted": "Encrypted & anti-fraud by design",
+    "control": "Your data stays under your control",
+    "india": "Built in India, for Indian businesses",
+    "safe": "Safe, verified transactions",
+    "training": "Free training & hand-holding included"
+  },
+  "assist": {
+    "industry": "Great choice! Now tell me — which industry is your business in? Tap the one that fits, and I'll show you a real example.",
+    "launch": "Perfect. Your Digital Employee is ready to go. Press Go Luq and watch it work — live, in seconds.",
+    "simRun": "Watch closely — this is your Digital Employee handling a real day's work, right now, in real time.",
+    "recap": "Done! In just seconds, it finished what takes a person hours. Let me walk you through exactly what it did for you.",
+    "booking": "Impressive, isn't it? Let's get your very own Digital Employee started — it's free to try. Don't worry, I'll guide you through this, step by step."
+  },
+  "recap": {
+    "doneIn": "Done in",
+    "seconds": "seconds",
+    "heading": "Here's everything your Digital Employee just handled",
+    "subtitle": "What takes a person hours — finished while you read this line.",
+    "continue": "Get this Digital Employee",
+    "replay": "Watch again"
+  },
+  "products": {
+    "kicker": "Already built · already working",
+    "title": "Real software we've delivered — live and in use today",
+    "subtitle": "Each one ships with Digital Employee capabilities built right in.",
+    "visit": "Visit site",
+    "tag": "Digital Employee inside",
+    "eagleeye": {
+      "name": "EagleEye.work",
+      "desc": "Workforce oversight that watches every task, attendance, and field activity — so nothing slips, even when you're not looking."
+    },
+    "sarathi": {
+      "name": "Sarathi-AI.com",
+      "desc": "An advisor & relationship CRM that follows up, nurtures, and guides every client like your sharpest salesperson — automatically."
+    },
+    "nidaan": {
+      "name": "NidaanPartner.com",
+      "desc": "Diagnostic & pathology lab management — sample to report — with patient reminders and follow-ups handled for you."
+    }
+  },
+  "homeBuild": {
+    "kicker": "Beyond Digital Employees",
+    "title": "Want custom software built for your business?",
+    "subtitle": "Our engineering team builds websites, apps, fully-offline software, and WhatsApp automations — own it, don't rent it. Mention it in your free trial.",
+    "cta": "Start a free trial to discuss"
+  },
+  "plans": {
+    "reception": "Digital Receptionist",
+    "support": "Digital Customer Support",
+    "sales": "Digital Sales (WhatsApp)",
+    "voiceLite": "Voice Calling — Lite",
+    "voicePro": "Voice Calling — Pro",
+    "workforce": "Complete Digital Workforce"
+  },
+  "partner": {
+    "crossMention": "Know other business owners? You can earn 35% every month by referring them.",
+    "becomePartner": "Become a Partner",
+    "backHome": "See what you'll be selling",
+    "assistant": "Digital Partner Guide",
+    "intro": "Welcome! Want to earn every single month — without any tech skills? Refer GoLuQ Digital Employees to businesses you already know. You earn 35% every month for the first year, and keep earning for as long as they stay. Many partners run a small YouTube channel and earn while they sleep. Want me to show you how much you could make?",
+    "showMe": "Show me the earnings",
+    "calc": {
+      "title": "Your earnings calculator",
+      "planLabel": "Which Digital Employee will you sell?",
+      "refsLabel": "How many businesses can you refer?",
+      "year1Monthly": "Per month (year 1)",
+      "year1Total": "Year-1 total",
+      "ongoingMonthly": "Per month (year 2+)",
+      "cumulative24m": "2-year projection",
+      "caveat": "Assumes referred businesses stay active. Real earnings vary.",
+      "perMonth": "/mo",
+      "ask": "Shall I guide you to register? It takes 2 minutes."
+    },
+    "questions": {
+      "earn": { "q": "How much can I earn?", "a": "35% of the plan price every month for the first year, then 12% for as long as the business stays. Use the calculator above to see your numbers." },
+      "paid": { "q": "When & how do I get paid?", "a": "Monthly via UPI, after a ₹500 minimum, following a quick review. We collect your PAN + UPI at sign-up." },
+      "tech": { "q": "Do I need any tech knowledge?", "a": "None. You just connect us to the business — we handle setup and training. Your job is the introduction." },
+      "find": { "q": "How do I find customers?", "a": "People you already know — local shops, clinics, your WhatsApp groups, or a small Hindi YouTube channel." },
+      "fee": { "q": "Is there any joining fee?", "a": "No. It is completely free to join." },
+      "track": { "q": "How is my referral tracked?", "a": "You get a personal link + code. Every click and lead shows up in your private dashboard." }
+    },
+    "guideRegister": "Guide me to register",
+    "reg": {
+      "title": "Register as a Partner",
+      "name": "Full name",
+      "phone": "Phone (+91)",
+      "email": "Email (optional)",
+      "pan": "PAN (for payouts)",
+      "upi": "UPI ID",
+      "youtube": "YouTube / Social URL (optional)",
+      "city": "City (optional)",
+      "submit": "Create my partner account",
+      "submitting": "Creating…",
+      "errName": "Please enter your name.",
+      "errPhone": "Enter a valid 10-digit mobile number.",
+      "errPan": "Enter a valid PAN (e.g. ABCDE1234F).",
+      "errUpi": "Enter a valid UPI ID (e.g. name@bank).",
+      "error": "Something went wrong. Please try again."
+    },
+    "done": {
+      "title": "You're a GoLuQ Partner! 🎉",
+      "shareLabel": "Your share link",
+      "dashLabel": "Your private dashboard",
+      "warning": "Save this link — it's your private key, don't share it.",
+      "copy": "Copy",
+      "copied": "Copied!",
+      "whatsapp": "Share on WhatsApp",
+      "tipsTitle": "Quick start",
+      "tip1": "Share your link on WhatsApp today.",
+      "tip2": "Make one short Hindi video explaining it.",
+      "tip3": "Target 3 local businesses this week."
+    },
+    "dash": {
+      "greeting": "Welcome back",
+      "clicks": "Clicks",
+      "leads": "Leads",
+      "conversions": "Conversions",
+      "earnings": "Earnings",
+      "pending": "Pending",
+      "approved": "Approved",
+      "paid": "Paid",
+      "recent": "Recent activity",
+      "none": "No activity yet — share your link to get started.",
+      "payoutTitle": "How payouts work",
+      "payoutBody": "We disburse via UPI once your approved balance reaches ₹500. Commission payouts may be subject to TDS under Indian tax law; PAN is required.",
+      "invalid": "Link not recognised — please re-check your private dashboard link.",
+      "loading": "Loading your dashboard…"
+    }
+  }
+}
