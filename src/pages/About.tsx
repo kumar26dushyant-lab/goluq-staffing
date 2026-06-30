@@ -31,7 +31,6 @@ export function About() {
   const creds = t("about.creds", { returnObjects: true }) as { org: string; detail: string }[];
   const caps = t("about.caps", { returnObjects: true }) as string[];
   const name = t("about.name");
-  const initials = name.split(" ").map((w) => w[0]).slice(0, 2).join("");
   const email = t("about.emailValue");
 
   return (
@@ -65,12 +64,11 @@ export function About() {
         {/* Founder */}
         <Section title={t("about.founderTitle")}>
           <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
-            <div
-              className="grid h-24 w-24 shrink-0 place-items-center rounded-2xl font-display text-3xl font-bold text-base"
-              style={{ background: "linear-gradient(135deg, rgb(var(--c-teal-glow)), #8b7cf6)" }}
-            >
-              {initials}
-            </div>
+            <img
+              src="/founder.png"
+              alt={name}
+              className="h-28 w-28 shrink-0 rounded-2xl object-cover ring-2 ring-teal-glow/40"
+            />
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="font-display text-2xl font-bold text-fg">{name}</h3>

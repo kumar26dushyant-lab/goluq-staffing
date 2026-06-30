@@ -5,6 +5,7 @@ import { StaffingApp } from "./pages/StaffingApp";
 import { PartnerLanding } from "./pages/PartnerLanding";
 import { PartnerDashboard } from "./pages/PartnerDashboard";
 import { About } from "./pages/About";
+import { Admin } from "./pages/Admin";
 
 /**
  * Router root. Three routes share the same global cinematic background (set in
@@ -24,6 +25,7 @@ export default function App() {
         <Route path="/about" element={<About />} />
         <Route path="/partner" element={<PartnerLanding />} />
         <Route path="/partner/dashboard" element={<PartnerDashboard />} />
+        <Route path="/admin" element={<Admin />} />
         <Route path="*" element={<StaffingApp />} />
       </Routes>
     </BrowserRouter>

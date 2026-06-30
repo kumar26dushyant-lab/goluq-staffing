@@ -2,10 +2,10 @@ import { motion } from "framer-motion";
 import { Eye, Compass, Activity, ExternalLink, Sparkles, type LucideIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-const PRODUCTS: { key: string; url: string; icon: LucideIcon; glow: string; ring: string; tint: string }[] = [
+const PRODUCTS: { key: string; url: string; icon: LucideIcon; logo?: string; glow: string; ring: string; tint: string }[] = [
   { key: "eagleeye", url: "https://eagleeye.work", icon: Eye, glow: "glow-teal", ring: "ring-teal-glow/30", tint: "text-brand-luq bg-teal-glow/12" },
-  { key: "sarathi", url: "https://sarathi-ai.com", icon: Compass, glow: "glow-violet", ring: "ring-[#8b7cf6]/40", tint: "text-[#a78bfa] bg-[#8b7cf6]/12" },
-  { key: "nidaan", url: "https://nidaanpartner.com", icon: Activity, glow: "glow-blue", ring: "ring-[#3b82f6]/40", tint: "text-[#60a5fa] bg-[#3b82f6]/12" },
+  { key: "sarathi", url: "https://sarathi-ai.com", icon: Compass, logo: "/logos/sarathi.png", glow: "glow-violet", ring: "ring-[#8b7cf6]/40", tint: "text-[#a78bfa] bg-[#8b7cf6]/12" },
+  { key: "nidaan", url: "https://nidaanpartner.com", icon: Activity, logo: "/logos/nidaan.png", glow: "glow-blue", ring: "ring-[#3b82f6]/40", tint: "text-[#60a5fa] bg-[#3b82f6]/12" },
 ];
 
 /**
@@ -40,8 +40,12 @@ export function ProductsShowcase({ className = "" }: { className?: string }) {
               className={`glass glass-interactive ${p.glow} group flex flex-col rounded-2xl p-6`}
             >
               <div className="flex items-center justify-between">
-                <span className={`grid h-14 w-14 place-items-center rounded-xl ring-1 ${p.tint} ${p.ring}`}>
-                  <Icon size={28} strokeWidth={2} />
+                <span className={`grid h-14 w-14 place-items-center overflow-hidden rounded-xl ring-1 ${p.tint} ${p.ring}`}>
+                  {p.logo ? (
+                    <img src={p.logo} alt="" className="h-full w-full object-contain p-1.5" />
+                  ) : (
+                    <Icon size={28} strokeWidth={2} />
+                  )}
                 </span>
                 <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ring-1 ${p.tint} ${p.ring}`}>
                   <Sparkles size={12} /> {t("products.tag")}

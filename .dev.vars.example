@@ -1,0 +1,15 @@
+# GoLuQ env — copy to `.dev.vars` (gitignored) for local `wrangler pages dev`,
+# and set the SAME keys in Cloudflare Pages → Settings → Environment variables.
+# NEVER commit real values. Copy the Evolution values from your server's evolution env.
+
+# Admin (protects /api/admin/* and the /admin page)
+ADMIN_SECRET=change-me-long-random
+
+# Shared Evolution API (same server as Sarathi/Nidaan — GoLuQ uses its OWN instance)
+EVOLUTION_API_URL=https://your-evolution-public-url
+EVOLUTION_API_KEY=your-evolution-global-api-key
+GOLUQ_WA_INSTANCE=goluq_main
+
+# Owner number that receives new-lead WhatsApp alerts (E.164 or 10-digit; set later
+# once the new GoLuQ number is live — leads still save to D1 without it)
+OWNER_WHATSAPP=

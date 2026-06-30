@@ -21,7 +21,19 @@ npx wrangler pages dev dist --d1 DB=goluq-leads
    - Build command: `npm run build`
    - Output dir: `dist`
 3. After first deploy → **Settings → Functions → D1 bindings**: add `DB` → `goluq-leads`.
-4. **Settings → Environment variables** (encrypted): add `ADMIN_SECRET` (used by `/api/affiliate/convert`), later `MSG91_KEY` for OTP.
+4. **Settings → Environment variables** (encrypted) — add:
+   - `ADMIN_SECRET` — long random string (protects `/api/affiliate/convert`, `/api/admin/*`, and the `/admin` page)
+   - `EVOLUTION_API_URL` — your shared Evolution server's public URL (same one Sarathi/Nidaan use)
+   - `EVOLUTION_API_KEY` — Evolution global API key
+   - `GOLUQ_WA_INSTANCE` — `goluq_main` (GoLuQ's OWN instance — does NOT touch Sarathi/Nidaan)
+   - `OWNER_WHATSAPP` — number to receive new-lead alerts (set once the new GoLuQ number is connected)
+
+## Lead engine (WhatsApp via shared Evolution)
+On a new lead, `/api/lead` saves to D1 then (best-effort, non-blocking) sends WhatsApp via the **shared Evolution server** using GoLuQ's own instance: an **owner alert** + an **instant customer auto-reply**. No Sarathi/Nidaan instance is touched.
+
+**Connect GoLuQ's WhatsApp number:** open `https://goluq.com/admin`, enter `ADMIN_SECRET`, click **Connect WhatsApp**, and scan the QR with the new GoLuQ number (WhatsApp → Linked devices). The `/admin` page also lists incoming leads. Leads still capture to D1 even before WhatsApp is connected.
+
+Local testing of Functions: `npx wrangler pages dev dist --d1 DB=goluq-leads` (reads `.dev.vars`).
 5. **Custom domains** → add `goluq.com` (+ `www`). SSL provisions automatically.
 6. Re-deploy. Verify a test lead:
 ```bash

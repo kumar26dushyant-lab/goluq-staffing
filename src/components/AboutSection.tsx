@@ -10,7 +10,6 @@ import { LINKEDIN_URL } from "../pages/About";
 export function AboutSection({ className = "" }: { className?: string }) {
   const { t } = useTranslation();
   const name = t("about.name");
-  const initials = name.split(" ").map((w) => w[0]).slice(0, 2).join("");
   const email = t("about.emailValue");
 
   return (
@@ -18,12 +17,11 @@ export function AboutSection({ className = "" }: { className?: string }) {
       <p className="font-mono text-sm uppercase tracking-[0.28em] text-brand-luq">{t("about.kicker")}</p>
 
       <div className="border-gradient glow-violet mt-4 flex flex-col gap-6 rounded-3xl bg-panel/40 p-6 sm:flex-row sm:items-center sm:p-8">
-        <div
-          className="grid h-24 w-24 shrink-0 place-items-center rounded-2xl font-display text-3xl font-bold text-base"
-          style={{ background: "linear-gradient(135deg, rgb(var(--c-teal-glow)), #8b7cf6)" }}
-        >
-          {initials}
-        </div>
+        <img
+          src="/founder.png"
+          alt={name}
+          className="h-28 w-28 shrink-0 rounded-2xl object-cover ring-2 ring-teal-glow/40"
+        />
 
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">

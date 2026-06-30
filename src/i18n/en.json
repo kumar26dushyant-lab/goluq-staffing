@@ -102,7 +102,7 @@
   "assist": {
     "industry": "Great choice! Now tell me — which industry is your business in? Tap the one that fits, and I'll show you a real example.",
     "launch": "Perfect. Your Digital Employee is ready to go. Press Go Luq and watch it work — live, in seconds.",
-    "simRun": "Watch closely — this is your Digital Employee handling a real day's work, right now, in real time.",
+    "simRun": "Watch closely — your Digital Employee is working, right now.",
     "recap": "Done! In just seconds, it finished what takes a person hours. Let me walk you through exactly what it did for you.",
     "booking": "Impressive, isn't it? Let's get your very own Digital Employee started — it's free to try. Don't worry, I'll guide you through this, step by step."
   },
@@ -189,7 +189,7 @@
     "diff1": "Most agencies sell you a service. We solve your problem.",
     "diff2": "Every solution starts with one question: what does this business actually need to grow, save money, or stop bleeding? That question comes from 20 years inside businesses like yours — not as a vendor on the outside, but as the person responsible for making things work.",
 
-    "closeTitle": "Built for Bhilai. Trusted in Boston. Ready for both.",
+    "closeTitle": "Wherever your business is, GoLuQ is ready.",
     "closeBody": "GoLuQ works with businesses across India and internationally — the US, UK, Australia, and APAC — because good business problems do not have a geography.",
     "closePunch": "If your business has a digital challenge, GoLuQ has a solution.",
     "getInTouch": "Get in touch"
