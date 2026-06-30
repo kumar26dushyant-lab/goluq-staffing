@@ -245,8 +245,8 @@ export default function HoloScene() {
       </Rig>
 
       <EffectComposer>
-        <Bloom mipmapBlur intensity={1.5} luminanceThreshold={0.12} luminanceSmoothing={0.6} />
-        <Vignette eskil={false} offset={0.18} darkness={0.62} />
+        <Bloom mipmapBlur intensity={0.95} luminanceThreshold={0.2} luminanceSmoothing={0.7} />
+        <Vignette eskil={false} offset={0.1} darkness={0.78} />
       </EffectComposer>
     </Canvas>
   );

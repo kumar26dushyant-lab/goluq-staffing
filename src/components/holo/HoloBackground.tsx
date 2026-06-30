@@ -25,18 +25,21 @@ export function HoloBackground() {
 
   return (
     <div className="pointer-events-none fixed inset-0 -z-10" aria-hidden="true">
-      <WebGLBoundary>
-        <Suspense fallback={null}>
-          <HoloScene />
-        </Suspense>
-      </WebGLBoundary>
+      {/* Reactor dialed back to ambient depth so content reads on top of it */}
+      <div className="absolute inset-0 opacity-[0.7]">
+        <WebGLBoundary>
+          <Suspense fallback={null}>
+            <HoloScene />
+          </Suspense>
+        </WebGLBoundary>
+      </div>
 
-      {/* Readability scrim — lets the reactor glow through but tames it under text */}
+      {/* Readability veil — stronger now, so text always wins over the background */}
       <div
         className="absolute inset-0"
         style={{
           background:
-            "radial-gradient(120% 85% at 50% 38%, transparent 0%, rgb(var(--c-base) / 0.42) 72%), linear-gradient(180deg, rgb(var(--c-base) / 0.28) 0%, rgb(var(--c-base) / 0.55) 100%)",
+            "radial-gradient(110% 80% at 50% 32%, transparent 0%, rgb(var(--c-base) / 0.6) 70%), linear-gradient(180deg, rgb(var(--c-base) / 0.45) 0%, rgb(var(--c-base) / 0.72) 100%)",
         }}
       />
     </div>
