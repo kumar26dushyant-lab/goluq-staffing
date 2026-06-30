@@ -6,6 +6,7 @@ import { PartnerLanding } from "./pages/PartnerLanding";
 import { PartnerDashboard } from "./pages/PartnerDashboard";
 import { About } from "./pages/About";
 import { Admin } from "./pages/Admin";
+import { AssistantChat } from "./components/AssistantChat";
 
 /**
  * Router root. Three routes share the same global cinematic background (set in
@@ -28,6 +29,7 @@ export default function App() {
         <Route path="/admin" element={<Admin />} />
         <Route path="*" element={<StaffingApp />} />
       </Routes>
+      <AssistantChat />
     </BrowserRouter>
   );
 }

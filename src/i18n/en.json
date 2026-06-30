@@ -194,6 +194,21 @@
     "closePunch": "If your business has a digital challenge, GoLuQ has a solution.",
     "getInTouch": "Get in touch"
   },
+  "chat": {
+    "open": "Ask the assistant",
+    "title": "Digital Staffing Assistant",
+    "subtitle": "Ask me anything about your business",
+    "placeholder": "Type your question…",
+    "send": "Send",
+    "greeting": "Hi! 👋 Tell me your business type and I'll show you which Digital Employee fits — or ask me anything.",
+    "thinking": "typing…",
+    "suggest": [
+      "Which worker fits my business?",
+      "Is it really free to try?",
+      "I run a clinic — can it help?",
+      "How does training work?"
+    ]
+  },
   "security": {
     "kicker": "Security & trust",
     "title": "Serious about your security",

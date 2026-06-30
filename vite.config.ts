@@ -39,6 +39,21 @@ function devApiMock(): Plugin {
           req.on("end", () => {
             // eslint-disable-next-line no-console
             console.log(`[dev-api] ${url}`, body);
+            if (url.startsWith("/api/assistant")) {
+              let lang = "en";
+              try {
+                lang = JSON.parse(body).lang === "hi" ? "hi" : "en";
+              } catch {
+                /* ignore */
+              }
+              return send({
+                ok: true,
+                reply:
+                  lang === "hi"
+                    ? "(डेमो) ज़रूर! ऊपर एक कर्मचारी चुनिए और उसे लाइव काम करते देखिए — ट्रायल मुफ़्त है। (असली स्मार्ट जवाब डिप्लॉय पर GEMINI_API_KEY के साथ आएँगे।)"
+                    : "(demo) Happy to help! Pick a worker above to watch it work live — the trial is free. (Real smart replies activate with GEMINI_API_KEY on deploy.)",
+              });
+            }
             if (url.startsWith("/api/affiliate/register")) {
               return send({
                 ok: true,

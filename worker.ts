@@ -18,6 +18,7 @@ import { onRequestGet as waStatus } from "./functions/api/admin/wa-status";
 import { onRequestGet as adminLeads } from "./functions/api/admin/leads";
 import { onRequest as cronFollowups } from "./functions/api/cron/followups";
 import { onRequestPost as waWebhook } from "./functions/api/wa/webhook";
+import { onRequestPost as assistant } from "./functions/api/assistant";
 
 interface Env {
   ASSETS: Fetcher;
@@ -78,6 +79,7 @@ export default {
 
       const run = async (h: Handler) => harden(await h(pagesCtx));
 
+      if (path === "/api/assistant" && method === "POST") return run(assistant);
       if (path === "/api/lead" && method === "POST") return run(lead);
       if (path === "/api/affiliate/register" && method === "POST") return run(affRegister);
       if (path === "/api/affiliate/track" && method === "POST") return run(affTrack);
