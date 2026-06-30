@@ -60,6 +60,14 @@ export function TopBar({
       <div className="flex items-center gap-2.5">
         {showPartnerCta && (
           <Link
+            to="/about"
+            className="hidden rounded-full px-3 py-2 text-sm font-semibold text-muted hover:text-fg md:block"
+          >
+            {t("about.navTitle")}
+          </Link>
+        )}
+        {showPartnerCta && (
+          <Link
             to="/partner"
             className="glass glass-interactive hidden items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-muted hover:text-fg sm:flex"
           >

@@ -4,6 +4,7 @@ import { captureRefFromUrl } from "./lib/refAttribution";
 import { StaffingApp } from "./pages/StaffingApp";
 import { PartnerLanding } from "./pages/PartnerLanding";
 import { PartnerDashboard } from "./pages/PartnerDashboard";
+import { About } from "./pages/About";
 
 /**
  * Router root. Three routes share the same global cinematic background (set in
@@ -20,6 +21,7 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<StaffingApp />} />
+        <Route path="/about" element={<About />} />
         <Route path="/partner" element={<PartnerLanding />} />
         <Route path="/partner/dashboard" element={<PartnerDashboard />} />
         <Route path="*" element={<StaffingApp />} />

@@ -141,14 +141,58 @@
   },
   "about": {
     "kicker": "The human behind it",
-    "title": "Built by an engineer who answers your email",
-    "name": "Dushyant Kumar",
-    "role": "Founder & Lead Engineer · GoLuQ",
-    "bio": "I personally design, build, and stand behind every GoLuQ Digital Employee. No call-centre maze, no runaround — when you write in, it reaches me, and I make sure your business is taken care of.",
+    "navTitle": "About us",
+    "name": "Dushyant Sharma",
+    "role": "Founder · GoLuQ",
+    "bioShort": "GoLuQ isn't built by a lab — it's built by someone who spent 20+ years inside the world's most demanding businesses, watching where they break and building what actually fixes them.",
+    "readMore": "Read the full story",
     "linkedin": "Connect on LinkedIn",
     "email": "Email me",
     "emailValue": "dushyant@goluq.com",
-    "note": "Prefer email? Write to dushyant@goluq.com — a real inbox you'll reach a real person at."
+    "note": "Prefer email? Write to dushyant@goluq.com — a real inbox you'll reach a real person at.",
+
+    "hero1": "Your business has a problem.",
+    "hero2": "We have already solved it before.",
+    "heroSub": "The only question is how fast you want it done.",
+    "stats": ["20+ Years of Business Experience", "6 Global Enterprises", "4 Continents", "9 Certifications", "Countless Problems Solved"],
+
+    "founderTitle": "The person behind GoLuQ",
+    "founder1": "Dushyant Sharma did not come from a technology lab. He came from the business floor.",
+    "founder2": "He has sat inside the operations of some of the world's most demanding organisations — watching where processes break, where revenue leaks, and where good ideas die because the right technology was never built. That is what changed everything.",
+    "founder3": "After 20+ years moving through leadership roles at Genpact, DXC Technology, Hexaware Technologies, Cornerstone OnDemand (EdCast), Definitive Healthcare, and HighLevel — across India, Dubai, and globally distributed teams spanning APAC, EMEA, and North America — he came to one conclusion:",
+    "founderPunch": "Most businesses do not need more software. They need someone who understands their business well enough to build the right software. GoLuQ is that someone.",
+
+    "credTitle": "Formally trained. Field tested.",
+    "credSub": "Expertise that is not just lived — it is credentialled by institutions that set the global standard.",
+    "creds": [
+      { "org": "The Institutes Knowledge Group, Malvern PA, USA", "detail": "Certified in Property & Casualty Insurance · Risk Management & Insurance" },
+      { "org": "Project Management Institute (PMI), USA", "detail": "Agile Project Management · Microsoft Project · Business Workflows" },
+      { "org": "Microsoft", "detail": "Career Essentials in Generative AI · Microsoft Copilot Studio" },
+      { "org": "Genpact Centre of Excellence", "detail": "Lean Six Sigma · Business Administration & Management" },
+      { "org": "AI & Technology", "detail": "Complete AI Project Management · Generative AI Strategy & Case Studies" }
+    ],
+
+    "capTitle": "One venture. Full digital capability.",
+    "capSub": "Think of GoLuQ as your complete digital arm — from a local Indore business automating customer follow-ups to a US enterprise needing a multi-tenant platform built from scratch.",
+    "caps": [
+      "Software Products & Web Applications",
+      "AI-Powered Workflows & Automation",
+      "Multi-Tenant Enterprise Platforms",
+      "CRM, Marketing & Sales Tech Stacks",
+      "Digital Workforce & Virtual Employees",
+      "Voice-First & Conversational Systems",
+      "Process Digitisation & Operational Tech"
+    ],
+    "capPunch": "If it exists in the digital world, GoLuQ can design it, build it, deploy it, and run it.",
+
+    "diffTitle": "Why GoLuQ is different",
+    "diff1": "Most agencies sell you a service. We solve your problem.",
+    "diff2": "Every solution starts with one question: what does this business actually need to grow, save money, or stop bleeding? That question comes from 20 years inside businesses like yours — not as a vendor on the outside, but as the person responsible for making things work.",
+
+    "closeTitle": "Built for Bhilai. Trusted in Boston. Ready for both.",
+    "closeBody": "GoLuQ works with businesses across India and internationally — the US, UK, Australia, and APAC — because good business problems do not have a geography.",
+    "closePunch": "If your business has a digital challenge, GoLuQ has a solution.",
+    "getInTouch": "Get in touch"
   },
   "plans": {
     "reception": "Digital Receptionist",
