@@ -8,6 +8,7 @@ import { StatReadout } from "../components/StatReadout";
 import { PartnerCTA } from "../components/PartnerCTA";
 import { ProductsShowcase } from "../components/ProductsShowcase";
 import { HomeBuild } from "../components/HomeBuild";
+import { SecuritySection } from "../components/SecuritySection";
 import { AboutSection } from "../components/AboutSection";
 import type { RoleId } from "../state/useAppState";
 
@@ -96,6 +97,7 @@ export function Greeting({ onPickRole }: { onPickRole: (id: RoleId) => void }) {
       {/* Below-the-fold homepage sections */}
       <ProductsShowcase className="mt-20" />
       <HomeBuild className="mt-12" />
+      <SecuritySection className="mt-16" />
       <AboutSection className="mt-16" />
     </div>
   );

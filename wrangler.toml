@@ -1,13 +1,23 @@
 name = "goluq-staffing"
+main = "worker.ts"
 compatibility_date = "2024-11-01"
-pages_build_output_dir = "dist"
 
-# D1 binding — create with:  npx wrangler d1 create goluq-leads
-# then paste the returned database_id below (and bind DB in the Pages dashboard too).
-[[d1_databases]]
-binding = "DB"
-database_name = "goluq-leads"
-database_id = "<paste-from-wrangler-d1-create>"
+# Serve the Vite build (dist) as static assets, with SPA fallback for client routes.
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
 
-# ADMIN_SECRET (used by /api/affiliate/convert) is set in the Pages dashboard →
-# Settings → Environment variables (encrypted), not here.
+# ── D1 (leads + affiliate) ────────────────────────────────────────────────
+# Create the DB first, then UNCOMMENT and paste the database_id:
+#   npx wrangler d1 create goluq-leads
+#   npx wrangler d1 execute goluq-leads --file=./schema.sql --remote
+# Until this is set, the site deploys fine; only the lead/admin APIs are inactive
+# (the booking form falls back to WhatsApp).
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "goluq-leads"
+# database_id = "<paste-from-wrangler-d1-create>"
+
+# Secrets/vars (ADMIN_SECRET, EVOLUTION_*, GOLUQ_WA_INSTANCE, OWNER_WHATSAPP,
+# GEMINI_API_KEY) are set in the dashboard → Settings → Variables and secrets.

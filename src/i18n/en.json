@@ -194,6 +194,19 @@
     "closePunch": "If your business has a digital challenge, GoLuQ has a solution.",
     "getInTouch": "Get in touch"
   },
+  "security": {
+    "kicker": "Security & trust",
+    "title": "Serious about your security",
+    "subtitle": "Your business data deserves real protection — here's how GoLuQ keeps it safe.",
+    "points": [
+      { "t": "Encrypted everywhere", "d": "HTTPS/TLS on every request — your data is encrypted in transit." },
+      { "t": "Hardened by default", "d": "Strict security headers and a content-security-policy block common web attacks." },
+      { "t": "Keys never leak", "d": "API keys and secrets stay server-side — they never touch your browser." },
+      { "t": "Your data, your control", "d": "We never sell or share your data. It stays yours, always." },
+      { "t": "Cloudflare secure edge", "d": "Runs on Cloudflare's global, DDoS-protected network." },
+      { "t": "Nothing to steal", "d": "Token-based access — no customer passwords are ever stored." }
+    ]
+  },
   "plans": {
     "reception": "Digital Receptionist",
     "support": "Digital Customer Support",
