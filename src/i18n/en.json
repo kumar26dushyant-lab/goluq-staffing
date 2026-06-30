@@ -122,15 +122,15 @@
     "tag": "Digital Employee inside",
     "eagleeye": {
       "name": "EagleEye.work",
-      "desc": "Workforce oversight that watches every task, attendance, and field activity — so nothing slips, even when you're not looking."
+      "desc": "Decision intelligence for teams — plugs into Asana & Slack, filters out the noise, and delivers a daily audio brief of only the risks that need you."
     },
     "sarathi": {
       "name": "Sarathi-AI.com",
-      "desc": "An advisor & relationship CRM that follows up, nurtures, and guides every client like your sharpest salesperson — automatically."
+      "desc": "A voice-first CRM for financial advisors — it follows up, nurtures, and guides every client across WhatsApp & Telegram, like your sharpest relationship manager."
     },
     "nidaan": {
       "name": "NidaanPartner.com",
-      "desc": "Diagnostic & pathology lab management — sample to report — with patient reminders and follow-ups handled for you."
+      "desc": "Insurance claim help, done right — when a claim is denied or stuck, Nidaan's experts review it and fight for what you're rightfully owed."
     }
   },
   "homeBuild": {

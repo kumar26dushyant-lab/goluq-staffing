@@ -1,0 +1,58 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Primary gradient - cyan -->
+    <linearGradient id="primary" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#22D3EE"/>
+      <stop offset="50%" stop-color="#06B6D4"/>
+      <stop offset="100%" stop-color="#0891B2"/>
+    </linearGradient>
+    <!-- Background gradient -->
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0C1222"/>
+      <stop offset="100%" stop-color="#1A2332"/>
+    </linearGradient>
+    <!-- Inner glow -->
+    <radialGradient id="innerGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#22D3EE" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#06B6D4" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Glow filter -->
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="240" fill="url(#bg)" stroke="url(#primary)" stroke-width="8"/>
+  
+  <!-- Inner glow effect -->
+  <circle cx="256" cy="256" r="192" fill="url(#innerGlow)" opacity="0.3"/>
+  
+  <!-- Eagle eye shape - stylized ellipse -->
+  <ellipse cx="256" cy="256" rx="160" ry="104" fill="none" stroke="url(#primary)" stroke-width="8" opacity="0.7"/>
+  
+  <!-- Inner eye ring -->
+  <circle cx="256" cy="256" r="80" fill="none" stroke="url(#primary)" stroke-width="6" opacity="0.9"/>
+  
+  <!-- Iris - the core -->
+  <circle cx="256" cy="256" r="48" fill="url(#primary)" filter="url(#glow)"/>
+  
+  <!-- Pupil - dark center -->
+  <circle cx="256" cy="256" r="24" fill="#0C1222"/>
+  
+  <!-- Eye highlights - makes it look alive -->
+  <circle cx="240" cy="240" r="16" fill="white" opacity="0.95"/>
+  <circle cx="272" cy="268" r="8" fill="white" opacity="0.5"/>
+  
+  <!-- Wing accents - stylized feathers (left) -->
+  <path d="M64 256 L128 216 L128 296 Z" fill="url(#primary)" opacity="0.9"/>
+  <path d="M32 256 L80 232 L80 280 Z" fill="url(#primary)" opacity="0.5"/>
+  
+  <!-- Wing accents - stylized feathers (right) -->
+  <path d="M448 256 L384 216 L384 296 Z" fill="url(#primary)" opacity="0.9"/>
+  <path d="M480 256 L432 232 L432 280 Z" fill="url(#primary)" opacity="0.5"/>
+</svg>

@@ -12,8 +12,22 @@ CREATE TABLE IF NOT EXISTS leads (
   cross_sell TEXT,
   wants_training INTEGER DEFAULT 0,
   ref_code TEXT,                       -- affiliate attribution (last-click within window)
-  created_at TEXT NOT NULL
+  created_at TEXT NOT NULL,
+  -- Soft follow-up engine (days 3/5/7/12; stops on opt-out)
+  followup_stage INTEGER DEFAULT 0,    -- 0..4 (which follow-up is next)
+  next_followup_at TEXT,               -- datetime the next follow-up is due (null = done)
+  opted_out INTEGER DEFAULT 0,         -- 1 = customer asked to stop / not interested
+  last_inbound_at TEXT,                -- last time the customer replied
+  status TEXT DEFAULT 'new'            -- new | engaged | opted_out | converted | done
 );
+-- If upgrading an existing DB, run these once (ignore "duplicate column" errors):
+--   ALTER TABLE leads ADD COLUMN followup_stage INTEGER DEFAULT 0;
+--   ALTER TABLE leads ADD COLUMN next_followup_at TEXT;
+--   ALTER TABLE leads ADD COLUMN opted_out INTEGER DEFAULT 0;
+--   ALTER TABLE leads ADD COLUMN last_inbound_at TEXT;
+--   ALTER TABLE leads ADD COLUMN status TEXT DEFAULT 'new';
+CREATE INDEX IF NOT EXISTS idx_leads_followup ON leads(next_followup_at);
+CREATE INDEX IF NOT EXISTS idx_leads_phone ON leads(phone);
 
 CREATE TABLE IF NOT EXISTS affiliates (
   id INTEGER PRIMARY KEY AUTOINCREMENT,

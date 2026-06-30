@@ -33,6 +33,15 @@ On a new lead, `/api/lead` saves to D1 then (best-effort, non-blocking) sends Wh
 
 **Connect GoLuQ's WhatsApp number:** open `https://goluq.com/admin`, enter `ADMIN_SECRET`, click **Connect WhatsApp**, and scan the QR with the new GoLuQ number (WhatsApp → Linked devices). The `/admin` page also lists incoming leads. Leads still capture to D1 even before WhatsApp is connected.
 
+### Soft follow-up (B2) — days 3 / 5 / 7 / 12, then stop
+On submit, the lead is scheduled for gentle WhatsApp touches on days **3, 5, 7, 12**. Each cycle messages the **lead** (warm nudge) + a soft reminder to **you**. If the lead replies **STOP / not interested** (EN or HI), the inbound webhook **opts them out instantly** — no more messages. Optional `GEMINI_API_KEY` makes the wording smarter and the intent-detection sharper (templates/keywords used otherwise).
+
+**Run the daily cron** (pick one):
+- **Oracle VM cron** (simplest, reuses your server): `0 10 * * *  curl -s "https://goluq.com/api/cron/followups?secret=YOUR_ADMIN_SECRET"`
+- **Cloudflare Cron worker**: a tiny scheduled worker that fetches the same URL daily.
+
+The inbound webhook (`/api/wa/webhook`) is auto-registered on GoLuQ's instance when you click **Connect WhatsApp** in `/admin`.
+
 Local testing of Functions: `npx wrangler pages dev dist --d1 DB=goluq-leads` (reads `.dev.vars`).
 5. **Custom domains** → add `goluq.com` (+ `www`). SSL provisions automatically.
 6. Re-deploy. Verify a test lead:

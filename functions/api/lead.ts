@@ -45,8 +45,10 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     }
 
     await env.DB.prepare(
-      `INSERT INTO leads (name, phone, email, message, role, industry, cross_sell, wants_training, ref_code, created_at)
-       VALUES (?,?,?,?,?,?,?,?,?,datetime('now'))`
+      `INSERT INTO leads (name, phone, email, message, role, industry, cross_sell, wants_training, ref_code, created_at,
+                          followup_stage, next_followup_at, opted_out, status)
+       VALUES (?,?,?,?,?,?,?,?,?,datetime('now'),
+               0, datetime('now','+3 days'), 0, 'new')`
     )
       .bind(name, phone, email, message, role, industry, JSON.stringify(crossSell), wantsTraining, ref)
       .run();

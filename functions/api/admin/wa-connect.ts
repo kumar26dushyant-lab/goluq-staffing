@@ -20,7 +20,9 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   }
 
   // Create is idempotent enough for our purpose — ignore "already exists" errors.
-  await createInstance(env);
+  // Register the inbound webhook so customer replies (incl. opt-outs) reach us.
+  const origin = new URL(request.url).origin;
+  await createInstance(env, `${origin}/api/wa/webhook`);
   const conn = await connectInstance(env);
   const state = await connectionState(env);
 

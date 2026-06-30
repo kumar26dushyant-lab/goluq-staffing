@@ -3,7 +3,7 @@ import { Eye, Compass, Activity, ExternalLink, Sparkles, type LucideIcon } from 
 import { useTranslation } from "react-i18next";
 
 const PRODUCTS: { key: string; url: string; icon: LucideIcon; logo?: string; glow: string; ring: string; tint: string }[] = [
-  { key: "eagleeye", url: "https://eagleeye.work", icon: Eye, glow: "glow-teal", ring: "ring-teal-glow/30", tint: "text-brand-luq bg-teal-glow/12" },
+  { key: "eagleeye", url: "https://eagleeye.work", icon: Eye, logo: "/logos/eagleeye.svg", glow: "glow-teal", ring: "ring-teal-glow/30", tint: "text-brand-luq bg-teal-glow/12" },
   { key: "sarathi", url: "https://sarathi-ai.com", icon: Compass, logo: "/logos/sarathi.png", glow: "glow-violet", ring: "ring-[#8b7cf6]/40", tint: "text-[#a78bfa] bg-[#8b7cf6]/12" },
   { key: "nidaan", url: "https://nidaanpartner.com", icon: Activity, logo: "/logos/nidaan.png", glow: "glow-blue", ring: "ring-[#3b82f6]/40", tint: "text-[#60a5fa] bg-[#3b82f6]/12" },
 ];
