@@ -2,10 +2,8 @@ node_modules
 dist
 server-dist
 data
+.git
 .env
-*.local
-.DS_Store
-.wrangler
 .dev.vars
 *.log
 _legacy
@@ -13,3 +11,4 @@ mockup
 mockup-hud
 mockup-v2
 accent-compare
+Goluq transformation plan

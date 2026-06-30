@@ -1,0 +1,15 @@
+# GoLuQ on the Oracle VM. Uses host networking so it can reach Evolution at
+# 127.0.0.1:8080 (same box) — no public Evolution URL needed. nginx proxies
+# goluq.com → 127.0.0.1:8090. Does NOT touch Sarathi/Nidaan.
+services:
+  goluq:
+    build: .
+    container_name: goluq
+    restart: unless-stopped
+    network_mode: host
+    env_file: .env
+    environment:
+      HOST: "127.0.0.1"
+      PORT: "8090"
+    volumes:
+      - ./data:/app/data
