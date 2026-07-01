@@ -1,6 +1,7 @@
 /// <reference types="@cloudflare/workers-types" />
 
 import { evoEnabled, sendText, type EvoEnv } from "../lib/evolution";
+import { getOwnerWhatsapp } from "../lib/settings";
 
 interface Env extends EvoEnv {
   DB: D1Database;
@@ -77,7 +78,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         (message ? `\nNote: ${message}` : "");
 
       const tasks: Promise<unknown>[] = [sendText(env, phone, customerMsg)];
-      if (env.OWNER_WHATSAPP) tasks.push(sendText(env, env.OWNER_WHATSAPP, ownerMsg));
+      const owner = await getOwnerWhatsapp(env.DB, env);
+      if (owner) tasks.push(sendText(env, owner, ownerMsg));
       context.waitUntil(Promise.allSettled(tasks));
     }
 

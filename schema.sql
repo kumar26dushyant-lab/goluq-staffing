@@ -29,6 +29,12 @@ CREATE TABLE IF NOT EXISTS leads (
 CREATE INDEX IF NOT EXISTS idx_leads_followup ON leads(next_followup_at);
 CREATE INDEX IF NOT EXISTS idx_leads_phone ON leads(phone);
 
+-- Runtime-editable admin settings (owner_whatsapp, followups_enabled, …)
+CREATE TABLE IF NOT EXISTS settings (
+  key TEXT PRIMARY KEY,
+  value TEXT
+);
+
 CREATE TABLE IF NOT EXISTS affiliates (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   code TEXT UNIQUE NOT NULL,           -- short share code, e.g. RAVI4K9

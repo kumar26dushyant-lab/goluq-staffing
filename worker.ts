@@ -15,7 +15,12 @@ import { onRequestGet as affStats } from "./functions/api/affiliate/stats";
 import { onRequestPost as affConvert } from "./functions/api/affiliate/convert";
 import { onRequestPost as waConnect } from "./functions/api/admin/wa-connect";
 import { onRequestGet as waStatus } from "./functions/api/admin/wa-status";
+import { onRequestPost as waSend } from "./functions/api/admin/wa-send";
 import { onRequestGet as adminLeads } from "./functions/api/admin/leads";
+import { onRequestGet as adminStats } from "./functions/api/admin/stats";
+import { onRequestPost as adminLead } from "./functions/api/admin/lead";
+import { onRequestGet as adminAffiliates } from "./functions/api/admin/affiliates";
+import { onRequestGet as adminSettingsGet, onRequestPost as adminSettingsPost } from "./functions/api/admin/settings";
 import { onRequest as cronFollowups } from "./functions/api/cron/followups";
 import { onRequestPost as waWebhook } from "./functions/api/wa/webhook";
 import { onRequestPost as assistant } from "./functions/api/assistant";
@@ -87,7 +92,13 @@ export default {
       if (path === "/api/affiliate/convert" && method === "POST") return run(affConvert);
       if (path === "/api/admin/wa-connect" && method === "POST") return run(waConnect);
       if (path === "/api/admin/wa-status" && method === "GET") return run(waStatus);
+      if (path === "/api/admin/wa-send" && method === "POST") return run(waSend);
+      if (path === "/api/admin/stats" && method === "GET") return run(adminStats);
       if (path === "/api/admin/leads" && method === "GET") return run(adminLeads);
+      if (path === "/api/admin/lead" && method === "POST") return run(adminLead);
+      if (path === "/api/admin/affiliates" && method === "GET") return run(adminAffiliates);
+      if (path === "/api/admin/settings" && method === "GET") return run(adminSettingsGet);
+      if (path === "/api/admin/settings" && method === "POST") return run(adminSettingsPost);
       if (path === "/api/cron/followups") return run(cronFollowups);
       if (path === "/api/wa/webhook" && method === "POST") return run(waWebhook);
 

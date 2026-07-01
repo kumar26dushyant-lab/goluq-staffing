@@ -2,6 +2,7 @@
 
 import { evoEnabled, sendText, type EvoEnv } from "../../lib/evolution";
 import { geminiEnabled, geminiText, type GeminiEnv } from "../../lib/gemini";
+import { getOwnerWhatsapp, followupsEnabled } from "../../lib/settings";
 
 interface Env extends EvoEnv, GeminiEnv {
   DB: D1Database;
@@ -66,6 +67,10 @@ export const onRequest: PagesFunction<Env> = async ({ request, env }) => {
   if (!evoEnabled(env)) {
     return Response.json({ ok: false, error: "evolution_not_configured" }, { status: 503 });
   }
+  if (!(await followupsEnabled(env.DB))) {
+    return Response.json({ ok: true, processed: 0, paused: true });
+  }
+  const owner = await getOwnerWhatsapp(env.DB, env);
 
   const due = await env.DB.prepare(
     `SELECT id, name, phone, role, industry, followup_stage, created_at
@@ -87,10 +92,10 @@ export const onRequest: PagesFunction<Env> = async ({ request, env }) => {
     await sendText(env, lead.phone, msg);
 
     // 2) soft reminder to the owner
-    if (env.OWNER_WHATSAPP) {
+    if (owner) {
       await sendText(
         env,
-        env.OWNER_WHATSAPP,
+        owner,
         `🔔 Follow-up #${stage + 1} sent to ${lead.name} (+91 ${lead.phone}) · ${roleLabel}` +
           `${lead.industry ? " · " + lead.industry : ""}. A personal call from you helps.`
       );
