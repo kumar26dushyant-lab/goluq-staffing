@@ -9,6 +9,7 @@ import { D1 } from "./d1";
 
 // Existing Cloudflare Function handlers — reused unchanged (web-standard Request/Response).
 import { onRequestPost as assistant } from "../functions/api/assistant";
+import { onRequestGet as publicConfig } from "../functions/api/config";
 import { onRequestPost as lead } from "../functions/api/lead";
 import { onRequestPost as affRegister } from "../functions/api/affiliate/register";
 import { onRequestPost as affTrack } from "../functions/api/affiliate/track";
@@ -98,6 +99,7 @@ app.use("*", async (c, next) => {
 
 // ── API routes → existing handlers ──────────────────────────────────────────
 app.post("/api/assistant", (c) => callFn(assistant as Handler, c.req.raw));
+app.get("/api/config", (c) => callFn(publicConfig as Handler, c.req.raw));
 app.post("/api/lead", (c) => callFn(lead as Handler, c.req.raw));
 app.post("/api/affiliate/register", (c) => callFn(affRegister as Handler, c.req.raw));
 app.post("/api/affiliate/track", (c) => callFn(affTrack as Handler, c.req.raw));

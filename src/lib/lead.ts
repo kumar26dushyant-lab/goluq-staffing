@@ -12,10 +12,13 @@ export interface LeadPayload {
   wantsTraining: boolean;
 }
 
-/** Optional WhatsApp fallback so a lead is never lost if the API is unreachable. */
-export const WHATSAPP_NUMBER = "919999999999"; // TODO(config): real business WhatsApp
-
-export function whatsappHref(p: Partial<LeadPayload>): string {
+/**
+ * Optional WhatsApp fallback so a lead is never lost if the API is unreachable.
+ * The number is NOT hardcoded — it comes from /api/config (admin-set); if none is
+ * configured the caller simply hides the WhatsApp option.
+ */
+export function whatsappHref(number: string, p: Partial<LeadPayload>): string {
+  const digits = (number || "").replace(/\D/g, "");
   const lines = [
     "Hi GoLuQ — I'd like a free Digital Employee trial.",
     p.name ? `Name: ${p.name}` : "",
@@ -23,7 +26,18 @@ export function whatsappHref(p: Partial<LeadPayload>): string {
     p.role ? `Role: ${p.role}` : "",
     p.industry ? `Industry: ${p.industry}` : "",
   ].filter(Boolean);
-  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(lines.join("\n"))}`;
+  return `https://wa.me/${digits}?text=${encodeURIComponent(lines.join("\n"))}`;
+}
+
+/** Public site config (business WhatsApp, etc.) — no secrets. */
+export async function fetchPublicConfig(): Promise<{ whatsapp: string }> {
+  try {
+    const r = await fetch("/api/config");
+    const d = await r.json();
+    return { whatsapp: (d?.whatsapp as string) || "" };
+  } catch {
+    return { whatsapp: "" };
+  }
 }
 
 /**

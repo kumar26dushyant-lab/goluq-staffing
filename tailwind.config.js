@@ -12,8 +12,9 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Surfaces (theme-aware)
-        base: withVar('--c-base'),       // page background floor
+        // Surfaces (theme-aware). NOTE: named "ink" not "base" — "base" collides
+        // with Tailwind's text-base font-size utility and silently tints text.
+        ink: withVar('--c-base'),        // page background floor / dark text on bright
         abyss: withVar('--c-abyss'),     // deep panel base
         panel: withVar('--c-panel'),     // glass card fill
         hairline: withVar('--c-hairline'),// glass borders

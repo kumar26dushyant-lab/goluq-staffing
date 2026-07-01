@@ -42,7 +42,7 @@ export function GoLuqButton({
           "0 0 24px rgba(34,211,238,0.45)",
         ] }}
         transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
-        className="relative flex items-center gap-3.5 rounded-full px-12 py-5 font-display text-2xl font-bold tracking-tight text-base"
+        className="relative flex items-center gap-3.5 rounded-full px-12 py-5 font-display text-2xl font-bold tracking-tight text-ink"
         style={{
           background:
             "linear-gradient(135deg, rgb(var(--c-teal-glow)) 0%, rgb(var(--c-teal-neon)) 100%)",

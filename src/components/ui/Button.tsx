@@ -30,7 +30,7 @@ export function Button({
   const base =
     "inline-flex items-center justify-center gap-2.5 rounded-full font-display font-bold tracking-tight transition-all disabled:opacity-70";
   const variants: Record<Variant, string> = {
-    primary: "text-base hover:brightness-110",
+    primary: "text-ink hover:brightness-110",
     secondary: "glass glass-interactive text-fg",
     ghost: "text-brand-luq ring-1 ring-teal-glow/40 bg-teal-glow/12 hover:bg-teal-glow/22",
   };

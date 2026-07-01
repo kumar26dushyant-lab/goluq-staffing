@@ -60,7 +60,7 @@ export function AssistantChat() {
         whileHover={{ scale: 1.06 }}
         whileTap={{ scale: 0.95 }}
         aria-label={t("chat.open")}
-        className="fixed bottom-5 right-5 z-50 grid h-14 w-14 place-items-center rounded-full text-base shadow-neon"
+        className="fixed bottom-5 right-5 z-50 grid h-14 w-14 place-items-center rounded-full text-ink shadow-neon"
         style={{ background: "linear-gradient(135deg, rgb(var(--c-teal-glow)), #8b7cf6)" }}
       >
         {open ? <X size={24} /> : <MessageCircle size={24} />}
@@ -144,7 +144,7 @@ export function AssistantChat() {
                 onClick={() => send(input)}
                 disabled={loading || !input.trim()}
                 aria-label={t("chat.send")}
-                className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-base disabled:opacity-50"
+                className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-ink disabled:opacity-50"
                 style={{ background: "linear-gradient(135deg, rgb(var(--c-teal-glow)), rgb(var(--c-teal-neon)))" }}
               >
                 <Send size={18} />

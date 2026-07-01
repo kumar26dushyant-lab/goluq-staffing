@@ -17,6 +17,8 @@ import {
 import { useTranslation } from "react-i18next";
 import { TopBar } from "../components/TopBar";
 import { Button } from "../components/ui/Button";
+import { BrandText } from "../components/BrandText";
+import { BrandMark } from "../components/BrandMark";
 
 // TODO(confirm): real LinkedIn profile URL.
 export const LINKEDIN_URL = "https://www.linkedin.com/in/dushyant-sharma-89659b23/";
@@ -51,14 +53,17 @@ export function About() {
           <p className="mt-5 text-lg italic text-muted sm:text-xl">{t("about.heroSub")}</p>
         </section>
 
-        {/* Stat strip */}
-        <div className="glass border-gradient -mx-1 flex gap-3 overflow-x-auto rounded-2xl px-4 py-4 sm:justify-center">
-          {stats.map((s, i) => (
-            <div key={i} className="flex shrink-0 items-center gap-3">
-              {i > 0 && <span className="text-teal-glow/40">·</span>}
-              <span className="whitespace-nowrap text-sm font-semibold text-fg sm:text-base">{s}</span>
-            </div>
-          ))}
+        {/* Stat strip — wrapping glow pills (no scrollbar) */}
+        <div className="flex flex-wrap justify-center gap-3">
+          {stats.map((s, i) => {
+            const [head, ...rest] = s.split(" ");
+            return (
+              <div key={i} className="glass glow-teal flex items-baseline gap-2 rounded-2xl px-5 py-3">
+                <span className="text-gradient-accent font-display text-xl font-bold">{head}</span>
+                <span className="text-sm font-semibold text-fg">{rest.join(" ")}</span>
+              </div>
+            );
+          })}
         </div>
 
         {/* Founder */}
@@ -78,12 +83,12 @@ export function About() {
             </div>
           </div>
           <div className="mt-6 space-y-4 text-base leading-relaxed text-muted sm:text-lg">
-            <p>{t("about.founder1")}</p>
-            <p>{t("about.founder2")}</p>
-            <p>{t("about.founder3")}</p>
+            <p><BrandText text={t("about.founder1")} /></p>
+            <p><BrandText text={t("about.founder2")} /></p>
+            <p><BrandText text={t("about.founder3")} /></p>
           </div>
           <div className="border-gradient glow-violet mt-6 rounded-2xl bg-panel/40 p-6">
-            <p className="font-display text-lg font-semibold text-fg sm:text-xl">{t("about.founderPunch")}</p>
+            <p className="font-display text-lg font-semibold text-fg sm:text-xl"><BrandText text={t("about.founderPunch")} /></p>
           </div>
         </Section>
 
@@ -124,8 +129,8 @@ export function About() {
               );
             })}
           </div>
-          <p className="mt-6 text-center font-display text-lg font-semibold text-luq-glow sm:text-xl">
-            {t("about.capPunch")}
+          <p className="mt-6 text-center font-display text-lg font-semibold text-fg sm:text-xl">
+            <BrandText text={t("about.capPunch")} />
           </p>
         </Section>
 
@@ -137,12 +142,13 @@ export function About() {
 
         {/* Closing */}
         <section className="mt-16 rounded-3xl border border-teal-glow/30 p-8 text-center shadow-neon sm:p-12" style={{ background: "rgb(var(--c-abyss) / 0.7)" }}>
-          <Globe size={40} className="mx-auto text-brand-luq" />
-          <h2 className="mt-4 text-balance font-display text-2xl font-bold leading-tight sm:text-4xl">
-            <span className="text-gradient-accent">{t("about.closeTitle")}</span>
+          <BrandMark className="mx-auto mb-4 block text-3xl" />
+          <Globe size={36} className="mx-auto text-brand-luq" />
+          <h2 className="mt-4 text-balance font-display text-2xl font-bold leading-tight text-fg sm:text-4xl">
+            <BrandText text={t("about.closeTitle")} />
           </h2>
-          <p className="mx-auto mt-4 max-w-xl text-base text-muted sm:text-lg">{t("about.closeBody")}</p>
-          <p className="mt-4 font-display text-lg font-bold text-fg sm:text-xl">{t("about.closePunch")}</p>
+          <p className="mx-auto mt-4 max-w-xl text-base text-muted sm:text-lg"><BrandText text={t("about.closeBody")} /></p>
+          <p className="mt-4 font-display text-lg font-bold text-fg sm:text-xl"><BrandText text={t("about.closePunch")} /></p>
 
           <div className="mt-7 flex flex-wrap justify-center gap-3">
             <a href={`mailto:${email}`}>
@@ -168,12 +174,17 @@ export function About() {
 }
 
 function Section({ title, sub, children }: { title: string; sub?: string; children: React.ReactNode }) {
+  const hasBrand = /goluq/i.test(title);
   return (
     <section className="mt-16">
       <h2 className="text-balance font-display text-2xl font-bold sm:text-4xl">
-        <span className="text-gradient-accent">{title}</span>
+        {hasBrand ? (
+          <BrandText text={title} className="text-fg" />
+        ) : (
+          <span className="text-gradient-accent">{title}</span>
+        )}
       </h2>
-      {sub && <p className="mt-2 max-w-2xl text-base text-muted sm:text-lg">{sub}</p>}
+      {sub && <p className="mt-2 max-w-2xl text-base text-muted sm:text-lg"><BrandText text={sub} /></p>}
       <div className="mt-6">{children}</div>
     </section>
   );

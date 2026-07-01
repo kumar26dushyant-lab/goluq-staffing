@@ -305,28 +305,34 @@ function WhatsApp() {
 
 function SettingsPanel() {
   const [owner, setOwner] = useState("");
+  const [publicWa, setPublicWa] = useState("");
   const [followups, setFollowups] = useState(true);
   const [saved, setSaved] = useState("");
-  useEffect(() => { adminGet("/api/admin/settings").then((d) => { setOwner(d.owner_whatsapp || ""); setFollowups(d.followups_enabled !== "0"); }); }, []);
+  useEffect(() => { adminGet("/api/admin/settings").then((d) => { setOwner(d.owner_whatsapp || ""); setPublicWa(d.public_whatsapp || ""); setFollowups(d.followups_enabled !== "0"); }); }, []);
   const save = async () => {
     setSaved("");
-    const d = await adminPost("/api/admin/settings", { owner_whatsapp: owner, followups_enabled: followups });
+    const d = await adminPost("/api/admin/settings", { owner_whatsapp: owner, public_whatsapp: publicWa, followups_enabled: followups });
     setSaved(d.ok ? "Saved ✅" : "Failed");
   };
   return (
     <div className="max-w-lg space-y-5">
-      <div className="glass rounded-2xl p-6">
+      <div className="glass space-y-5 rounded-2xl p-6">
         <label className="block">
-          <span className="mb-1.5 block text-base font-semibold text-fg">Owner WhatsApp number</span>
-          <span className="mb-2 block text-sm text-muted">Receives a WhatsApp alert for every new lead. 10-digit or 91XXXXXXXXXX.</span>
+          <span className="mb-1.5 block text-base font-semibold text-fg">Owner WhatsApp (private)</span>
+          <span className="mb-2 block text-sm text-muted">Receives a WhatsApp alert for every new lead. Not shown on the site. 10-digit or 91XXXXXXXXXX.</span>
           <input className={inputClass} value={owner} onChange={(e) => setOwner(e.target.value)} placeholder="9198XXXXXXXX" />
         </label>
-        <label className="mt-5 flex items-center gap-3">
+        <label className="block">
+          <span className="mb-1.5 block text-base font-semibold text-fg">Public contact WhatsApp (shown on site)</span>
+          <span className="mb-2 block text-sm text-muted">Optional. If set, visitors can reach you on WhatsApp from the booking form. Leave blank to hide it.</span>
+          <input className={inputClass} value={publicWa} onChange={(e) => setPublicWa(e.target.value)} placeholder="Leave blank to hide" />
+        </label>
+        <label className="flex items-center gap-3">
           <input type="checkbox" checked={followups} onChange={(e) => setFollowups(e.target.checked)} className="h-5 w-5" />
           <span className="text-base font-semibold text-fg">Automatic follow-ups (day 3 / 5 / 7 / 12)</span>
         </label>
-        <Button className="mt-6" onClick={save}><ShieldCheck size={16} /> Save settings</Button>
-        {saved && <span className="ml-3 text-sm text-muted">{saved}</span>}
+        <div><Button onClick={save}><ShieldCheck size={16} /> Save settings</Button>
+        {saved && <span className="ml-3 text-sm text-muted">{saved}</span>}</div>
       </div>
     </div>
   );

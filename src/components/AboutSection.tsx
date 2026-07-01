@@ -2,6 +2,7 @@ import { Linkedin, Mail, BadgeCheck, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { LINKEDIN_URL } from "../pages/About";
+import { BrandText } from "./BrandText";
 
 /**
  * Homepage founder teaser — condensed trust block linking to the full /about
@@ -29,7 +30,7 @@ export function AboutSection({ className = "" }: { className?: string }) {
             <BadgeCheck size={20} className="text-brand-luq" />
           </div>
           <p className="mt-0.5 text-base font-semibold text-brand-luq">{t("about.role")}</p>
-          <p className="mt-3 text-base leading-relaxed text-muted sm:text-lg">{t("about.bioShort")}</p>
+          <p className="mt-3 text-base leading-relaxed text-muted sm:text-lg"><BrandText text={t("about.bioShort")} /></p>
 
           <div className="mt-5 flex flex-wrap items-center gap-3">
             <Link

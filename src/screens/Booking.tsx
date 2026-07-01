@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import {
   User,
@@ -17,7 +17,7 @@ import { CrossSellGrid, type CrossSellId } from "../components/CrossSellGrid";
 import { TrustBadges } from "../components/TrustBadges";
 import { StageAssistant } from "../components/StageAssistant";
 import { Button } from "../components/ui/Button";
-import { submitLead, whatsappHref } from "../lib/lead";
+import { submitLead, whatsappHref, fetchPublicConfig } from "../lib/lead";
 import { inputClass } from "../lib/ui";
 import type { RoleId, IndustryId } from "../state/useAppState";
 
@@ -47,6 +47,9 @@ export function Booking({
   const [otpOpen, setOtpOpen] = useState(false);
   const [errors, setErrors] = useState<{ name?: string; phone?: string; email?: string }>({});
   const [status, setStatus] = useState<Status>("idle");
+  const [waNumber, setWaNumber] = useState("");
+
+  useEffect(() => { fetchPublicConfig().then((c) => setWaNumber(c.whatsapp)); }, []);
 
   const toggleCross = (id: CrossSellId) =>
     setCrossSell((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
@@ -195,7 +198,7 @@ export function Booking({
             onClick={() => setWantsTraining((v) => !v)}
             className="flex w-full items-center gap-3 rounded-xl border border-teal-glow/25 bg-teal-glow/[0.06] p-3.5 text-left"
           >
-            <span className={`grid h-5 w-5 shrink-0 place-items-center rounded-md border ${wantsTraining ? "border-teal-glow bg-teal-glow text-base" : "border-hairline/30"}`}>
+            <span className={`grid h-5 w-5 shrink-0 place-items-center rounded-md border ${wantsTraining ? "border-teal-glow bg-teal-glow text-ink" : "border-hairline/30"}`}>
               {wantsTraining && <CheckCircle2 size={13} strokeWidth={3} />}
             </span>
             <span className="flex items-center gap-2 text-base font-semibold text-fg">
@@ -236,9 +239,11 @@ export function Booking({
             <button type="button" onClick={handleSubmit} className="rounded-full bg-teal-glow/15 px-4 py-2 text-sm font-semibold text-brand-luq ring-1 ring-teal-glow/30">
               {t("booking.retry")}
             </button>
-            <a href={whatsappHref({ name, phone, role, industry })} target="_blank" rel="noreferrer" className="rounded-full border border-hairline/20 px-4 py-2 text-sm font-semibold text-fg">
-              {t("booking.whatsapp")}
-            </a>
+            {waNumber && (
+              <a href={whatsappHref(waNumber, { name, phone, role, industry })} target="_blank" rel="noreferrer" className="rounded-full border border-hairline/20 px-4 py-2 text-sm font-semibold text-fg">
+                {t("booking.whatsapp")}
+              </a>
+            )}
           </div>
         </div>
       )}

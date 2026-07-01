@@ -42,7 +42,7 @@ export function CrossSellGrid({
           >
             <span
               className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-md border transition-colors ${
-                on ? "border-teal-glow bg-teal-glow text-base" : "border-hairline/30"
+                on ? "border-teal-glow bg-teal-glow text-ink" : "border-hairline/30"
               }`}
             >
               {on && <Check size={13} strokeWidth={3.5} />}
