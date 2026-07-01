@@ -17,4 +17,4 @@ OWNER_WHATSAPP=
 # Gemini (OPTIONAL — server-side only, never in the browser). Powers smart
 # follow-up wording + reply-intent. Without it, templates/keywords are used.
 GEMINI_API_KEY=
-GEMINI_MODEL=gemini-2.0-flash
+GEMINI_MODEL=gemini-2.5-flash

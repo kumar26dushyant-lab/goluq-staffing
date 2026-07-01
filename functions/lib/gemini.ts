@@ -17,9 +17,9 @@ export function geminiEnabled(env: GeminiEnv): boolean {
   return Boolean(env.GEMINI_API_KEY);
 }
 
-export async function geminiText(env: GeminiEnv, prompt: string, maxTokens = 256): Promise<string> {
+export async function geminiText(env: GeminiEnv, prompt: string, maxTokens = 400): Promise<string> {
   if (!env.GEMINI_API_KEY) return "";
-  const model = env.GEMINI_MODEL || "gemini-2.0-flash";
+  const model = env.GEMINI_MODEL || "gemini-2.5-flash";
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${env.GEMINI_API_KEY}`;
   try {
     const res = await fetch(url, {
@@ -27,7 +27,13 @@ export async function geminiText(env: GeminiEnv, prompt: string, maxTokens = 256
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.7, maxOutputTokens: maxTokens },
+        // thinkingBudget:0 → Gemini 2.5 answers directly instead of spending the
+        // token budget on hidden "thinking" (which was truncating short replies).
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: maxTokens,
+          thinkingConfig: { thinkingBudget: 0 },
+        },
       }),
     });
     if (!res.ok) return "";

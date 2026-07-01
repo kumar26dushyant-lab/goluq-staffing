@@ -54,7 +54,7 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
     const prompt =
       `${SYSTEM}\n\nReply in ${lang === "hi" ? "Hindi" : "English"}.\n\n${convo}\nAssistant:`;
 
-    const reply = await geminiText(env, prompt, 280);
+    const reply = await geminiText(env, prompt, 500);
     return Response.json({ ok: true, reply: reply || fallback(lang) });
   } catch {
     return Response.json({ ok: true, reply: fallback("en") });
