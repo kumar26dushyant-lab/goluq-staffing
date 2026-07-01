@@ -1,0 +1,15 @@
+[Unit]
+Description=GoLuQ web (Node/Hono, serves SPA + API)
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/goluq
+EnvironmentFile=/opt/goluq/.env
+ExecStart=/usr/bin/node /opt/goluq/server-dist/index.mjs
+Restart=always
+RestartSec=3
+User=root
+
+[Install]
+WantedBy=multi-user.target
