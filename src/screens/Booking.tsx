@@ -137,7 +137,7 @@ export function Booking({
                 +91
               </span>
               <input
-                className={INPUT}
+                className={`${INPUT} min-w-0 flex-1`}
                 value={phone}
                 onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
                 placeholder={t("booking.phonePh")}

@@ -81,6 +81,15 @@
   html {
     -webkit-text-size-adjust: 100%;
     scroll-behavior: smooth;
+    overflow-x: hidden;
+  }
+
+  /* Media never forces horizontal scroll on small screens */
+  img,
+  svg,
+  video,
+  canvas {
+    max-width: 100%;
   }
 
   body {
@@ -89,6 +98,7 @@
     min-height: 100vh;
     min-height: 100dvh;
     overflow-x: hidden;
+    overflow-wrap: break-word; /* long URLs/tokens wrap instead of overflowing */
     text-rendering: optimizeLegibility;
     /* Larger, more readable base type across the whole app */
     font-size: 17px;

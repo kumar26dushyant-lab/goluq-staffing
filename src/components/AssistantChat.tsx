@@ -60,8 +60,12 @@ export function AssistantChat() {
         whileHover={{ scale: 1.06 }}
         whileTap={{ scale: 0.95 }}
         aria-label={t("chat.open")}
-        className="fixed bottom-5 right-5 z-50 grid h-14 w-14 place-items-center rounded-full text-ink shadow-neon"
-        style={{ background: "linear-gradient(135deg, rgb(var(--c-teal-glow)), #8b7cf6)" }}
+        className="fixed z-50 grid h-14 w-14 place-items-center rounded-full text-ink shadow-neon"
+        style={{
+          background: "linear-gradient(135deg, rgb(var(--c-teal-glow)), #8b7cf6)",
+          bottom: "max(1.25rem, env(safe-area-inset-bottom))",
+          right: "max(1.25rem, env(safe-area-inset-right))",
+        }}
       >
         {open ? <X size={24} /> : <MessageCircle size={24} />}
         {!open && (
