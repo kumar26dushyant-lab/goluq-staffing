@@ -1,0 +1,3 @@
+Contact: mailto:dushyant@goluq.com
+Preferred-Languages: en, hi
+Canonical: https://goluq.com/.well-known/security.txt

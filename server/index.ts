@@ -97,6 +97,42 @@ app.use("*", async (c, next) => {
   for (const [k, v] of Object.entries(SECURITY_HEADERS)) c.res.headers.set(k, v);
 });
 
+// ── In-memory rate limiting (per client IP) — blocks form/endpoint abuse ─────
+const rlStore = new Map<string, { count: number; reset: number }>();
+setInterval(() => {
+  const now = Date.now();
+  for (const [k, v] of rlStore) if (now > v.reset) rlStore.delete(k);
+}, 5 * 60 * 1000).unref?.();
+
+function rateLimited(ip: string, bucket: string, max: number, windowMs: number): boolean {
+  const now = Date.now();
+  const key = `${ip}|${bucket}`;
+  const e = rlStore.get(key);
+  if (!e || now > e.reset) {
+    rlStore.set(key, { count: 1, reset: now + windowMs });
+    return false;
+  }
+  e.count += 1;
+  return e.count > max;
+}
+
+app.use("/api/*", async (c, next) => {
+  const ip =
+    c.req.header("cf-connecting-ip") ||
+    (c.req.header("x-forwarded-for") || "").split(",")[0].trim() ||
+    "unknown";
+  const path = new URL(c.req.url).pathname;
+  // Tighter caps on the write/abuse-prone endpoints; generous otherwise.
+  let max = 120;
+  const write = c.req.method === "POST";
+  if (write && (path === "/api/lead" || path === "/api/assistant" || path === "/api/affiliate/register")) max = 15;
+  else if (path.startsWith("/api/admin/") || path.startsWith("/api/wa/")) max = 60;
+  if (rateLimited(ip, path, max, 60_000)) {
+    return c.json({ ok: false, error: "rate_limited" }, 429);
+  }
+  await next();
+});
+
 // ── API routes → existing handlers ──────────────────────────────────────────
 app.post("/api/assistant", (c) => callFn(assistant as Handler, c.req.raw));
 app.get("/api/config", (c) => callFn(publicConfig as Handler, c.req.raw));
