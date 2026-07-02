@@ -9,6 +9,7 @@ import { Button } from "../components/ui/Button";
 import { EarningsCalculator } from "../components/partner/EarningsCalculator";
 import { QuestionChips } from "../components/partner/QuestionChips";
 import { AffiliateRegisterForm } from "../components/partner/AffiliateRegisterForm";
+import { NudgeBubble } from "../components/NudgeBubble";
 import type { AffiliateRegisterResult } from "../lib/affiliate";
 
 type PartnerStep = "intro" | "calculator" | "questions" | "register" | "done";
@@ -75,6 +76,7 @@ export function PartnerLanding() {
           )}
         </AnimatePresence>
       </main>
+      <NudgeBubble stepKey="partner" />
     </div>
   );
 }

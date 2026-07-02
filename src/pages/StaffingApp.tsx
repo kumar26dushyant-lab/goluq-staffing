@@ -6,6 +6,7 @@ import { Industry } from "../screens/Industry";
 import { Launch } from "../screens/Launch";
 import { Simulation } from "../screens/Simulation";
 import { Booking } from "../screens/Booking";
+import { NudgeBubble } from "../components/NudgeBubble";
 
 /** Route "/" — the 5-step talking staffing flow. Screens swap via AnimatePresence. */
 export function StaffingApp() {
@@ -68,6 +69,10 @@ export function StaffingApp() {
           </motion.div>
         </AnimatePresence>
       </main>
+
+      {["greeting", "industry", "launch", "booking"].includes(state.step) && (
+        <NudgeBubble key={state.step} stepKey={state.step} />
+      )}
     </div>
   );
 }

@@ -209,6 +209,28 @@
       "How does training work?"
     ]
   },
+  "nudge": {
+    "greeting": [
+      "Not sure where to start? Tap any worker to watch it handle a real job.",
+      "Take your time — pick the role closest to your business and see it work."
+    ],
+    "industry": [
+      "Which industry fits you best? Tap one and I'll show a real example.",
+      "Pick your industry — the demo adapts to your exact business."
+    ],
+    "launch": [
+      "Ready when you are — press Go Luq to watch it work, live.",
+      "Just one tap on Go Luq and you'll see it handle a full day's work."
+    ],
+    "booking": [
+      "Stuck on the form? Just your name and number is enough to start.",
+      "It's a free trial — no risk. Want me to help you fill this in?"
+    ],
+    "partner": [
+      "Curious how much you could earn? Try the calculator above.",
+      "It's free to join — shall I guide you through signing up?"
+    ]
+  },
   "security": {
     "kicker": "Security & trust",
     "title": "Serious about your security",
