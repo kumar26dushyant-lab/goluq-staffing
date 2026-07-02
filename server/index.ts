@@ -116,11 +116,30 @@ function rateLimited(ip: string, bucket: string, max: number, windowMs: number):
   return e.count > max;
 }
 
+const clientIp = (c: { req: { header: (k: string) => string | undefined } }) =>
+  c.req.header("cf-connecting-ip") ||
+  (c.req.header("x-forwarded-for") || "").split(",")[0].trim() ||
+  "unknown";
+
+// ── Admin brute-force lockout — repeated wrong secret → temporary block ──────
+const failStore = new Map<string, { fails: number; until: number }>();
+app.use("/api/admin/*", async (c, next) => {
+  const ip = clientIp(c);
+  const e = failStore.get(ip);
+  if (e && e.fails >= 8 && Date.now() < e.until) {
+    return c.json({ ok: false, error: "too_many_attempts" }, 429);
+  }
+  await next();
+  if (c.res.status === 401) {
+    const cur = failStore.get(ip) ?? { fails: 0, until: 0 };
+    failStore.set(ip, { fails: cur.fails + 1, until: Date.now() + 15 * 60 * 1000 });
+  } else if (c.res.status < 400) {
+    failStore.delete(ip);
+  }
+});
+
 app.use("/api/*", async (c, next) => {
-  const ip =
-    c.req.header("cf-connecting-ip") ||
-    (c.req.header("x-forwarded-for") || "").split(",")[0].trim() ||
-    "unknown";
+  const ip = clientIp(c);
   const path = new URL(c.req.url).pathname;
   // Tighter caps on the write/abuse-prone endpoints; generous otherwise.
   let max = 120;

@@ -25,13 +25,10 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   const conn = await connectInstance(env);
   const state = await connectionState(env);
 
-  const qr = conn?.base64 || conn?.qrcode?.base64 || null;
-  const pairingCode = conn?.pairingCode || conn?.code || null;
+  const currentState = state?.instance?.state || state?.state || "unknown";
+  // Only surface a QR when NOT already connected. Never expose the raw QR
+  // content ("code") — it's not a human pairing code.
+  const qr = currentState === "open" ? null : conn?.base64 || conn?.qrcode?.base64 || null;
 
-  return Response.json({
-    ok: true,
-    qr, // data:image/png;base64,... (or null if already connected)
-    pairingCode,
-    state: state?.instance?.state || state?.state || "unknown",
-  });
+  return Response.json({ ok: true, qr, state: currentState });
 };

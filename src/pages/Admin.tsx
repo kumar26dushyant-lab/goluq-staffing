@@ -252,9 +252,9 @@ function Affiliates() {
 function WhatsApp() {
   const [state, setState] = useState("…");
   const [qr, setQr] = useState<string | null>(null);
-  const [pairing, setPairing] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [to, setTo] = useState(""); const [text, setText] = useState("Test from GoLuQ ✅"); const [sent, setSent] = useState("");
+  const connected = state === "open";
 
   const refresh = useCallback(async () => {
     const d = await adminGet("/api/admin/wa-status");
@@ -263,11 +263,17 @@ function WhatsApp() {
   useEffect(() => { refresh(); }, [refresh]);
 
   const connect = async () => {
-    setBusy(true); setQr(null); setPairing(null);
+    setBusy(true); setQr(null);
     const d = await adminPost("/api/admin/wa-connect", {});
     setBusy(false);
-    if (d.ok) { setQr(d.qr || null); setPairing(d.pairingCode || null); setState(d.state || "connecting");
-      const iv = setInterval(async () => { const s = await adminGet("/api/admin/wa-status"); setState(s.state); if (s.state === "open") { setQr(null); clearInterval(iv); } }, 3000);
+    if (d.ok) {
+      setState(d.state || "connecting");
+      if (d.state !== "open") setQr(d.qr || null);
+      const iv = setInterval(async () => {
+        const s = await adminGet("/api/admin/wa-status");
+        setState(s.state);
+        if (s.state === "open") { setQr(null); clearInterval(iv); }
+      }, 3000);
     }
   };
   const send = async () => {
@@ -281,13 +287,15 @@ function WhatsApp() {
       <div className="glass rounded-2xl p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div><h2 className="font-display text-xl font-bold text-fg">Connection</h2>
-            <p className="mt-1 text-sm">State: <span className={state === "open" ? "text-success" : "text-warn"}>{state}</span></p></div>
-          <Button variant="ghost" onClick={connect} disabled={busy}>{busy ? "Connecting…" : state === "open" ? "Reconnect" : "Connect WhatsApp"}</Button>
+            <p className="mt-1 text-sm">State: <span className={connected ? "text-success" : "text-warn"}>{connected ? "connected ✅" : state}</span></p></div>
+          <Button variant={connected ? "secondary" : "ghost"} onClick={connect} disabled={busy}>{busy ? "Connecting…" : connected ? "Reconnect" : "Connect WhatsApp"}</Button>
         </div>
-        {qr && <div className="mt-5 flex flex-col items-center gap-2">
+        {connected && !qr && (
+          <p className="mt-4 rounded-xl bg-success/10 px-4 py-3 text-sm text-success">Your WhatsApp number is linked. New leads will trigger alerts + auto-replies (once an owner number is set in Settings).</p>
+        )}
+        {!connected && qr && <div className="mt-5 flex flex-col items-center gap-2">
           <img src={qr} alt="WhatsApp QR" className="h-56 w-56 rounded-xl bg-white p-2" />
           <p className="text-sm text-muted">Scan with the GoLuQ number → WhatsApp → Linked devices.</p></div>}
-        {pairing && <p className="mt-3 text-center font-mono text-lg text-brand-luq">Pairing code: {pairing}</p>}
       </div>
 
       <div className="glass rounded-2xl p-6">
