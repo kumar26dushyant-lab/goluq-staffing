@@ -46,15 +46,15 @@ export function StageAssistant({
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`relative flex items-start gap-4 rounded-2xl border border-teal-glow/30 p-4 shadow-neon sm:p-5 ${className}`}
-      style={{ background: "rgb(var(--c-abyss) / 0.86)", backdropFilter: "blur(18px)" }}
+      className={`relative flex items-start gap-4 rounded-2xl border border-teal-glow/30 p-5 shadow-neon sm:gap-5 ${className}`}
+      style={{ background: "rgb(var(--c-abyss) / 0.88)", backdropFilter: "blur(18px)" }}
     >
-      <div className="relative grid h-14 w-14 shrink-0 place-items-center rounded-full bg-teal-glow/15 ring-1 ring-teal-glow/40">
-        <WaveformOrb speaking={speaking} bars={14} className="h-7" />
+      <div className="relative grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-full bg-teal-glow/15 ring-1 ring-teal-glow/40">
+        <WaveformOrb speaking={speaking} bars={9} className="h-6" />
       </div>
 
-      <div className="min-w-0 flex-1">
-        <div className="mb-1.5 flex items-center gap-2">
+      <div className="min-w-0 flex-1 pt-0.5">
+        <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-2">
           <span className="font-mono text-xs uppercase tracking-[0.22em] text-brand-luq">
             {t("greeting.assistant")}
           </span>

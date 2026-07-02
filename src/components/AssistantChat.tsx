@@ -81,8 +81,8 @@ export function AssistantChat() {
           >
             {/* Header */}
             <div className="flex items-center gap-3 border-b border-hairline/10 p-4">
-              <div className="grid h-10 w-10 place-items-center rounded-full bg-teal-glow/15 ring-1 ring-teal-glow/30">
-                <WaveformOrb speaking={loading} bars={10} className="h-5" />
+              <div className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-full bg-teal-glow/15 ring-1 ring-teal-glow/30">
+                <WaveformOrb speaking={loading} bars={7} className="h-5" />
               </div>
               <div>
                 <p className="font-display text-base font-bold text-fg">{t("chat.title")}</p>
