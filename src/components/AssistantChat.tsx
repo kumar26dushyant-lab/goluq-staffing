@@ -1,28 +1,72 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { MessageCircle, X, Send, Sparkles } from "lucide-react";
+import { MessageCircle, X, Send, Sparkles, Phone, Check } from "lucide-react";
+import { useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { askAssistant, type ChatMsg } from "../lib/assistant";
+import { askAssistant, pageFromPath, type ChatMsg } from "../lib/assistant";
+import { submitLead } from "../lib/lead";
 import { useVoice } from "../lib/voice";
 import { WaveformOrb } from "./WaveformOrb";
 
+/** How long a visitor sits before the guide walks over and says hello. */
+const TEASER_DELAY_MS = 20_000;
+const TEASER_KEY = "goluq_chat_teased";
+
+const CHAT_INPUT =
+  "mt-3 w-full rounded-xl border border-hairline/20 bg-panel/60 px-3 py-2.5 text-base text-fg placeholder:text-faint outline-none focus:border-teal-glow/50";
+
 /**
- * Floating conversational assistant (Gemini-powered via the server proxy). Lets a
- * visitor TYPE questions and get smart, on-brand answers — and it speaks them too.
- * Available on every page. Curated flows still own the core claims; this handles
- * free-text. Key never touches the browser (see /api/assistant).
+ * The site guide — a floating, Gemini-backed representative (server proxy; the
+ * key never touches the browser). Three behaviours make it a salesperson rather
+ * than a help widget:
+ *
+ *  1. It APPROACHES. After ~20s it offers an opening line, the way a showroom
+ *     rep walks over rather than waiting at the desk. Once per session only.
+ *  2. It knows WHERE the visitor is standing — home / build / partner — and the
+ *     server prompt pitches the appropriate next step for that page.
+ *  3. It CLOSES. Once a real conversation has started it offers to take a name
+ *     and number, and posts it straight into the lead engine with the transcript
+ *     attached, so the follow-up knows what was already discussed.
  */
 export function AssistantChat() {
   const { t, i18n } = useTranslation();
   const lang = i18n.language.startsWith("hi") ? "hi" : "en";
   const { say } = useVoice();
+  const { pathname } = useLocation();
+  const page = pageFromPath(pathname);
 
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [teaser, setTeaser] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const suggest = t("chat.suggest", { returnObjects: true }) as string[];
+
+  // Lead capture
+  const [capturing, setCapturing] = useState(false);
+  const [leadName, setLeadName] = useState("");
+  const [leadPhone, setLeadPhone] = useState("");
+  const [leadState, setLeadState] = useState<"idle" | "sending" | "done" | "error">("idle");
+
+  const turns = messages.filter((m) => m.role === "user").length;
+
+  // Approach the visitor once per session, if they haven't opened the chat.
+  useEffect(() => {
+    if (sessionStorage.getItem(TEASER_KEY)) return;
+    const id = window.setTimeout(() => {
+      setOpen((isOpen) => {
+        if (!isOpen) setTeaser(true);
+        return isOpen;
+      });
+    }, TEASER_DELAY_MS);
+    return () => window.clearTimeout(id);
+  }, []);
+
+  const dismissTeaser = () => {
+    setTeaser(false);
+    sessionStorage.setItem(TEASER_KEY, "1");
+  };
 
   // Seed greeting on first open (and re-seed on language change while empty)
   useEffect(() => {
@@ -34,7 +78,7 @@ export function AssistantChat() {
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
-  }, [messages, loading]);
+  }, [messages, loading, capturing]);
 
   const send = async (text: string) => {
     const q = text.trim();
@@ -43,7 +87,7 @@ export function AssistantChat() {
     const next: ChatMsg[] = [...messages, { role: "user", content: q }];
     setMessages(next);
     setLoading(true);
-    const reply = await askAssistant(next, lang);
+    const reply = await askAssistant(next, lang, page);
     setLoading(false);
     if (reply) {
       setMessages((m) => [...m, { role: "assistant", content: reply }]);
@@ -51,12 +95,77 @@ export function AssistantChat() {
     }
   };
 
+  const sendLead = async () => {
+    if (!/^[6-9]\d{9}$/.test(leadPhone.replace(/\D/g, "")) || leadName.trim().length < 2) {
+      return setLeadState("error");
+    }
+    setLeadState("sending");
+    try {
+      // Attach the conversation so whoever follows up already knows the context.
+      const transcript = messages
+        .slice(-8)
+        .map((m) => `${m.role === "user" ? "Them" : "Guide"}: ${m.content}`)
+        .join("\n");
+      await submitLead({
+        name: leadName.trim(),
+        phone: leadPhone.replace(/\D/g, ""),
+        message: `[CHAT LEAD · ${page.toUpperCase()}]\n${transcript}`,
+        crossSell: ["chat-lead"],
+        wantsTraining: false,
+      });
+      setLeadState("done");
+      setCapturing(false);
+      setMessages((m) => [...m, { role: "assistant", content: t("chat.leadSent") }]);
+    } catch {
+      setLeadState("error");
+    }
+  };
+
+  const openChat = () => {
+    dismissTeaser();
+    setOpen(true);
+  };
+
   return (
     <>
+      {/* The approach — a single line, dismissable, once per session. */}
+      <AnimatePresence>
+        {teaser && !open && (
+          <motion.div
+            initial={{ opacity: 0, y: 12, scale: 0.94 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 8, scale: 0.96 }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            className="fixed z-50 max-w-[15rem] rounded-2xl border border-teal-glow/35 p-3.5 shadow-glass"
+            style={{
+              background: "rgb(var(--c-abyss) / 0.97)",
+              backdropFilter: "blur(16px)",
+              bottom: "calc(max(1.25rem, env(safe-area-inset-bottom)) + 4.5rem)",
+              right: "max(1.25rem, env(safe-area-inset-right))",
+            }}
+          >
+            <button type="button" onClick={openChat} className="block text-left">
+              <p className="text-sm leading-snug text-fg">{t("chat.teaser")}</p>
+            </button>
+            <button
+              type="button"
+              onClick={dismissTeaser}
+              aria-label={t("chat.teaserDismiss")}
+              className="absolute -right-2 -top-2 grid h-6 w-6 place-items-center rounded-full border border-hairline/20 bg-panel text-muted"
+            >
+              <X size={13} />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Launcher */}
       <motion.button
         type="button"
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => {
+          dismissTeaser();
+          setOpen((o) => !o);
+        }}
         whileHover={{ scale: 1.06 }}
         whileTap={{ scale: 0.95 }}
         aria-label={t("chat.open")}
@@ -131,6 +240,74 @@ export function AssistantChat() {
                     </button>
                   ))}
                 </div>
+              )}
+
+              {/* The close — offered only once a real conversation exists, so it
+                  reads as a natural next step rather than a pop-up demand. */}
+              {turns >= 2 && leadState !== "done" && !capturing && !loading && (
+                <button
+                  type="button"
+                  onClick={() => setCapturing(true)}
+                  className="inline-flex items-center gap-2 rounded-full bg-teal-glow/12 px-4 py-2 text-sm font-semibold text-brand-luq ring-1 ring-teal-glow/30"
+                >
+                  <Phone size={14} /> {t("chat.leaveNumber")}
+                </button>
+              )}
+
+              {capturing && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="rounded-2xl border border-teal-glow/30 bg-teal-glow/[0.06] p-4"
+                >
+                  <p className="font-display text-base font-bold text-fg">{t("chat.leadTitle")}</p>
+                  <p className="mt-1 text-sm text-muted">{t("chat.leadBody")}</p>
+                  <input
+                    value={leadName}
+                    onChange={(e) => setLeadName(e.target.value)}
+                    placeholder={t("booking.namePh")}
+                    autoComplete="name"
+                    className={CHAT_INPUT}
+                  />
+                  <input
+                    value={leadPhone}
+                    onChange={(e) => setLeadPhone(e.target.value)}
+                    placeholder={t("booking.phonePh")}
+                    inputMode="tel"
+                    autoComplete="tel"
+                    className={`${CHAT_INPUT} mt-2`}
+                  />
+                  {leadState === "error" && (
+                    <p role="alert" className="mt-2 text-sm font-semibold text-danger">
+                      {t("chat.leadError")}
+                    </p>
+                  )}
+                  <div className="mt-3 flex gap-2">
+                    <button
+                      type="button"
+                      onClick={sendLead}
+                      disabled={leadState === "sending"}
+                      className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold text-ink disabled:opacity-60"
+                      style={{
+                        background:
+                          "linear-gradient(135deg, rgb(var(--c-teal-glow)), rgb(var(--c-teal-neon)))",
+                      }}
+                    >
+                      <Check size={14} />
+                      {leadState === "sending" ? t("booking.submitting") : t("chat.leadCta")}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCapturing(false);
+                        setLeadState("idle");
+                      }}
+                      className="rounded-full px-4 py-2 text-sm font-semibold text-muted"
+                    >
+                      {t("chat.cancel")}
+                    </button>
+                  </div>
+                </motion.div>
               )}
             </div>
 

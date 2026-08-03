@@ -31,7 +31,8 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
 
   const rows = await env.DB.prepare(
     `SELECT id, name, phone, email, message, role, industry, cross_sell, wants_training,
-            ref_code, status, opted_out, followup_stage, last_inbound_at, created_at
+            ref_code, status, opted_out, followup_stage, last_inbound_at, created_at,
+            session_id, source, landing
      FROM leads ${whereSql} ORDER BY id DESC LIMIT ${limit}`
   )
     .bind(...binds)
@@ -39,7 +40,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
   const leads = rows.results ?? [];
 
   if (format === "csv") {
-    const cols = ["id", "created_at", "name", "phone", "email", "role", "industry", "wants_training", "status", "opted_out", "ref_code", "message"];
+    const cols = ["id", "created_at", "name", "phone", "email", "role", "industry", "wants_training", "status", "opted_out", "ref_code", "source", "landing", "message"];
     const esc = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
     const csv = [cols.join(","), ...leads.map((l) => cols.map((c) => esc(l[c])).join(","))].join("\n");
     return new Response(csv, {

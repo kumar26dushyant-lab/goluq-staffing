@@ -1,11 +1,16 @@
 import { motion, useReducedMotion } from "framer-motion";
-import { GraduationCap } from "lucide-react";
+import { GraduationCap, Zap } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { CapabilityTabs } from "../components/CapabilityTabs";
+import { ENTRY_PRICE_INR, inr } from "../content/catalogue";
 import { HeroWordmark } from "../components/HeroWordmark";
 import { StageAssistant } from "../components/StageAssistant";
 import { RoleSlots } from "../components/RoleSlots";
 import { StatReadout } from "../components/StatReadout";
 import { PartnerCTA } from "../components/PartnerCTA";
+import { ProofStrip } from "../components/ProofStrip";
+import { WhatsAppCta } from "../components/WhatsAppCta";
+import { CaseStudyNidaan } from "../components/CaseStudyNidaan";
 import { ProductsShowcase } from "../components/ProductsShowcase";
 import { HomeBuild } from "../components/HomeBuild";
 import { SecuritySection } from "../components/SecuritySection";
@@ -54,6 +59,22 @@ export function Greeting({ onPickRole }: { onPickRole: (id: RoleId) => void }) {
           {t("greeting.headline")}{" "}
           <span className="text-gradient-accent">{t("greeting.headlineAccent")}</span>
         </motion.h1>
+
+        {/* Instant-value hook — the cheapest rung of the ladder, stated in money
+            and hours, so a visitor knows within one line that they can afford us. */}
+        <motion.p
+          initial={reduced ? false : { opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.24, duration: 0.6 }}
+          className="mt-5 flex flex-wrap items-center gap-x-2 gap-y-1 text-base font-semibold text-fg sm:text-lg"
+          style={{ textShadow: "0 2px 16px rgb(0 0 0 / 0.6)" }}
+        >
+          <Zap size={18} className="shrink-0 text-brand-luq" />
+          {t("catalogue.hook")}
+          <span className="text-brand-luq">
+            {t("catalogue.hookPrice", { p: inr(ENTRY_PRICE_INR) })}
+          </span>
+        </motion.p>
       </div>
 
       {/* Assistant + reassurance */}
@@ -77,8 +98,26 @@ export function Greeting({ onPickRole }: { onPickRole: (id: RoleId) => void }) {
         </motion.div>
       </div>
 
+      {/* Proof, high — before the visitor commits a minute to the demo funnel. */}
+      <ProofStrip className="mt-5" />
+
+      {/* Lowest-friction conversion on the page — no form, no chat, just talk. */}
+      <WhatsAppCta className="mt-4" />
+
+      {/* What GoLuQ actually is. Digital Employees are one tab of seven; that
+          tab jumps to the live demo deck below rather than opening a new page. */}
+      <CapabilityTabs
+        className="mt-14"
+        onPickDemo={() =>
+          document.getElementById("deploy-deck")?.scrollIntoView({ behavior: "smooth", block: "start" })
+        }
+      />
+
       {/* ── Deploy deck ──────────────────────────────────────────── */}
-      <div className="mt-10 grid gap-6 lg:grid-cols-[1.5fr_1fr] lg:items-start">
+      <div
+        id="deploy-deck"
+        className="mt-16 grid scroll-mt-20 gap-6 lg:grid-cols-[1.5fr_1fr] lg:items-start"
+      >
         <div>
           <div className="mb-4 flex items-baseline gap-3">
             <span className="font-mono text-sm uppercase tracking-[0.28em] text-brand-luq sm:text-base">
@@ -92,10 +131,13 @@ export function Greeting({ onPickRole }: { onPickRole: (id: RoleId) => void }) {
         <StatReadout className="lg:sticky lg:top-6" />
       </div>
 
-      <PartnerCTA className="mt-10" />
+      {/* Below-the-fold: proof first, then the affiliate and cross-sell asks. */}
+      <div id="proof" className="scroll-mt-20">
+        <ProductsShowcase className="mt-20" />
+        <CaseStudyNidaan className="mt-16" compact />
+      </div>
 
-      {/* Below-the-fold homepage sections */}
-      <ProductsShowcase className="mt-20" />
+      <PartnerCTA className="mt-16" />
       <HomeBuild className="mt-12" />
       <SecuritySection className="mt-16" />
       <AboutSection className="mt-16" />

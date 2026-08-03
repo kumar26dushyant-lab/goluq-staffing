@@ -1,4 +1,5 @@
 import { getActiveRef } from "./refAttribution";
+import { leadAttribution } from "./track";
 import type { RoleId, IndustryId } from "../state/useAppState";
 
 export interface LeadPayload {
@@ -10,6 +11,8 @@ export interface LeadPayload {
   industry?: IndustryId;
   crossSell: string[];
   wantsTraining: boolean;
+  /** Set by the /build/global page: phone is E.164, not an Indian 10-digit mobile. */
+  intl?: boolean;
 }
 
 /**
@@ -49,7 +52,9 @@ export async function submitLead(payload: LeadPayload): Promise<void> {
   const res = await fetch("/api/lead", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ ...payload, ref: getActiveRef() }),
+    // Attribution rides along automatically so every lead can be traced back to
+    // the session and source that produced it — see lib/track.ts.
+    body: JSON.stringify({ ...payload, ref: getActiveRef(), ...leadAttribution() }),
   });
   if (!res.ok) throw new Error(`lead failed: ${res.status}`);
 }

@@ -1,6 +1,7 @@
-import { useEffect } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { useEffect, lazy, Suspense } from "react";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { captureRefFromUrl } from "./lib/refAttribution";
+import { trackPageview } from "./lib/track";
 import { StaffingApp } from "./pages/StaffingApp";
 import { PartnerLanding } from "./pages/PartnerLanding";
 import { PartnerDashboard } from "./pages/PartnerDashboard";
@@ -8,10 +9,31 @@ import { About } from "./pages/About";
 import { Admin } from "./pages/Admin";
 import { AssistantChat } from "./components/AssistantChat";
 
+// The custom-build practice is a separate, lower-traffic funnel — keep it out of
+// the initial bundle so "/" stays inside the BUILD_SPEC ~200KB gzip budget.
+const BuildPractice = lazy(() =>
+  import("./pages/BuildPractice").then((m) => ({ default: m.BuildPractice }))
+);
+
 /**
- * Router root. Three routes share the same global cinematic background (set in
- * main.tsx): "/" staffing app, "/partner" affiliate bot, "/partner/dashboard"
- * token dashboard. SPA fallback handled by public/_redirects on Cloudflare.
+ * Fires one pageview per client-side route change. Lives inside BrowserRouter
+ * because useLocation needs the router context; `/admin` is excluded so the
+ * owner's own sessions don't pollute the visitor numbers.
+ */
+function Pageviews() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    if (pathname.startsWith("/admin")) return;
+    trackPageview(pathname);
+  }, [pathname]);
+  return null;
+}
+
+/**
+ * Router root. All routes share the same global cinematic background (set in
+ * main.tsx): "/" staffing app, "/build" + "/build/global" custom-build practice,
+ * "/partner" affiliate bot, "/partner/dashboard" token dashboard. SPA fallback
+ * handled by public/_redirects on Cloudflare.
  */
 export default function App() {
   // Capture affiliate ?ref= once on first load (last-click, 90-day), any route.
@@ -21,8 +43,26 @@ export default function App() {
 
   return (
     <BrowserRouter>
+      <Pageviews />
       <Routes>
         <Route path="/" element={<StaffingApp />} />
+        {/* Custom-build practice — a separate funnel from "/" on purpose. */}
+        <Route
+          path="/build"
+          element={
+            <Suspense fallback={<div className="min-h-dvh" />}>
+              <BuildPractice region="in" />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/build/global"
+          element={
+            <Suspense fallback={<div className="min-h-dvh" />}>
+              <BuildPractice region="global" />
+            </Suspense>
+          }
+        />
         <Route path="/about" element={<About />} />
         <Route path="/partner" element={<PartnerLanding />} />
         <Route path="/partner/dashboard" element={<PartnerDashboard />} />

@@ -61,6 +61,12 @@ export function TopBar({
       </div>
 
       <div className="flex shrink-0 items-center gap-1.5 sm:gap-2.5">
+        <Link
+          to="/build"
+          className="hidden rounded-full px-3 py-2 text-sm font-semibold text-muted hover:text-fg md:block"
+        >
+          {t("buildIn.nav")}
+        </Link>
         {showPartnerCta && (
           <Link
             to="/about"

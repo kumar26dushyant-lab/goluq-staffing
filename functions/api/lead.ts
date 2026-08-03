@@ -40,18 +40,32 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     const crossSell = Array.isArray(body.crossSell) ? (body.crossSell as string[]) : [];
     const wantsTraining = body.wantsTraining ? 1 : 0;
     const ref = body.ref ? String(body.ref) : null;
+    // International enquiries (the /build/global page) carry E.164 numbers, not
+    // Indian 10-digit mobiles, so they validate on a different rule.
+    const intl = body.intl === true;
 
-    if (!name || !/^[6-9]\d{9}$/.test(phone)) {
+    const phoneOk = intl
+      ? /^\+?[1-9]\d{7,14}$/.test(phone.replace(/[\s-]/g, ""))
+      : /^[6-9]\d{9}$/.test(phone);
+    if (!name || !phoneOk) {
       return Response.json({ ok: false, error: "name & valid phone required" }, { status: 400 });
     }
 
+    // Attribution — which session/source produced this lead (see lib/track.ts).
+    const sessionId = body.session_id ? String(body.session_id).slice(0, 40) : null;
+    const source = body.source ? String(body.source).slice(0, 80) : null;
+    const landing = body.landing ? String(body.landing).slice(0, 200) : null;
+
     await env.DB.prepare(
       `INSERT INTO leads (name, phone, email, message, role, industry, cross_sell, wants_training, ref_code, created_at,
-                          followup_stage, next_followup_at, opted_out, status)
+                          followup_stage, next_followup_at, opted_out, status, session_id, source, landing)
        VALUES (?,?,?,?,?,?,?,?,?,datetime('now'),
-               0, datetime('now','+3 days'), 0, 'new')`
+               0, datetime('now','+3 days'), 0, 'new', ?,?,?)`
     )
-      .bind(name, phone, email, message, role, industry, JSON.stringify(crossSell), wantsTraining, ref)
+      .bind(
+        name, phone, email, message, role, industry, JSON.stringify(crossSell), wantsTraining, ref,
+        sessionId, source, landing
+      )
       .run();
 
     // Fire WhatsApp notifications without blocking the response.
@@ -68,7 +82,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       const ownerMsg =
         `🆕 *New GoLuQ lead*\n` +
         `Name: ${name}\n` +
-        `Phone: +91 ${phone}\n` +
+        `Phone: ${intl ? phone : `+91 ${phone}`}\n` +
         `Worker: ${roleLabel}\n` +
         `Industry: ${indLabel}\n` +
         `Wants training: ${wantsTraining ? "Yes" : "No"}\n` +
@@ -77,7 +91,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         (ref ? `Referred by: ${ref}\n` : "") +
         (message ? `\nNote: ${message}` : "");
 
-      const tasks: Promise<unknown>[] = [sendText(env, phone, customerMsg)];
+      // The Evolution instance is provisioned for Indian numbers — don't push an
+      // auto-reply at an arbitrary international number; just alert the owner.
+      const tasks: Promise<unknown>[] = intl ? [] : [sendText(env, phone, customerMsg)];
       const owner = await getOwnerWhatsapp(env.DB, env);
       if (owner) tasks.push(sendText(env, owner, ownerMsg));
       context.waitUntil(Promise.allSettled(tasks));

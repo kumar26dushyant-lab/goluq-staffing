@@ -106,6 +106,12 @@ export function Simulation({
             <span className="text-gradient-accent">{t("recap.heading")}</span>
           </h2>
           <p className="max-w-md text-base text-muted sm:text-lg">{t("recap.subtitle")}</p>
+          {/* Honesty label: this is a demonstration of intended behaviour, not a
+              live system running on the visitor's data. The product is built to
+              order — see the note in content/catalogue.ts. */}
+          <p className="mt-2 rounded-full bg-warn/10 px-3.5 py-1.5 text-xs font-semibold text-muted ring-1 ring-warn/25">
+            {t("recap.demoNote")}
+          </p>
         </motion.div>
 
         {/* Slow, readable highlight reveal */}

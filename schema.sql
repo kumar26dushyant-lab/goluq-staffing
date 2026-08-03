@@ -29,6 +29,28 @@ CREATE TABLE IF NOT EXISTS leads (
 CREATE INDEX IF NOT EXISTS idx_leads_followup ON leads(next_followup_at);
 CREATE INDEX IF NOT EXISTS idx_leads_phone ON leads(phone);
 
+-- First-party visitor analytics. DELIBERATELY carries no PII: no IP, no cookie,
+-- no cross-site identifier. `session_id` is a random value held in sessionStorage
+-- that dies with the tab — enough to stitch a journey into a lead, not enough to
+-- identify a person. This is what keeps the site defensible under DPDP Act 2023
+-- without gating analytics behind a consent banner.
+CREATE TABLE IF NOT EXISTS visits (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  session_id TEXT NOT NULL,
+  path TEXT NOT NULL,
+  referrer_host TEXT,                  -- host only, never the full URL
+  utm_source TEXT,
+  utm_medium TEXT,
+  utm_campaign TEXT,
+  ref_code TEXT,                       -- affiliate attribution, if any
+  device TEXT,                         -- mobile | tablet | desktop
+  country TEXT,                        -- from the edge/proxy header when present
+  lang TEXT,
+  created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_visits_session ON visits(session_id);
+CREATE INDEX IF NOT EXISTS idx_visits_created ON visits(created_at);
+
 -- Runtime-editable admin settings (owner_whatsapp, followups_enabled, …)
 CREATE TABLE IF NOT EXISTS settings (
   key TEXT PRIMARY KEY,

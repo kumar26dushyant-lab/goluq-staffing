@@ -12,9 +12,9 @@
   "greeting": {
     "kicker": "See it for yourself.",
     "command": "Go Luq.",
-    "headline": "Meet a Digital Employee that quietly handles the busywork that slows you down —",
-    "headlineAccent": "and adds value you never imagined.",
-    "intro": "I'm your GoLuQ Digital Staffing Assistant. In under a minute I'll deploy a Digital Employee for your business — works 24×7, makes zero errors, takes zero salary, never takes leave. Pick a worker below and watch it work, live, for free.",
+    "headline": "We build and deploy the software your business actually runs on —",
+    "headlineAccent": "websites, apps, automations, and Digital Employees.",
+    "intro": "I'm your GoLuQ guide. We build everything from a small automation that saves your team 20 hours a week, right up to a complete multi-branch platform — and the fastest way to see how we work is a free demonstration of a Digital Employee handling a real job from your business. Pick a worker below.",
     "tapToHear": "Tap to hear",
     "mute": "Mute",
     "assistant": "Digital Staffing Assistant",
@@ -33,11 +33,26 @@
     "leaveVal": "Never"
   },
   "roles": {
-    "voice": { "label": "Digital Voice Calling Employee", "blurb": "Calls back every missed lead in their own language." },
-    "support": { "label": "Digital Customer Support Employee", "blurb": "Answers every customer, instantly, around the clock." },
-    "sales": { "label": "Digital Sales Employee", "blurb": "Chases, follows up, and closes — never forgets." },
-    "reception": { "label": "Digital Receptionist", "blurb": "Books, reminds, reschedules — your front desk that never sleeps." },
-    "workforce": { "label": "Complete Digital Workforce", "blurb": "A coordinated team of 3–5 digital workers, in sync." }
+    "voice": {
+      "label": "Digital Voice Calling Employee",
+      "blurb": "Calls back every missed lead in their own language."
+    },
+    "support": {
+      "label": "Digital Customer Support Employee",
+      "blurb": "Answers every customer, instantly, around the clock."
+    },
+    "sales": {
+      "label": "Digital Sales Employee",
+      "blurb": "Chases, follows up, and closes — never forgets."
+    },
+    "reception": {
+      "label": "Digital Receptionist",
+      "blurb": "Books, reminds, reschedules — your front desk that never sleeps."
+    },
+    "workforce": {
+      "label": "Complete Digital Workforce",
+      "blurb": "A coordinated team of 3–5 digital workers, in sync."
+    }
   },
   "industries": {
     "prompt": "Which industry is your business in?",
@@ -48,7 +63,7 @@
     "travel": "Tours, Travel & Cab Services"
   },
   "launch": {
-    "helper": "Watch your Digital Employee work — live.",
+    "helper": "See exactly how your Digital Employee would work.",
     "ready": "Ready to deploy"
   },
   "booking": {
@@ -57,8 +72,8 @@
     "humanLabel": "A human employee",
     "digitalLabel": "Your Digital Employee",
     "costSaved": "Cost saved: up to {{x}}",
-    "formKicker": "Book your free trial",
-    "formTitle": "Deploy your Digital Employee",
+    "formKicker": "No cost to start",
+    "formTitle": "Request your Digital Employee",
     "name": "Full name",
     "namePh": "Your name",
     "phone": "Phone number",
@@ -78,8 +93,8 @@
       "whatsapp": "Custom WhatsApp & Communication Automations"
     },
     "reassureTitle": "Worried it's too technical? Don't be.",
-    "reassureBody": "Every trial includes a free, simple-language walkthrough. We sit with you until you're comfortable running it yourself — no tech knowledge needed.",
-    "cta": "Book Your Free Digital Employee Trial",
+    "reassureBody": "Every build includes a free, simple-language walkthrough. We sit with you until you're comfortable running it yourself — no tech knowledge needed.",
+    "cta": "Request My Digital Employee",
     "submitting": "Sending…",
     "successTitle": "You're all set!",
     "successBody": "We'll reach out on WhatsApp shortly.",
@@ -101,10 +116,10 @@
   },
   "assist": {
     "industry": "Great choice! Now tell me — which industry is your business in? Tap the one that fits, and I'll show you a real example.",
-    "launch": "Perfect. Your Digital Employee is ready to go. Press Go Luq and watch it work — live, in seconds.",
-    "simRun": "Watch closely — your Digital Employee is working, right now.",
+    "launch": "Perfect. Press Go Luq and I will show you exactly how your Digital Employee would handle this.",
+    "simRun": "Watch closely — this is how your Digital Employee would handle it.",
     "recap": "Done! In just seconds, it finished what takes a person hours. Let me walk you through exactly what it did for you.",
-    "booking": "Impressive, isn't it? Let's get your very own Digital Employee started — it's free to try. Don't worry, I'll guide you through this, step by step."
+    "booking": "Impressive, isn't it? Let's get yours built. Tell me a little about your business and I'll guide you through it, step by step."
   },
   "recap": {
     "doneIn": "Done in",
@@ -112,13 +127,15 @@
     "heading": "Here's everything your Digital Employee just handled",
     "subtitle": "What takes a person hours — finished while you read this line.",
     "continue": "Get this Digital Employee",
-    "replay": "Watch again"
+    "replay": "Watch again",
+    "demoNote": "A demonstration of how this would work in your business — we build and test yours before it goes live."
   },
   "products": {
     "kicker": "Already built · already working",
     "title": "Real software we've delivered — live and in use today",
     "subtitle": "Each one ships with Digital Employee capabilities built right in.",
     "visit": "Visit site",
+    "stripCta": "Jump to the work we've already delivered",
     "tag": "Digital Employee inside",
     "eagleeye": {
       "name": "EagleEye.work",
@@ -136,8 +153,8 @@
   "homeBuild": {
     "kicker": "Beyond Digital Employees",
     "title": "Want custom software built for your business?",
-    "subtitle": "Our engineering team builds websites, apps, fully-offline software, and WhatsApp automations — own it, don't rent it. Mention it in your free trial.",
-    "cta": "Start a free trial to discuss"
+    "subtitle": "Our engineering practice builds websites, apps, fully-offline software, multi-branch operations platforms and WhatsApp automations — one-time cost, and you own the source code outright.",
+    "cta": "See the custom-build practice"
   },
   "about": {
     "kicker": "The human behind it",
@@ -150,28 +167,45 @@
     "email": "Email me",
     "emailValue": "dushyant@goluq.com",
     "note": "Prefer email? Write to dushyant@goluq.com — a real inbox you'll reach a real person at.",
-
     "hero1": "Your business has a problem.",
     "hero2": "We have already solved it before.",
     "heroSub": "The only question is how fast you want it done.",
-    "stats": ["20+ Years of Business Experience", "6 Global Enterprises", "4 Continents", "9 Certifications", "Countless Problems Solved"],
-
+    "stats": [
+      "20+ Years of Business Experience",
+      "6 Global Enterprises",
+      "4 Continents",
+      "9 Certifications",
+      "Countless Problems Solved"
+    ],
     "founderTitle": "The person behind GoLuQ",
     "founder1": "Dushyant Sharma did not come from a technology lab. He came from the business floor.",
     "founder2": "He has sat inside the operations of some of the world's most demanding organisations — watching where processes break, where revenue leaks, and where good ideas die because the right technology was never built. That is what changed everything.",
     "founder3": "After 20+ years moving through leadership roles at Genpact, DXC Technology, Hexaware Technologies, Cornerstone OnDemand (EdCast), Definitive Healthcare, and HighLevel — across India, Dubai, and globally distributed teams spanning APAC, EMEA, and North America — he came to one conclusion:",
     "founderPunch": "Most businesses do not need more software. They need someone who understands their business well enough to build the right software. GoLuQ is that someone.",
-
     "credTitle": "Formally trained. Field tested.",
     "credSub": "Expertise that is not just lived — it is credentialled by institutions that set the global standard.",
     "creds": [
-      { "org": "The Institutes Knowledge Group, Malvern PA, USA", "detail": "Certified in Property & Casualty Insurance · Risk Management & Insurance" },
-      { "org": "Project Management Institute (PMI), USA", "detail": "Agile Project Management · Microsoft Project · Business Workflows" },
-      { "org": "Microsoft", "detail": "Career Essentials in Generative AI · Microsoft Copilot Studio" },
-      { "org": "Genpact Centre of Excellence", "detail": "Lean Six Sigma · Business Administration & Management" },
-      { "org": "AI & Technology", "detail": "Complete AI Project Management · Generative AI Strategy & Case Studies" }
+      {
+        "org": "The Institutes Knowledge Group, Malvern PA, USA",
+        "detail": "Certified in Property & Casualty Insurance · Risk Management & Insurance"
+      },
+      {
+        "org": "Project Management Institute (PMI), USA",
+        "detail": "Agile Project Management · Microsoft Project · Business Workflows"
+      },
+      {
+        "org": "Microsoft",
+        "detail": "Career Essentials in Generative AI · Microsoft Copilot Studio"
+      },
+      {
+        "org": "Genpact Centre of Excellence",
+        "detail": "Lean Six Sigma · Business Administration & Management"
+      },
+      {
+        "org": "AI & Technology",
+        "detail": "Complete AI Project Management · Generative AI Strategy & Case Studies"
+      }
     ],
-
     "capTitle": "One venture. Full digital capability.",
     "capSub": "Think of GoLuQ as your complete digital arm — from a local Indore business automating customer follow-ups to a US enterprise needing a multi-tenant platform built from scratch.",
     "caps": [
@@ -184,11 +218,9 @@
       "Process Digitisation & Operational Tech"
     ],
     "capPunch": "If it exists in the digital world, GoLuQ can design it, build it, deploy it, and run it.",
-
     "diffTitle": "Why GoLuQ is different",
     "diff1": "Most agencies sell you a service. We solve your problem.",
     "diff2": "Every solution starts with one question: what does this business actually need to grow, save money, or stop bleeding? That question comes from 20 years inside businesses like yours — not as a vendor on the outside, but as the person responsible for making things work.",
-
     "closeTitle": "Wherever your business is, GoLuQ is ready.",
     "closeBody": "GoLuQ works with businesses across India and internationally — the US, UK, Australia, and APAC — because good business problems do not have a geography.",
     "closePunch": "If your business has a digital challenge, GoLuQ has a solution.",
@@ -200,14 +232,23 @@
     "subtitle": "Ask me anything about your business",
     "placeholder": "Type your question…",
     "send": "Send",
-    "greeting": "Hi! 👋 Tell me your business type and I'll show you which Digital Employee fits — or ask me anything.",
+    "greeting": "Hi! 👋 I'm your GoLuQ guide. Tell me what your business does, and I'll show you exactly where it's losing time — and what it costs to fix. Small automations start at ₹3,000.",
     "thinking": "typing…",
+    "teaser": "Tell me your business — I'll show you what's costing you time.",
+    "teaserDismiss": "Dismiss",
     "suggest": [
-      "Which worker fits my business?",
-      "Is it really free to try?",
-      "I run a clinic — can it help?",
-      "How does training work?"
-    ]
+      "What could you build for my business?",
+      "What does it cost?",
+      "I run a clinic — where do I start?",
+      "Show me something you've built"
+    ],
+    "leaveNumber": "Have someone call me",
+    "leadTitle": "Leave your number",
+    "leadBody": "A real person will reach out on WhatsApp — usually within a few hours.",
+    "leadCta": "Send",
+    "leadSent": "Got it — we'll be in touch on WhatsApp shortly. 🙏",
+    "leadError": "That didn't send. Please check the number and try again.",
+    "cancel": "Cancel"
   },
   "nudge": {
     "greeting": [
@@ -236,12 +277,30 @@
     "title": "Serious about your security",
     "subtitle": "Your business data deserves real protection — here's how GoLuQ keeps it safe.",
     "points": [
-      { "t": "Encrypted everywhere", "d": "HTTPS/TLS on every request — your data is encrypted in transit." },
-      { "t": "Hardened by default", "d": "Strict security headers and a content-security-policy block common web attacks." },
-      { "t": "Keys never leak", "d": "API keys and secrets stay server-side — they never touch your browser." },
-      { "t": "Your data, your control", "d": "We never sell or share your data. It stays yours, always." },
-      { "t": "Cloudflare secure edge", "d": "Runs on Cloudflare's global, DDoS-protected network." },
-      { "t": "Nothing to steal", "d": "Token-based access — no customer passwords are ever stored." }
+      {
+        "t": "Encrypted everywhere",
+        "d": "HTTPS/TLS on every request — your data is encrypted in transit."
+      },
+      {
+        "t": "Hardened by default",
+        "d": "Strict security headers and a content-security-policy block common web attacks."
+      },
+      {
+        "t": "Keys never leak",
+        "d": "API keys and secrets stay server-side — they never touch your browser."
+      },
+      {
+        "t": "Your data, your control",
+        "d": "We never sell or share your data. It stays yours, always."
+      },
+      {
+        "t": "Cloudflare secure edge",
+        "d": "Runs on Cloudflare's global, DDoS-protected network."
+      },
+      {
+        "t": "Nothing to steal",
+        "d": "Token-based access — no customer passwords are ever stored."
+      }
     ]
   },
   "plans": {
@@ -272,12 +331,30 @@
       "ask": "Shall I guide you to register? It takes 2 minutes."
     },
     "questions": {
-      "earn": { "q": "How much can I earn?", "a": "35% of the plan price every month for the first year, then 12% for as long as the business stays. Use the calculator above to see your numbers." },
-      "paid": { "q": "When & how do I get paid?", "a": "Monthly via UPI, after a ₹500 minimum, following a quick review. We collect your PAN + UPI at sign-up." },
-      "tech": { "q": "Do I need any tech knowledge?", "a": "None. You just connect us to the business — we handle setup and training. Your job is the introduction." },
-      "find": { "q": "How do I find customers?", "a": "People you already know — local shops, clinics, your WhatsApp groups, or a small Hindi YouTube channel." },
-      "fee": { "q": "Is there any joining fee?", "a": "No. It is completely free to join." },
-      "track": { "q": "How is my referral tracked?", "a": "You get a personal link + code. Every click and lead shows up in your private dashboard." }
+      "earn": {
+        "q": "How much can I earn?",
+        "a": "35% of the plan price every month for the first year, then 12% for as long as the business stays. Use the calculator above to see your numbers."
+      },
+      "paid": {
+        "q": "When & how do I get paid?",
+        "a": "Monthly via UPI, after a ₹500 minimum, following a quick review. We collect your PAN + UPI at sign-up."
+      },
+      "tech": {
+        "q": "Do I need any tech knowledge?",
+        "a": "None. You just connect us to the business — we handle setup and training. Your job is the introduction."
+      },
+      "find": {
+        "q": "How do I find customers?",
+        "a": "People you already know — local shops, clinics, your WhatsApp groups, or a small Hindi YouTube channel."
+      },
+      "fee": {
+        "q": "Is there any joining fee?",
+        "a": "No. It is completely free to join."
+      },
+      "track": {
+        "q": "How is my referral tracked?",
+        "a": "You get a personal link + code. Every click and lead shows up in your private dashboard."
+      }
     },
     "guideRegister": "Guide me to register",
     "reg": {
@@ -326,5 +403,786 @@
       "invalid": "Link not recognised — please re-check your private dashboard link.",
       "loading": "Loading your dashboard…"
     }
+  },
+  "catalogue": {
+    "kicker": "Everything we build",
+    "title": "If it runs on a computer, a laptop or a phone — we build it, deploy it, and run it for you.",
+    "subtitle": "Websites, apps, automations, offline software, Digital Employees, complete multi-branch platforms. One practice, the whole stack — starting far smaller than most people expect.",
+    "hook": "Automations that take 20+ hours of manual work off your team every week.",
+    "hookPrice": "From {{p}}.",
+    "from": "From",
+    "perMonth": "per month",
+    "oneTime": "one-time",
+    "leadTimeLabel": "Typically",
+    "estimate": "Indicative starting price — the exact figure is fixed in writing before any work begins.",
+    "ctaDemo": "Watch one work, free",
+    "ctaBuild": "See how a build works",
+    "ctaEnquiry": "Get a quote",
+    "anythingTitle": "Building something that isn't on this list?",
+    "anythingBody": "That's normal. Most of what we ship didn't have a category until the business described the problem. If the work is repetitive, error-prone, or spread across five spreadsheets and a WhatsApp group, it can be built. Tell us what's slowing you down.",
+    "items": {
+      "automation": {
+        "name": "Software & Workflow Automations",
+        "desc": "The repetitive work your team does by hand every week — data entry, report generation, reconciliation, moving files between systems — done automatically, correctly, every time.",
+        "b": [
+          "Typically removes 20+ hours of manual work a week from one office",
+          "Works with the software and spreadsheets you already run",
+          "Small enough to pay for itself inside the first month"
+        ]
+      },
+      "whatsapp": {
+        "name": "WhatsApp & Communication Automations",
+        "desc": "Order updates, appointment reminders, payment follow-ups, catalogue replies and lead routing — running on WhatsApp, where your customers already are.",
+        "b": [
+          "Hindi and English, in your own voice",
+          "Follows up every time, so nobody has to remember",
+          "Connects to the records you already keep"
+        ]
+      },
+      "digitalEmployee": {
+        "name": "Digital Employees",
+        "desc": "A worker that answers, calls, follows up and books — 24×7, zero errors, zero salary, never on leave. Built around your business and tested against your real cases before it ever speaks to a customer.",
+        "b": [
+          "See a free demonstration of exactly how one would work for you",
+          "Receptionist, support, sales, voice calling, or a full coordinated team",
+          "Simple-language training included, always"
+        ]
+      },
+      "website": {
+        "name": "Websites & Web Applications",
+        "desc": "Not a template with your logo dropped on it. A site built around how your business actually sells, with the booking, payment and enquiry flows you really need.",
+        "b": [
+          "Built for speed and for being found",
+          "Wired into your enquiry and follow-up systems from day one",
+          "The code is yours"
+        ]
+      },
+      "app": {
+        "name": "Mobile & Desktop Apps",
+        "desc": "For your customers, your field staff, or your office team. Android, iOS and desktop — built to the job rather than to a template.",
+        "b": [
+          "Keeps working where the signal doesn't reach",
+          "Separate access for staff and customers",
+          "Published under your own developer account"
+        ]
+      },
+      "offline": {
+        "name": "Zero-Internet Local Software",
+        "desc": "Runs entirely on your own office or plant machines. No internet, no cloud, nothing leaving the building — for when total data safety is the actual requirement.",
+        "b": [
+          "Nothing ever leaves your premises",
+          "Keeps running when the connection doesn't",
+          "Yours outright — no licence to renew"
+        ]
+      },
+      "platform": {
+        "name": "Custom Platforms & Multi-Branch Systems",
+        "desc": "The full operating system for a business — office and branch control, role-based access, lifecycle tracking and roll-up reporting. Like the one running NidaanPartner.com.",
+        "b": [
+          "Multi-office and multi-role — new branches added by configuration",
+          "Unlimited users, because there are no seats to licence",
+          "Full source code and IP transferred to you on delivery"
+        ]
+      }
+    },
+    "disclaimerShort": "Starting price for a standard build on initial requirements. Heavy customisation can change scope, timeline and cost — always agreed in writing first.",
+    "disclaimerTitle": "How our pricing works",
+    "disclaimerBody": "Every price shown is the starting point for a standard, industry-proven version built from your initial requirements — the version most businesses actually need. If you later want deeper customisation, extra integrations or unusual workflows, scope and timeline grow, and we quote that separately before building anything. You will never get a surprise invoice, and you will always know the number before we start."
+  },
+  "caseNidaan": {
+    "kicker": "Flagship build · live in production",
+    "title": "NidaanPartner.com — a multi-office claims operation running on software we built end to end",
+    "lede": "Nidaan – The Legal Consultants LLP recovers insurance claims that insurers rejected, underpaid or stalled. Running that across multiple offices, a panel of physicians, advocates and surveyors, and a network of insurance advisors is not a website problem — it is an operations-control problem. GoLuQ built the entire control layer.",
+    "role": "GoLuQ's Principal Architect is Co-Founder & Tech Architect at Nidaan — this system was designed from inside the operation, not specified from outside it.",
+    "statsTitle": "What the operation runs at today",
+    "stats": [
+      {
+        "v": "95%+",
+        "l": "Claim success rate"
+      },
+      {
+        "v": "5,000+",
+        "l": "Policyholders assisted"
+      },
+      {
+        "v": "2,000+",
+        "l": "Claims settled"
+      },
+      {
+        "v": "100+",
+        "l": "Hospitals engaged"
+      },
+      {
+        "v": "48–72h",
+        "l": "Case review turnaround"
+      },
+      {
+        "v": "4",
+        "l": "Offices on one control plane"
+      }
+    ],
+    "statsNote": "Operational figures as published by Nidaan – The Legal Consultants LLP.",
+    "buildTitle": "The office & branch control layer",
+    "buildLede": "The heart of the build: one control plane that lets head office run every branch, and every branch run its own desk — without the two ever colliding.",
+    "modules": [
+      {
+        "t": "Branch & office hierarchy",
+        "d": "Head office, regional offices and branch desks modelled as a real hierarchy. Every case, document and payment belongs to a branch and rolls up automatically."
+      },
+      {
+        "t": "Role-based access control",
+        "d": "Claim experts, panel physicians, senior advocates and licensed surveyors each see exactly their own queue — and nothing from another branch's caseload."
+      },
+      {
+        "t": "Claim lifecycle engine",
+        "d": "Intake → medical review → TPA challenge → Competent Authority or Consumer Court filing → settlement. Every stage owned, dated and auditable."
+      },
+      {
+        "t": "Advisor & partner network",
+        "d": "Insurance advisors file and track multi-claim submissions from their own dashboard, mapped to their own branch, with white-labelled client reporting."
+      },
+      {
+        "t": "Subscription & entitlement control",
+        "d": "Silver, Gold and Platinum tiers with per-plan claim quotas and sum-insured caps enforced by the system — not by a spreadsheet and a phone call."
+      },
+      {
+        "t": "Roll-up reporting",
+        "d": "Head office sees performance by branch, by advisor and by claim type in one view. Each branch sees only its own. Same data, different altitude."
+      }
+    ],
+    "scaleTitle": "Built so the next branch is a configuration entry, not a rebuild",
+    "scaleBody": "Nidaan's desks today run across Indore and Bhopal, serving policyholders in Madhya Pradesh, Chhattisgarh, Maharashtra, Rajasthan and Punjab. The control layer was never designed for four offices — it was designed so that the fortieth office is a configuration entry. Create the branch, assign the roles, and its cases, advisors, quotas and reporting exist from that moment.",
+    "stackTitle": "Also shipped inside this build",
+    "stack": [
+      "Sarathi-AI voice-first CRM, bundled into every plan",
+      "WhatsApp & Telegram client communication, Hindi and English",
+      "Branded PDF case reports generated per claim",
+      "Installable mobile app with offline access",
+      "Renewal, follow-up and reminder automation",
+      "Free-to-start claim review funnel with paid tier upgrade"
+    ],
+    "quote": "This is what owning your software actually means. Nidaan does not rent its operating system from anyone. It was built for how Nidaan really works, it runs on Nidaan's own infrastructure, and adding the fifth office costs a configuration change — not a new licence.",
+    "visit": "Visit NidaanPartner.com",
+    "cta": "Build something like this for my business"
+  },
+  "buildIn": {
+    "nav": "Custom builds",
+    "meta": {
+      "title": "GoLuQ — Custom software your firm owns outright",
+      "desc": "Bespoke systems for Indian clinics, CA firms, law practices and SMBs. Built to your workflow, deployed on infrastructure in your name, full source code and IP transferred on delivery."
+    },
+    "hero": {
+      "kicker": "GoLuQ Engineering Practice",
+      "h1": "The software running your practice was built for someone else's practice.",
+      "h1accent": "We build yours. You own it.",
+      "sub": "We build for clinics, CA firms, law practices, factories, distributors, schools, workshops — any business with work worth systematising. Architected to your exact workflow, deployed on infrastructure in your name, with the full source code and IP transferred to you on delivery.",
+      "points": [
+        "Built to how your firm actually works, not to a template",
+        "Runs on a cloud account in your firm's name",
+        "Source code and IP transferred to you on delivery",
+        "No per-seat licences — add staff without adding cost"
+      ],
+      "ctaPrimary": "Book a 30-minute architecture call",
+      "ctaProof": "See what we've already built",
+      "ctaWhatsapp": "WhatsApp a question",
+      "ctaNote": "Free. No obligation. You leave the call with a straight answer on whether custom is right for you."
+    },
+    "problem": {
+      "kicker": "The real cost problem",
+      "title": "The line item that grows while your revenue doesn't",
+      "lede": "Per-seat software is the only expense in your firm that punishes you for growing. Here is what it actually costs beyond the invoice.",
+      "items": [
+        {
+          "t": "You pay more for hiring",
+          "d": "Every new employee adds a licence. The tool gets no better; the bill gets bigger. Growth becomes a cost centre."
+        },
+        {
+          "t": "Renewal pricing isn't a negotiation",
+          "d": "Once your operations depend on it, the price is whatever they say it is. Migration cost is your only leverage, and they know it."
+        },
+        {
+          "t": "You bend your workflow to fit the tool",
+          "d": "The product was built for the average of a thousand firms. Your staff quietly maintain spreadsheets to cover the gaps."
+        },
+        {
+          "t": "Your data sits in someone else's tenancy",
+          "d": "Under export terms you accepted years ago, on infrastructure you cannot audit, mixed with everyone else's."
+        },
+        {
+          "t": "You end the year owning nothing",
+          "d": "Three years of payments, no asset on your books, and access ends the day you stop paying."
+        }
+      ]
+    },
+    "calc": {
+      "kicker": "Do the maths yourself",
+      "title": "What are you actually paying to rent?",
+      "lede": "Change any number. Nothing here is hidden, and the assumptions are all on screen.",
+      "seats": "Staff who need access",
+      "perSeat": "Cost per user, per month",
+      "years": "Over how many years",
+      "rentTotal": "Total rent paid",
+      "rentSub": "and you own nothing at the end",
+      "ownTotal": "Typical GoLuQ build",
+      "ownSub": "one-time, source code and IP yours",
+      "hosting": "Plus your own cloud hosting, paid directly at cost",
+      "verdictWin": "Over {{y}} years you'd pay {{d}} more to rent than to own — and still own nothing.",
+      "verdictLose": "At this size, renting is genuinely the better call. We'd tell you that on the call too.",
+      "note": "Build cost varies with scope. The band shown is our typical engagement range for a firm of this size; the exact figure is fixed in writing before any work starts."
+    },
+    "model": {
+      "kicker": "How it works",
+      "title": "Software as an asset, not a subscription line",
+      "lede": "We build it once, to your workflow, and hand you the keys. Here's precisely what that means — including what still costs money afterwards.",
+      "yes": [
+        {
+          "t": "Scoped to your actual workflow",
+          "d": "We map how the work moves through your firm today, then build that — including the parts your current software forced you to work around."
+        },
+        {
+          "t": "Deployed to infrastructure in your name",
+          "d": "Your own cloud account, your billing, your access keys. We deploy into it; we don't hold it."
+        },
+        {
+          "t": "Unlimited users, permanently",
+          "d": "There are no seats to license. Hire twenty people next year and the software cost does not move."
+        },
+        {
+          "t": "Source code in your Git organisation",
+          "d": "On delivery, with an IP transfer agreement in writing. Any competent engineer can pick it up from there."
+        }
+      ],
+      "honestTitle": "What still costs money — stated plainly",
+      "honestLede": "Anyone who tells you a custom build has zero ongoing cost is selling you something. Here is the honest picture.",
+      "honest": [
+        {
+          "t": "Cloud hosting",
+          "d": "Typically ₹2,000–₹15,000 per month depending on load. Billed by the cloud provider directly to you, at cost. We never mark it up."
+        },
+        {
+          "t": "Security patching & upkeep",
+          "d": "Dependencies need updating. Either take a support retainer, or have your own engineer handle it — both are legitimate."
+        },
+        {
+          "t": "New features later",
+          "d": "Quoted per block of work, at a rate agreed upfront. You choose when, or never."
+        },
+        {
+          "t": "Third-party services you choose",
+          "d": "WhatsApp Business API, SMS, payment gateway, AI models — priced by those vendors, paid by you, visible to you."
+        }
+      ],
+      "notTitle": "What we don't do",
+      "not": [
+        "We don't hold your code, your domains, or your cloud account hostage.",
+        "We don't charge per user, ever.",
+        "We don't take a project we think off-the-shelf software would serve better.",
+        "We don't claim certifications we do not hold."
+      ]
+    },
+    "tco": {
+      "kicker": "The three-year maths",
+      "title": "Renting vs owning, with the assumptions visible",
+      "lede": "Modelled on a firm with 15 staff needing access, at ₹1,200–₹1,800 per user per month. Change the numbers in the calculator above and this table moves with them.",
+      "colSaas": "Per-seat software",
+      "colOwn": "A GoLuQ build",
+      "rows": [
+        {
+          "l": "Three-year total",
+          "a": "₹6.5L – ₹9.7L in licence fees, for 15 users",
+          "b": "One-time build + your own hosting"
+        },
+        {
+          "l": "Cost of adding 10 more staff",
+          "a": "Licence fees rise every month, permanently",
+          "b": "₹0 — there are no seats to buy"
+        },
+        {
+          "l": "Where your data lives",
+          "a": "The vendor's tenancy, under their terms",
+          "b": "A cloud account in your firm's name"
+        },
+        {
+          "l": "Who decides the roadmap",
+          "a": "The vendor, for their entire market",
+          "b": "You, for your practice"
+        },
+        {
+          "l": "What you own after three years",
+          "a": "Nothing. Stop paying and access ends.",
+          "b": "The full source code and the IP"
+        },
+        {
+          "l": "If the price rises 30%",
+          "a": "You pay it, or you migrate",
+          "b": "Doesn't apply — there is no licence"
+        },
+        {
+          "l": "If the vendor shuts down",
+          "a": "An export file and a deadline",
+          "b": "Doesn't apply — it's already yours"
+        }
+      ],
+      "honestTitle": "When renting is genuinely the better call",
+      "honestBody": "If you have fewer than about eight users on a genuinely standard workflow — plain accounting, plain billing, nothing specific to how you operate — buy the off-the-shelf product. It will be cheaper and faster and we will say so on the call. Custom pays off when the workflow is actually yours, or when headcount makes per-seat pricing compound against you."
+    },
+    "verticals": {
+      "kicker": "Who we build for",
+      "title": "Built around the work, not around a demo",
+      "lede": "These are the sectors we've built most often — not a list of who we'll take. If your business runs on repetitive work, records and follow-ups, it can be built for. If we build, we build for everyone.",
+      "items": [
+        {
+          "t": "Clinics & Nursing Homes",
+          "d": "Patient records, OPD queue and appointment routing, billing and insurance paperwork, WhatsApp reminders that actually reach patients.",
+          "b": [
+            "Patient data handled under DPDP Act 2023 obligations",
+            "Records stay on infrastructure you control",
+            "Front-desk workflows built for how your OPD really runs"
+          ]
+        },
+        {
+          "t": "CA & CS Firms",
+          "d": "Document vaults with a full audit trail, client-deliverable tracking, statutory filing calendars, and automated document-chase follow-ups.",
+          "b": [
+            "Client confidentiality expectations built into the access model",
+            "Filing-cycle deadlines modelled, not bolted on",
+            "Per-client document status without a WhatsApp group"
+          ]
+        },
+        {
+          "t": "Legal Practices & Advocates",
+          "d": "Matter and hearing calendars, case lifecycle tracking, drafting templates, and privileged-communication handling — purely internal practice tooling.",
+          "b": [
+            "Designed strictly as internal efficiency tooling",
+            "No client-solicitation or advertising features, by design",
+            "Privilege-aware access control across the practice"
+          ]
+        },
+        {
+          "t": "Factories, Plants & Manufacturing",
+          "d": "Production and job-work tracking, batch and quality records, machine downtime logs, stores and raw-material inventory, gate passes and dispatch, multi-plant roll-up reporting.",
+          "b": [
+            "Shop-floor screens built for shop-floor conditions",
+            "Runs offline on plant machines where the network doesn't reach",
+            "Multi-plant control from one place, as built for NidaanPartner.com"
+          ]
+        },
+        {
+          "t": "Retail, Distribution & Trading",
+          "d": "Stock across branches, billing and GST invoicing, purchase and vendor workflows, credit and collections tracking, route and delivery management.",
+          "b": [
+            "One live stock position across every branch",
+            "Credit ageing your accountant doesn't have to rebuild monthly",
+            "Unlimited counters and users — no per-seat licence"
+          ]
+        },
+        {
+          "t": "Everyone else — and that's most of you",
+          "d": "Schools and coaching institutes, travel, transport and logistics, real-estate offices, gyms and salons, workshops and service centres, agencies, NGOs, contractors, labs.",
+          "b": [
+            "No business is too small or too unusual to build for",
+            "We start from your workflow, never from a template",
+            "If off-the-shelf software would serve you better, we'll say so"
+          ]
+        }
+      ],
+      "legalNote": "On legal practices: Bar Council of India Rule 36 prohibits advocates from advertising or soliciting work. Everything we build for a law practice is internal operations tooling — case management, calendars, document handling, confidentiality — and nothing in it is designed for client acquisition."
+    },
+    "process": {
+      "kicker": "How a build actually runs",
+      "title": "Five steps, with dates attached",
+      "lede": "Scope ambiguity is what makes custom software frightening. Here is exactly what happens and when.",
+      "steps": [
+        {
+          "n": "01",
+          "t": "Architecture call",
+          "w": "30 minutes · free",
+          "d": "You describe how the work moves through your firm today. We map it and tell you honestly whether a custom build is the right call — including when it isn't."
+        },
+        {
+          "n": "02",
+          "t": "Blueprint & fixed quote",
+          "w": "Week 1–2",
+          "d": "A written architecture: screens, data model, integrations, infrastructure plan, and a fixed-scope price. Yours to keep even if you stop here."
+        },
+        {
+          "n": "03",
+          "t": "Build",
+          "w": "Week 3–10 typical",
+          "d": "Working demos every week on your own staging URL. You watch it take shape, and changes cost the least at this stage."
+        },
+        {
+          "n": "04",
+          "t": "Handover & training",
+          "w": "Week 10–12",
+          "d": "Deployed to your cloud account. Source code in your Git organisation, IP transfer signed. Your team trained in Hindi or English until they run it without us."
+        },
+        {
+          "n": "05",
+          "t": "Run",
+          "w": "Ongoing · optional",
+          "d": "Take a support retainer, or take nothing at all. Your system, your infrastructure, your call — and that stays true forever."
+        }
+      ]
+    },
+    "objections": {
+      "kicker": "The questions you're actually thinking",
+      "title": "Straight answers, before you ask",
+      "items": [
+        {
+          "q": "What happens if you disappear?",
+          "a": "Your code lives in your Git organisation and your system runs in your cloud account — both from delivery day, not as a parting gift. You get architecture documentation, a dependency inventory and an access map. Any competent engineering team can pick it up cold. This is the single biggest risk in custom software, and the structure above is how it gets removed."
+        },
+        {
+          "q": "Who maintains it in year three?",
+          "a": "Your choice. A support retainer with us, your own hired engineer, or another firm entirely — the code is yours and it is documented for exactly that. If you take nothing, the system keeps running; you simply take on patching yourself."
+        },
+        {
+          "q": "My staff aren't technical.",
+          "a": "That is assumed, not an exception. Training in plain Hindi or English is included, and we stay until your team runs it comfortably on their own. The systems we build get used by front-desk staff and branch clerks every day."
+        },
+        {
+          "q": "Isn't off-the-shelf cheaper?",
+          "a": "Often, yes — and when it is, we will tell you on the call rather than take the project. Custom wins when the workflow is genuinely specific to you, or when per-seat pricing compounds against your headcount. Below that line, buy the product."
+        },
+        {
+          "q": "How do I know the estimate holds?",
+          "a": "The blueprint stage produces a fixed-scope price before any build work starts. Scope changes are quoted separately and approved by you in writing before they are built. You never receive a surprise invoice."
+        },
+        {
+          "q": "How long before we're actually using it?",
+          "a": "A focused first version typically reaches your team in 8–12 weeks. We deliberately scope a working first release rather than a complete one — you start getting value while the rest is built."
+        }
+      ]
+    },
+    "final": {
+      "title": "Find out what you're really paying to rent",
+      "body": "Thirty minutes, no cost, no obligation. Bring your current software invoices and how your work actually flows. You leave with a straight answer on whether a custom build makes financial sense for your firm — including a clear no if that's the honest answer.",
+      "cta": "Book a 30-minute architecture call",
+      "alt": "Or WhatsApp us a question",
+      "trust": "Every build ships with a written IP transfer agreement — 100% legal ownership of the source code, on delivery.",
+      "email": "Prefer email? dushyant@goluq.com reaches a real person."
+    },
+    "bridge": {
+      "title": "Not ready for a full build?",
+      "body": "A Digital Employee starts at ₹799/month, built around your business in 2–4 weeks. See a free demonstration of how one would work for you before committing to anything bigger.",
+      "cta": "Watch a Digital Employee work, free"
+    }
+  },
+  "buildGlobal": {
+    "nav": "Custom builds",
+    "meta": {
+      "title": "GoLuQ — Custom software your firm owns outright",
+      "desc": "Bespoke systems for medical practices, law firms, accounting practices and SMBs across the US, UK, Australia and UAE. Deployed to your own cloud, full source code and IP transferred on delivery."
+    },
+    "hero": {
+      "kicker": "GoLuQ Engineering Practice",
+      "h1": "You're paying per seat for software built to the average of a thousand firms.",
+      "h1accent": "None of them is yours.",
+      "sub": "We build for private medical practices, law and accounting firms, boutique financial institutions, manufacturers, and any operation with a workflow worth owning. Architected to how you actually work, deployed to your own AWS, Azure or GCP account, with full source and IP transferred on delivery.",
+      "points": [
+        "Architected to your operating workflow, not to a market average",
+        "Deployed to your own cloud account, under your billing",
+        "Full source code and IP transferred on delivery",
+        "No per-seat licences — headcount stops driving software cost"
+      ],
+      "ctaPrimary": "Book an architecture session",
+      "ctaProof": "Review shipped work",
+      "ctaWhatsapp": "Email the architect",
+      "ctaNote": "45 minutes, no cost. You leave with an architecture opinion you can act on, whether or not you engage us."
+    },
+    "problem": {
+      "kicker": "The CAPEX reframe",
+      "title": "A permanent operating tax that buys you no asset",
+      "lede": "Per-seat SaaS is the only line in your budget that scales with your success and leaves nothing behind. The costs beyond the invoice are the expensive ones.",
+      "items": [
+        {
+          "t": "Cost compounds with headcount",
+          "d": "At $50–$150 per seat per month, every hire is a permanent software increase. Growth becomes a recurring penalty rather than leverage."
+        },
+        {
+          "t": "Renewal pricing is not a negotiation",
+          "d": "Once the platform is embedded in operations, migration cost is your only leverage — and the vendor has already modelled it."
+        },
+        {
+          "t": "Your workflow bends to the product",
+          "d": "It was built for the market's median firm. The delta between that and your actual operation is absorbed by your staff, in spreadsheets, forever."
+        },
+        {
+          "t": "Your data lives in someone else's tenancy",
+          "d": "Multi-tenant infrastructure you cannot audit, under export terms drafted for the vendor's protection, not yours."
+        },
+        {
+          "t": "Nothing appears on the balance sheet",
+          "d": "Three years of OPEX, zero asset. At diligence, owned IP is a line item; a stack of vendor contracts is a liability with switching costs attached."
+        }
+      ]
+    },
+    "calc": {
+      "kicker": "Model it yourself",
+      "title": "What does renting actually cost you?",
+      "lede": "Every assumption is editable and visible. Break it if you can — that's the point.",
+      "seats": "Seats requiring access",
+      "perSeat": "Cost per seat, per month",
+      "years": "Modelling horizon (years)",
+      "rentTotal": "Total licence spend",
+      "rentSub": "with no asset at the end of it",
+      "ownTotal": "Typical GoLuQ engagement",
+      "ownSub": "one-time, source and IP transferred",
+      "hosting": "Plus your own cloud spend, billed to you directly at cost",
+      "verdictWin": "Over {{y}} years you'd spend {{d}} more renting than owning — and hold no asset at the end.",
+      "verdictLose": "At this scale, SaaS is the correct commercial decision. We'd say so in the session as well.",
+      "note": "Engagement cost varies with scope. The band shown is our typical range at this scale; the exact figure is fixed in writing at the blueprint stage, before any build work begins."
+    },
+    "model": {
+      "kicker": "The appliance model",
+      "title": "Single-tenant, sovereign, zero-licence",
+      "lede": "Built once to your workflow, deployed into your infrastructure, transferred to you outright. Including an honest account of what still costs money.",
+      "yes": [
+        {
+          "t": "Architected to your operating workflow",
+          "d": "We model how work actually moves through your firm — including every process your current platform forced you to work around."
+        },
+        {
+          "t": "Deployed to your own cloud account",
+          "d": "AWS, Azure or GCP, in your name, under your billing and your access controls. Single-tenant by construction, not by configuration."
+        },
+        {
+          "t": "Unlimited users, permanently",
+          "d": "There are no seats to license. Doubling headcount does not move the software line."
+        },
+        {
+          "t": "Source and IP transferred on delivery",
+          "d": "Into your Git organisation, under an executed IP transfer agreement. Not escrowed. Not licensed. Transferred."
+        }
+      ],
+      "honestTitle": "What still costs money — stated plainly",
+      "honestLede": "Any practice claiming a custom build has no ongoing cost is not being straight with you. The real picture:",
+      "honest": [
+        {
+          "t": "Cloud infrastructure",
+          "d": "Typically $80–$600 per month depending on load and redundancy. Billed by your cloud provider directly to you, at cost. Never marked up by us."
+        },
+        {
+          "t": "Security patching & dependency upkeep",
+          "d": "Handled under a support retainer, or by your own engineering team. Both are legitimate; the code is documented for either."
+        },
+        {
+          "t": "Feature engineering",
+          "d": "Quoted in blocks, at a rate agreed at contract. Entirely at your discretion, including never."
+        },
+        {
+          "t": "Third-party services you select",
+          "d": "Payment processing, communications APIs, model inference. Priced by those vendors, billed to you, fully visible."
+        }
+      ],
+      "notTitle": "What we don't do",
+      "not": [
+        "We don't hold your code, cloud account, or domains as leverage.",
+        "We don't charge per user, under any circumstance.",
+        "We don't take an engagement that off-the-shelf software would serve better.",
+        "We don't claim certifications we do not hold — see the compliance note below."
+      ]
+    },
+    "tco": {
+      "kicker": "Total cost of ownership",
+      "title": "Five-year modelling, assumptions on the table",
+      "lede": "Modelled on 25 seats at $95 per seat per month. Adjust the calculator above and this changes with it.",
+      "colSaas": "Per-seat enterprise SaaS",
+      "colOwn": "A GoLuQ appliance",
+      "rows": [
+        {
+          "l": "Five-year licence spend",
+          "a": "~$142,500 at 25 seats",
+          "b": "One-time build + your own cloud spend"
+        },
+        {
+          "l": "Cost of adding 25 more seats",
+          "a": "Doubles the monthly line, permanently",
+          "b": "$0 — there are no seats"
+        },
+        {
+          "l": "Tenancy & data isolation",
+          "a": "Multi-tenant, vendor-controlled",
+          "b": "Single-tenant, in your cloud account"
+        },
+        {
+          "l": "Roadmap control",
+          "a": "Vendor's, optimised for their whole market",
+          "b": "Yours, optimised for your operation"
+        },
+        {
+          "l": "Asset position at year five",
+          "a": "None. Access ends when payment does.",
+          "b": "Owned source code and IP on the balance sheet"
+        },
+        {
+          "l": "Exit cost & portability",
+          "a": "Export format, timeline, and fees are theirs to set",
+          "b": "No exit — you already hold everything"
+        },
+        {
+          "l": "Vendor-shutdown exposure",
+          "a": "Full operational dependency",
+          "b": "None"
+        },
+        {
+          "l": "Diligence position",
+          "a": "Contract stack with switching costs",
+          "b": "Owned IP, documented architecture"
+        }
+      ],
+      "honestTitle": "When SaaS is the right decision",
+      "honestBody": "Under roughly fifteen seats on a genuinely commodity workflow, buy the product. It will be faster to deploy and cheaper across the horizon, and we will tell you so in the session rather than take the engagement. Custom becomes correct when the workflow is a genuine differentiator, when per-seat cost compounds against headcount, or when data sovereignty is a regulatory requirement rather than a preference."
+    },
+    "verticals": {
+      "kicker": "Vertical focus",
+      "title": "Built to the framework that governs you",
+      "lede": "These are the sectors we've delivered into most often — not a gate on who we take. Sector isn't the qualifier; workflow specificity is.",
+      "items": [
+        {
+          "t": "Healthcare & Private Practice",
+          "d": "Patient portals, scheduling and intake engines, EHR integration paths, clinician workflow tooling.",
+          "b": [
+            "HIPAA-aligned data-handling patterns and BAA posture (US)",
+            "UK GDPR special-category data handling (UK)",
+            "Privacy Act and APP obligations (AU) · health-data localisation (UAE)"
+          ]
+        },
+        {
+          "t": "Legal & Professional Services",
+          "d": "Matter lifecycle management, encrypted document pipelines, conflict checking, privilege-preserving communications.",
+          "b": [
+            "Privilege-aware access control by construction",
+            "Immutable audit trail across matter history",
+            "Client data isolated to your tenancy alone"
+          ]
+        },
+        {
+          "t": "Wealth Management & Finance",
+          "d": "Client portals, multi-tenant advisory tooling, portfolio views, regulatory reporting exports.",
+          "b": [
+            "Immutable audit logging on every state change",
+            "Least-privilege access model across advisor roles",
+            "Reporting exports built to your regulator's format"
+          ]
+        },
+        {
+          "t": "Manufacturing & Industrial Operations",
+          "d": "Production and job tracking, batch and quality records, machine downtime and maintenance logs, stores inventory, dispatch, and multi-plant roll-up reporting.",
+          "b": [
+            "Shop-floor interfaces built for shop-floor conditions",
+            "Runs on-premise where plant networks are isolated by policy",
+            "Multi-plant control from a single plane"
+          ]
+        },
+        {
+          "t": "High-Growth SMBs",
+          "d": "Operational dashboards, automated client onboarding, multi-branch control planes, integration across an existing stack.",
+          "b": [
+            "Multi-office control layer, as shipped for NidaanPartner.com",
+            "Unlimited users across every location",
+            "Integrates with the systems you already run"
+          ]
+        },
+        {
+          "t": "And whatever isn't on this list",
+          "d": "Logistics and field service, education, property, hospitality, agencies, non-profits, labs, franchises, trade associations.",
+          "b": [
+            "Sector is not a qualifier — workflow specificity is",
+            "We start from your operation, never from a template",
+            "If a product would serve you better, we'll say so in the session"
+          ]
+        }
+      ],
+      "complianceTitle": "On compliance — precisely stated",
+      "complianceBody": "GoLuQ does not hold HIPAA, SOC 2, ISO 27001, GDPR or ADHICS certification, and will never claim to. What we provide is engineering: encryption in transit and at rest, least-privilege access models, immutable audit logging, and single-tenant isolation — built so that the certification you hold, on the infrastructure you control, withstands your audit. Certification attaches to your organisation and your environment. We build to survive the assessment; we do not sell you a badge."
+    },
+    "process": {
+      "kicker": "Engagement model",
+      "title": "Five phases, with the IP transfer point marked",
+      "lede": "Scope ambiguity is the real risk in custom engineering. Here is precisely how an engagement runs.",
+      "steps": [
+        {
+          "n": "01",
+          "t": "Architecture session",
+          "w": "45 minutes · no cost",
+          "d": "You describe the operation. We return an architectural opinion — including a direct recommendation against building, when that's the honest answer."
+        },
+        {
+          "n": "02",
+          "t": "Blueprint & fixed scope",
+          "w": "Week 1–3",
+          "d": "Written architecture: data model, service boundaries, integration surface, infrastructure and security design, and a fixed-scope price. Yours regardless of what you do next."
+        },
+        {
+          "n": "03",
+          "t": "Build",
+          "w": "Week 4–14 typical",
+          "d": "Weekly working increments on your staging environment. Change is cheapest here, and it's designed to be seen early."
+        },
+        {
+          "n": "04",
+          "t": "Handover & IP transfer",
+          "w": "Week 14–16",
+          "d": "Deployed to your cloud account. Source in your Git organisation. IP transfer agreement executed. Architecture documentation, dependency inventory and access model delivered."
+        },
+        {
+          "n": "05",
+          "t": "Run",
+          "w": "Ongoing · optional",
+          "d": "Support retainer, engineering blocks, or nothing at all. The system is yours and it keeps running either way."
+        }
+      ]
+    },
+    "objections": {
+      "kicker": "The questions worth asking",
+      "title": "Direct answers",
+      "items": [
+        {
+          "q": "Key-person risk — what if you become unavailable?",
+          "a": "Your source lives in your Git organisation and the system runs in your cloud account from delivery, not as a contingency. You receive architecture documentation, a full dependency inventory and a documented access model. Any competent engineering team continues from a cold start. This is the central risk in boutique engagement, and the structure is designed specifically to remove it."
+        },
+        {
+          "q": "Who maintains this in year three?",
+          "a": "Your decision: a retainer with us, your own team, or another firm. The code is yours and documented for exactly that scenario. With no retainer the system continues to run; you assume patching and dependency upkeep."
+        },
+        {
+          "q": "Will this pass our security review?",
+          "a": "You receive architecture documentation, a dependency inventory with licence audit, the access and authorisation model, audit-log design, and the infrastructure-as-code that provisions the environment. It runs in your tenancy under your existing controls, which is usually the shortest path through an assessment, not the longest."
+        },
+        {
+          "q": "How do you handle delivery across time zones?",
+          "a": "The Principal Architect has delivered across APAC, EMEA, North America and the Gulf for twenty years, including at DXC, Cornerstone OnDemand and HighLevel. Fixed weekly overlap hours are agreed at contract, all decisions are written, and every increment is inspectable on your own staging environment rather than described to you on a call."
+        },
+        {
+          "q": "Where does our data sit, and who can reach it?",
+          "a": "In your cloud account, in the region you select, under access keys you hold. Engineering access is scoped, time-boxed and logged, and is revoked entirely at handover. There is no GoLuQ-controlled copy of your production data."
+        },
+        {
+          "q": "How is scope change handled?",
+          "a": "The blueprint fixes scope and price before build begins. Changes are quoted separately and approved in writing before implementation. There are no surprise invoices, and no discovery of scope halfway through."
+        }
+      ]
+    },
+    "final": {
+      "title": "Take ownership of the stack your firm runs on",
+      "body": "Forty-five minutes, no cost. Bring your current licence spend and how your operation actually works. You leave with an architectural opinion you can act on — including a clear recommendation against building, if that's the honest one.",
+      "cta": "Book an architecture session",
+      "alt": "Or email the architect directly",
+      "trust": "Every engagement is backed by an executed IP transfer agreement granting 100% legal ownership of the source code.",
+      "email": "dushyant@goluq.com reaches the Principal Architect directly."
+    },
+    "bridge": {
+      "title": "Want to see delivery quality before committing?",
+      "body": "See a free demonstration of a Digital Employee built for a business like yours — a fast, low-stakes look at how we work before a larger engagement.",
+      "cta": "Watch one work, free"
+    }
+  },
+  "whatsapp": {
+    "title": "Prefer to just talk?",
+    "subtitle": "Message us on WhatsApp — a real person replies",
+    "aria": "Message GoLuQ on WhatsApp",
+    "prefill": "Hi GoLuQ — I saw your site and wanted to ask about"
   }
 }

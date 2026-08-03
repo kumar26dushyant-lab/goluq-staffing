@@ -1,4 +1,5 @@
-import { Globe, Smartphone, ShieldOff, MessageCircle, ArrowUp, type LucideIcon } from "lucide-react";
+import { Globe, Smartphone, ShieldOff, MessageCircle, ArrowRight, type LucideIcon } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Button } from "./ui/Button";
 
@@ -52,13 +53,13 @@ export function HomeBuild({ className = "" }: { className?: string }) {
         })}
       </div>
 
-      <Button
-        size="lg"
-        className="mt-7"
-        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-      >
-        <ArrowUp size={18} /> {t("homeBuild.cta")}
-      </Button>
+      {/* Hands off to the dedicated custom-build funnel rather than bouncing the
+          visitor back up into the Digital Employee demo. */}
+      <Link to="/build" className="mt-7 inline-block">
+        <Button size="lg">
+          {t("homeBuild.cta")} <ArrowRight size={18} />
+        </Button>
+      </Link>
     </section>
   );
 }

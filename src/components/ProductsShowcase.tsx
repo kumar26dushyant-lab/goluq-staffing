@@ -40,9 +40,21 @@ export function ProductsShowcase({ className = "" }: { className?: string }) {
               className={`glass glass-interactive ${p.glow} group flex flex-col rounded-2xl p-6`}
             >
               <div className="flex items-center justify-between">
-                <span className={`grid h-14 w-14 place-items-center overflow-hidden rounded-xl ring-1 ${p.tint} ${p.ring}`}>
+                {/* Logo tiles get a solid white plate in BOTH themes. These are
+                    dark-ink marks — on a translucent tint over the dark surface
+                    they vanished entirely. Icon-only tiles keep the brand tint. */}
+                <span
+                  className={`grid h-14 w-14 place-items-center overflow-hidden rounded-xl ring-1 ${
+                    p.logo ? `bg-white ${p.ring}` : `${p.tint} ${p.ring}`
+                  }`}
+                >
                   {p.logo ? (
-                    <img src={p.logo} alt="" className="h-full w-full object-contain p-1.5" />
+                    <img
+                      src={p.logo}
+                      alt=""
+                      loading="lazy"
+                      className="h-full w-full object-contain p-2"
+                    />
                   ) : (
                     <Icon size={28} strokeWidth={2} />
                   )}

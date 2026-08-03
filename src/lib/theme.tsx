@@ -19,12 +19,21 @@ interface ThemeCtx {
 
 const Ctx = createContext<ThemeCtx | null>(null);
 
+/**
+ * Light is the product default, not an alternate skin. Reasons: the brand's
+ * product logos (EagleEye/Sarathi/Nidaan) are dark-ink marks that wash out on a
+ * near-black surface, and the overwhelming majority of traffic is mobile, often
+ * outdoors, where the light surface is simply more readable.
+ *
+ * Note this deliberately does NOT follow prefers-color-scheme on a first visit —
+ * a visitor whose phone is in dark mode still gets GoLuQ's light presentation.
+ * They can switch, and the choice is remembered.
+ */
 function getInitialTheme(): Theme {
-  if (typeof window === "undefined") return "dark";
+  if (typeof window === "undefined") return "light";
   const stored = localStorage.getItem(STORAGE_KEY);
   if (stored === "light" || stored === "dark") return stored;
-  // Follow OS preference on first visit
-  return window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+  return "light";
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {

@@ -1,14 +1,15 @@
-import { useCallback, useEffect, useState } from "react";
+import { Fragment, useCallback, useEffect, useState } from "react";
 import {
   LayoutDashboard, Users, TrendingUp, MessageSquare, Settings as SettingsIcon,
   LogOut, Search, Download, Trash2, RefreshCw, Send, ShieldCheck, Circle,
+  BarChart3, ChevronDown,
 } from "lucide-react";
 import { Button } from "../components/ui/Button";
 import { BrandMark } from "../components/BrandMark";
 import { inputClass } from "../lib/ui";
 import { getToken, setToken, clearToken, adminGet, adminPost, leadsCsvUrl } from "../lib/adminApi";
 
-type Section = "overview" | "leads" | "affiliates" | "whatsapp" | "settings";
+type Section = "overview" | "leads" | "visitors" | "affiliates" | "whatsapp" | "settings";
 
 export function Admin() {
   const [authed, setAuthed] = useState(false);
@@ -26,6 +27,7 @@ export function Admin() {
   const NAV: { id: Section; label: string; icon: typeof Users }[] = [
     { id: "overview", label: "Overview", icon: LayoutDashboard },
     { id: "leads", label: "Leads", icon: Users },
+    { id: "visitors", label: "Visitors", icon: BarChart3 },
     { id: "affiliates", label: "Affiliates", icon: TrendingUp },
     { id: "whatsapp", label: "WhatsApp", icon: MessageSquare },
     { id: "settings", label: "Settings", icon: SettingsIcon },
@@ -59,6 +61,7 @@ export function Admin() {
       <main className="mx-auto max-w-5xl px-4 py-6 sm:px-8">
         {section === "overview" && <Overview />}
         {section === "leads" && <Leads />}
+        {section === "visitors" && <Visitors />}
         {section === "affiliates" && <Affiliates />}
         {section === "whatsapp" && <WhatsApp />}
         {section === "settings" && <SettingsPanel />}
@@ -148,12 +151,34 @@ function Overview() {
   );
 }
 
+function Detail({ label, value }: { label: string; value: unknown }) {
+  const v = String(value ?? "").trim();
+  if (!v || v === "null") return null;
+  return (
+    <p className="text-sm">
+      <span className="text-faint">{label}: </span>
+      <span className="text-fg">{v}</span>
+    </p>
+  );
+}
+
+/** cross_sell is stored as a JSON array string; show it readably or not at all. */
+function safeList(raw: unknown): string {
+  try {
+    const a = JSON.parse(String(raw ?? "[]"));
+    return Array.isArray(a) && a.length ? a.join(", ") : "";
+  } catch {
+    return "";
+  }
+}
+
 function Leads() {
   const [rows, setRows] = useState<any[]>([]);
   const [total, setTotal] = useState(0);
   const [q, setQ] = useState("");
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(true);
+  const [openId, setOpenId] = useState<number | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -191,31 +216,159 @@ function Leads() {
         <table className="w-full min-w-[720px] text-left text-sm">
           <thead className="text-faint">
             <tr className="border-b border-hairline/15">
-              {["When", "Name", "Phone", "Worker", "Industry", "Status", ""].map((h) => <th key={h} className="p-3 font-semibold">{h}</th>)}
+              {["", "When", "Name", "Phone", "Source", "Status", ""].map((h, i) => <th key={i} className="p-3 font-semibold">{h}</th>)}
             </tr>
           </thead>
           <tbody>
             {rows.map((l) => (
-              <tr key={l.id} className="border-b border-hairline/8 align-middle">
-                <td className="p-3 text-muted">{String(l.created_at).slice(0, 16)}</td>
-                <td className="p-3 font-semibold text-fg">{l.name}</td>
-                <td className="p-3"><a className="text-brand-luq" href={`https://wa.me/91${l.phone}`} target="_blank" rel="noreferrer">+91 {l.phone}</a></td>
-                <td className="p-3 text-muted">{l.role || "—"}</td>
-                <td className="p-3 text-muted">{l.industry || "—"}</td>
-                <td className="p-3">
-                  <select value={l.status || "new"} onChange={(e) => act(l.id, "status", { status: e.target.value })}
-                    className="rounded-lg border border-hairline/20 bg-panel/40 px-2 py-1 text-xs text-fg">
-                    {["new", "engaged", "converted", "opted_out", "done"].map((s) => <option key={s} value={s}>{s}</option>)}
-                  </select>
-                </td>
-                <td className="p-3">
-                  <button type="button" onClick={() => act(l.id, "delete")} className="text-faint hover:text-danger" aria-label="Delete"><Trash2 size={16} /></button>
-                </td>
-              </tr>
+              <Fragment key={l.id}>
+                <tr className="border-b border-hairline/8 align-middle">
+                  <td className="p-3">
+                    <button type="button" onClick={() => setOpenId(openId === l.id ? null : l.id)}
+                      aria-label={openId === l.id ? "Collapse" : "Expand"} aria-expanded={openId === l.id}
+                      className="text-faint hover:text-fg">
+                      <ChevronDown size={16} className={`transition-transform ${openId === l.id ? "rotate-180" : ""}`} />
+                    </button>
+                  </td>
+                  <td className="p-3 text-muted">{String(l.created_at).slice(0, 16)}</td>
+                  <td className="p-3 font-semibold text-fg">{l.name}</td>
+                  <td className="p-3"><a className="text-brand-luq" href={`https://wa.me/91${l.phone}`} target="_blank" rel="noreferrer">+91 {l.phone}</a></td>
+                  <td className="p-3 text-muted">{l.source || "—"}</td>
+                  <td className="p-3">
+                    <select value={l.status || "new"} onChange={(e) => act(l.id, "status", { status: e.target.value })}
+                      className="rounded-lg border border-hairline/20 bg-panel/40 px-2 py-1 text-xs text-fg">
+                      {["new", "engaged", "converted", "opted_out", "done"].map((s) => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                  </td>
+                  <td className="p-3">
+                    <button type="button" onClick={() => act(l.id, "delete")} className="text-faint hover:text-danger" aria-label="Delete"><Trash2 size={16} /></button>
+                  </td>
+                </tr>
+                {openId === l.id && (
+                  <tr className="border-b border-hairline/8 bg-panel/30">
+                    <td colSpan={7} className="p-4">
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <Detail label="Email" value={l.email} />
+                        <Detail label="Worker" value={l.role} />
+                        <Detail label="Industry" value={l.industry} />
+                        <Detail label="Landed on" value={l.landing} />
+                        <Detail label="Referred by" value={l.ref_code} />
+                        <Detail label="Wants training" value={l.wants_training ? "Yes" : "No"} />
+                        <Detail label="Also wants" value={safeList(l.cross_sell)} />
+                      </div>
+                      {/* Chat transcripts and build enquiries land here — this is
+                          the most useful field on the record and it was previously
+                          not shown anywhere in the admin at all. */}
+                      {l.message && (
+                        <div className="mt-3">
+                          <p className="mb-1 font-mono text-xs uppercase tracking-wider text-faint">Message / conversation</p>
+                          <pre className="max-h-72 overflow-auto whitespace-pre-wrap rounded-xl border border-hairline/15 bg-ink/40 p-3 text-sm text-fg">{l.message}</pre>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                )}
+              </Fragment>
             ))}
             {!loading && rows.length === 0 && <tr><td colSpan={7} className="p-6 text-center text-muted">No leads.</td></tr>}
           </tbody>
         </table>
+      </div>
+    </div>
+  );
+}
+
+/** Horizontal bar list — enough to read a distribution at a glance, no chart lib. */
+function BarList({ title, rows }: { title: string; rows: { k: string; sessions: number }[] }) {
+  const max = Math.max(1, ...rows.map((r) => r.sessions));
+  return (
+    <div className="glass rounded-2xl p-5">
+      <p className="mb-3 font-mono text-xs uppercase tracking-wider text-faint">{title}</p>
+      {rows.length === 0 && <p className="text-sm text-muted">No data yet.</p>}
+      <div className="space-y-2">
+        {rows.map((r) => (
+          <div key={r.k} className="relative overflow-hidden rounded-lg bg-panel/40">
+            <div
+              className="absolute inset-y-0 left-0 bg-teal-glow/20"
+              style={{ width: `${(r.sessions / max) * 100}%` }}
+              aria-hidden="true"
+            />
+            <div className="relative flex items-center justify-between gap-3 px-3 py-2">
+              <span className="truncate text-sm text-fg">{r.k}</span>
+              <span className="shrink-0 font-mono text-sm font-semibold text-brand-luq">
+                {r.sessions}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function Visitors() {
+  const [d, setD] = useState<any>(null);
+  const [err, setErr] = useState("");
+  const load = useCallback(() => {
+    adminGet("/api/admin/visitors").then(setD).catch(() => setErr("Failed to load"));
+  }, []);
+  useEffect(() => { load(); }, [load]);
+
+  if (err) return <p className="text-danger">{err}</p>;
+  if (!d) return <p className="text-muted">Loading…</p>;
+
+  const f = d.funnel || {};
+  const rate = f.sessions ? ((f.leads / f.sessions) * 100).toFixed(1) : "0.0";
+  const maxDay = Math.max(1, ...(d.daily || []).map((x: any) => x.sessions));
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-muted">
+          Cookie-free, first-party. No IP or personal data is stored.
+        </p>
+        <Button variant="secondary" size="md" onClick={load}><RefreshCw size={16} /></Button>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <Card label="Sessions (all time)" value={d.totals.sessions} accent />
+        <Card label="Sessions today" value={d.totals.todaySessions} />
+        <Card label="Sessions this week" value={d.totals.weekSessions} />
+        <Card label="Pageviews" value={d.totals.views} />
+      </div>
+
+      {/* The number to actually run the business on. */}
+      <div className="glass rounded-2xl p-5">
+        <p className="mb-3 font-mono text-xs uppercase tracking-wider text-faint">Funnel</p>
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <div><p className="text-sm text-muted">Visited</p><p className="font-display text-2xl font-bold text-fg">{f.sessions}</p></div>
+          <div><p className="text-sm text-muted">Saw /build</p><p className="font-display text-2xl font-bold text-fg">{f.buildSessions}</p></div>
+          <div><p className="text-sm text-muted">Became leads</p><p className="font-display text-2xl font-bold text-fg">{f.leads}</p></div>
+          <div><p className="text-sm text-muted">Visit → lead</p><p className="font-display text-2xl font-bold text-brand-luq">{rate}%</p></div>
+        </div>
+      </div>
+
+      {/* Last 14 days */}
+      <div className="glass rounded-2xl p-5">
+        <p className="mb-3 font-mono text-xs uppercase tracking-wider text-faint">Sessions · last 14 days</p>
+        {(d.daily || []).length === 0 ? (
+          <p className="text-sm text-muted">No data yet.</p>
+        ) : (
+          <div className="flex h-32 items-end gap-1.5">
+            {d.daily.map((x: any) => (
+              <div key={x.k} className="flex flex-1 flex-col items-center gap-1" title={`${x.k}: ${x.sessions}`}>
+                <div className="w-full rounded-t bg-teal-glow/40" style={{ height: `${(x.sessions / maxDay) * 100}%`, minHeight: 2 }} />
+                <span className="text-[10px] text-faint">{String(x.k).slice(5)}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-3">
+        <BarList title="Top pages" rows={d.pages || []} />
+        <BarList title="Sources" rows={d.sources || []} />
+        <BarList title="Devices" rows={d.devices || []} />
       </div>
     </div>
   );

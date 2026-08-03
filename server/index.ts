@@ -25,6 +25,8 @@ import { onRequestGet as adminAffiliates } from "../functions/api/admin/affiliat
 import { onRequestGet as adminSettingsGet, onRequestPost as adminSettingsPost } from "../functions/api/admin/settings";
 import { onRequest as cronFollowups } from "../functions/api/cron/followups";
 import { onRequestPost as waWebhook } from "../functions/api/wa/webhook";
+import { onRequestPost as track } from "../functions/api/track";
+import { onRequestGet as adminVisitors } from "../functions/api/admin/visitors";
 
 const ROOT = process.cwd();
 const DIST = join(ROOT, "dist");
@@ -35,6 +37,21 @@ mkdirSync(DATA_DIR, { recursive: true });
 const sqlite = new Database(join(DATA_DIR, "goluq.db"));
 sqlite.pragma("journal_mode = WAL");
 sqlite.exec(readFileSync(join(ROOT, "schema.sql"), "utf8"));
+
+// Additive migrations for databases created before a column existed. schema.sql
+// is re-exec'd on every boot, so ALTERs can't live there (they'd throw on the
+// second start) — each one is attempted and its "duplicate column" ignored.
+for (const sql of [
+  `ALTER TABLE leads ADD COLUMN session_id TEXT`,
+  `ALTER TABLE leads ADD COLUMN source TEXT`,
+  `ALTER TABLE leads ADD COLUMN landing TEXT`,
+]) {
+  try {
+    sqlite.exec(sql);
+  } catch {
+    /* column already present */
+  }
+}
 
 // ── Env passed to handlers (DB + secrets from .env / process.env) ───────────
 const env = {
@@ -156,6 +173,7 @@ app.use("/api/*", async (c, next) => {
 app.post("/api/assistant", (c) => callFn(assistant as Handler, c.req.raw));
 app.get("/api/config", (c) => callFn(publicConfig as Handler, c.req.raw));
 app.post("/api/lead", (c) => callFn(lead as Handler, c.req.raw));
+app.post("/api/track", (c) => callFn(track as Handler, c.req.raw));
 app.post("/api/affiliate/register", (c) => callFn(affRegister as Handler, c.req.raw));
 app.post("/api/affiliate/track", (c) => callFn(affTrack as Handler, c.req.raw));
 app.get("/api/affiliate/stats", (c) => callFn(affStats as Handler, c.req.raw));
@@ -167,6 +185,7 @@ app.get("/api/admin/stats", (c) => callFn(adminStats as Handler, c.req.raw));
 app.get("/api/admin/leads", (c) => callFn(adminLeads as Handler, c.req.raw));
 app.post("/api/admin/lead", (c) => callFn(adminLead as Handler, c.req.raw));
 app.get("/api/admin/affiliates", (c) => callFn(adminAffiliates as Handler, c.req.raw));
+app.get("/api/admin/visitors", (c) => callFn(adminVisitors as Handler, c.req.raw));
 app.get("/api/admin/settings", (c) => callFn(adminSettingsGet as Handler, c.req.raw));
 app.post("/api/admin/settings", (c) => callFn(adminSettingsPost as Handler, c.req.raw));
 app.all("/api/cron/followups", (c) => callFn(cronFollowups as Handler, c.req.raw));
