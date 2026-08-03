@@ -2,7 +2,7 @@ import { Fragment, useCallback, useEffect, useState } from "react";
 import {
   LayoutDashboard, Users, TrendingUp, MessageSquare, Settings as SettingsIcon,
   LogOut, Search, Download, Trash2, RefreshCw, Send, ShieldCheck, Circle,
-  BarChart3, ChevronDown, IndianRupee, Bot, Radio,
+  BarChart3, ChevronDown, IndianRupee, Bot, Radio, Mail,
 } from "lucide-react";
 import { Button } from "../components/ui/Button";
 import { BrandMark } from "../components/BrandMark";
@@ -14,7 +14,7 @@ import {
 
 type Section =
   | "overview" | "leads" | "chat" | "visitors" | "pricing"
-  | "bot" | "affiliates" | "whatsapp" | "settings";
+  | "bot" | "inbox" | "affiliates" | "whatsapp" | "settings";
 
 export function Admin() {
   const [authed, setAuthed] = useState(false);
@@ -43,6 +43,7 @@ export function Admin() {
     { id: "overview", label: "Overview", icon: LayoutDashboard },
     { id: "leads", label: "Leads", icon: Users },
     { id: "chat", label: "Live chat", icon: MessageSquare },
+    { id: "inbox", label: "Inbox", icon: Mail },
     { id: "visitors", label: "Visitors", icon: BarChart3 },
     { id: "pricing", label: "Pricing & offers", icon: IndianRupee },
     { id: "bot", label: "Bot", icon: Bot },
@@ -86,6 +87,7 @@ export function Admin() {
         {section === "overview" && <Overview />}
         {section === "leads" && <Leads />}
         {section === "chat" && <LiveChat />}
+        {section === "inbox" && <Inbox />}
         {section === "visitors" && <Visitors />}
         {section === "pricing" && <Pricing />}
         {section === "bot" && <BotPanel />}
@@ -804,6 +806,118 @@ function BotPanel() {
         <div>
           <Button onClick={save}><ShieldCheck size={16} /> Save</Button>
           {saved && <span className="ml-3 text-sm text-muted">{saved}</span>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Inbox — email sent to dushyant@goluq.com, mirrored here by the Cloudflare
+ * Email Worker. Replying sends AS the domain, so the personal Gmail address is
+ * never exposed to the visitor.
+ */
+function Inbox() {
+  const [threads, setThreads] = useState<any[]>([]);
+  const [openId, setOpenId] = useState<number | null>(null);
+  const [msgs, setMsgs] = useState<any[]>([]);
+  const [reply, setReply] = useState("");
+  const [canSend, setCanSend] = useState(true);
+  const [from, setFrom] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+
+  const loadList = useCallback(async () => {
+    const d = await adminGet("/api/admin/emails");
+    setThreads(d.threads || []);
+    setCanSend(!!d.canSend);
+    setFrom(d.from || "");
+  }, []);
+  const loadOne = useCallback(async (id: number) => {
+    const d = await adminGet(`/api/admin/emails?id=${id}`);
+    setMsgs(d.messages || []);
+  }, []);
+
+  useEffect(() => {
+    loadList();
+    const iv = setInterval(loadList, 30000);
+    return () => clearInterval(iv);
+  }, [loadList]);
+
+  const send = async () => {
+    if (!openId || !reply.trim()) return;
+    setBusy(true); setErr("");
+    const d = await adminPost("/api/admin/emails", { id: openId, text: reply.trim() });
+    setBusy(false);
+    if (d.ok) { setReply(""); loadOne(openId); loadList(); }
+    else setErr(d.error || "Could not send.");
+  };
+
+  return (
+    <div className="space-y-4">
+      {!canSend && (
+        <p className="rounded-2xl border border-warn/30 bg-warn/10 p-4 text-sm text-fg">
+          <strong>Receiving only.</strong> Replies are disabled until a sending provider is
+          configured — set <code className="font-mono text-brand-luq">MAIL_API_KEY</code> and{" "}
+          <code className="font-mono text-brand-luq">MAIL_FROM</code> in the server .env. Until then
+          you can read here and reply from Gmail (which would expose your personal address).
+        </p>
+      )}
+      {canSend && from && (
+        <p className="text-sm text-muted">Replies are sent as <span className="font-mono text-brand-luq">{from}</span>.</p>
+      )}
+
+      <div className="grid gap-4 lg:grid-cols-[300px_1fr]">
+        <div className="space-y-2">
+          {threads.length === 0 && <p className="text-sm text-muted">No email yet.</p>}
+          {threads.map((t) => (
+            <button key={t.id} type="button" onClick={() => { setOpenId(t.id); loadOne(t.id); }}
+              className={`block w-full rounded-2xl p-3 text-left ${openId === t.id ? "bg-teal-glow/15 ring-1 ring-teal-glow/40" : "glass"}`}>
+              <div className="flex items-center justify-between gap-2">
+                <span className="truncate text-sm font-semibold text-fg">{t.counterparty}</span>
+                {t.unread > 0 && <span className="rounded-full bg-danger px-2 py-0.5 text-[10px] font-bold text-white">new</span>}
+              </div>
+              <p className="mt-0.5 truncate text-xs font-medium text-muted">{t.subject}</p>
+              <p className="mt-1 truncate text-[11px] text-faint">{t.preview}</p>
+            </button>
+          ))}
+        </div>
+
+        <div className="glass flex min-h-[420px] flex-col rounded-2xl p-4">
+          {!openId && <p className="m-auto text-sm text-muted">Pick a conversation.</p>}
+          {openId && (
+            <>
+              <div className="flex-1 space-y-3 overflow-y-auto">
+                {msgs.map((m) => (
+                  <div key={m.id} className={`rounded-2xl p-3 ${m.direction === "in" ? "bg-panel/60" : "bg-teal-glow/15"}`}>
+                    <p className="mb-1 flex flex-wrap items-center gap-2 text-[11px] text-faint">
+                      <span className="font-semibold uppercase tracking-wider">
+                        {m.direction === "in" ? "Received" : "Sent"}
+                      </span>
+                      <span>{String(m.created_at).slice(0, 16)}</span>
+                    </p>
+                    <p className="text-sm font-semibold text-fg">{m.subject}</p>
+                    <pre className="mt-1.5 whitespace-pre-wrap font-sans text-sm text-muted">{m.body}</pre>
+                  </div>
+                ))}
+              </div>
+              {err && <p className="mt-2 text-sm text-danger">{err}</p>}
+              <div className="mt-3 space-y-2 border-t border-hairline/10 pt-3">
+                <textarea className={`${inputClass} min-h-[90px]`} value={reply} disabled={!canSend}
+                  placeholder={canSend ? "Type your reply…" : "Sending not configured"}
+                  onChange={(e) => setReply(e.target.value)} />
+                <div className="flex gap-2">
+                  <Button size="md" onClick={send} disabled={busy || !canSend || !reply.trim()}>
+                    <Send size={16} /> {busy ? "Sending…" : "Send reply"}
+                  </Button>
+                  <Button size="md" variant="secondary"
+                    onClick={async () => { await adminPost("/api/admin/emails", { id: openId, action: "archive" }); setOpenId(null); loadList(); }}>
+                    Archive
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

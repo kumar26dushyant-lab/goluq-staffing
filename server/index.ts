@@ -31,6 +31,8 @@ import { onRequestPost as chat } from "../functions/api/chat";
 import { onRequestGet as adminChatsGet, onRequestPost as adminChatsPost } from "../functions/api/admin/chats";
 import { onRequestGet as adminPricingGet, onRequestPost as adminPricingPost } from "../functions/api/admin/pricing";
 import { onRequestGet as adminAuthGet, onRequestPost as adminAuthPost } from "../functions/api/admin/auth";
+import { onRequestPost as emailInbound } from "../functions/api/email/inbound";
+import { onRequestGet as adminEmailsGet, onRequestPost as adminEmailsPost } from "../functions/api/admin/emails";
 
 const ROOT = process.cwd();
 const DIST = join(ROOT, "dist");
@@ -67,6 +69,10 @@ const env = {
   GEMINI_API_KEY: process.env.GEMINI_API_KEY,
   GEMINI_MODEL: process.env.GEMINI_MODEL,
   ADMIN_SECRET: process.env.ADMIN_SECRET || "",
+  INBOUND_SECRET: process.env.INBOUND_SECRET,
+  MAIL_API_KEY: process.env.MAIL_API_KEY,
+  MAIL_FROM: process.env.MAIL_FROM,
+  MAIL_PROVIDER: process.env.MAIL_PROVIDER,
 } as Record<string, unknown>;
 
 type Handler = (ctx: unknown) => Response | Promise<Response>;
@@ -194,6 +200,9 @@ app.get("/api/admin/affiliates", (c) => callFn(adminAffiliates as Handler, c.req
 app.get("/api/admin/visitors", (c) => callFn(adminVisitors as Handler, c.req.raw));
 app.get("/api/admin/chats", (c) => callFn(adminChatsGet as Handler, c.req.raw));
 app.post("/api/admin/chats", (c) => callFn(adminChatsPost as Handler, c.req.raw));
+app.post("/api/email/inbound", (c) => callFn(emailInbound as Handler, c.req.raw));
+app.get("/api/admin/emails", (c) => callFn(adminEmailsGet as Handler, c.req.raw));
+app.post("/api/admin/emails", (c) => callFn(adminEmailsPost as Handler, c.req.raw));
 app.get("/api/admin/auth", (c) => callFn(adminAuthGet as Handler, c.req.raw));
 app.post("/api/admin/auth", (c) => callFn(adminAuthPost as Handler, c.req.raw));
 app.get("/api/admin/pricing", (c) => callFn(adminPricingGet as Handler, c.req.raw));

@@ -114,6 +114,35 @@ CREATE TABLE IF NOT EXISTS admin_sessions (
 );
 CREATE INDEX IF NOT EXISTS idx_adminsess_exp ON admin_sessions(expires_at);
 
+-- Email that reaches dushyant@goluq.com, mirrored into the cockpit so a reply
+-- can be sent AS goluq.com and the owner's personal Gmail is never exposed.
+-- Inbound arrives via /api/email/inbound (see the Cloudflare Email Worker in
+-- deploy/email-worker.js); outbound goes through functions/lib/mailer.ts.
+CREATE TABLE IF NOT EXISTS email_threads (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  counterparty TEXT NOT NULL,          -- the other person's address
+  subject TEXT,
+  last_at TEXT NOT NULL,
+  unread INTEGER DEFAULT 0,
+  archived INTEGER DEFAULT 0,
+  created_at TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS email_messages (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  thread_id INTEGER NOT NULL,
+  direction TEXT NOT NULL,             -- in | out
+  from_addr TEXT,
+  to_addr TEXT,
+  subject TEXT,
+  body TEXT,
+  message_id TEXT,                     -- RFC Message-ID, for threading + dedupe
+  created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_emailmsg_thread ON email_messages(thread_id, id);
+CREATE INDEX IF NOT EXISTS idx_emailthread_last ON email_threads(last_at);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_emailmsg_msgid ON email_messages(message_id)
+  WHERE message_id IS NOT NULL;
+
 -- Runtime-editable admin settings (owner_whatsapp, followups_enabled, …)
 CREATE TABLE IF NOT EXISTS settings (
   key TEXT PRIMARY KEY,
