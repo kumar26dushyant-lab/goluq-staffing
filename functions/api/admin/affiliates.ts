@@ -9,7 +9,7 @@ interface Env {
 
 /** Admin: affiliates with click/lead/earning rollups. */
 export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
-  if (!checkAdmin(request, env)) return unauthorized();
+  if (!(await checkAdmin(request, env))) return unauthorized();
   const rows = await env.DB.prepare(
     `SELECT a.id, a.code, a.name, a.phone, a.email, a.city, a.upi_id, a.status, a.created_at,
             (SELECT COUNT(*) FROM ref_hits h WHERE h.code = a.code) AS clicks,

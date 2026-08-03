@@ -9,7 +9,7 @@ interface Env extends EvoEnv {
 
 /** Admin: current WhatsApp connection state for GoLuQ's instance. */
 export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
-  if (!checkAdmin(request, env)) return unauthorized();
+  if (!(await checkAdmin(request, env))) return unauthorized();
   if (!evoEnabled(env)) {
     return Response.json({ ok: true, configured: false, state: "not_configured" });
   }

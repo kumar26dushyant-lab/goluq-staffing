@@ -10,7 +10,7 @@ interface Env {
 
 /** GET → current settings. POST { owner_whatsapp?, followups_enabled? } → save. */
 export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
-  if (!checkAdmin(request, env)) return unauthorized();
+  if (!(await checkAdmin(request, env))) return unauthorized();
   return Response.json({
     ok: true,
     owner_whatsapp: (await getSetting(env.DB, "owner_whatsapp")) ?? "",
@@ -23,7 +23,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
 };
 
 export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
-  if (!checkAdmin(request, env)) return unauthorized();
+  if (!(await checkAdmin(request, env))) return unauthorized();
   try {
     const b = await request.json<{ owner_whatsapp?: string; public_whatsapp?: string; followups_enabled?: boolean | string; bot_instructions?: string; chat_enabled?: boolean | string; announcement?: string }>();
     if (typeof b.owner_whatsapp === "string") {

@@ -12,7 +12,7 @@ interface Env extends EvoEnv, GeminiEnv {
 
 /** Admin overview: headline counts + config/connection status. */
 export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
-  if (!checkAdmin(request, env)) return unauthorized();
+  if (!(await checkAdmin(request, env))) return unauthorized();
 
   const one = async (sql: string) =>
     (await env.DB.prepare(sql).first<{ c: number }>("c")) ?? 0;

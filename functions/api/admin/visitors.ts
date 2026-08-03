@@ -20,7 +20,7 @@ const all = async <T>(db: D1Database, sql: string, ...binds: unknown[]): Promise
  * business on.
  */
 export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
-  if (!checkAdmin(request, env)) {
+  if (!(await checkAdmin(request, env))) {
     return Response.json({ ok: false, error: "unauthorised" }, { status: 401 });
   }
   try {

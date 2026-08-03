@@ -33,7 +33,9 @@ export function WhatsAppCta({
 
   const digits = wa.replace(/\D/g, "");
   const href = `https://wa.me/${digits}?text=${encodeURIComponent(t("whatsapp.prefill"))}`;
-  const pretty = digits.length === 12 ? `+${digits.slice(0, 2)} ${digits.slice(2)}` : `+${digits}`;
+  // Hyphen, not a space: "+91 8349504400" renders with an awkward gap in the
+  // mono face and reads as two separate numbers.
+  const pretty = digits.length === 12 ? `+${digits.slice(0, 2)}-${digits.slice(2)}` : `+${digits}`;
 
   if (variant === "fab") {
     return (

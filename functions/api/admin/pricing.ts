@@ -9,7 +9,7 @@ interface Env {
 }
 
 export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
-  if (!checkAdmin(request, env)) {
+  if (!(await checkAdmin(request, env))) {
     return Response.json({ ok: false, error: "unauthorised" }, { status: 401 });
   }
   const rows = await getPricing(env.DB);
@@ -21,7 +21,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
  * single row without resubmitting the whole table.
  */
 export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
-  if (!checkAdmin(request, env)) {
+  if (!(await checkAdmin(request, env))) {
     return Response.json({ ok: false, error: "unauthorised" }, { status: 401 });
   }
   try {

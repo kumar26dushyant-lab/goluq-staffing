@@ -94,6 +94,26 @@ CREATE TABLE IF NOT EXISTS chat_messages (
 CREATE INDEX IF NOT EXISTS idx_chatmsg_session ON chat_messages(session_id, id);
 CREATE INDEX IF NOT EXISTS idx_chatsess_last ON chat_sessions(last_at);
 
+-- Owner login for the cockpit. Single row (id = 1) — this is a one-owner tool,
+-- not a multi-user product. `pass_hash` is PBKDF2-SHA256 (see functions/lib/auth.ts);
+-- `setup_token` backs the one-time "choose your password" link.
+CREATE TABLE IF NOT EXISTS admin_auth (
+  id INTEGER PRIMARY KEY CHECK (id = 1),
+  username TEXT,
+  pass_hash TEXT,
+  setup_token TEXT,
+  setup_expires TEXT,
+  updated_at TEXT
+);
+
+-- Opaque server-side sessions, so a token can be revoked and carries no data.
+CREATE TABLE IF NOT EXISTS admin_sessions (
+  token TEXT PRIMARY KEY,
+  created_at TEXT NOT NULL,
+  expires_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_adminsess_exp ON admin_sessions(expires_at);
+
 -- Runtime-editable admin settings (owner_whatsapp, followups_enabled, …)
 CREATE TABLE IF NOT EXISTS settings (
   key TEXT PRIMARY KEY,

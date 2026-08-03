@@ -9,7 +9,7 @@ interface Env {
 
 /** Admin: update or delete a single lead. Body: { id, action, status? }. */
 export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
-  if (!checkAdmin(request, env)) return unauthorized();
+  if (!(await checkAdmin(request, env))) return unauthorized();
   try {
     const b = await request.json<{ id?: number; action?: string; status?: string }>();
     const id = Number(b.id);

@@ -15,7 +15,7 @@ interface Env {
  * POST                → send a reply as the owner, or close the conversation
  */
 export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
-  if (!checkAdmin(request, env)) {
+  if (!(await checkAdmin(request, env))) {
     return Response.json({ ok: false, error: "unauthorised" }, { status: 401 });
   }
   const url = new URL(request.url);
@@ -60,7 +60,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
 };
 
 export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
-  if (!checkAdmin(request, env)) {
+  if (!(await checkAdmin(request, env))) {
     return Response.json({ ok: false, error: "unauthorised" }, { status: 401 });
   }
   try {

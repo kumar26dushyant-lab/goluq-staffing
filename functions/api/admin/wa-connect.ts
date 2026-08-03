@@ -13,7 +13,7 @@ interface Env extends EvoEnv {
  * number. Gated by x-admin-secret. No effect on Sarathi/Nidaan instances.
  */
 export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
-  if (!checkAdmin(request, env)) return unauthorized();
+  if (!(await checkAdmin(request, env))) return unauthorized();
   if (!evoEnabled(env)) {
     return Response.json({ ok: false, error: "evolution_not_configured" }, { status: 503 });
   }

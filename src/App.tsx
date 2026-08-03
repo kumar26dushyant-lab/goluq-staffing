@@ -6,7 +6,7 @@ import { StaffingApp } from "./pages/StaffingApp";
 import { PartnerLanding } from "./pages/PartnerLanding";
 import { PartnerDashboard } from "./pages/PartnerDashboard";
 import { About } from "./pages/About";
-import { Admin } from "./pages/Admin";
+import { Admin, AdminSetup } from "./pages/Admin";
 import { AssistantChat } from "./components/AssistantChat";
 
 // The custom-build practice is a separate, lower-traffic funnel — keep it out of
@@ -67,6 +67,7 @@ export default function App() {
         <Route path="/partner" element={<PartnerLanding />} />
         <Route path="/partner/dashboard" element={<PartnerDashboard />} />
         <Route path="/admin" element={<Admin />} />
+        <Route path="/admin/setup" element={<AdminSetup />} />
         <Route path="*" element={<StaffingApp />} />
       </Routes>
       <AssistantChat />

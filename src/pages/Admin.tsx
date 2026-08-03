@@ -7,7 +7,10 @@ import {
 import { Button } from "../components/ui/Button";
 import { BrandMark } from "../components/BrandMark";
 import { inputClass } from "../lib/ui";
-import { getToken, setToken, clearToken, adminGet, adminPost, leadsCsvUrl } from "../lib/adminApi";
+import {
+  getToken, setToken, clearToken, adminGet, adminPost, leadsCsvUrl,
+  login, logout, setPasswordWithToken, checkSetupToken,
+} from "../lib/adminApi";
 
 type Section =
   | "overview" | "leads" | "chat" | "visitors" | "pricing"
@@ -57,7 +60,7 @@ export function Admin() {
         </div>
         <div className="flex items-center gap-2">
           <InstallApp />
-          <button type="button" onClick={() => { clearToken(); setAuthed(false); }}
+          <button type="button" onClick={async () => { await logout(); setAuthed(false); }}
             className="inline-flex items-center gap-2 rounded-full glass px-4 py-2 text-sm font-semibold text-muted hover:text-fg">
             <LogOut size={15} /> <span className="hidden sm:inline">Sign out</span>
           </button>
@@ -161,32 +164,151 @@ function InstallApp() {
 }
 
 function SignIn({ onIn }: { onIn: () => void }) {
+  const [user, setUser] = useState("");
   const [pw, setPw] = useState("");
   const [remember, setRemember] = useState(true);
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
+
   const submit = async () => {
-    if (!pw) return;
+    if (!user || !pw) return;
     setBusy(true); setErr("");
-    setToken(pw, remember);
     try {
-      const r = await adminGet("/api/admin/stats");
-      if (r.ok) onIn(); else throw new Error();
-    } catch { clearToken(); setErr("Incorrect admin secret."); } finally { setBusy(false); }
+      const r = await login(user, pw);
+      if (r.ok && r.token) { setToken(r.token, remember); onIn(); }
+      else setErr(r.error || "Incorrect username or password.");
+    } catch {
+      setErr("Could not reach the server. Please try again.");
+    } finally { setBusy(false); }
   };
+
   return (
     <Screen>
       <div className="glass w-full max-w-sm rounded-3xl p-8">
         <BrandMark className="text-2xl" />
-        <h1 className="mt-4 font-display text-2xl font-bold text-fg">Admin sign in</h1>
-        <p className="mt-1 text-sm text-muted">Enter your admin secret to continue.</p>
-        <input type="password" className={`${inputClass} mt-5`} value={pw} placeholder="Admin secret"
-          onChange={(e) => setPw(e.target.value)} onKeyDown={(e) => e.key === "Enter" && submit()} autoFocus />
-        <label className="mt-3 flex items-center gap-2 text-sm text-muted">
-          <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} /> Remember me on this device
+        <h1 className="mt-4 font-display text-2xl font-bold text-fg">Sign in</h1>
+        <p className="mt-1 text-sm text-muted">Your cockpit — leads, live chat and controls.</p>
+
+        <label className="mt-5 block">
+          <span className="mb-1.5 block text-sm font-semibold text-muted">Mobile number</span>
+          <input className={inputClass} value={user} placeholder="10-digit mobile" inputMode="numeric"
+            autoComplete="username" onChange={(e) => setUser(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && submit()} autoFocus />
         </label>
-        {err && <p className="mt-2 text-sm text-danger">{err}</p>}
+        <label className="mt-3 block">
+          <span className="mb-1.5 block text-sm font-semibold text-muted">Password</span>
+          <input type="password" className={inputClass} value={pw} placeholder="Your password"
+            autoComplete="current-password" onChange={(e) => setPw(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && submit()} />
+        </label>
+
+        <label className="mt-3 flex items-center gap-2 text-sm text-muted">
+          <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} /> Keep me signed in
+        </label>
+        {err && <p role="alert" className="mt-2 text-sm text-danger">{err}</p>}
         <Button full className="mt-5" onClick={submit} disabled={busy}>{busy ? "Signing in…" : "Sign in"}</Button>
+        <p className="mt-4 text-xs leading-relaxed text-faint">
+          Forgot your password? A new setup link can be generated from the server — see DEPLOY_VM.md.
+        </p>
+      </div>
+    </Screen>
+  );
+}
+
+/**
+ * Route "/admin/setup?token=…" — first-time (or reset) password choice.
+ * The link is single-use and expires after 24h; using it signs you straight in.
+ */
+export function AdminSetup() {
+  const [status, setStatus] = useState<"checking" | "ready" | "invalid" | "done">("checking");
+  const [username, setUsername] = useState("");
+  const [pw, setPw] = useState("");
+  const [pw2, setPw2] = useState("");
+  const [err, setErr] = useState("");
+  const [busy, setBusy] = useState(false);
+  const token = new URLSearchParams(window.location.search).get("token") || "";
+
+  useEffect(() => {
+    checkSetupToken(token).then((r) => {
+      setUsername(r.username);
+      setStatus(r.valid ? "ready" : "invalid");
+    });
+  }, [token]);
+
+  const submit = async () => {
+    setErr("");
+    if (pw.length < 8) return setErr("Please use at least 8 characters.");
+    if (pw !== pw2) return setErr("The two passwords do not match.");
+    setBusy(true);
+    const r = await setPasswordWithToken(token, pw);
+    setBusy(false);
+    if (r.ok && r.token) {
+      setToken(r.token, true);
+      setStatus("done");
+      setTimeout(() => { window.location.href = "/admin"; }, 900);
+    } else {
+      setErr(r.error || "Could not set the password.");
+    }
+  };
+
+  if (status === "checking") return <Screen><p className="text-muted">Checking your link…</p></Screen>;
+
+  if (status === "invalid") {
+    return (
+      <Screen>
+        <div className="glass w-full max-w-sm rounded-3xl p-8 text-center">
+          <BrandMark className="mx-auto text-2xl" />
+          <h1 className="mt-4 font-display text-xl font-bold text-fg">This link is no longer valid</h1>
+          <p className="mt-2 text-sm text-muted">
+            Setup links can only be used once and expire after 24 hours. Generate a new one from the
+            server, then open it again.
+          </p>
+        </div>
+      </Screen>
+    );
+  }
+
+  if (status === "done") {
+    return (
+      <Screen>
+        <div className="glass w-full max-w-sm rounded-3xl p-8 text-center">
+          <ShieldCheck size={40} className="mx-auto text-success" />
+          <h1 className="mt-4 font-display text-xl font-bold text-fg">Password set</h1>
+          <p className="mt-2 text-sm text-muted">Signing you in…</p>
+        </div>
+      </Screen>
+    );
+  }
+
+  return (
+    <Screen>
+      <div className="glass w-full max-w-sm rounded-3xl p-8">
+        <BrandMark className="text-2xl" />
+        <h1 className="mt-4 font-display text-2xl font-bold text-fg">Choose your password</h1>
+        <p className="mt-1 text-sm text-muted">
+          You'll sign in with <span className="font-mono text-brand-luq">{username || "your mobile number"}</span> and
+          this password from now on.
+        </p>
+
+        <label className="mt-5 block">
+          <span className="mb-1.5 block text-sm font-semibold text-muted">New password</span>
+          <input type="password" className={inputClass} value={pw} autoComplete="new-password"
+            placeholder="At least 8 characters" onChange={(e) => setPw(e.target.value)} autoFocus />
+        </label>
+        <label className="mt-3 block">
+          <span className="mb-1.5 block text-sm font-semibold text-muted">Confirm password</span>
+          <input type="password" className={inputClass} value={pw2} autoComplete="new-password"
+            placeholder="Type it again" onChange={(e) => setPw2(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && submit()} />
+        </label>
+
+        {err && <p role="alert" className="mt-2 text-sm text-danger">{err}</p>}
+        <Button full className="mt-5" onClick={submit} disabled={busy}>
+          {busy ? "Saving…" : "Set password & sign in"}
+        </Button>
+        <p className="mt-4 text-xs leading-relaxed text-faint">
+          This link works once. Setting a password signs out any other device.
+        </p>
       </div>
     </Screen>
   );

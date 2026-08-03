@@ -10,7 +10,7 @@ interface Env {
 /** Admin: leads list with optional search (?q=) + status filter (?status=) +
  *  CSV export (?format=csv). Token-gated. */
 export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
-  if (!checkAdmin(request, env)) return unauthorized();
+  if (!(await checkAdmin(request, env))) return unauthorized();
   const url = new URL(request.url);
   const q = (url.searchParams.get("q") || "").trim();
   const status = (url.searchParams.get("status") || "").trim();

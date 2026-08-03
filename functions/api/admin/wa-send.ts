@@ -9,7 +9,7 @@ interface Env extends EvoEnv {
 
 /** Admin: send a test/manual WhatsApp message. Body { to, text }. */
 export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
-  if (!checkAdmin(request, env)) return unauthorized();
+  if (!(await checkAdmin(request, env))) return unauthorized();
   if (!evoEnabled(env)) return Response.json({ ok: false, error: "evolution_not_configured" }, { status: 503 });
   try {
     const { to, text } = await request.json<{ to?: string; text?: string }>();

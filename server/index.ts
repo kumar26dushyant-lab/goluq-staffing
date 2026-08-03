@@ -30,6 +30,7 @@ import { onRequestGet as adminVisitors } from "../functions/api/admin/visitors";
 import { onRequestPost as chat } from "../functions/api/chat";
 import { onRequestGet as adminChatsGet, onRequestPost as adminChatsPost } from "../functions/api/admin/chats";
 import { onRequestGet as adminPricingGet, onRequestPost as adminPricingPost } from "../functions/api/admin/pricing";
+import { onRequestGet as adminAuthGet, onRequestPost as adminAuthPost } from "../functions/api/admin/auth";
 
 const ROOT = process.cwd();
 const DIST = join(ROOT, "dist");
@@ -193,6 +194,8 @@ app.get("/api/admin/affiliates", (c) => callFn(adminAffiliates as Handler, c.req
 app.get("/api/admin/visitors", (c) => callFn(adminVisitors as Handler, c.req.raw));
 app.get("/api/admin/chats", (c) => callFn(adminChatsGet as Handler, c.req.raw));
 app.post("/api/admin/chats", (c) => callFn(adminChatsPost as Handler, c.req.raw));
+app.get("/api/admin/auth", (c) => callFn(adminAuthGet as Handler, c.req.raw));
+app.post("/api/admin/auth", (c) => callFn(adminAuthPost as Handler, c.req.raw));
 app.get("/api/admin/pricing", (c) => callFn(adminPricingGet as Handler, c.req.raw));
 app.post("/api/admin/pricing", (c) => callFn(adminPricingPost as Handler, c.req.raw));
 app.get("/api/admin/settings", (c) => callFn(adminSettingsGet as Handler, c.req.raw));
