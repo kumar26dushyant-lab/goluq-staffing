@@ -27,6 +27,9 @@ import { onRequest as cronFollowups } from "../functions/api/cron/followups";
 import { onRequestPost as waWebhook } from "../functions/api/wa/webhook";
 import { onRequestPost as track } from "../functions/api/track";
 import { onRequestGet as adminVisitors } from "../functions/api/admin/visitors";
+import { onRequestPost as chat } from "../functions/api/chat";
+import { onRequestGet as adminChatsGet, onRequestPost as adminChatsPost } from "../functions/api/admin/chats";
+import { onRequestGet as adminPricingGet, onRequestPost as adminPricingPost } from "../functions/api/admin/pricing";
 
 const ROOT = process.cwd();
 const DIST = join(ROOT, "dist");
@@ -162,7 +165,8 @@ app.use("/api/*", async (c, next) => {
   let max = 120;
   const write = c.req.method === "POST";
   if (write && (path === "/api/lead" || path === "/api/assistant" || path === "/api/affiliate/register")) max = 15;
-  else if (path.startsWith("/api/admin/") || path.startsWith("/api/wa/")) max = 60;
+  else if (path === "/api/chat") max = 240;
+  else if (path.startsWith("/api/admin/") || path.startsWith("/api/wa/")) max = 300;
   if (rateLimited(ip, path, max, 60_000)) {
     return c.json({ ok: false, error: "rate_limited" }, 429);
   }
@@ -174,6 +178,7 @@ app.post("/api/assistant", (c) => callFn(assistant as Handler, c.req.raw));
 app.get("/api/config", (c) => callFn(publicConfig as Handler, c.req.raw));
 app.post("/api/lead", (c) => callFn(lead as Handler, c.req.raw));
 app.post("/api/track", (c) => callFn(track as Handler, c.req.raw));
+app.post("/api/chat", (c) => callFn(chat as Handler, c.req.raw));
 app.post("/api/affiliate/register", (c) => callFn(affRegister as Handler, c.req.raw));
 app.post("/api/affiliate/track", (c) => callFn(affTrack as Handler, c.req.raw));
 app.get("/api/affiliate/stats", (c) => callFn(affStats as Handler, c.req.raw));
@@ -186,6 +191,10 @@ app.get("/api/admin/leads", (c) => callFn(adminLeads as Handler, c.req.raw));
 app.post("/api/admin/lead", (c) => callFn(adminLead as Handler, c.req.raw));
 app.get("/api/admin/affiliates", (c) => callFn(adminAffiliates as Handler, c.req.raw));
 app.get("/api/admin/visitors", (c) => callFn(adminVisitors as Handler, c.req.raw));
+app.get("/api/admin/chats", (c) => callFn(adminChatsGet as Handler, c.req.raw));
+app.post("/api/admin/chats", (c) => callFn(adminChatsPost as Handler, c.req.raw));
+app.get("/api/admin/pricing", (c) => callFn(adminPricingGet as Handler, c.req.raw));
+app.post("/api/admin/pricing", (c) => callFn(adminPricingPost as Handler, c.req.raw));
 app.get("/api/admin/settings", (c) => callFn(adminSettingsGet as Handler, c.req.raw));
 app.post("/api/admin/settings", (c) => callFn(adminSettingsPost as Handler, c.req.raw));
 app.all("/api/cron/followups", (c) => callFn(cronFollowups as Handler, c.req.raw));

@@ -17,8 +17,14 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { CATALOGUE, inr, type TierId } from "../content/catalogue";
+import { CATALOGUE as SEED, inr, type TierId } from "../content/catalogue";
+import { usePricing } from "../lib/siteConfig";
 import { Button } from "./ui/Button";
+
+/** Which funnel each tier hands off to. Structural, so it stays in code. */
+const CTA_BY_ID: Record<string, "demo" | "build" | "enquiry"> = Object.fromEntries(
+  SEED.map((o) => [o.id, o.cta])
+);
 
 const ICONS: Record<TierId, LucideIcon> = {
   automation: Workflow,
@@ -51,6 +57,8 @@ export function CapabilityTabs({
 }) {
   const { t } = useTranslation();
   const reduced = useReducedMotion();
+  // Live from /api/config so cockpit price + offer edits show up without a deploy.
+  const CATALOGUE = usePricing();
   const [active, setActive] = useState<TierId>("automation");
 
   const offering = CATALOGUE.find((o) => o.id === active) ?? CATALOGUE[0];
@@ -142,9 +150,29 @@ export function CapabilityTabs({
               <p className="text-sm font-semibold uppercase tracking-wide text-faint">
                 {t("catalogue.from")}
               </p>
-              <p className="text-gradient-accent mt-1 font-display text-3xl font-bold tabular-nums sm:text-4xl">
-                {inr(offering.fromInr)}
-              </p>
+              {/* An active offer strikes through the normal price rather than
+                  replacing it — the saving has to be visible to do any work. */}
+              {offering.offerInr ? (
+                <>
+                  <p className="mt-1 flex flex-wrap items-baseline gap-2">
+                    <span className="text-gradient-accent font-display text-3xl font-bold tabular-nums sm:text-4xl">
+                      {inr(offering.offerInr)}
+                    </span>
+                    <span className="font-display text-xl text-faint line-through tabular-nums">
+                      {inr(offering.fromInr)}
+                    </span>
+                  </p>
+                  {offering.offerLabel && (
+                    <span className="mt-1.5 inline-block rounded-full bg-success/15 px-3 py-1 text-sm font-bold text-success ring-1 ring-success/30">
+                      {offering.offerLabel}
+                    </span>
+                  )}
+                </>
+              ) : (
+                <p className="text-gradient-accent mt-1 font-display text-3xl font-bold tabular-nums sm:text-4xl">
+                  {inr(offering.fromInr)}
+                </p>
+              )}
               <p className="text-base font-semibold text-muted">
                 {offering.recurring ? t("catalogue.perMonth") : t("catalogue.oneTime")}
               </p>
@@ -155,19 +183,19 @@ export function CapabilityTabs({
               </p>
 
               <div className="mt-5">
-                {offering.cta === "demo" && (
+                {CTA_BY_ID[offering.id] === "demo" && (
                   <Button size="md" full onClick={onPickDemo}>
                     {t("catalogue.ctaDemo")} <ArrowRight size={16} />
                   </Button>
                 )}
-                {offering.cta === "build" && (
+                {CTA_BY_ID[offering.id] === "build" && (
                   <Link to="/build" className="block">
                     <Button size="md" full>
                       {t("catalogue.ctaBuild")} <ArrowRight size={16} />
                     </Button>
                   </Link>
                 )}
-                {offering.cta === "enquiry" && (
+                {CTA_BY_ID[offering.id] === "enquiry" && (
                   <Link to="/build#enquiry" className="block">
                     <Button size="md" full>
                       {t("catalogue.ctaEnquiry")} <ArrowRight size={16} />

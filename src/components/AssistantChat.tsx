@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { MessageCircle, X, Send, Sparkles, Phone, Check } from "lucide-react";
+import { MessageCircle, X, Send, Sparkles, Phone, Check, UserRound } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { askAssistant, pageFromPath, type ChatMsg } from "../lib/assistant";
+import { recordTurn, requestHuman, syncChat } from "../lib/liveChat";
 import { submitLead } from "../lib/lead";
 import { useVoice } from "../lib/voice";
 import { WaveformOrb } from "./WaveformOrb";
@@ -43,6 +44,11 @@ export function AssistantChat() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const suggest = t("chat.suggest", { returnObjects: true }) as string[];
 
+  // Live handoff to a real person
+  const [handoff, setHandoff] = useState(false);
+  const [agentJoined, setAgentJoined] = useState(false);
+  const lastAgentId = useRef(0);
+
   // Lead capture
   const [capturing, setCapturing] = useState(false);
   const [leadName, setLeadName] = useState("");
@@ -80,19 +86,53 @@ export function AssistantChat() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, loading, capturing]);
 
+  // Once a human is involved, poll for their replies. Polling (rather than a
+  // socket) keeps this working behind the existing CSP and needs no new infra;
+  // 4s is fast enough to feel live in a sales conversation.
+  useEffect(() => {
+    if (!open || (!handoff && !agentJoined)) return;
+    const tick = async () => {
+      const r = await syncChat(lastAgentId.current, page, lang);
+      if (r.agentJoined) setAgentJoined(true);
+      if (r.messages.length) {
+        lastAgentId.current = r.messages[r.messages.length - 1].id;
+        setMessages((m) => [
+          ...m,
+          ...r.messages.map((x: { content: string }) => ({ role: "assistant" as const, content: x.content })),
+        ]);
+      }
+    };
+    const iv = window.setInterval(tick, 4000);
+    tick();
+    return () => window.clearInterval(iv);
+  }, [open, handoff, agentJoined, page, lang]);
+
   const send = async (text: string) => {
     const q = text.trim();
     if (!q || loading) return;
     setInput("");
     const next: ChatMsg[] = [...messages, { role: "user", content: q }];
     setMessages(next);
+    void recordTurn("visitor", q, page, lang);
+
+    // With a human on the line the guide stops answering — two voices replying
+    // to the same person reads as chaos.
+    if (agentJoined) return;
+
     setLoading(true);
     const reply = await askAssistant(next, lang, page);
     setLoading(false);
     if (reply) {
       setMessages((m) => [...m, { role: "assistant", content: reply }]);
+      void recordTurn("guide", reply, page, lang);
       say(reply); // speak it (respects mute/unlock)
     }
+  };
+
+  const askForHuman = async () => {
+    setHandoff(true);
+    setMessages((m) => [...m, { role: "assistant", content: t("chat.handoffSent") }]);
+    await requestHuman(page, lang, lastAgentId.current);
   };
 
   const sendLead = async () => {
@@ -199,7 +239,9 @@ export function AssistantChat() {
               </div>
               <div>
                 <p className="font-display text-base font-bold text-fg">{t("chat.title")}</p>
-                <p className="text-xs text-muted">{t("chat.subtitle")}</p>
+                <p className="text-xs text-muted">
+                  {agentJoined ? t("chat.agentLabel") : t("chat.subtitle")}
+                </p>
               </div>
             </div>
 
@@ -242,16 +284,29 @@ export function AssistantChat() {
                 </div>
               )}
 
-              {/* The close — offered only once a real conversation exists, so it
-                  reads as a natural next step rather than a pop-up demand. */}
-              {turns >= 2 && leadState !== "done" && !capturing && !loading && (
-                <button
-                  type="button"
-                  onClick={() => setCapturing(true)}
-                  className="inline-flex items-center gap-2 rounded-full bg-teal-glow/12 px-4 py-2 text-sm font-semibold text-brand-luq ring-1 ring-teal-glow/30"
-                >
-                  <Phone size={14} /> {t("chat.leaveNumber")}
-                </button>
+              {/* Actions — offered only once a real conversation exists, so they
+                  read as a natural next step rather than a pop-up demand. */}
+              {turns >= 2 && !loading && !capturing && (
+                <div className="flex flex-wrap gap-2">
+                  {leadState !== "done" && (
+                    <button
+                      type="button"
+                      onClick={() => setCapturing(true)}
+                      className="inline-flex items-center gap-2 rounded-full bg-teal-glow/12 px-4 py-2 text-sm font-semibold text-brand-luq ring-1 ring-teal-glow/30"
+                    >
+                      <Phone size={14} /> {t("chat.leaveNumber")}
+                    </button>
+                  )}
+                  {!handoff && !agentJoined && (
+                    <button
+                      type="button"
+                      onClick={askForHuman}
+                      className="inline-flex items-center gap-2 rounded-full bg-panel/60 px-4 py-2 text-sm font-semibold text-fg ring-1 ring-hairline/20"
+                    >
+                      <UserRound size={14} /> {t("chat.talkHuman")}
+                    </button>
+                  )}
+                </div>
               )}
 
               {capturing && (

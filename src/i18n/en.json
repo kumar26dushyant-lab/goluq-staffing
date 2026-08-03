@@ -248,7 +248,11 @@
     "leadCta": "Send",
     "leadSent": "Got it — we'll be in touch on WhatsApp shortly. 🙏",
     "leadError": "That didn't send. Please check the number and try again.",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "talkHuman": "Talk to a real person",
+    "handoffSent": "I have alerted the team — someone will reply here shortly. You can keep typing in the meantime.",
+    "agentJoined": "A real person has joined the chat.",
+    "agentLabel": "GoLuQ team"
   },
   "nudge": {
     "greeting": [

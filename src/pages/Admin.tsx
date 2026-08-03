@@ -2,24 +2,36 @@ import { Fragment, useCallback, useEffect, useState } from "react";
 import {
   LayoutDashboard, Users, TrendingUp, MessageSquare, Settings as SettingsIcon,
   LogOut, Search, Download, Trash2, RefreshCw, Send, ShieldCheck, Circle,
-  BarChart3, ChevronDown,
+  BarChart3, ChevronDown, IndianRupee, Bot, Radio,
 } from "lucide-react";
 import { Button } from "../components/ui/Button";
 import { BrandMark } from "../components/BrandMark";
 import { inputClass } from "../lib/ui";
 import { getToken, setToken, clearToken, adminGet, adminPost, leadsCsvUrl } from "../lib/adminApi";
 
-type Section = "overview" | "leads" | "visitors" | "affiliates" | "whatsapp" | "settings";
+type Section =
+  | "overview" | "leads" | "chat" | "visitors" | "pricing"
+  | "bot" | "affiliates" | "whatsapp" | "settings";
 
 export function Admin() {
   const [authed, setAuthed] = useState(false);
   const [checking, setChecking] = useState(true);
   const [section, setSection] = useState<Section>("overview");
+  // Waiting-visitor count, polled globally so the badge shows from any tab.
+  const [waiting, setWaiting] = useState(0);
 
   useEffect(() => {
     if (!getToken()) { setChecking(false); return; }
     adminGet("/api/admin/stats").then(() => setAuthed(true)).catch(() => clearToken()).finally(() => setChecking(false));
   }, []);
+
+  useEffect(() => {
+    if (!authed) return;
+    const poll = () => adminGet("/api/admin/chats").then((d) => setWaiting(d.waiting || 0)).catch(() => {});
+    poll();
+    const iv = setInterval(poll, 15000);
+    return () => clearInterval(iv);
+  }, [authed]);
 
   if (checking) return <Screen><p className="text-muted">Loading…</p></Screen>;
   if (!authed) return <SignIn onIn={() => setAuthed(true)} />;
@@ -27,7 +39,10 @@ export function Admin() {
   const NAV: { id: Section; label: string; icon: typeof Users }[] = [
     { id: "overview", label: "Overview", icon: LayoutDashboard },
     { id: "leads", label: "Leads", icon: Users },
+    { id: "chat", label: "Live chat", icon: MessageSquare },
     { id: "visitors", label: "Visitors", icon: BarChart3 },
+    { id: "pricing", label: "Pricing & offers", icon: IndianRupee },
+    { id: "bot", label: "Bot", icon: Bot },
     { id: "affiliates", label: "Affiliates", icon: TrendingUp },
     { id: "whatsapp", label: "WhatsApp", icon: MessageSquare },
     { id: "settings", label: "Settings", icon: SettingsIcon },
@@ -40,10 +55,13 @@ export function Admin() {
           <BrandMark className="text-xl" />
           <span className="rounded-full bg-teal-glow/10 px-2.5 py-1 text-xs font-semibold uppercase tracking-wider text-brand-luq">Admin</span>
         </div>
-        <button type="button" onClick={() => { clearToken(); setAuthed(false); }}
-          className="inline-flex items-center gap-2 rounded-full glass px-4 py-2 text-sm font-semibold text-muted hover:text-fg">
-          <LogOut size={15} /> Sign out
-        </button>
+        <div className="flex items-center gap-2">
+          <InstallApp />
+          <button type="button" onClick={() => { clearToken(); setAuthed(false); }}
+            className="inline-flex items-center gap-2 rounded-full glass px-4 py-2 text-sm font-semibold text-muted hover:text-fg">
+            <LogOut size={15} /> <span className="hidden sm:inline">Sign out</span>
+          </button>
+        </div>
       </header>
 
       <nav className="sticky top-[57px] z-20 flex gap-1 overflow-x-auto border-b border-hairline/10 bg-abyss/70 px-3 py-2 backdrop-blur-xl sm:px-8">
@@ -53,6 +71,9 @@ export function Admin() {
             <button key={n.id} type="button" onClick={() => setSection(n.id)}
               className={`inline-flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${on ? "bg-teal-glow/20 text-brand-luq" : "text-muted hover:text-fg"}`}>
               <Icon size={16} /> {n.label}
+              {n.id === "chat" && waiting > 0 && (
+                <span className="ml-1 rounded-full bg-danger px-1.5 py-0.5 text-[10px] font-bold text-white">{waiting}</span>
+              )}
             </button>
           );
         })}
@@ -61,7 +82,10 @@ export function Admin() {
       <main className="mx-auto max-w-5xl px-4 py-6 sm:px-8">
         {section === "overview" && <Overview />}
         {section === "leads" && <Leads />}
+        {section === "chat" && <LiveChat />}
         {section === "visitors" && <Visitors />}
+        {section === "pricing" && <Pricing />}
+        {section === "bot" && <BotPanel />}
         {section === "affiliates" && <Affiliates />}
         {section === "whatsapp" && <WhatsApp />}
         {section === "settings" && <SettingsPanel />}
@@ -72,6 +96,68 @@ export function Admin() {
 
 function Screen({ children }: { children: React.ReactNode }) {
   return <div className="grid min-h-dvh place-items-center px-6">{children}</div>;
+}
+
+/**
+ * "Install app" — captures the browser's install prompt so the cockpit can be
+ * added to a phone home screen and opened like a native app (it launches
+ * straight into /admin, per the manifest start_url).
+ *
+ * Chrome/Edge/Android fire `beforeinstallprompt`; iOS Safari never does, so
+ * there we fall back to telling the user where the Share → Add to Home Screen
+ * option is rather than showing a button that does nothing.
+ */
+function InstallApp() {
+  const [prompt, setPrompt] = useState<any>(null);
+  const [installed, setInstalled] = useState(false);
+  const [showIosHint, setShowIosHint] = useState(false);
+
+  useEffect(() => {
+    const onPrompt = (e: Event) => {
+      e.preventDefault();
+      setPrompt(e);
+    };
+    const onInstalled = () => setInstalled(true);
+    window.addEventListener("beforeinstallprompt", onPrompt);
+    window.addEventListener("appinstalled", onInstalled);
+    if (window.matchMedia("(display-mode: standalone)").matches) setInstalled(true);
+    return () => {
+      window.removeEventListener("beforeinstallprompt", onPrompt);
+      window.removeEventListener("appinstalled", onInstalled);
+    };
+  }, []);
+
+  if (installed) return null;
+
+  const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  if (!prompt && !isIos) return null;
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={async () => {
+          if (prompt) {
+            prompt.prompt();
+            const res = await prompt.userChoice.catch(() => null);
+            if (res?.outcome === "accepted") setInstalled(true);
+            setPrompt(null);
+          } else {
+            setShowIosHint((v) => !v);
+          }
+        }}
+        className="inline-flex items-center gap-2 rounded-full bg-teal-glow/15 px-4 py-2 text-sm font-semibold text-brand-luq ring-1 ring-teal-glow/30"
+      >
+        <Download size={15} /> Install app
+      </button>
+      {showIosHint && (
+        <p className="absolute right-4 top-16 z-40 max-w-[16rem] rounded-xl border border-hairline/20 bg-abyss p-3 text-xs text-muted shadow-glass">
+          On iPhone: tap the <strong className="text-fg">Share</strong> button, then{" "}
+          <strong className="text-fg">Add to Home Screen</strong>.
+        </p>
+      )}
+    </>
+  );
 }
 
 function SignIn({ onIn }: { onIn: () => void }) {
@@ -369,6 +455,234 @@ function Visitors() {
         <BarList title="Top pages" rows={d.pages || []} />
         <BarList title="Sources" rows={d.sources || []} />
         <BarList title="Devices" rows={d.devices || []} />
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Live chat inbox. Polls every 5s so a waiting visitor surfaces without a
+ * refresh — the WhatsApp alert is the primary notification, this is where the
+ * conversation actually happens.
+ */
+function LiveChat() {
+  const [chats, setChats] = useState<any[]>([]);
+  const [waiting, setWaiting] = useState(0);
+  const [openChat, setOpenChat] = useState<string | null>(null);
+  const [msgs, setMsgs] = useState<any[]>([]);
+  const [reply, setReply] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const loadList = useCallback(async () => {
+    const d = await adminGet("/api/admin/chats");
+    setChats(d.chats || []);
+    setWaiting(d.waiting || 0);
+  }, []);
+
+  const loadOne = useCallback(async (id: string) => {
+    const d = await adminGet(`/api/admin/chats?id=${encodeURIComponent(id)}`);
+    setMsgs(d.messages || []);
+  }, []);
+
+  useEffect(() => {
+    loadList();
+    const iv = setInterval(() => {
+      loadList();
+      if (openChat) loadOne(openChat);
+    }, 5000);
+    return () => clearInterval(iv);
+  }, [loadList, loadOne, openChat]);
+
+  const send = async () => {
+    if (!openChat || !reply.trim()) return;
+    setBusy(true);
+    await adminPost("/api/admin/chats", { id: openChat, text: reply.trim() });
+    setReply("");
+    setBusy(false);
+    loadOne(openChat);
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-muted">
+          {waiting > 0
+            ? <span className="font-semibold text-warn">{waiting} visitor{waiting === 1 ? "" : "s"} waiting for you</span>
+            : "No one waiting right now."}
+        </p>
+        <Button variant="secondary" size="md" onClick={loadList}><RefreshCw size={16} /></Button>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-[300px_1fr]">
+        <div className="space-y-2">
+          {chats.length === 0 && <p className="text-sm text-muted">No conversations yet.</p>}
+          {chats.map((c) => (
+            <button key={c.id} type="button" onClick={() => { setOpenChat(c.id); loadOne(c.id); }}
+              className={`block w-full rounded-2xl p-3 text-left transition-colors ${openChat === c.id ? "bg-teal-glow/15 ring-1 ring-teal-glow/40" : "glass"}`}>
+              <div className="flex items-center justify-between gap-2">
+                <span className="flex items-center gap-2 text-sm font-semibold text-fg">
+                  {c.needs_human ? <Radio size={13} className="animate-pulse text-warn" /> : null}
+                  {c.visitor_name || c.page || "Visitor"}
+                </span>
+                {c.unread_for_agent > 0 && (
+                  <span className="rounded-full bg-danger px-2 py-0.5 text-xs font-bold text-white">{c.unread_for_agent}</span>
+                )}
+              </div>
+              <p className="mt-1 truncate text-xs text-muted">{c.last_message || "—"}</p>
+              <p className="mt-1 text-[11px] text-faint">{String(c.last_at || "").slice(0, 16)}</p>
+            </button>
+          ))}
+        </div>
+
+        <div className="glass flex min-h-[420px] flex-col rounded-2xl p-4">
+          {!openChat && <p className="m-auto text-sm text-muted">Pick a conversation.</p>}
+          {openChat && (
+            <>
+              <div className="flex-1 space-y-2 overflow-y-auto">
+                {msgs.map((m) => (
+                  <div key={m.id} className={`flex ${m.role === "visitor" ? "justify-start" : "justify-end"}`}>
+                    <div className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm ${
+                      m.role === "visitor" ? "bg-panel/60 text-fg"
+                      : m.role === "agent" ? "bg-teal-glow/25 text-fg"
+                      : "border border-hairline/15 text-muted"}`}>
+                      <span className="mb-0.5 block text-[10px] uppercase tracking-wider text-faint">
+                        {m.role === "visitor" ? "Visitor" : m.role === "agent" ? "You" : "Guide"}
+                      </span>
+                      {m.content}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-3 flex gap-2 border-t border-hairline/10 pt-3">
+                <input className={inputClass} value={reply} placeholder="Type your reply…"
+                  onChange={(e) => setReply(e.target.value)} onKeyDown={(e) => e.key === "Enter" && send()} />
+                <Button size="md" onClick={send} disabled={busy || !reply.trim()}><Send size={16} /></Button>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** Prices, lead times and promotional offers — live, no deploy needed. */
+function Pricing() {
+  const [rows, setRows] = useState<any[]>([]);
+  const [labels, setLabels] = useState<Record<string, string>>({});
+  const [saved, setSaved] = useState("");
+
+  const load = useCallback(async () => {
+    const d = await adminGet("/api/admin/pricing");
+    setRows(d.pricing || []); setLabels(d.labels || {});
+  }, []);
+  useEffect(() => { load(); }, [load]);
+
+  const set = (i: number, k: string, v: any) =>
+    setRows((r) => r.map((row, j) => (j === i ? { ...row, [k]: v } : row)));
+
+  const save = async () => {
+    setSaved("");
+    const d = await adminPost("/api/admin/pricing", { rows });
+    setSaved(d.ok ? "Saved ✅ — live on the site and in the bot immediately" : "Failed");
+    load();
+  };
+
+  return (
+    <div className="space-y-4">
+      <p className="text-sm text-muted">
+        These drive the homepage price list <em>and</em> the prices the guide quotes in chat. Changes are live immediately — no deploy.
+      </p>
+      <div className="space-y-3">
+        {rows.map((r, i) => (
+          <div key={r.id} className="glass rounded-2xl p-4">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="font-display text-base font-bold text-fg">{labels[r.id] || r.id}</p>
+              <label className="flex items-center gap-2 text-sm text-muted">
+                <input type="checkbox" checked={r.enabled !== 0 && r.enabled !== false}
+                  onChange={(e) => set(i, "enabled", e.target.checked)} /> Show on site
+              </label>
+            </div>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <label className="block">
+                <span className="mb-1 block text-xs text-faint">Price (₹)</span>
+                <input className={inputClass} type="number" value={r.price_inr}
+                  onChange={(e) => set(i, "price_inr", Number(e.target.value))} />
+              </label>
+              <label className="block">
+                <span className="mb-1 block text-xs text-faint">Lead time</span>
+                <input className={inputClass} value={r.lead_time || ""}
+                  onChange={(e) => set(i, "lead_time", e.target.value)} />
+              </label>
+              <label className="block">
+                <span className="mb-1 block text-xs text-faint">Offer label (optional)</span>
+                <input className={inputClass} value={r.offer_label || ""} placeholder="e.g. Launch offer"
+                  onChange={(e) => set(i, "offer_label", e.target.value)} />
+              </label>
+              <label className="block">
+                <span className="mb-1 block text-xs text-faint">Offer price (₹, optional)</span>
+                <input className={inputClass} type="number" value={r.offer_price_inr || ""}
+                  onChange={(e) => set(i, "offer_price_inr", e.target.value)} />
+              </label>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="flex items-center gap-3">
+        <Button onClick={save}><ShieldCheck size={16} /> Save pricing</Button>
+        {saved && <span className="text-sm text-muted">{saved}</span>}
+      </div>
+    </div>
+  );
+}
+
+/** Owner-editable persona instructions appended to the guide's system prompt. */
+function BotPanel() {
+  const [instr, setInstr] = useState("");
+  const [enabled, setEnabled] = useState(true);
+  const [announce, setAnnounce] = useState("");
+  const [saved, setSaved] = useState("");
+  useEffect(() => {
+    adminGet("/api/admin/settings").then((d) => {
+      setInstr(d.bot_instructions || "");
+      setEnabled(d.chat_enabled !== "0");
+      setAnnounce(d.announcement || "");
+    });
+  }, []);
+  const save = async () => {
+    setSaved("");
+    const d = await adminPost("/api/admin/settings", {
+      bot_instructions: instr,
+      chat_enabled: enabled,
+      announcement: announce,
+    });
+    setSaved(d.ok ? "Saved ✅ — applies to the very next message" : "Failed");
+  };
+  return (
+    <div className="max-w-2xl space-y-5">
+      <div className="glass space-y-5 rounded-2xl p-6">
+        <label className="flex items-center gap-3">
+          <input type="checkbox" className="h-5 w-5" checked={enabled} onChange={(e) => setEnabled(e.target.checked)} />
+          <span className="text-base font-semibold text-fg">Guide is available to visitors</span>
+        </label>
+        <label className="block">
+          <span className="mb-1.5 block text-base font-semibold text-fg">Extra instructions for the guide</span>
+          <span className="mb-2 block text-sm text-muted">
+            Added on top of its built-in selling rules. Use it for things that change often — a push on one service, a
+            promotion to mention, a phrase to avoid. Plain sentences work best.
+          </span>
+          <textarea className={`${inputClass} min-h-[160px]`} value={instr} onChange={(e) => setInstr(e.target.value)}
+            placeholder={"e.g. We are pushing WhatsApp automations this month — lead with that when the business handles many customer messages."} />
+        </label>
+        <label className="block">
+          <span className="mb-1.5 block text-base font-semibold text-fg">Site announcement (optional)</span>
+          <input className={inputClass} value={announce} onChange={(e) => setAnnounce(e.target.value)}
+            placeholder="Shown as a banner. Leave blank to hide." />
+        </label>
+        <div>
+          <Button onClick={save}><ShieldCheck size={16} /> Save</Button>
+          {saved && <span className="ml-3 text-sm text-muted">{saved}</span>}
+        </div>
       </div>
     </div>
   );

@@ -51,6 +51,49 @@ CREATE TABLE IF NOT EXISTS visits (
 CREATE INDEX IF NOT EXISTS idx_visits_session ON visits(session_id);
 CREATE INDEX IF NOT EXISTS idx_visits_created ON visits(created_at);
 
+-- Catalogue pricing, editable from the cockpit. src/content/catalogue.ts holds
+-- the seed defaults and stays the fallback if the API is unreachable — but once
+-- a row exists here, THIS is the source of truth for the site AND for the prices
+-- the conversational guide quotes. That kills the old drift problem where a
+-- price change had to be made in three places and shipped.
+CREATE TABLE IF NOT EXISTS pricing (
+  id TEXT PRIMARY KEY,                 -- matches TierId in catalogue.ts
+  price_inr INTEGER NOT NULL,
+  recurring INTEGER DEFAULT 0,
+  lead_time TEXT,
+  enabled INTEGER DEFAULT 1,           -- 0 hides the tier from the site entirely
+  offer_label TEXT,                    -- e.g. "Launch offer — this month only"
+  offer_price_inr INTEGER,             -- optional promotional price
+  sort_order INTEGER DEFAULT 0,
+  updated_at TEXT
+);
+
+-- Live visitor conversations. The guide's replies are persisted so the owner can
+-- read what was said before taking over, and so a handoff has context.
+CREATE TABLE IF NOT EXISTS chat_sessions (
+  id TEXT PRIMARY KEY,                 -- the sessionStorage session id from lib/track.ts
+  created_at TEXT NOT NULL,
+  last_at TEXT NOT NULL,
+  needs_human INTEGER DEFAULT 0,       -- visitor asked for a person
+  agent_joined INTEGER DEFAULT 0,      -- owner has replied at least once
+  closed INTEGER DEFAULT 0,
+  unread_for_agent INTEGER DEFAULT 0,
+  visitor_name TEXT,
+  visitor_phone TEXT,
+  page TEXT,
+  lang TEXT
+);
+
+CREATE TABLE IF NOT EXISTS chat_messages (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  session_id TEXT NOT NULL,
+  role TEXT NOT NULL,                  -- visitor | guide | agent
+  content TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_chatmsg_session ON chat_messages(session_id, id);
+CREATE INDEX IF NOT EXISTS idx_chatsess_last ON chat_sessions(last_at);
+
 -- Runtime-editable admin settings (owner_whatsapp, followups_enabled, …)
 CREATE TABLE IF NOT EXISTS settings (
   key TEXT PRIMARY KEY,
