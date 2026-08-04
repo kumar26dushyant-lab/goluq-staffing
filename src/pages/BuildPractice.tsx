@@ -13,6 +13,7 @@ import {
   Factory,
   ShieldAlert,
   Sparkles,
+  Globe2,
   type LucideIcon,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -101,6 +102,22 @@ export function BuildPractice({ region }: { region: Region }) {
       <TopBar showBack onBack={() => navigate("/")} />
 
       <main className="mx-auto w-full max-w-6xl px-5 pb-24 pt-2 sm:px-8">
+        {/* Region switch. The global variant existed but nothing linked to it,
+            so it was reachable only by typing the URL — an entire pricing
+            presentation nobody could find. */}
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pt-3 text-sm">
+          <span className="flex items-center gap-1.5 text-muted">
+            <Globe2 size={15} className="text-brand-luq" />
+            {t(`${ns}.region.label`)}
+          </span>
+          <Link
+            to={region === "in" ? "/build/global" : "/build"}
+            className="font-semibold text-brand-luq hover:underline"
+          >
+            {t(`${ns}.region.switch`)}
+          </Link>
+        </div>
+
         {/* ── 1 · Hero ──────────────────────────────────────────────── */}
         <section className="grid gap-8 py-8 sm:py-12 lg:grid-cols-[1.15fr_1fr] lg:items-center">
           <div>

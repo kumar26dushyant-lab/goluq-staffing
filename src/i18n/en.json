@@ -874,6 +874,10 @@
       "title": "Not ready for a full build?",
       "body": "A Digital Employee starts at ₹799/month, built around your business in 2–4 weeks. See a free demonstration of how one would work for you before committing to anything bigger.",
       "cta": "Watch a Digital Employee work, free"
+    },
+    "region": {
+      "label": "Showing India pricing (₹)",
+      "switch": "Outside India? See international pricing"
     }
   },
   "buildGlobal": {
@@ -1184,6 +1188,10 @@
       "title": "Want to see delivery quality before committing?",
       "body": "See a free demonstration of a Digital Employee built for a business like yours — a fast, low-stakes look at how we work before a larger engagement.",
       "cta": "Watch one work, free"
+    },
+    "region": {
+      "label": "Showing international pricing (USD)",
+      "switch": "In India? See India pricing"
     }
   },
   "whatsapp": {
