@@ -1211,6 +1211,9 @@
     "skip": "Skip ahead",
     "transcript": "Read transcript",
     "soundOn": "Turn your sound on",
-    "intro": "A real customer calls after hours. Hear how your Digital Employee answers."
+    "intro": "A real customer calls after hours. Hear how your Digital Employee answers.",
+    "language": "Voice",
+    "pricingTitle": "What voice calling actually costs",
+    "pricingBody": "Voice is priced separately from chat, because every minute on a phone line costs real money. Voice calling starts at {{p}}/month including {{c}}. The ₹799 tier is for chat and WhatsApp workers, which do not use call minutes."
   }
 }

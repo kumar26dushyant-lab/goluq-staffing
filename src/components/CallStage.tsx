@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Phone, PhoneOff, Play, Pause, Volume2, FileText } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { playTurn, clipUrl, type PlayHandle } from "../lib/callAudio";
-import type { Dialogue } from "../content/dialogues";
+import { playTurn, clipUrl, CALL_LANGS, type CallLang, type PlayHandle } from "../lib/callAudio";
+import { line, type Dialogue } from "../content/dialogues";
 
 type CallState = "idle" | "ringing" | "connected" | "ended";
 
@@ -25,21 +25,22 @@ export function CallStage({
   dialogue,
   role,
   industry,
-  lang,
   onFinished,
 }: {
   dialogue: Dialogue;
   role: string;
   industry: string;
-  lang: "en" | "hi";
   onFinished: (seconds: number) => void;
 }) {
   const { t } = useTranslation();
   const reduced = useReducedMotion();
 
+  // Hindi by default: domestic visitors want to hear the worker speak their
+  // language, regardless of which language they are reading the site in.
+  const [lang, setLang] = useState<CallLang>("hi");
+  const [speaking, setSpeaking] = useState(false);
   const [state, setState] = useState<CallState>("idle");
   const [turn, setTurn] = useState(-1);
-  const [paused, setPaused] = useState(false);
   const [seconds, setSeconds] = useState(0);
   const [showTranscript, setShowTranscript] = useState(false);
 
@@ -73,13 +74,21 @@ export function CallStage({
       if (cancelled.current) return;
       setTurn(i);
       const tn = dialogue.turns[i];
-      await playTurn(tn[lang], tn.who, lang, clipUrl(lang, role, industry, i), (h) => {
-        handle.current = h;
-      });
+      setSpeaking(false);
+      await playTurn(
+        line(tn, lang),
+        tn.who,
+        lang,
+        clipUrl(lang, role, industry, i),
+        (h) => { handle.current = h; },
+        () => setSpeaking(true)
+      );
+      setSpeaking(false);
       if (cancelled.current) return;
       await wait(reduced ? 60 : 320); // natural gap between speakers
     }
     if (cancelled.current) return;
+    setSpeaking(false);
     setState("ended");
     onFinished(seconds);
   };
@@ -87,12 +96,15 @@ export function CallStage({
   const hangUp = () => {
     cancelled.current = true;
     handle.current?.stop();
+    setSpeaking(false);
     setState("ended");
     onFinished(seconds);
   };
 
   const current = turn >= 0 ? dialogue.turns[turn] : null;
   const agentSpeaking = current?.who === "agent";
+  const customerLabel = lang === "en" ? "Customer" : lang === "mr" ? "ग्राहक" : "ग्राहक";
+  const idle = state === "idle" || state === "ended";
 
   return (
     <div className="glass overflow-hidden rounded-3xl">
@@ -107,7 +119,7 @@ export function CallStage({
         </span>
         <div className="min-w-0 flex-1">
           <p className="truncate font-display text-base font-bold text-fg">
-            {dialogue.scene[lang]}
+            {line(dialogue.scene, lang)}
           </p>
           <p className="text-xs text-muted">
             {state === "ringing" && t("call.ringing")}
@@ -133,14 +145,14 @@ export function CallStage({
         {/* Who is speaking */}
         <div className="flex items-center justify-center gap-8">
           <Speaker
-            label={lang === "hi" ? "ग्राहक" : "Customer"}
-            active={state === "connected" && !agentSpeaking && !paused}
+            label={customerLabel}
+            active={state === "connected" && speaking && !agentSpeaking}
             reduced={!!reduced}
           />
           <Speaker
             label="GoLuQ"
             brand
-            active={state === "connected" && !!agentSpeaking && !paused}
+            active={state === "connected" && speaking && !!agentSpeaking}
             reduced={!!reduced}
           />
         </div>
@@ -157,14 +169,14 @@ export function CallStage({
                 transition={{ duration: 0.25 }}
               >
                 <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-faint">
-                  {current.by ? current.by[lang] : agentSpeaking ? "GoLuQ" : lang === "hi" ? "ग्राहक" : "Customer"}
+                  {current.by ? line(current.by, lang) : agentSpeaking ? "GoLuQ" : customerLabel}
                 </p>
                 <p
                   className={`text-balance text-lg leading-relaxed sm:text-xl ${
                     agentSpeaking ? "font-semibold text-fg" : "text-muted"
                   }`}
                 >
-                  {current[lang]}
+                  {line(current, lang)}
                 </p>
               </motion.div>
             ) : (
@@ -173,9 +185,33 @@ export function CallStage({
           </AnimatePresence>
         </div>
 
+        {/* Which language the worker speaks. Offered up-front because hearing it
+            in your own language IS the demonstration for a domestic buyer.
+            Locked during a call — switching mid-sentence would be nonsense. */}
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
+          <span className="text-xs font-semibold uppercase tracking-wider text-faint">
+            {t("call.language")}
+          </span>
+          {CALL_LANGS.map((l) => (
+            <button
+              key={l.id}
+              type="button"
+              disabled={!idle}
+              onClick={() => setLang(l.id)}
+              className={`rounded-full px-3.5 py-1.5 text-sm font-semibold transition-colors ${
+                lang === l.id
+                  ? "bg-teal-glow/20 text-brand-luq ring-1 ring-teal-glow/45"
+                  : "glass text-muted hover:text-fg"
+              } ${idle ? "" : "cursor-not-allowed opacity-50"}`}
+            >
+              {l.label}
+            </button>
+          ))}
+        </div>
+
         {/* Controls */}
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-          {state === "idle" || state === "ended" ? (
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+          {idle ? (
             <button
               type="button"
               onClick={run}
@@ -191,10 +227,7 @@ export function CallStage({
           ) : (
             <button
               type="button"
-              onClick={() => {
-                setPaused((p) => !p);
-                handle.current?.stop();
-              }}
+              onClick={() => handle.current?.stop()}
               className="glass glass-interactive inline-flex items-center gap-2 rounded-full px-5 py-3 text-base font-semibold text-fg"
             >
               <Pause size={17} /> {t("call.skip")}
@@ -227,7 +260,7 @@ export function CallStage({
                     : "border border-hairline/15 bg-panel/50 text-muted"
                 } ${i === turn ? "ring-1 ring-brand-luq" : ""}`}
               >
-                {tn[lang]}
+                {line(tn, lang)}
               </span>
             </li>
           ))}

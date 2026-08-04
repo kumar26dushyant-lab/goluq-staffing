@@ -12,8 +12,25 @@ import { isSpeechSupported, pronounceBrand } from "./speak";
  * for the key it needs). Until they exist, every turn falls back to the browser's
  * built-in voice, so the demo works today and upgrades the moment the files land.
  */
+/**
+ * The call has its own language, separate from the site's. An India-centric
+ * visitor wants to hear the worker speak Hindi even while reading the site in
+ * English — that is the whole point of the demonstration.
+ */
+export type CallLang = "hi" | "en" | "mr";
+
+export const CALL_LANGS: { id: CallLang; label: string; speech: string }[] = [
+  { id: "hi", label: "हिन्दी", speech: "hi-IN" },
+  { id: "en", label: "English", speech: "en-IN" },
+  { id: "mr", label: "मराठी", speech: "mr-IN" },
+];
+
+export function speechCode(lang: CallLang): string {
+  return CALL_LANGS.find((l) => l.id === lang)?.speech ?? "hi-IN";
+}
+
 export function clipUrl(
-  lang: "en" | "hi",
+  lang: CallLang,
   role: string,
   industry: string,
   index: number
@@ -38,9 +55,10 @@ export interface PlayHandle {
 export function playTurn(
   text: string,
   who: "caller" | "agent",
-  lang: "en" | "hi",
+  lang: CallLang,
   url: string,
-  onHandle?: (h: PlayHandle) => void
+  onHandle?: (h: PlayHandle) => void,
+  onStart?: () => void
 ): Promise<void> {
   return new Promise((resolve) => {
     let done = false;
@@ -54,7 +72,15 @@ export function playTurn(
     const audio = new Audio(url);
     audio.preload = "auto";
 
+    // A failed load fires BOTH `onerror` AND rejects `play()`. Without this
+    // latch the fallback ran twice and every line was spoken twice — which also
+    // desynced the on-screen speaker, because turn N's audio was still going
+    // while turn N+1 was displayed.
+    let fellBack = false;
     const useFallback = () => {
+      if (fellBack || done) return;
+      fellBack = true;
+      onStart?.();
       // Device voice. Rate/pitch differ per side so the two speakers are
       // distinguishable even without generated clips.
       if (!isSpeechSupported()) {
@@ -64,8 +90,8 @@ export function playTurn(
         onHandle?.({ stop: () => { window.clearTimeout(timer); finish(); } });
         return;
       }
-      const u = new SpeechSynthesisUtterance(pronounceBrand(text, lang));
-      u.lang = lang === "hi" ? "hi-IN" : "en-IN";
+      const u = new SpeechSynthesisUtterance(pronounceBrand(text, lang === "en" ? "en" : "hi"));
+      u.lang = speechCode(lang);
       const v = fallbackVoice(who);
       u.rate = v.rate;
       u.pitch = v.pitch;
@@ -75,6 +101,11 @@ export function playTurn(
       window.speechSynthesis.speak(u);
     };
 
+    // The on-screen speaker lights up only once sound is genuinely coming out,
+    // so the waveform can never run ahead of the audio.
+    audio.onplaying = () => {
+      if (!fellBack) onStart?.();
+    };
     audio.onended = finish;
     audio.onerror = useFallback;
     onHandle?.({
@@ -91,7 +122,7 @@ export function playTurn(
 
 /** True once at least one generated clip for this conversation is reachable. */
 export async function hasGeneratedAudio(
-  lang: "en" | "hi",
+  lang: CallLang,
   role: string,
   industry: string
 ): Promise<boolean> {

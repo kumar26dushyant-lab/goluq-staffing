@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { CheckCircle2, ArrowRight, RotateCcw, Phone, MessageCircle, Users } from "lucide-react";
+import { CheckCircle2, ArrowRight, RotateCcw, Phone, MessageCircle, Users, IndianRupee } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { getScenario } from "../content/scenarios";
+import { planById } from "../content/affiliateConfig";
+import { inr } from "../content/catalogue";
 import { getDialogue, type Turn } from "../content/dialogues";
 import { CallStage } from "../components/CallStage";
 import { StageAssistant } from "../components/StageAssistant";
@@ -11,6 +13,9 @@ import { Button } from "../components/ui/Button";
 import type { RoleId, IndustryId } from "../state/useAppState";
 
 type Phase = "run" | "recap";
+
+// The entry voice plan — the honest price for what the call demo just showed.
+const VOICE_PLAN = planById("voiceLite");
 
 /** A voice worker is demonstrated as a phone call; everyone else as a chat. */
 function channelFor(role: RoleId) {
@@ -144,6 +149,24 @@ export function Simulation({
           </p>
         </motion.div>
 
+        {/* The visitor has just watched a VOICE call. If the only price on the
+            page is the ₹799 chat tier, they will assume that buys them this —
+            and find out otherwise on a sales call. Say it here instead. */}
+        {isCall && (
+          <div className="mt-6 flex items-start gap-3 rounded-2xl border border-warn/30 bg-warn/[0.07] p-5">
+            <IndianRupee size={20} className="mt-0.5 shrink-0 text-warn" />
+            <div>
+              <p className="font-display text-base font-bold text-fg">{t("call.pricingTitle")}</p>
+              <p className="mt-1.5 text-sm leading-relaxed text-muted sm:text-base">
+                {t("call.pricingBody", {
+                  p: inr(VOICE_PLAN.priceInr),
+                  c: VOICE_PLAN.cap,
+                })}
+              </p>
+            </div>
+          </div>
+        )}
+
         <div className="mt-8">
           <RoiScorecard role={role} industry={industry} />
         </div>
@@ -188,7 +211,6 @@ export function Simulation({
             dialogue={dialogue}
             role={role}
             industry={industry}
-            lang={lang}
             onFinished={(secs) => {
               setElapsed(secs);
               setPhase("recap");

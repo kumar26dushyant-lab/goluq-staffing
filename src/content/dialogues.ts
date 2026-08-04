@@ -16,92 +16,133 @@ export interface Turn {
   who: "caller" | "agent";
   en: string;
   hi: string;
+  /** Marathi is authored for the VOICE role only — see `line()` for the fallback. */
+  mr?: string;
   /** Optional worker label — used by the Workforce role to show who took it. */
-  by?: { en: string; hi: string };
+  by?: { en: string; hi: string; mr?: string };
+}
+
+/** A call can be heard in any of these, independently of the site language. */
+export type DialogueLang = "en" | "hi" | "mr";
+
+/** Reads a line in the requested language, falling back Marathi → Hindi → English. */
+export function line(
+  o: { en: string; hi: string; mr?: string } | undefined,
+  lang: DialogueLang
+): string {
+  if (!o) return "";
+  if (lang === "mr") return o.mr || o.hi || o.en;
+  return o[lang] || o.en;
 }
 
 export interface Dialogue {
   /** Sets the scene: channel, time, why it matters. */
-  scene: { en: string; hi: string };
+  scene: { en: string; hi: string; mr?: string };
   turns: Turn[];
   /** What concretely happened as a result. */
-  result: { en: string; hi: string };
+  result: { en: string; hi: string; mr?: string };
 }
 
-const T = (who: Turn["who"], en: string, hi: string, by?: Turn["by"]): Turn => ({ who, en, hi, by });
+const T = (who: Turn["who"], en: string, hi: string, mr?: string, by?: Turn["by"]): Turn =>
+  ({ who, en, hi, mr, by });
 
 // ── VOICE — an actual phone call ─────────────────────────────────────────────
 const voice: Record<IndustryId, Dialogue> = {
   clinic: {
-    scene: { en: "Missed call · 9:42 PM · clinic closed", hi: "मिस्ड कॉल · रात 9:42 · क्लिनिक बंद" },
+    scene: {
+      en: "Missed call · 9:42 PM · clinic closed",
+      hi: "मिस्ड कॉल · रात 9:42 · क्लिनिक बंद",
+      mr: "मिस्ड कॉल · रात्री ९:४२ · क्लिनिक बंद",
+    },
     turns: [
-      T("agent", "Good evening, this is Dr. Mehta's clinic returning your call. How can I help?", "नमस्ते, डॉ. मेहता के क्लिनिक से कॉल बैक कर रहे हैं। कैसे मदद करूँ?"),
-      T("caller", "My father has chest pain since evening. Can he see the doctor tomorrow?", "पापा को शाम से सीने में दर्द है। कल डॉक्टर को दिखा सकते हैं?"),
-      T("agent", "I'm sorry to hear that. If the pain is severe right now, please go to Emergency — shall I read out the nearest one?", "सुनकर दुख हुआ। अगर दर्द अभी तेज़ है तो कृपया इमरजेंसी जाइए — सबसे नज़दीकी बता दूँ?"),
-      T("caller", "No, it's mild now. Tomorrow morning is fine.", "नहीं, अभी हल्का है। कल सुबह ठीक रहेगा।"),
-      T("agent", "Done — 10:15 AM with Dr. Mehta. Please come fasting, and bring any old ECG reports.", "हो गया — सुबह 10:15, डॉ. मेहता के साथ। खाली पेट आइएगा, और पुरानी ECG रिपोर्ट साथ लाइएगा।"),
-      T("caller", "Thank you so much.", "बहुत-बहुत धन्यवाद।"),
+      T("agent", "Good evening, this is Dr. Mehta's clinic returning your call. How can I help?", "नमस्ते, डॉ. मेहता के क्लिनिक से कॉल बैक कर रहे हैं। कैसे मदद करूँ?", "नमस्कार, डॉ. मेहता यांच्या क्लिनिकमधून कॉल बॅक करत आहोत. कशी मदत करू?"),
+      T("caller", "My father has chest pain since evening. Can he see the doctor tomorrow?", "पापा को शाम से सीने में दर्द है। कल डॉक्टर को दिखा सकते हैं?", "बाबांना संध्याकाळपासून छातीत दुखतंय. उद्या डॉक्टरांना दाखवता येईल का?"),
+      T("agent", "I'm sorry to hear that. If the pain is severe right now, please go to Emergency — shall I read out the nearest one?", "सुनकर दुख हुआ। अगर दर्द अभी तेज़ है तो कृपया इमरजेंसी जाइए — सबसे नज़दीकी बता दूँ?", "ऐकून वाईट वाटलं. आत्ता वेदना तीव्र असतील तर कृपया इमर्जन्सीला जा — जवळचं ठिकाण सांगू का?"),
+      T("caller", "No, it's mild now. Tomorrow morning is fine.", "नहीं, अभी हल्का है। कल सुबह ठीक रहेगा।", "नाही, आत्ता कमी आहे. उद्या सकाळी चालेल."),
+      T("agent", "Done — 10:15 AM with Dr. Mehta. Please come fasting, and bring any old ECG reports.", "हो गया — सुबह 10:15, डॉ. मेहता के साथ। खाली पेट आइएगा, और पुरानी ECG रिपोर्ट साथ लाइएगा।", "झालं — सकाळी १०:१५, डॉ. मेहता यांच्याकडे. उपाशीपोटी या, आणि जुने ईसीजी रिपोर्ट सोबत आणा."),
+      T("caller", "Thank you so much.", "बहुत-बहुत धन्यवाद।", "खूप खूप धन्यवाद."),
     ],
     result: {
       en: "Appointment booked, doctor's calendar updated, WhatsApp confirmation sent — and an emergency was screened for. At 9:42 PM, with nobody at the desk.",
       hi: "अपॉइंटमेंट बुक, डॉक्टर का कैलेंडर अपडेट, WhatsApp पर पुष्टि — और इमरजेंसी की जाँच भी हुई। रात 9:42 बजे, बिना किसी के डेस्क पर होते हुए।",
+      mr: "अपॉइंटमेंट बुक, डॉक्टरांचं कॅलेंडर अपडेट, WhatsApp वर पुष्टी — आणि इमर्जन्सीची तपासणीही झाली. रात्री ९:४२ ला, डेस्कवर कोणीही नसताना.",
     },
   },
   diagnostic: {
-    scene: { en: "Missed call · 8:10 AM · before the lab opens", hi: "मिस्ड कॉल · सुबह 8:10 · लैब खुलने से पहले" },
+    scene: {
+      en: "Missed call · 8:10 AM · before the lab opens",
+      hi: "मिस्ड कॉल · सुबह 8:10 · लैब खुलने से पहले",
+      mr: "मिस्ड कॉल · सकाळी ८:१० · लॅब उघडण्यापूर्वी",
+    },
     turns: [
-      T("agent", "Good morning, this is City Diagnostics returning your call.", "नमस्ते, City Diagnostics से कॉल बैक कर रहे हैं।"),
-      T("caller", "I need a full body checkup. Can someone come home to take the sample?", "मुझे फुल बॉडी चेकअप कराना है। घर से सैंपल ले जाएँगे क्या?"),
-      T("agent", "Yes, home collection is available in your area. Tomorrow 7 to 9 AM — shall I book that?", "जी हाँ, आपके इलाक़े में होम कलेक्शन उपलब्ध है। कल सुबह 7 से 9 — बुक कर दूँ?"),
-      T("caller", "Yes. And do I need to fast?", "हाँ। और खाली पेट रहना है क्या?"),
-      T("agent", "Twelve hours fasting, water is fine. I'll send the prep instructions on WhatsApp now.", "बारह घंटे खाली पेट, पानी चल जाएगा। तैयारी की जानकारी अभी WhatsApp पर भेज देता हूँ।"),
+      T("agent", "Good morning, this is City Diagnostics returning your call.", "नमस्ते, City Diagnostics से कॉल बैक कर रहे हैं।", "नमस्कार, City Diagnostics मधून कॉल बॅक करत आहोत."),
+      T("caller", "I need a full body checkup. Can someone come home to take the sample?", "मुझे फुल बॉडी चेकअप कराना है। घर से सैंपल ले जाएँगे क्या?", "मला फुल बॉडी चेकअप करायचा आहे. घरून सॅम्पल घेऊन जाल का?"),
+      T("agent", "Yes, home collection is available in your area. Tomorrow 7 to 9 AM — shall I book that?", "जी हाँ, आपके इलाक़े में होम कलेक्शन उपलब्ध है। कल सुबह 7 से 9 — बुक कर दूँ?", "होय, तुमच्या भागात होम कलेक्शन उपलब्ध आहे. उद्या सकाळी ७ ते ९ — बुक करू का?"),
+      T("caller", "Yes. And do I need to fast?", "हाँ। और खाली पेट रहना है क्या?", "हो. आणि उपाशी राहावं लागेल का?"),
+      T("agent", "Twelve hours fasting, water is fine. I'll send the prep instructions on WhatsApp now.", "बारह घंटे खाली पेट, पानी चल जाएगा। तैयारी की जानकारी अभी WhatsApp पर भेज देता हूँ।", "बारा तास उपाशी, पाणी चालेल. तयारीची माहिती आत्ताच WhatsApp वर पाठवतो."),
     ],
     result: {
       en: "Home collection scheduled, phlebotomist assigned, prep instructions sent. The call was returned in under a minute — the lab hadn't opened yet.",
       hi: "होम कलेक्शन तय, स्टाफ़ नियुक्त, तैयारी की जानकारी भेजी गई। कॉल एक मिनट में लौटाई गई — लैब तब खुली भी नहीं थी।",
+      mr: "होम कलेक्शन ठरलं, स्टाफ नेमला, तयारीची माहिती पाठवली. कॉल एका मिनिटात परत केला — लॅब तेव्हा उघडलीही नव्हती.",
     },
   },
   coaching: {
-    scene: { en: "Missed call · 7:30 PM · admission season", hi: "मिस्ड कॉल · शाम 7:30 · एडमिशन का सीज़न" },
+    scene: {
+      en: "Missed call · 7:30 PM · admission season",
+      hi: "मिस्ड कॉल · शाम 7:30 · एडमिशन का सीज़न",
+      mr: "मिस्ड कॉल · संध्याकाळी ७:३० · प्रवेशाचा हंगाम",
+    },
     turns: [
-      T("agent", "Good evening, this is Apex Classes returning your call.", "नमस्ते, Apex Classes से कॉल बैक कर रहे हैं।"),
-      T("caller", "My daughter is in class 11. What are the timings for the NEET batch?", "मेरी बेटी 11वीं में है। NEET बैच का समय क्या है?"),
-      T("agent", "Morning batch is 6 to 8:30 AM, evening 5 to 7:30 PM. Which suits her school hours?", "मॉर्निंग बैच सुबह 6 से 8:30, शाम 5 से 7:30। उसके स्कूल के हिसाब से कौन सा ठीक रहेगा?"),
-      T("caller", "Evening. What about the fees?", "शाम वाला। फ़ीस कितनी है?"),
-      T("agent", "I'll send the full fee structure on WhatsApp. Would you like a free demo class this Saturday?", "पूरी फ़ीस डिटेल WhatsApp पर भेज देता हूँ। इस शनिवार एक मुफ़्त डेमो क्लास रखवा दूँ?"),
-      T("caller", "Yes, please book it.", "हाँ, बुक कर दीजिए।"),
+      T("agent", "Good evening, this is Apex Classes returning your call.", "नमस्ते, Apex Classes से कॉल बैक कर रहे हैं।", "नमस्कार, Apex Classes मधून कॉल बॅक करत आहोत."),
+      T("caller", "My daughter is in class 11. What are the timings for the NEET batch?", "मेरी बेटी 11वीं में है। NEET बैच का समय क्या है?", "माझी मुलगी अकरावीत आहे. NEET बॅचची वेळ काय आहे?"),
+      T("agent", "Morning batch is 6 to 8:30 AM, evening 5 to 7:30 PM. Which suits her school hours?", "मॉर्निंग बैच सुबह 6 से 8:30, शाम 5 से 7:30। उसके स्कूल के हिसाब से कौन सा ठीक रहेगा?", "सकाळची बॅच ६ ते ८:३०, संध्याकाळची ५ ते ७:३०. तिच्या शाळेच्या वेळेनुसार कोणती योग्य राहील?"),
+      T("caller", "Evening. What about the fees?", "शाम वाला। फ़ीस कितनी है?", "संध्याकाळची. आणि फी किती आहे?"),
+      T("agent", "I'll send the full fee structure on WhatsApp. Would you like a free demo class this Saturday?", "पूरी फ़ीस डिटेल WhatsApp पर भेज देता हूँ। इस शनिवार एक मुफ़्त डेमो क्लास रखवा दूँ?", "पूर्ण फी रचना WhatsApp वर पाठवतो. या शनिवारी एक मोफत डेमो क्लास ठेवू का?"),
+      T("caller", "Yes, please book it.", "हाँ, बुक कर दीजिए।", "हो, बुक करा."),
     ],
     result: {
       en: "Demo class booked, fee structure sent, parent's number captured with the batch they want. That enquiry would otherwise have been a missed call in a busy season.",
       hi: "डेमो क्लास बुक, फ़ीस डिटेल भेजी, अभिभावक का नंबर और पसंदीदा बैच दर्ज। वरना व्यस्त सीज़न में यह बस एक मिस्ड कॉल रह जाती।",
+      mr: "डेमो क्लास बुक, फी रचना पाठवली, पालकांचा नंबर आणि हवी असलेली बॅच नोंदवली. अन्यथा गजबजलेल्या हंगामात ही फक्त एक मिस्ड कॉल राहिली असती.",
     },
   },
   ca: {
-    scene: { en: "Missed call · 10:20 PM · two days before the GST deadline", hi: "मिस्ड कॉल · रात 10:20 · GST डेडलाइन से दो दिन पहले" },
+    scene: {
+      en: "Missed call · 10:20 PM · two days before the GST deadline",
+      hi: "मिस्ड कॉल · रात 10:20 · GST डेडलाइन से दो दिन पहले",
+      mr: "मिस्ड कॉल · रात्री १०:२० · GST मुदतीच्या दोन दिवस आधी",
+    },
     turns: [
-      T("agent", "Good evening, this is Sharma & Associates returning your call.", "नमस्ते, Sharma & Associates से कॉल बैक कर रहे हैं।"),
-      T("caller", "Has my GST return been filed? The deadline is on the 20th.", "मेरी GST रिटर्न फ़ाइल हो गई? 20 तारीख़ लास्ट डेट है।"),
-      T("agent", "Let me check. Your GSTR-1 is filed. GSTR-3B is pending — we're still short of two purchase bills from you.", "देखता हूँ। आपकी GSTR-1 फ़ाइल हो चुकी है। GSTR-3B बाक़ी है — आपकी दो परचेज़ बिल अभी नहीं मिलीं।"),
-      T("caller", "Which two?", "कौन सी दो?"),
-      T("agent", "The March bills from Verma Traders and Singh Enterprises. I'll WhatsApp you the list — send photos and we'll file tomorrow.", "मार्च की — वर्मा ट्रेडर्स और सिंह एंटरप्राइज़ेज़ वाली। लिस्ट WhatsApp कर देता हूँ — फ़ोटो भेज दीजिए, कल फ़ाइल कर देंगे।"),
+      T("agent", "Good evening, this is Sharma & Associates returning your call.", "नमस्ते, Sharma & Associates से कॉल बैक कर रहे हैं।", "नमस्कार, Sharma & Associates मधून कॉल बॅक करत आहोत."),
+      T("caller", "Has my GST return been filed? The deadline is on the 20th.", "मेरी GST रिटर्न फ़ाइल हो गई? 20 तारीख़ लास्ट डेट है।", "माझं GST रिटर्न भरलं का? २० तारीख शेवटची आहे."),
+      T("agent", "Let me check. Your GSTR-1 is filed. GSTR-3B is pending — we're still short of two purchase bills from you.", "देखता हूँ। आपकी GSTR-1 फ़ाइल हो चुकी है। GSTR-3B बाक़ी है — आपकी दो परचेज़ बिल अभी नहीं मिलीं।", "बघतो. तुमचं GSTR-1 भरलं आहे. GSTR-3B बाकी आहे — तुमची दोन खरेदी बिलं अजून मिळालेली नाहीत."),
+      T("caller", "Which two?", "कौन सी दो?", "कोणती दोन?"),
+      T("agent", "The March bills from Verma Traders and Singh Enterprises. I'll WhatsApp you the list — send photos and we'll file tomorrow.", "मार्च की — वर्मा ट्रेडर्स और सिंह एंटरप्राइज़ेज़ वाली। लिस्ट WhatsApp कर देता हूँ — फ़ोटो भेज दीजिए, कल फ़ाइल कर देंगे।", "मार्चची — वर्मा ट्रेडर्स आणि सिंग एंटरप्रायझेसची. यादी WhatsApp करतो — फोटो पाठवा, उद्या भरून टाकू."),
     ],
     result: {
       en: "Client answered at 10:20 PM with their exact filing status and precisely what was missing — no partner had to be disturbed, and the deadline held.",
       hi: "रात 10:20 बजे क्लाइंट को सही स्थिति और ठीक-ठीक क्या बाक़ी है, दोनों बता दिया — किसी पार्टनर को परेशान नहीं करना पड़ा, और डेडलाइन बच गई।",
+      mr: "रात्री १०:२० ला क्लायंटला नेमकी स्थिती आणि नेमकं काय बाकी आहे, दोन्ही सांगितलं — कोणत्याही पार्टनरला त्रास द्यावा लागला नाही, आणि मुदत पाळली गेली.",
     },
   },
   travel: {
-    scene: { en: "Missed call · 5:05 AM · airport run", hi: "मिस्ड कॉल · सुबह 5:05 · एयरपोर्ट की ट्रिप" },
+    scene: {
+      en: "Missed call · 5:05 AM · airport run",
+      hi: "मिस्ड कॉल · सुबह 5:05 · एयरपोर्ट की ट्रिप",
+      mr: "मिस्ड कॉल · पहाटे ५:०५ · विमानतळाची ट्रिप",
+    },
     turns: [
-      T("agent", "Good morning, this is Sunrise Travels returning your call.", "नमस्ते, Sunrise Travels से कॉल बैक कर रहे हैं।"),
-      T("caller", "I need a cab to the airport at 7, my flight is at 10.", "मुझे 7 बजे एयरपोर्ट के लिए कैब चाहिए, फ़्लाइट 10 बजे है।"),
-      T("agent", "For a 10 AM flight I'd suggest 6:30 — there's traffic on the bypass. Sedan or SUV?", "10 बजे की फ़्लाइट के लिए 6:30 बेहतर रहेगा — बायपास पर ट्रैफ़िक रहता है। सेडान या SUV?"),
-      T("caller", "Sedan is fine. Two people, two bags.", "सेडान ठीक है। दो लोग, दो बैग।"),
-      T("agent", "Booked — 6:30 pickup, ₹850 fixed. Driver's name and number will reach you on WhatsApp by 6.", "बुक हो गया — 6:30 पिकअप, ₹850 फ़िक्स। ड्राइवर का नाम और नंबर 6 बजे तक WhatsApp पर आ जाएगा।"),
+      T("agent", "Good morning, this is Sunrise Travels returning your call.", "नमस्ते, Sunrise Travels से कॉल बैक कर रहे हैं।", "नमस्कार, Sunrise Travels मधून कॉल बॅक करत आहोत."),
+      T("caller", "I need a cab to the airport at 7, my flight is at 10.", "मुझे 7 बजे एयरपोर्ट के लिए कैब चाहिए, फ़्लाइट 10 बजे है।", "मला ७ वाजता विमानतळासाठी कॅब हवी आहे, फ्लाइट १० वाजता आहे."),
+      T("agent", "For a 10 AM flight I'd suggest 6:30 — there's traffic on the bypass. Sedan or SUV?", "10 बजे की फ़्लाइट के लिए 6:30 बेहतर रहेगा — बायपास पर ट्रैफ़िक रहता है। सेडान या SUV?", "१० वाजताच्या फ्लाइटसाठी ६:३० बरं राहील — बायपासवर ट्रॅफिक असतं. सेडान की SUV?"),
+      T("caller", "Sedan is fine. Two people, two bags.", "सेडान ठीक है। दो लोग, दो बैग।", "सेडान चालेल. दोन माणसं, दोन बॅगा."),
+      T("agent", "Booked — 6:30 pickup, ₹850 fixed. Driver's name and number will reach you on WhatsApp by 6.", "बुक हो गया — 6:30 पिकअप, ₹850 फ़िक्स। ड्राइवर का नाम और नंबर 6 बजे तक WhatsApp पर आ जाएगा।", "बुक झालं — ६:३० पिकअप, ₹८५० फिक्स. ड्रायव्हरचं नाव आणि नंबर ६ पर्यंत WhatsApp वर येईल."),
     ],
     result: {
       en: "Booking confirmed and a driver assigned at 5 AM — plus the customer was warned about traffic before they were late for a flight.",
       hi: "सुबह 5 बजे बुकिंग पक्की और ड्राइवर तय — और ग्राहक को फ़्लाइट छूटने से पहले ट्रैफ़िक की चेतावनी भी मिल गई।",
+      mr: "पहाटे ५ वाजता बुकिंग पक्कं आणि ड्रायव्हर ठरला — आणि ग्राहकाला फ्लाइट चुकण्याआधी ट्रॅफिकची सूचनाही मिळाली.",
     },
   },
 };

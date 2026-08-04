@@ -50,6 +50,12 @@ const VOICES = {
     agent: { languageCode: "hi-IN", name: "hi-IN-Wavenet-A" },
     caller: { languageCode: "hi-IN", name: "hi-IN-Wavenet-B" },
   },
+  // Marathi is authored for the VOICE role only; other roles fall back to Hindi
+  // text, so only generate mr clips where a real mr line exists.
+  mr: {
+    agent: { languageCode: "mr-IN", name: "mr-IN-Wavenet-A" },
+    caller: { languageCode: "mr-IN", name: "mr-IN-Wavenet-B" },
+  },
 };
 
 const ROLES = ["voice", "support", "sales", "reception", "workforce"];
@@ -105,7 +111,7 @@ for (const role of ROLES) {
     if (onlyIndustry && industry !== onlyIndustry) continue;
     const dialogue = getDialogue(role, industry);
 
-    for (const lang of ["en", "hi"]) {
+    for (const lang of ["en", "hi", "mr"]) {
       const dir = join(OUT, lang, `${role}-${industry}`);
       mkdirSync(dir, { recursive: true });
 
@@ -116,10 +122,13 @@ for (const role of ROLES) {
           continue;
         }
         const turn = dialogue.turns[i];
+        // Skip Marathi where no Marathi line was written — the player falls back
+        // to the Hindi clip, which is better than a Marathi voice reading Hindi.
+        if (lang === "mr" && !turn.mr) { skipped++; continue; }
         const voice = VOICES[lang][turn.who];
         let mp3;
         try {
-          mp3 = await synth(turn[lang], voice);
+          mp3 = await synth(turn[lang] || turn.hi, voice);
         } catch (err) {
           console.error(`\nFailed on ${lang}/${role}-${industry}/${i}.mp3`);
           console.error(String(err.message || err));
