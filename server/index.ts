@@ -219,7 +219,17 @@ app.all("/api/*", (c) => c.json({ ok: false, error: "not_found" }, 404));
 // ── Static SPA (dist) + client-route fallback ───────────────────────────────
 const indexHtml = readFileSync(join(DIST, "index.html"), "utf8");
 app.use("/*", serveStatic({ root: "./dist" }));
-app.get("*", (c) => c.html(indexHtml));
+app.get("*", (c) => {
+  // A request for a FILE that doesn't exist must 404, not fall through to the
+  // SPA shell. Otherwise a missing /audio/*.mp3 resolves to HTML and the browser
+  // fails at decode time instead of at fetch time — which hides genuinely
+  // missing assets and breaks any HEAD-based existence check.
+  const path = new URL(c.req.url).pathname;
+  if (/\.[a-z0-9]{2,5}$/i.test(path) && !path.endsWith(".html")) {
+    return c.notFound();
+  }
+  return c.html(indexHtml);
+});
 
 // ── Built-in daily follow-up scheduler (no external cron needed) ────────────
 async function runFollowups() {
