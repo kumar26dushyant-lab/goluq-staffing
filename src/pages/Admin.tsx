@@ -2,11 +2,13 @@ import { Fragment, useCallback, useEffect, useState } from "react";
 import {
   LayoutDashboard, Users, TrendingUp, MessageSquare, Settings as SettingsIcon,
   LogOut, Search, Download, Trash2, RefreshCw, Send, ShieldCheck, Circle,
-  BarChart3, ChevronDown, IndianRupee, Bot, Radio, Mail,
+  BarChart3, ChevronDown, IndianRupee, Bot, Radio, Mail, FileText,
 } from "lucide-react";
 import { Button } from "../components/ui/Button";
 import { BrandMark } from "../components/BrandMark";
+import { useTranslation } from "react-i18next";
 import { inputClass } from "../lib/ui";
+import { EDITABLE_COPY, EDITABLE_KEYS } from "../content/editableCopy";
 import {
   getToken, setToken, clearToken, adminGet, adminPost, leadsCsvUrl,
   login, logout, setPasswordWithToken, checkSetupToken,
@@ -14,7 +16,7 @@ import {
 
 type Section =
   | "overview" | "leads" | "chat" | "visitors" | "pricing"
-  | "bot" | "inbox" | "affiliates" | "whatsapp" | "settings";
+  | "bot" | "content" | "inbox" | "affiliates" | "whatsapp" | "settings";
 
 export function Admin() {
   const [authed, setAuthed] = useState(false);
@@ -46,6 +48,7 @@ export function Admin() {
     { id: "inbox", label: "Inbox", icon: Mail },
     { id: "visitors", label: "Visitors", icon: BarChart3 },
     { id: "pricing", label: "Pricing & offers", icon: IndianRupee },
+    { id: "content", label: "Content", icon: FileText },
     { id: "bot", label: "Bot", icon: Bot },
     { id: "affiliates", label: "Affiliates", icon: TrendingUp },
     { id: "whatsapp", label: "WhatsApp", icon: MessageSquare },
@@ -90,6 +93,7 @@ export function Admin() {
         {section === "inbox" && <Inbox />}
         {section === "visitors" && <Visitors />}
         {section === "pricing" && <Pricing />}
+        {section === "content" && <Content />}
         {section === "bot" && <BotPanel />}
         {section === "affiliates" && <Affiliates />}
         {section === "whatsapp" && <WhatsApp />}
@@ -919,6 +923,105 @@ function Inbox() {
             </>
           )}
         </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Content — owner-editable site copy.
+ *
+ * Each field shows the shipped default as its placeholder, so leaving a box
+ * empty means "use the default". That makes reverting obvious: clear the box
+ * and save. Only the curated list in content/editableCopy.ts is exposed.
+ */
+function Content() {
+  const { t, i18n } = useTranslation();
+  const [vals, setVals] = useState<Record<string, { en: string; hi: string }>>({});
+  const [saved, setSaved] = useState("");
+  const [openGroup, setOpenGroup] = useState<string>(EDITABLE_COPY[0]?.id ?? "");
+
+  const load = useCallback(async () => {
+    const d = await adminGet("/api/admin/content");
+    const next: Record<string, { en: string; hi: string }> = {};
+    for (const r of d.overrides || []) next[r.key] = { en: r.val_en || "", hi: r.val_hi || "" };
+    setVals(next);
+  }, []);
+  useEffect(() => { load(); }, [load]);
+
+  const set = (key: string, lng: "en" | "hi", v: string) =>
+    setVals((s) => ({ ...s, [key]: { en: s[key]?.en ?? "", hi: s[key]?.hi ?? "", [lng]: v } }));
+
+  const save = async () => {
+    setSaved("");
+    const rows = EDITABLE_KEYS.map((key) => ({
+      key,
+      en: vals[key]?.en ?? "",
+      hi: vals[key]?.hi ?? "",
+    }));
+    const d = await adminPost("/api/admin/content", { rows });
+    setSaved(d.ok ? "Saved ✅ — live on the site now (reload to see it)" : "Failed");
+    load();
+  };
+
+  /** The shipped default, read straight from the bundled translations. */
+  const def = (key: string, lng: "en" | "hi") =>
+    i18n.getFixedT(lng)(key, { defaultValue: "" }) as string;
+
+  return (
+    <div className="space-y-4">
+      <p className="text-sm text-muted">
+        Change the words on the site without a deploy. Leave a box <strong>empty</strong> to use the
+        built-in default (shown greyed out inside it).
+      </p>
+
+      {EDITABLE_COPY.map((g) => {
+        const open = openGroup === g.id;
+        return (
+          <div key={g.id} className="glass rounded-2xl">
+            <button type="button" onClick={() => setOpenGroup(open ? "" : g.id)}
+              className="flex w-full items-center justify-between gap-3 p-5 text-left">
+              <span>
+                <span className="block font-display text-base font-bold text-fg">{g.title}</span>
+                <span className="mt-0.5 block text-sm text-muted">{g.blurb}</span>
+              </span>
+              <ChevronDown size={18} className={`shrink-0 text-brand-luq transition-transform ${open ? "rotate-180" : ""}`} />
+            </button>
+
+            {open && (
+              <div className="space-y-5 border-t border-hairline/10 p-5">
+                {g.fields.map((f) => (
+                  <div key={f.key}>
+                    <p className="text-sm font-semibold text-fg">{f.label}</p>
+                    {f.hint && <p className="mt-0.5 text-xs text-faint">{f.hint}</p>}
+                    <div className="mt-2 grid gap-2 lg:grid-cols-2">
+                      {(["en", "hi"] as const).map((lng) => (
+                        <label key={lng} className="block">
+                          <span className="mb-1 block text-[11px] uppercase tracking-wider text-faint">
+                            {lng === "en" ? "English" : "हिन्दी"}
+                          </span>
+                          {f.multiline ? (
+                            <textarea className={`${inputClass} min-h-[80px]`} value={vals[f.key]?.[lng] ?? ""}
+                              placeholder={def(f.key, lng)} onChange={(e) => set(f.key, lng, e.target.value)} />
+                          ) : (
+                            <input className={inputClass} value={vals[f.key]?.[lng] ?? ""}
+                              placeholder={def(f.key, lng)} onChange={(e) => set(f.key, lng, e.target.value)} />
+                          )}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })}
+
+      <div className="sticky bottom-4 flex items-center gap-3 rounded-2xl bg-abyss/90 p-3 backdrop-blur-xl">
+        <Button onClick={save}><ShieldCheck size={16} /> Save content</Button>
+        {saved && <span className="text-sm text-muted">{saved}</span>}
+        <span className="ml-auto text-xs text-faint">{t("about.navTitle")}</span>
       </div>
     </div>
   );

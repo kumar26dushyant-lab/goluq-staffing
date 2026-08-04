@@ -36,11 +36,25 @@ export const onRequestGet: PagesFunction<Env> = async ({ env }) => {
     // Site must render even if the pricing table is unavailable.
   }
 
+  // Owner-edited copy, overlaid on the shipped translations by the SPA.
+  let content: Record<string, { en?: string; hi?: string }> = {};
+  try {
+    const rows = await env.DB.prepare(
+      `SELECT key, val_en, val_hi FROM content_overrides`
+    ).all<{ key: string; val_en: string | null; val_hi: string | null }>();
+    for (const r of rows.results ?? []) {
+      content[r.key] = { en: r.val_en || undefined, hi: r.val_hi || undefined };
+    }
+  } catch {
+    content = {};
+  }
+
   return Response.json({
     ok: true,
     whatsapp: whatsapp || "",
     chatEnabled: chatEnabled !== "0",
     announcement: announcement || "",
     pricing,
+    content,
   });
 };

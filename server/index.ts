@@ -33,6 +33,7 @@ import { onRequestGet as adminPricingGet, onRequestPost as adminPricingPost } fr
 import { onRequestGet as adminAuthGet, onRequestPost as adminAuthPost } from "../functions/api/admin/auth";
 import { onRequestPost as emailInbound } from "../functions/api/email/inbound";
 import { onRequestGet as adminEmailsGet, onRequestPost as adminEmailsPost } from "../functions/api/admin/emails";
+import { onRequestGet as adminContentGet, onRequestPost as adminContentPost } from "../functions/api/admin/content";
 
 const ROOT = process.cwd();
 const DIST = join(ROOT, "dist");
@@ -201,6 +202,8 @@ app.get("/api/admin/visitors", (c) => callFn(adminVisitors as Handler, c.req.raw
 app.get("/api/admin/chats", (c) => callFn(adminChatsGet as Handler, c.req.raw));
 app.post("/api/admin/chats", (c) => callFn(adminChatsPost as Handler, c.req.raw));
 app.post("/api/email/inbound", (c) => callFn(emailInbound as Handler, c.req.raw));
+app.get("/api/admin/content", (c) => callFn(adminContentGet as Handler, c.req.raw));
+app.post("/api/admin/content", (c) => callFn(adminContentPost as Handler, c.req.raw));
 app.get("/api/admin/emails", (c) => callFn(adminEmailsGet as Handler, c.req.raw));
 app.post("/api/admin/emails", (c) => callFn(adminEmailsPost as Handler, c.req.raw));
 app.get("/api/admin/auth", (c) => callFn(adminAuthGet as Handler, c.req.raw));

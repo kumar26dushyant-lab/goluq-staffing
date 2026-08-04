@@ -2,6 +2,7 @@ import { useEffect, lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { captureRefFromUrl } from "./lib/refAttribution";
 import { trackPageview } from "./lib/track";
+import { fetchSiteConfig } from "./lib/siteConfig";
 import { StaffingApp } from "./pages/StaffingApp";
 import { PartnerLanding } from "./pages/PartnerLanding";
 import { PartnerDashboard } from "./pages/PartnerDashboard";
@@ -39,6 +40,9 @@ export default function App() {
   // Capture affiliate ?ref= once on first load (last-click, 90-day), any route.
   useEffect(() => {
     captureRefFromUrl();
+    // Pull site config on every route, not just ones that render prices — the
+    // owner's copy overrides ride along with it and must reach /about too.
+    void fetchSiteConfig();
   }, []);
 
   return (

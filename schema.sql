@@ -143,6 +143,18 @@ CREATE INDEX IF NOT EXISTS idx_emailthread_last ON email_threads(last_at);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_emailmsg_msgid ON email_messages(message_id)
   WHERE message_id IS NOT NULL;
 
+-- Owner-editable site copy. `key` is a dotted i18n path (e.g. "about.founder1").
+-- Values here are overlaid on top of the shipped translations at runtime, so the
+-- JSON files remain the defaults and an override can always be cleared to fall
+-- back. Only a curated list of keys is exposed in the cockpit — see
+-- src/content/editableCopy.ts — so this never becomes a raw string editor.
+CREATE TABLE IF NOT EXISTS content_overrides (
+  key TEXT PRIMARY KEY,
+  val_en TEXT,
+  val_hi TEXT,
+  updated_at TEXT
+);
+
 -- Runtime-editable admin settings (owner_whatsapp, followups_enabled, …)
 CREATE TABLE IF NOT EXISTS settings (
   key TEXT PRIMARY KEY,

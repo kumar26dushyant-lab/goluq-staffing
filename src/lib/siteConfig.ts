@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { CATALOGUE, type Offering, type TierId } from "../content/catalogue";
+import { applyContentOverrides } from "./content";
 
 export interface LivePrice {
   id: TierId;
@@ -51,6 +52,8 @@ export async function fetchSiteConfig(): Promise<SiteConfig> {
       const d = await r.json();
       const pricing: LivePrice[] =
         Array.isArray(d?.pricing) && d.pricing.length ? d.pricing : fromLocal();
+      // Owner-edited copy is applied before anything renders off it.
+      applyContentOverrides(d?.content);
       cache = {
         whatsapp: String(d?.whatsapp || ""),
         chatEnabled: d?.chatEnabled !== false,
