@@ -4,6 +4,7 @@ import { CheckCircle2, ArrowRight, RotateCcw, Phone, MessageCircle, Users } from
 import { useTranslation } from "react-i18next";
 import { getScenario } from "../content/scenarios";
 import { getDialogue, type Turn } from "../content/dialogues";
+import { CallStage } from "../components/CallStage";
 import { StageAssistant } from "../components/StageAssistant";
 import { RoiScorecard } from "../components/RoiScorecard";
 import { Button } from "../components/ui/Button";
@@ -46,6 +47,8 @@ export function Simulation({
   const dialogue = getDialogue(role, industry);
   const channel = channelFor(role);
   const ChannelIcon = channel.icon;
+  // Voice workers get the audible call; chat workers get message bubbles.
+  const isCall = channel.key === "call";
 
   const [phase, setPhase] = useState<Phase>("run");
   const [shown, setShown] = useState(0);
@@ -57,7 +60,10 @@ export function Simulation({
 
   // Play the conversation. Timing is deliberately readable rather than fast —
   // the point is that the reply is *good*, which nobody can judge at 200ms.
+  // Skipped entirely for the voice role, where CallStage drives the pacing off
+  // the audio itself.
   useEffect(() => {
+    if (isCall) return;
     setShown(0);
     setTyping(false);
     setPhase("run");
@@ -174,8 +180,24 @@ export function Simulation({
         </p>
       </motion.div>
 
-      {/* The conversation */}
-      <div className="relative mt-5">
+      {/* A voice worker is demonstrated by LETTING THE VISITOR HEAR IT. A
+          transcript proves nothing about a product whose whole job is talking. */}
+      {isCall ? (
+        <div className="mt-5">
+          <CallStage
+            dialogue={dialogue}
+            role={role}
+            industry={industry}
+            lang={lang}
+            onFinished={(secs) => {
+              setElapsed(secs);
+              setPhase("recap");
+            }}
+          />
+        </div>
+      ) : (
+        /* The conversation, for chat-channel workers */
+        <div className="relative mt-5">
         <div className="mb-2 flex flex-wrap items-center justify-between gap-2 text-xs">
           <span className="flex items-center gap-1.5 font-semibold text-muted">
             <ChannelIcon size={14} className="text-brand-luq" />
@@ -206,8 +228,9 @@ export function Simulation({
               </span>
             </li>
           )}
-        </ol>
-      </div>
+          </ol>
+        </div>
+      )}
     </div>
   );
 }

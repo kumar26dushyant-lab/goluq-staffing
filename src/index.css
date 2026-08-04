@@ -420,3 +420,9 @@
   /* Freeze the holo-core rings/orbit in a pleasant static pose */
   .holo-stage { transform: rotateX(16deg); }
 }
+
+/* Waveform bars for the mock call — only animate while a side is speaking. */
+@keyframes wave {
+  0%, 100% { height: 6px; }
+  50% { height: 20px; }
+}

@@ -1199,5 +1199,18 @@
     "subtitle": "Message us on WhatsApp — a real person replies",
     "aria": "Message GoLuQ on WhatsApp",
     "prefill": "Hi GoLuQ — I saw your site and wanted to ask about"
+  },
+  "call": {
+    "listen": "Listen to the call",
+    "replay": "Play again",
+    "ringing": "Ringing…",
+    "connected": "Connected",
+    "ended": "Call ended",
+    "tapToPlay": "Tap play to hear the call",
+    "hangUp": "End call",
+    "skip": "Skip ahead",
+    "transcript": "Read transcript",
+    "soundOn": "Turn your sound on",
+    "intro": "A real customer calls after hours. Hear how your Digital Employee answers."
   }
 }
