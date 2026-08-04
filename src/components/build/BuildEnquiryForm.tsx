@@ -18,6 +18,11 @@ export function BuildEnquiryForm({ region, ns }: { region: Region; ns: string })
   const { t } = useTranslation();
   const intl = region === "global";
 
+  // Which catalogue tier the visitor clicked "Get a quote" on, if any. Carried
+  // through so the enquiry says what they actually want rather than arriving blank.
+  const service = new URLSearchParams(window.location.search).get("service") || "";
+  const serviceName = service ? t(`catalogue.items.${service}.name`, { defaultValue: "" }) : "";
+
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -45,11 +50,12 @@ export function BuildEnquiryForm({ region, ns }: { region: Region; ns: string })
     setErr(null);
     setStatus("sending");
     try {
+      const tag = serviceName ? `${region.toUpperCase()} · ${serviceName}` : region.toUpperCase();
       await submitLead({
         name: name.trim(),
         phone: phoneClean,
         email: email.trim() || undefined,
-        message: `[CUSTOM BUILD ENQUIRY · ${region.toUpperCase()}] ${message.trim()}`,
+        message: `[CUSTOM BUILD ENQUIRY · ${tag}] ${message.trim()}`,
         crossSell: ["custom-build"],
         wantsTraining: false,
         intl,
@@ -80,6 +86,14 @@ export function BuildEnquiryForm({ region, ns }: { region: Region; ns: string })
 
   return (
     <form onSubmit={onSubmit} className="glass rounded-2xl p-6 sm:p-7" noValidate>
+      {/* Confirms the visitor landed on the right thing after clicking a card. */}
+      {serviceName && (
+        <p className="mb-5 flex flex-wrap items-center gap-2 rounded-xl border border-teal-glow/30 bg-teal-glow/[0.07] px-4 py-3 text-sm">
+          <span className="text-muted">{t("catalogue.quoteFor")}</span>
+          <span className="font-display font-bold text-fg">{serviceName}</span>
+        </p>
+      )}
+
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label={t("booking.name")} id="b-name">
           <input

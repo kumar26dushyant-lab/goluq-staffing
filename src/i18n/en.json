@@ -161,7 +161,7 @@
     "navTitle": "About us",
     "name": "Dushyant Sharma",
     "role": "Founder · GoLuQ",
-    "bioShort": "GoLuQ isn't built by a lab — it's built by someone who spent 20+ years inside the world's most demanding businesses, watching where they break and building what actually fixes them.",
+    "bioShort": "GoLuQ is built by an engineer who spent 20+ years inside the world's most demanding businesses — seeing precisely where they break, and building what actually fixes them.",
     "readMore": "Read the full story",
     "linkedin": "Connect on LinkedIn",
     "email": "Email me",
@@ -178,7 +178,7 @@
       "Countless Problems Solved"
     ],
     "founderTitle": "The person behind GoLuQ",
-    "founder1": "Dushyant Sharma did not come from a technology lab. He came from the business floor.",
+    "founder1": "Dushyant Sharma is an engineer who learned the business first. He builds the systems — and he knows exactly what to build, because he has run the operations that depend on them.",
     "founder2": "He has sat inside the operations of some of the world's most demanding organisations — watching where processes break, where revenue leaks, and where good ideas die because the right technology was never built. That is what changed everything.",
     "founder3": "After 20+ years moving through leadership roles at Genpact, DXC Technology, Hexaware Technologies, Cornerstone OnDemand (EdCast), Definitive Healthcare, and HighLevel — across India, Dubai, and globally distributed teams spanning APAC, EMEA, and North America — he came to one conclusion:",
     "founderPunch": "Most businesses do not need more software. They need someone who understands their business well enough to build the right software. GoLuQ is that someone.",
@@ -491,7 +491,10 @@
     },
     "disclaimerShort": "Starting price for a standard build on initial requirements. Heavy customisation can change scope, timeline and cost — always agreed in writing first.",
     "disclaimerTitle": "How our pricing works",
-    "disclaimerBody": "Every price shown is the starting point for a standard, industry-proven version built from your initial requirements — the version most businesses actually need. If you later want deeper customisation, extra integrations or unusual workflows, scope and timeline grow, and we quote that separately before building anything. You will never get a surprise invoice, and you will always know the number before we start."
+    "disclaimerBody": "Every price shown is the starting point for a standard, industry-proven version built from your initial requirements — the version most businesses actually need. If you later want deeper customisation, extra integrations or unusual workflows, scope and timeline grow, and we quote that separately before building anything. You will never get a surprise invoice, and you will always know the number before we start.",
+    "ctaQuote": "Get a quote",
+    "ctaDemoSecondary": "Or watch a demonstration first",
+    "quoteFor": "Quote request for"
   },
   "caseNidaan": {
     "kicker": "Flagship build · live in production",

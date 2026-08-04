@@ -50,6 +50,27 @@ export function BuildPractice({ region }: { region: Region }) {
   const navigate = useNavigate();
   const reduced = useReducedMotion();
 
+  /**
+   * React Router does not scroll to `#hash` on navigation, and this page is
+   * lazy-loaded, so the target does not exist on the first frame. Without this,
+   * every "Get a quote" link silently dropped the visitor at the top of the
+   * page instead of at the form.
+   */
+  useEffect(() => {
+    const id = window.location.hash.slice(1);
+    if (!id) return;
+    let tries = 0;
+    const find = () => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+        return;
+      }
+      if (tries++ < 20) window.setTimeout(find, 50); // wait for the chunk to mount
+    };
+    find();
+  }, []);
+
   // The global page is written for an English-reading audience; the India page
   // keeps the site-wide EN/HI toggle.
   useEffect(() => {

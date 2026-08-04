@@ -182,25 +182,24 @@ export function CapabilityTabs({
                 {t("catalogue.leadTimeLabel")} {offering.leadTime}
               </p>
 
-              <div className="mt-5">
-                {CTA_BY_ID[offering.id] === "demo" && (
-                  <Button size="md" full onClick={onPickDemo}>
-                    {t("catalogue.ctaDemo")} <ArrowRight size={16} />
+              {/* EVERY tier goes straight to the enquiry form, carrying which
+                  service was clicked. Previously four of seven landed on the top
+                  of /build with no form in sight — the strongest lead moment on
+                  the page was being thrown away. */}
+              <div className="mt-5 space-y-2">
+                <Link to={`/build?service=${offering.id}#enquiry`} className="block">
+                  <Button size="md" full>
+                    {t("catalogue.ctaQuote")} <ArrowRight size={16} />
                   </Button>
-                )}
-                {CTA_BY_ID[offering.id] === "build" && (
-                  <Link to="/build" className="block">
-                    <Button size="md" full>
-                      {t("catalogue.ctaBuild")} <ArrowRight size={16} />
-                    </Button>
-                  </Link>
-                )}
-                {CTA_BY_ID[offering.id] === "enquiry" && (
-                  <Link to="/build#enquiry" className="block">
-                    <Button size="md" full>
-                      {t("catalogue.ctaEnquiry")} <ArrowRight size={16} />
-                    </Button>
-                  </Link>
+                </Link>
+                {CTA_BY_ID[offering.id] === "demo" && onPickDemo && (
+                  <button
+                    type="button"
+                    onClick={onPickDemo}
+                    className="block w-full rounded-full px-4 py-2 text-sm font-semibold text-brand-luq hover:underline"
+                  >
+                    {t("catalogue.ctaDemoSecondary")}
+                  </button>
                 )}
               </div>
 
