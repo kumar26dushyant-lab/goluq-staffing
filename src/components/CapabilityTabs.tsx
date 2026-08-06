@@ -203,6 +203,14 @@ export function CapabilityTabs({
                 )}
               </div>
 
+              {/* Voice is a different cost base from chat — a visitor must not
+                  read ₹799 and assume it buys live phone calling. */}
+              {active === "digitalEmployee" && (
+                <p className="mt-3 rounded-xl border border-warn/25 bg-warn/[0.07] p-3 text-xs leading-relaxed text-muted">
+                  {t("catalogue.items.digitalEmployee.voiceNote")}
+                </p>
+              )}
+
               {/* Scope disclaimer sits WITH the price, not buried in a footer —
                   the point is that nobody can say they didn't see it. */}
               <p className="mt-3 text-xs leading-relaxed text-faint">
