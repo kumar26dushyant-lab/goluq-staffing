@@ -108,7 +108,14 @@ async function synth(text, who, attempt = 0) {
 
   const json = await res.json();
   const inline = json?.candidates?.[0]?.content?.parts?.[0]?.inlineData;
-  if (!inline?.data) throw new Error(`no audio returned: ${JSON.stringify(json).slice(0, 300)}`);
+  if (!inline?.data) {
+    // Short utterances sometimes come back empty with finishReason OTHER.
+    if (attempt < 3) {
+      await sleep(1500);
+      return synth(text, who, attempt + 1);
+    }
+    throw new Error(`no audio after retries (finishReason: ${json?.candidates?.[0]?.finishReason})`);
+  }
   return Buffer.from(inline.data, "base64");
 }
 
@@ -132,6 +139,7 @@ function pcmToMp3(pcm, outFile) {
 
 const [argRole, argIndustry] = process.argv.slice(2);
 let made = 0, skipped = 0, bytes = 0;
+const failed = [];
 
 for (const role of ROLES) {
   if (argRole && role !== argRole) continue;
@@ -173,5 +181,11 @@ for (const role of ROLES) {
 console.log(
   `\nDone. ${made} clip(s) written (${(bytes / 1024 / 1024).toFixed(1)} MB), ${skipped} skipped.`
 );
+if (failed.length) {
+  console.log(`
+${failed.length} clip(s) could not be generated and will use the device
+voice instead: ${failed.join(", ")}`);
+  console.log("Re-run to retry just those.");
+}
 console.log("Commit public/audio/ and deploy — the call upgrades automatically.");
 esbuild.stop?.();
