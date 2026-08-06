@@ -166,11 +166,10 @@ for (const role of ROLES) {
           made++;
           process.stdout.write(`  ${lang}/${role}-${industry}/${i}.mp3\n`);
         } catch (err) {
-          console.error(`\nFailed on ${lang}/${role}-${industry}/${i}.mp3`);
-          console.error(String(err.message || err));
-          console.error("\nNothing was lost — re-run and it resumes where it stopped.");
-          esbuild.stop?.();
-          process.exit(1);
+          // One stubborn clip must not block the other eighty — anything
+          // missing simply falls back to the device voice at play time.
+          failed.push(`${lang}/${role}-${industry}/${i}`);
+          process.stdout.write(`  SKIP ${lang}/${role}-${industry}/${i}.mp3 — ${err.message}\n`);
         }
         await sleep(1100); // stay inside the per-minute quota
       }
