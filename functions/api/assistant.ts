@@ -136,7 +136,10 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
       lang === "hi" ? "Hindi" : "English"
     }.\n\n${convo}\nGuide:`;
 
-    const reply = await geminiText(env, prompt, 500);
+    const raw = await geminiText(env, prompt, 500);
+    // The prompt ends with "Guide:" so the model continues in character, but it
+    // sometimes echoes that label back. Strip it rather than show it to a visitor.
+    const reply = (raw || "").replace(/^\s*(guide|assistant)\s*:\s*/i, "").trim();
     return Response.json({ ok: true, reply: reply || fallback(lang) });
   } catch {
     return Response.json({ ok: true, reply: fallback("en") });
