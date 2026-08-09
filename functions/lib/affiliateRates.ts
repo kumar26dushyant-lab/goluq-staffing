@@ -26,6 +26,9 @@ export const DEFAULT_RATES: AffiliateRates = {
 };
 
 const num = (v: string | null, fallback: number) => {
+  // Number(null) is 0, which is finite and >= 0 — so an unset setting would
+  // silently become a 0% commission rate. Reject empty explicitly first.
+  if (v === null || v === undefined || v === "") return fallback;
   const n = Number(v);
   return Number.isFinite(n) && n >= 0 ? n : fallback;
 };
