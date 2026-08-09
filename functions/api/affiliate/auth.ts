@@ -1,6 +1,6 @@
 /// <reference types="@cloudflare/workers-types" />
 
-import { createSession, hashPassword, randomToken, verifyPassword } from "../../lib/auth";
+import { hashPassword, randomToken, verifyPassword } from "../../lib/auth";
 import { mailEnabled, sendMail, type MailEnv } from "../../lib/mailer";
 
 interface Env extends MailEnv {
@@ -113,21 +113,10 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
 
     // ── Forgot password → emailed reset link ───────────────────────────
     if (action === "forgot") {
-      const phone = digits(b.phone);
-      const aff = await env.DB.prepare(
-        `SELECT id, email, name FROM affiliates WHERE phone = ? AND status = 'active' LIMIT 1`
-      )
-        .bind(phone)
-        .first<{ id: number; email: string | null; name: string }>();
-
-      // Always answer the same way, so this can't be used to discover who is
-      // registered. The only exception is a genuine configuration problem.
-      const generic = {
-        ok: true,
-        message: "If that number is registered, a reset link has been sent to the email on file.",
-      };
-      if (!aff?.email) return Response.json(generic);
-
+      // The "email isn't configured" answer is checked BEFORE any lookup, so it
+      // is identical for every number. Checking it after would turn this into an
+      // oracle: a registered number would get one message and an unknown number
+      // another, revealing who has an account.
       if (!mailEnabled(env)) {
         return Response.json(
           {
@@ -138,6 +127,20 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
           { status: 503 }
         );
       }
+
+      const phone = digits(b.phone);
+      const aff = await env.DB.prepare(
+        `SELECT id, email, name FROM affiliates WHERE phone = ? AND status = 'active' LIMIT 1`
+      )
+        .bind(phone)
+        .first<{ id: number; email: string | null; name: string }>();
+
+      // From here on the answer is identical whether or not the number exists.
+      const generic = {
+        ok: true,
+        message: "If that number is registered, a reset link has been sent to the email on file.",
+      };
+      if (!aff?.email) return Response.json(generic);
 
       const token = randomToken(24);
       await env.DB.prepare(
