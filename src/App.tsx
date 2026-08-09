@@ -6,6 +6,7 @@ import { fetchSiteConfig } from "./lib/siteConfig";
 import { StaffingApp } from "./pages/StaffingApp";
 import { PartnerLanding } from "./pages/PartnerLanding";
 import { PartnerDashboard } from "./pages/PartnerDashboard";
+import { PartnerReset } from "./pages/PartnerReset";
 import { About } from "./pages/About";
 import { Admin, AdminSetup } from "./pages/Admin";
 import { AssistantChat } from "./components/AssistantChat";
@@ -70,6 +71,7 @@ export default function App() {
         <Route path="/about" element={<About />} />
         <Route path="/partner" element={<PartnerLanding />} />
         <Route path="/partner/dashboard" element={<PartnerDashboard />} />
+        <Route path="/partner/reset" element={<PartnerReset />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/admin/setup" element={<AdminSetup />} />
         <Route path="*" element={<StaffingApp />} />

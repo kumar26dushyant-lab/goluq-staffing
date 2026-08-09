@@ -4,6 +4,7 @@ interface Env {
   DB: D1Database;
 }
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PAN_RE = /^[A-Z]{5}[0-9]{4}[A-Z]$/;
 const UPI_RE = /^[\w.\-]{2,256}@[a-zA-Z]{2,64}$/;
 const PHONE_RE = /^[6-9]\d{9}$/;
@@ -33,12 +34,17 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
     const phone = String(b.phone ?? "").trim();
     const pan = String(b.pan ?? "").trim().toUpperCase();
     const upiId = String(b.upiId ?? "").trim();
-    const email = b.email ? String(b.email).trim() : null;
+    // Email is MANDATORY now: it is the only channel for a password reset, so
+    // registering without one would create an account that can never be recovered.
+    const email = String(b.email ?? "").trim().toLowerCase();
     const city = b.city ? String(b.city).trim() : null;
     const youtube = b.youtubeUrl ? String(b.youtubeUrl).trim() : null;
 
     if (name.length < 2 || !PHONE_RE.test(phone) || !PAN_RE.test(pan) || !UPI_RE.test(upiId)) {
       return Response.json({ ok: false, error: "invalid input" }, { status: 400 });
+    }
+    if (!EMAIL_RE.test(email)) {
+      return Response.json({ ok: false, error: "invalid email" }, { status: 400 });
     }
 
     const origin = new URL(request.url).origin;
@@ -68,14 +74,23 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
     if (!code) return Response.json({ ok: false, error: "code collision" }, { status: 500 });
 
     const token = makeToken();
+    // One-time token so the partner can choose a password straight after signing
+    // up — the account is unusable until they do.
+    const setup = makeToken();
     await env.DB.prepare(
-      `INSERT INTO affiliates (code, token, name, phone, email, city, pan, upi_id, youtube_url, status, created_at)
-       VALUES (?,?,?,?,?,?,?,?,?, 'active', datetime('now'))`
+      `INSERT INTO affiliates (code, token, name, phone, email, city, pan, upi_id, youtube_url, status, created_at, reset_token, reset_expires)
+       VALUES (?,?,?,?,?,?,?,?,?, 'active', datetime('now'), ?, datetime('now','+7 days'))`
     )
-      .bind(code, token, name, phone, email, city, pan, upiId, youtube)
+      .bind(code, token, name, phone, email, city, pan, upiId, youtube, setup)
       .run();
 
-    return Response.json({ ok: true, code, token, ...links(code, token) });
+    return Response.json({
+      ok: true,
+      code,
+      token,
+      setupUrl: `${origin}/partner/reset?token=${setup}`,
+      ...links(code, token),
+    });
   } catch {
     return Response.json({ ok: false, error: "server" }, { status: 500 });
   }

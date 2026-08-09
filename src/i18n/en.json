@@ -1,6 +1,6 @@
 {
   "common": {
-    "partner": "Become a Partner · Earn 35%",
+    "partner": "Become a Partner · Earn {{rate}}%",
     "back": "Back",
     "english": "English",
     "hindi": "हिन्दी",
@@ -365,7 +365,7 @@
       "title": "Register as a Partner",
       "name": "Full name",
       "phone": "Phone (+91)",
-      "email": "Email (optional)",
+      "email": "Email (for password reset)",
       "pan": "PAN (for payouts)",
       "upi": "UPI ID",
       "youtube": "YouTube / Social URL (optional)",
@@ -376,7 +376,8 @@
       "errPhone": "Enter a valid 10-digit mobile number.",
       "errPan": "Enter a valid PAN (e.g. ABCDE1234F).",
       "errUpi": "Enter a valid UPI ID (e.g. name@bank).",
-      "error": "Something went wrong. Please try again."
+      "error": "Something went wrong. Please try again.",
+      "errEmail": "Enter a valid email — your password reset goes there."
     },
     "done": {
       "title": "You're a GoLuQ Partner! 🎉",
@@ -405,7 +406,43 @@
       "payoutTitle": "How payouts work",
       "payoutBody": "We disburse via UPI once your approved balance reaches ₹500. Commission payouts may be subject to TDS under Indian tax law; PAN is required.",
       "invalid": "Link not recognised — please re-check your private dashboard link.",
-      "loading": "Loading your dashboard…"
+      "loading": "Loading your dashboard…",
+      "signOut": "Sign out",
+      "referrals": "Businesses you referred",
+      "ledger": "Commission history",
+      "ledgerNone": "Nothing yet. Commission appears here each month a business you referred pays.",
+      "month": "Month",
+      "customer": "Business",
+      "rate": "Rate",
+      "amount": "Amount",
+      "stConverted": "Paying customer",
+      "st_new": "New lead",
+      "st_engaged": "In conversation",
+      "st_converted": "Paying customer",
+      "st_done": "Closed",
+      "st_opted_out": "Opted out",
+      "rateNote": "You earn {{y1}}% of the plan price every month for the first year, then {{lt}}% for as long as they stay. Payouts start once your approved balance reaches {{min}}."
+    },
+    "login": {
+      "title": "Partner sign in",
+      "sub": "Your referrals, your earnings.",
+      "password": "Password",
+      "signIn": "Sign in",
+      "forgot": "Forgot password?",
+      "register": "Not a partner yet? Register",
+      "failed": "Incorrect mobile number or password.",
+      "sent": "If that number is registered, a reset link has been sent to the email on file.",
+      "legacy": "Your old dashboard link still works, but partner accounts now use a password. Tap “Forgot password?” to set one.",
+      "choosePassword": "Choose your password",
+      "chooseSub": "You will sign in with your mobile number and this password.",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm password",
+      "setPassword": "Set password & sign in",
+      "passwordSet": "Password set",
+      "signingIn": "Signing you in…",
+      "onceOnly": "This link works once and signs out any other device.",
+      "tooShort": "Please use at least 8 characters.",
+      "mismatch": "The two passwords do not match."
     }
   },
   "catalogue": {

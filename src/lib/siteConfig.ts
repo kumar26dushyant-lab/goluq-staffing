@@ -11,11 +11,19 @@ export interface LivePrice {
   offerInr: number | null;
 }
 
+export interface AffiliateRates {
+  year1: number;
+  lifetime: number;
+  minPayoutInr: number;
+  attributionDays: number;
+}
+
 export interface SiteConfig {
   whatsapp: string;
   chatEnabled: boolean;
   announcement: string;
   pricing: LivePrice[];
+  affiliate?: AffiliateRates;
 }
 
 /** Local catalogue as a LivePrice list — the fallback if /api/config fails. */
@@ -59,6 +67,7 @@ export async function fetchSiteConfig(): Promise<SiteConfig> {
         chatEnabled: d?.chatEnabled !== false,
         announcement: String(d?.announcement || ""),
         pricing,
+        affiliate: d?.affiliate,
       };
     } catch {
       cache = { whatsapp: "", chatEnabled: true, announcement: "", pricing: fromLocal() };

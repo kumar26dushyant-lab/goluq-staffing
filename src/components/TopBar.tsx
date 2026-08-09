@@ -6,6 +6,7 @@ import { BrandMark } from "./BrandMark";
 import { LanguageToggle } from "./LanguageToggle";
 import { ThemeToggle } from "./ThemeToggle";
 import { useVoice } from "../lib/voice";
+import { useSiteConfig } from "../lib/siteConfig";
 
 function VoiceToggle() {
   const { supported, muted, toggleMute } = useVoice();
@@ -32,6 +33,7 @@ export function TopBar({
   showPartnerCta?: boolean;
 }) {
   const { t } = useTranslation();
+  const cfg = useSiteConfig();
 
   return (
     <header
@@ -81,7 +83,7 @@ export function TopBar({
             className="glass glass-interactive hidden items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-muted hover:text-fg sm:flex"
           >
             <TrendingUp size={15} className="text-brand-luq" />
-            {t("common.partner")}
+            {t("common.partner", { rate: Math.round((cfg?.affiliate?.year1 ?? 0.25) * 100) })}
           </Link>
         )}
         <VoiceToggle />

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion, useSpring, useReducedMotion } from "framer-motion";
 import { useTranslation } from "react-i18next";
+import { useSiteConfig } from "../../lib/siteConfig";
 import {
   PLANS,
   DEFAULT_PLAN_ID,
@@ -34,10 +35,15 @@ export function EarningsCalculator() {
   const [planId, setPlanId] = useState(DEFAULT_PLAN_ID);
   const [n, setN] = useState(10);
 
+  // Live rates so a cockpit change reaches the calculator without a deploy.
+  const cfg = useSiteConfig();
+  const r1 = cfg?.affiliate?.year1 ?? RATE_YEAR1;
+  const rLt = cfg?.affiliate?.lifetime ?? RATE_LIFETIME;
+
   const price = planById(planId).priceInr;
-  const year1Monthly = n * RATE_YEAR1 * price;
+  const year1Monthly = n * r1 * price;
   const year1Total = year1Monthly * 12;
-  const ongoingMonthly = n * RATE_LIFETIME * price;
+  const ongoingMonthly = n * rLt * price;
   const cumulative24m = year1Total + ongoingMonthly * 12;
 
   const cards = [

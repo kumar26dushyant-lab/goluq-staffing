@@ -9,6 +9,7 @@ import { BrandMark } from "../components/BrandMark";
 import { useTranslation } from "react-i18next";
 import { inputClass } from "../lib/ui";
 import { EDITABLE_COPY, EDITABLE_KEYS } from "../content/editableCopy";
+import { PLANS } from "../content/affiliateConfig";
 import {
   getToken, setToken, clearToken, adminGet, adminPost, leadsCsvUrl,
   login, logout, setPasswordWithToken, checkSetupToken,
@@ -473,6 +474,8 @@ function Leads() {
                       {/* Chat transcripts and build enquiries land here — this is
                           the most useful field on the record and it was previously
                           not shown anywhere in the admin at all. */}
+                      <LeadCommission lead={l} onDone={load} />
+
                       {l.message && (
                         <div className="mt-3">
                           <p className="mb-1 font-mono text-xs uppercase tracking-wider text-faint">Message / conversation</p>
@@ -1027,6 +1030,77 @@ function Content() {
   );
 }
 
+/**
+ * Turns a lead into a paying customer and records each month's payment.
+ *
+ * This is the step that was missing entirely: `commissions` had no writer, so
+ * every partner dashboard showed ₹0 forever no matter how many businesses they
+ * brought in. Accrual is one month per recorded payment — never forward-booked,
+ * because money that hasn't been collected isn't owed to anyone.
+ */
+function LeadCommission({ lead, onDone }: { lead: any; onDone: () => void }) {
+  const [price, setPrice] = useState(String(lead.plan_price_inr || ""));
+  const [planId, setPlanId] = useState(lead.plan_id || "");
+  const [period, setPeriod] = useState(new Date().toISOString().slice(0, 7));
+  const [msg, setMsg] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const call = async (body: any) => {
+    setBusy(true); setMsg("");
+    const d = await adminPost("/api/admin/commission", body);
+    setBusy(false);
+    setMsg(d.ok ? (d.amount !== undefined ? `Recorded ₹${d.amount} at ${Math.round(d.rate * 100)}%` : "Saved ✅") : d.error || "Failed");
+    if (d.ok) onDone();
+  };
+
+  if (!lead.ref_code) {
+    return <p className="text-xs text-faint">Not referred by a partner — no commission applies.</p>;
+  }
+
+  return (
+    <div className="mt-3 rounded-xl border border-teal-glow/25 bg-teal-glow/[0.05] p-3">
+      <p className="text-xs font-semibold uppercase tracking-wider text-brand-luq">
+        Partner {lead.ref_code}
+        {lead.converted_at ? ` · customer since ${String(lead.converted_at).slice(0, 10)}` : ""}
+      </p>
+
+      {!lead.converted_at ? (
+        <div className="mt-2 flex flex-wrap items-end gap-2">
+          <label className="block">
+            <span className="mb-1 block text-[11px] text-faint">Plan</span>
+            <select className={`${inputClass} w-auto`} value={planId} onChange={(e) => setPlanId(e.target.value)}>
+              <option value="">—</option>
+              {PLANS.map((p) => <option key={p.id} value={p.id}>{p.id} · ₹{p.priceInr}</option>)}
+            </select>
+          </label>
+          <label className="block">
+            <span className="mb-1 block text-[11px] text-faint">Monthly ₹</span>
+            <input className={`${inputClass} w-28`} type="number" value={price}
+              onChange={(e) => setPrice(e.target.value)} />
+          </label>
+          <Button size="md" disabled={busy || !price}
+            onClick={() => call({ action: "convert", leadId: lead.id, planId, planPriceInr: Number(price) })}>
+            Mark as customer
+          </Button>
+        </div>
+      ) : (
+        <div className="mt-2 flex flex-wrap items-end gap-2">
+          <label className="block">
+            <span className="mb-1 block text-[11px] text-faint">Payment received for</span>
+            <input className={`${inputClass} w-36`} type="month" value={period}
+              onChange={(e) => setPeriod(e.target.value)} />
+          </label>
+          <Button size="md" disabled={busy}
+            onClick={() => call({ action: "accrue", leadId: lead.id, period })}>
+            Record payment
+          </Button>
+        </div>
+      )}
+      {msg && <p className="mt-2 text-xs text-muted">{msg}</p>}
+    </div>
+  );
+}
+
 function Affiliates() {
   const [rows, setRows] = useState<any[]>([]);
   useEffect(() => { adminGet("/api/admin/affiliates").then((d) => setRows(d.affiliates || [])); }, []);
@@ -1147,6 +1221,75 @@ function SettingsPanel() {
         </label>
         <div><Button onClick={save}><ShieldCheck size={16} /> Save settings</Button>
         {saved && <span className="ml-3 text-sm text-muted">{saved}</span>}</div>
+      </div>
+
+      <AffiliateRates />
+    </div>
+  );
+}
+
+/**
+ * Partner commission terms. Changing a rate never rewrites history — every
+ * commission row snapshots the rate it was accrued at — so this only affects
+ * money earned from here on.
+ */
+function AffiliateRates() {
+  const [r, setR] = useState({ year1: 25, lifetime: 12, minPayoutInr: 500, attributionDays: 90 });
+  const [saved, setSaved] = useState("");
+
+  useEffect(() => {
+    fetch("/api/config").then((x) => x.json()).then((d) => {
+      if (d?.affiliate) {
+        setR({
+          year1: Math.round(d.affiliate.year1 * 100),
+          lifetime: Math.round(d.affiliate.lifetime * 100),
+          minPayoutInr: d.affiliate.minPayoutInr,
+          attributionDays: d.affiliate.attributionDays,
+        });
+      }
+    }).catch(() => {});
+  }, []);
+
+  const save = async () => {
+    setSaved("");
+    const d = await adminPost("/api/admin/settings", {
+      aff_rate_year1: r.year1 / 100,
+      aff_rate_lifetime: r.lifetime / 100,
+      aff_min_payout: r.minPayoutInr,
+      aff_attribution_days: r.attributionDays,
+    });
+    setSaved(d.ok ? "Saved ✅ — live on the site and the earnings calculator" : "Failed");
+  };
+
+  const F = (label: string, key: keyof typeof r, suffix: string) => (
+    <label className="block">
+      <span className="mb-1 block text-sm font-semibold text-fg">{label}</span>
+      <div className="flex items-center gap-2">
+        <input className={`${inputClass} w-28`} type="number" value={r[key]}
+          onChange={(e) => setR({ ...r, [key]: Number(e.target.value) })} />
+        <span className="text-sm text-muted">{suffix}</span>
+      </div>
+    </label>
+  );
+
+  return (
+    <div className="glass space-y-5 rounded-2xl p-6">
+      <div>
+        <h2 className="font-display text-lg font-bold text-fg">Partner commission</h2>
+        <p className="mt-1 text-sm text-muted">
+          Drives the partner page, the earnings calculator and every future accrual.
+          Existing commission rows keep the rate they were created at.
+        </p>
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        {F("First year", "year1", "% per month")}
+        {F("After year one", "lifetime", "% per month")}
+        {F("Minimum payout", "minPayoutInr", "₹")}
+        {F("Attribution window", "attributionDays", "days")}
+      </div>
+      <div>
+        <Button onClick={save}><ShieldCheck size={16} /> Save commission terms</Button>
+        {saved && <span className="ml-3 text-sm text-muted">{saved}</span>}
       </div>
     </div>
   );

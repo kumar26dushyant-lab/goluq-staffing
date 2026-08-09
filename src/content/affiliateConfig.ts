@@ -4,8 +4,8 @@
  * Keep this ↔ the spec §16 table ↔ the workbook in sync.
  */
 
-export const RATE_YEAR1 = 0.35; // affiliate share, months 1–12
-export const RATE_LIFETIME = 0.12; // affiliate share, month 13+
+export const RATE_YEAR1 = 0.25; // affiliate share, months 1–12 (fallback; live value comes from /api/config)
+export const RATE_LIFETIME = 0.12; // affiliate share, month 13+ (fallback; live value comes from /api/config)
 export const ATTRIBUTION_DAYS = 90; // last-click window
 export const MIN_PAYOUT_INR = 500;
 

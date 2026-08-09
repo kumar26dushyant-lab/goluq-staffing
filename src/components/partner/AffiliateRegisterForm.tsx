@@ -41,7 +41,7 @@ export function AffiliateRegisterForm({
       const r = await registerAffiliate({
         name: f.name.trim(),
         phone: f.phone,
-        email: f.email.trim() || undefined,
+        email: f.email.trim(),
         pan: f.pan,
         upiId: f.upiId,
         youtubeUrl: f.youtubeUrl.trim() || undefined,

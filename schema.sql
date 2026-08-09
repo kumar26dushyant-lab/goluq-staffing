@@ -176,6 +176,17 @@ CREATE TABLE IF NOT EXISTS affiliates (
   created_at TEXT NOT NULL
 );
 
+-- Affiliate login sessions. Affiliates get a real account (phone + password)
+-- instead of the old secret-URL dashboard link, which was unrecoverable if the
+-- WhatsApp message was lost. Same opaque-token model as the admin sessions.
+CREATE TABLE IF NOT EXISTS affiliate_sessions (
+  token TEXT PRIMARY KEY,
+  affiliate_id INTEGER NOT NULL,
+  created_at TEXT NOT NULL,
+  expires_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_affsess_exp ON affiliate_sessions(expires_at);
+
 CREATE TABLE IF NOT EXISTS ref_hits (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   code TEXT NOT NULL,                  -- no PII stored: code + time only

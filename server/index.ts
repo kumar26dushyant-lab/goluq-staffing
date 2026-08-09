@@ -14,6 +14,8 @@ import { onRequestPost as lead } from "../functions/api/lead";
 import { onRequestPost as affRegister } from "../functions/api/affiliate/register";
 import { onRequestPost as affTrack } from "../functions/api/affiliate/track";
 import { onRequestGet as affStats } from "../functions/api/affiliate/stats";
+import { onRequestPost as affAuth } from "../functions/api/affiliate/auth";
+import { onRequestGet as adminCommissionGet, onRequestPost as adminCommissionPost } from "../functions/api/admin/commission";
 import { onRequestPost as affConvert } from "../functions/api/affiliate/convert";
 import { onRequestPost as waConnect } from "../functions/api/admin/wa-connect";
 import { onRequestGet as waStatus } from "../functions/api/admin/wa-status";
@@ -52,6 +54,14 @@ for (const sql of [
   `ALTER TABLE leads ADD COLUMN session_id TEXT`,
   `ALTER TABLE leads ADD COLUMN source TEXT`,
   `ALTER TABLE leads ADD COLUMN landing TEXT`,
+  // Conversion tracking — what turns a lead into recurring affiliate commission.
+  `ALTER TABLE leads ADD COLUMN converted_at TEXT`,
+  `ALTER TABLE leads ADD COLUMN plan_id TEXT`,
+  `ALTER TABLE leads ADD COLUMN plan_price_inr REAL`,
+  // Affiliates get a real login instead of a secret URL.
+  `ALTER TABLE affiliates ADD COLUMN pass_hash TEXT`,
+  `ALTER TABLE affiliates ADD COLUMN reset_token TEXT`,
+  `ALTER TABLE affiliates ADD COLUMN reset_expires TEXT`,
 ]) {
   try {
     sqlite.exec(sql);
@@ -172,7 +182,7 @@ app.use("/api/*", async (c, next) => {
   // Tighter caps on the write/abuse-prone endpoints; generous otherwise.
   let max = 120;
   const write = c.req.method === "POST";
-  if (write && (path === "/api/lead" || path === "/api/assistant" || path === "/api/affiliate/register")) max = 15;
+  if (write && (path === "/api/lead" || path === "/api/assistant" || path === "/api/affiliate/register" || path === "/api/affiliate/auth")) max = 15;
   else if (path === "/api/chat") max = 240;
   else if (path.startsWith("/api/admin/") || path.startsWith("/api/wa/")) max = 300;
   if (rateLimited(ip, path, max, 60_000)) {
@@ -190,6 +200,9 @@ app.post("/api/chat", (c) => callFn(chat as Handler, c.req.raw));
 app.post("/api/affiliate/register", (c) => callFn(affRegister as Handler, c.req.raw));
 app.post("/api/affiliate/track", (c) => callFn(affTrack as Handler, c.req.raw));
 app.get("/api/affiliate/stats", (c) => callFn(affStats as Handler, c.req.raw));
+app.post("/api/affiliate/auth", (c) => callFn(affAuth as Handler, c.req.raw));
+app.get("/api/admin/commission", (c) => callFn(adminCommissionGet as Handler, c.req.raw));
+app.post("/api/admin/commission", (c) => callFn(adminCommissionPost as Handler, c.req.raw));
 app.post("/api/affiliate/convert", (c) => callFn(affConvert as Handler, c.req.raw));
 app.post("/api/admin/wa-connect", (c) => callFn(waConnect as Handler, c.req.raw));
 app.get("/api/admin/wa-status", (c) => callFn(waStatus as Handler, c.req.raw));

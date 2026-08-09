@@ -2,6 +2,7 @@
 
 import { checkAdmin, unauthorized } from "../../lib/admin";
 import { getSetting, setSetting } from "../../lib/settings";
+import { saveRates } from "../../lib/affiliateRates";
 
 interface Env {
   DB: D1Database;
@@ -25,7 +26,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
 export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   if (!(await checkAdmin(request, env))) return unauthorized();
   try {
-    const b = await request.json<{ owner_whatsapp?: string; public_whatsapp?: string; followups_enabled?: boolean | string; bot_instructions?: string; chat_enabled?: boolean | string; announcement?: string }>();
+    const b = await request.json<{ owner_whatsapp?: string; public_whatsapp?: string; followups_enabled?: boolean | string; bot_instructions?: string; chat_enabled?: boolean | string; announcement?: string; aff_rate_year1?: number; aff_rate_lifetime?: number; aff_min_payout?: number; aff_attribution_days?: number }>();
     if (typeof b.owner_whatsapp === "string") {
       await setSetting(env.DB, "owner_whatsapp", b.owner_whatsapp.replace(/\D/g, ""));
     }
@@ -42,6 +43,13 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
     if (typeof b.announcement === "string") {
       await setSetting(env.DB, "announcement", b.announcement.slice(0, 300));
     }
+    // Partner commission terms live alongside the other runtime settings.
+    await saveRates(env.DB, {
+      year1: b.aff_rate_year1 !== undefined ? Number(b.aff_rate_year1) : undefined,
+      lifetime: b.aff_rate_lifetime !== undefined ? Number(b.aff_rate_lifetime) : undefined,
+      minPayoutInr: b.aff_min_payout !== undefined ? Number(b.aff_min_payout) : undefined,
+      attributionDays: b.aff_attribution_days !== undefined ? Number(b.aff_attribution_days) : undefined,
+    });
     if (b.chat_enabled !== undefined) {
       const on = b.chat_enabled === true || b.chat_enabled === "1";
       await setSetting(env.DB, "chat_enabled", on ? "1" : "0");

@@ -2,6 +2,7 @@
 
 import { getSetting } from "../lib/settings";
 import { getPricing } from "../lib/pricing";
+import { getRates } from "../lib/affiliateRates";
 
 interface Env {
   DB: D1Database;
@@ -49,9 +50,12 @@ export const onRequestGet: PagesFunction<Env> = async ({ env }) => {
     content = {};
   }
 
+  const rates = await getRates(env.DB);
+
   return Response.json({
     ok: true,
     whatsapp: whatsapp || "",
+    affiliate: rates,
     chatEnabled: chatEnabled !== "0",
     announcement: announcement || "",
     pricing,
