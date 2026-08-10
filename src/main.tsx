@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { ThemeProvider } from "./lib/theme";
 import { VoiceProvider } from "./lib/voice";
 import { AuroraBackground } from "./components/AuroraBackground";
+import { WelcomeSplash } from "./components/WelcomeSplash";
 import { HoloBackground } from "./components/holo/HoloBackground";
 import App from "./App";
 import "./i18n";
@@ -24,6 +25,7 @@ createRoot(document.getElementById("root")!).render(
       <AuroraBackground />
       <HoloBackground />
       <VoiceProvider>
+        <WelcomeSplash />
         <App />
       </VoiceProvider>
     </ThemeProvider>
