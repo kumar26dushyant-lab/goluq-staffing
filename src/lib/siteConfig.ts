@@ -24,6 +24,8 @@ export interface SiteConfig {
   announcement: string;
   pricing: LivePrice[];
   affiliate?: AffiliateRates;
+  /** Two-letter country of the visitor, from the edge. "" when unknown. */
+  country: string;
 }
 
 /** Local catalogue as a LivePrice list — the fallback if /api/config fails. */
@@ -68,9 +70,10 @@ export async function fetchSiteConfig(): Promise<SiteConfig> {
         announcement: String(d?.announcement || ""),
         pricing,
         affiliate: d?.affiliate,
+        country: String(d?.country || ""),
       };
     } catch {
-      cache = { whatsapp: "", chatEnabled: true, announcement: "", pricing: fromLocal() };
+      cache = { whatsapp: "", chatEnabled: true, announcement: "", pricing: fromLocal(), country: "" };
     }
     return cache;
   })();

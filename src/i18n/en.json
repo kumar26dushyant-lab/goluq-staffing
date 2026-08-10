@@ -1260,6 +1260,7 @@
     "speaking": "Playing…",
     "skip": "Skip",
     "hint": "Say it “Go Look” — not “golu”.",
-    "spoken": "Welcome to GoLuQ. We build and run the software your business needs."
+    "spoken": "Welcome to GoLuQ. We build and run the software your business needs.",
+    "unmute": "Unmute & listen"
   }
 }

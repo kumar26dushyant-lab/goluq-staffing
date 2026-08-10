@@ -14,7 +14,15 @@ interface Env {
  * Nothing here is hardcoded; the SPA falls back to src/content/catalogue.ts only
  * if this call fails outright.
  */
-export const onRequestGet: PagesFunction<Env> = async ({ env }) => {
+export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
+  // Country drives the default language on a first visit: India gets Hindi,
+  // everywhere else English. Cloudflare sits in front of the origin, so
+  // cf-ipcountry is present in production.
+  const country = (
+    request.headers.get("cf-ipcountry") ||
+    request.headers.get("x-country") ||
+    ""
+  ).toUpperCase().slice(0, 2);
   const [whatsapp, chatEnabled, announcement] = await Promise.all([
     getSetting(env.DB, "public_whatsapp"),
     getSetting(env.DB, "chat_enabled"),
@@ -55,6 +63,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ env }) => {
   return Response.json({
     ok: true,
     whatsapp: whatsapp || "",
+    country,
     affiliate: rates,
     chatEnabled: chatEnabled !== "0",
     announcement: announcement || "",
