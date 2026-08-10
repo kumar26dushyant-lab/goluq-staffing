@@ -68,7 +68,7 @@ export const onRequest: PagesFunction<Env> = async ({ request, env }) => {
     return Response.json({ ok: false, error: "evolution_not_configured" }, { status: 503 });
   }
   if (!(await followupsEnabled(env.DB))) {
-    return Response.json({ ok: true, processed: 0, paused: true });
+    return Response.json({ ok: true, disabled: true, processed: 0, skipped: 0, found: 0 });
   }
   const owner = await getOwnerWhatsapp(env.DB, env);
 
@@ -82,6 +82,7 @@ export const onRequest: PagesFunction<Env> = async ({ request, env }) => {
 
   const rows = due.results ?? [];
   let processed = 0;
+  let skipped = 0;
 
   for (const lead of rows) {
     const stage = lead.followup_stage;
@@ -89,7 +90,16 @@ export const onRequest: PagesFunction<Env> = async ({ request, env }) => {
 
     // 1) soft touch to the lead
     const msg = await leadMessage(env, stage, lead.name, roleLabel, lead.industry ?? "");
-    await sendText(env, lead.phone, msg);
+    const sent = await sendText(env, lead.phone, msg);
+
+    // evoRequest SWALLOWS failures — it returns { error } rather than throwing.
+    // Without this check a disconnected WhatsApp would still advance the stage,
+    // so a lead would burn through all four touches, receive nothing, and end up
+    // marked 'done'. Leave the schedule untouched instead and retry tomorrow.
+    if (sent?.error) {
+      skipped += 1;
+      continue;
+    }
 
     // 2) soft reminder to the owner
     if (owner) {
@@ -117,5 +127,7 @@ export const onRequest: PagesFunction<Env> = async ({ request, env }) => {
     processed += 1;
   }
 
-  return Response.json({ ok: true, processed, found: rows.length });
+  // `skipped` is the number that could not be delivered — those keep their slot
+  // in the sequence and are retried, rather than being silently consumed.
+  return Response.json({ ok: true, processed, skipped, found: rows.length });
 };
