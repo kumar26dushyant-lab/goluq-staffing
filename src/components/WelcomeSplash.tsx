@@ -13,28 +13,27 @@ const MIN_VISIBLE_MS = 5000;
 /** How long to wait for speech to actually begin before offering a tap. */
 const AUTOPLAY_GRACE_MS = 1200;
 /** If speech never starts and nobody taps, leave anyway. */
-const SILENT_HOLD_MS = 7000;
+const SILENT_HOLD_MS = 8000;
 /** Absolute ceiling — nothing may strand a visitor here. */
-const HARD_STOP_MS = 20000;
+const HARD_STOP_MS = 25000;
 
 /**
- * The first few seconds.
+ * The first few seconds: the mark in Latin and Devanagari with the roman
+ * pronunciation, so a visitor learns how to say the name before anything else.
  *
- * Pronunciation is the point: most Indian visitors read "GoLuQ" as "golu", so
- * the mark appears in Latin AND Devanagari with the roman hint. That half is
- * pure visuals and cannot fail.
+ * Language follows the visitor — India gets Hindi (page and voice), everyone
+ * else English — unless they have already chosen a language, which always wins.
  *
- * Language follows the visitor: India gets Hindi (page + voice), everyone else
- * English — unless they have already chosen a language, which always wins.
+ * TIMING MODEL: one deadline (`closeAt`) that may only ever move FORWARD, read
+ * by one ticker. An earlier version scheduled several independent `setTimeout`
+ * closes that raced each other and dismissed the splash after a second or two.
+ * Nothing here can pull the deadline in — only the explicit Skip button leaves
+ * immediately.
  *
- * Two traps this has already fallen into, both fixed here:
- *  1. `say()` calls `onEnd()` SYNCHRONOUSLY when muted or unsupported. Closing
- *     on `onEnd` therefore dismissed the splash in milliseconds with no sound —
- *     the reported "flicker and gone". Only `onStart` proves audio began, so
- *     closing is now gated on `started`.
- *  2. Mobile browsers block speechSynthesis without a gesture (desktop usually
- *     allows it). We attempt playback, then reveal a tap button if nothing
- *     actually started.
+ * AUDIO: `say()` fires `onEnd()` SYNCHRONOUSLY when muted or unsupported, so
+ * `onEnd` proves nothing. Only `onStart` proves audio began. Mobile browsers
+ * block speechSynthesis without a gesture (desktop usually allows it), so we
+ * attempt playback and reveal a tap button only if nothing actually started.
  */
 export function WelcomeSplash() {
   const { t, i18n } = useTranslation();
@@ -45,28 +44,19 @@ export function WelcomeSplash() {
   const [speaking, setSpeaking] = useState(false);
   const [needsTap, setNeedsTap] = useState(false);
   const started = useRef(false);
-  const shownAt = useRef(0);
-  const timers = useRef<number[]>([]);
+  const closeAt = useRef(0);
 
-  const clearTimers = () => {
-    timers.current.forEach((id) => window.clearTimeout(id));
-    timers.current = [];
-  };
-  const later = (fn: () => void, ms: number) => {
-    timers.current.push(window.setTimeout(fn, ms));
-  };
-
-  /** Close, but never before the visitor has had the full brand moment. */
-  const close = () => {
-    const elapsed = Date.now() - shownAt.current;
-    const wait = Math.max(0, MIN_VISIBLE_MS - elapsed);
-    clearTimers();
-    if (wait === 0) setOpen(false);
-    else timers.current.push(window.setTimeout(() => setOpen(false), wait));
+  /** Ask to leave in `ms`. Never brings the deadline forward. */
+  const closeIn = (ms: number) => {
+    const want = Date.now() + ms;
+    if (want > closeAt.current) closeAt.current = want;
   };
 
   const speakNow = () => {
     setNeedsTap(false);
+    // Hold the splash open while a sentence is in flight; the deadline is
+    // pulled back to a short beat as soon as it genuinely ends.
+    closeIn(HARD_STOP_MS);
     say(
       t("welcome.spoken"),
       {
@@ -76,9 +66,12 @@ export function WelcomeSplash() {
         },
         onEnd: () => {
           setSpeaking(false);
-          // Only meaningful if audio genuinely played — otherwise this fires
-          // instantly and would kill the splash before it was read.
-          if (started.current) later(close, 900);
+          if (started.current) {
+            // Speech really played — leave shortly after, but never before the
+            // minimum. Reset then extend so we don't wait out HARD_STOP_MS.
+            closeAt.current = 0;
+            closeIn(900);
+          }
         },
       },
       true
@@ -87,8 +80,7 @@ export function WelcomeSplash() {
 
   const unmuteAndSpeak = () => {
     toggleMute();
-    // Let the provider's state settle before asking it to speak.
-    later(speakNow, 60);
+    window.setTimeout(speakNow, 60); // let the provider's state settle
   };
 
   useEffect(() => {
@@ -98,51 +90,56 @@ export function WelcomeSplash() {
     if (sessionStorage.getItem(SEEN_KEY)) return;
     sessionStorage.setItem(SEEN_KEY, "1");
 
-    shownAt.current = Date.now();
+    closeAt.current = Date.now() + MIN_VISIBLE_MS;
     setOpen(true);
 
     let cancelled = false;
 
+    // The single ticker. Nothing else calls setOpen(false) except Skip.
+    const tick = window.setInterval(() => {
+      if (Date.now() >= closeAt.current) {
+        window.clearInterval(tick);
+        setOpen(false);
+      }
+    }, 150);
+
     (async () => {
-      // Pick the language BEFORE speaking, so an Indian visitor hears Hindi and
-      // everyone else hears English. A stored preference always wins.
+      // Resolve the language BEFORE speaking, so the greeting is never in the
+      // wrong one. A stored preference always wins over geography.
       try {
         const cfg = await fetchSiteConfig();
-        const chosen = localStorage.getItem(LANG_KEY);
-        if (!chosen && cfg.country) {
+        if (!localStorage.getItem(LANG_KEY) && cfg.country) {
           const want = cfg.country === "IN" ? "hi" : "en";
           if (!i18n.language.startsWith(want)) await i18n.changeLanguage(want);
         }
       } catch {
-        /* fall back to whatever the detector already picked */
+        /* keep whatever the detector picked */
       }
       if (cancelled) return;
 
       if (!supported) {
-        later(close, SILENT_HOLD_MS);
+        closeIn(SILENT_HOLD_MS);
         return;
       }
       if (muted) {
-        // Respect the mute, but offer a one-tap way to hear it.
-        setNeedsTap(true);
-        later(close, SILENT_HOLD_MS);
+        setNeedsTap(true); // respect the mute, but offer one tap to hear it
+        closeIn(SILENT_HOLD_MS);
         return;
       }
 
       speakNow();
-      later(() => {
+      window.setTimeout(() => {
+        if (cancelled || started.current) return;
         // Nothing began → the platform refused. Ask for one tap.
-        if (!started.current) {
-          setNeedsTap(true);
-          later(close, SILENT_HOLD_MS);
-        }
+        setNeedsTap(true);
+        closeAt.current = 0;
+        closeIn(SILENT_HOLD_MS);
       }, AUTOPLAY_GRACE_MS);
     })();
 
-    later(close, HARD_STOP_MS);
     return () => {
       cancelled = true;
-      clearTimers();
+      window.clearInterval(tick);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -155,7 +152,7 @@ export function WelcomeSplash() {
           initial={reduced ? { opacity: 1 } : { opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={reduced ? { opacity: 0 } : { opacity: 0, y: "-100%" }}
-          transition={{ duration: reduced ? 0.25 : 0.85, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: reduced ? 0.25 : 0.8, ease: [0.22, 1, 0.36, 1] }}
           className="fixed inset-0 z-[60] flex flex-col items-center justify-center"
           style={{
             background: "rgb(var(--c-base))",
@@ -179,6 +176,8 @@ export function WelcomeSplash() {
               <span className="brand-luq ml-[0.06em]">LuQ</span>
             </motion.p>
 
+            {/* How the name is said — shown, never contrasted with a wrong
+                version, which only plants the wrong one. */}
             <motion.p
               initial={reduced ? false : { opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -202,9 +201,9 @@ export function WelcomeSplash() {
               initial={reduced ? false : { opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.6, duration: 0.5 }}
-              className="mt-4 text-balance text-sm leading-relaxed text-muted sm:text-base"
+              className="mt-5 text-balance text-sm leading-relaxed text-muted sm:text-base"
             >
-              {t("welcome.hint")}
+              {t("welcome.tagline")}
             </motion.p>
 
             {/* Read-along, so the words and the voice arrive together. */}
@@ -256,13 +255,10 @@ export function WelcomeSplash() {
               </span>
             )}
 
+            {/* The only thing allowed to leave immediately. */}
             <button
               type="button"
-              onClick={() => {
-                shownAt.current = 0; // an explicit skip should not be delayed
-                clearTimers();
-                setOpen(false);
-              }}
+              onClick={() => setOpen(false)}
               className="mt-8 min-h-[2.75rem] px-4 text-sm font-semibold text-muted underline-offset-4 hover:text-fg hover:underline"
             >
               {t("welcome.skip")} →
