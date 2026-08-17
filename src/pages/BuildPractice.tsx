@@ -24,6 +24,7 @@ import { CaseStudyNidaan } from "../components/CaseStudyNidaan";
 import { ProductsShowcase } from "../components/ProductsShowcase";
 import { RentVsOwn } from "../components/build/RentVsOwn";
 import { BuildEnquiryForm } from "../components/build/BuildEnquiryForm";
+import { WhatsAppCta } from "../components/WhatsAppCta";
 import { LINKEDIN_URL } from "./About";
 import type { Region } from "../content/buildPricing";
 
@@ -499,6 +500,8 @@ export function BuildPractice({ region }: { region: Region }) {
                 {t(`${ns}.final.trust`)}
               </p>
               <p className="mt-4 text-sm text-faint">{t(`${ns}.final.email`)}</p>
+              {/* Some buyers will never fill a form — give them the direct route. */}
+              <WhatsAppCta variant="bar" context="build" className="mt-4" />
             </div>
             <BuildEnquiryForm region={region} ns={ns} />
           </div>

@@ -10,12 +10,23 @@ import { PartnerReset } from "./pages/PartnerReset";
 import { About } from "./pages/About";
 import { Admin, AdminSetup } from "./pages/Admin";
 import { AssistantChat } from "./components/AssistantChat";
+import { WhatsAppCta } from "./components/WhatsAppCta";
 
 // The custom-build practice is a separate, lower-traffic funnel — keep it out of
 // the initial bundle so "/" stays inside the BUILD_SPEC ~200KB gzip budget.
 const BuildPractice = lazy(() =>
   import("./pages/BuildPractice").then((m) => ({ default: m.BuildPractice }))
 );
+
+/**
+ * One-tap WhatsApp, floating on every visitor-facing page. Hidden on the
+ * cockpit and the partner area — those people already have his number.
+ */
+function VisitorWhatsApp() {
+  const { pathname } = useLocation();
+  if (pathname.startsWith("/admin") || pathname.startsWith("/partner")) return null;
+  return <WhatsAppCta variant="fab" context={pathname.startsWith("/build") ? "build" : "general"} />;
+}
 
 /**
  * Fires one pageview per client-side route change. Lives inside BrowserRouter
@@ -77,6 +88,9 @@ export default function App() {
         <Route path="*" element={<StaffingApp />} />
       </Routes>
       <AssistantChat />
+      {/* Sits above the chat launcher: the bot answers instantly, this reaches
+          a human. Both are useful; they must not overlap. */}
+      <VisitorWhatsApp />
     </BrowserRouter>
   );
 }

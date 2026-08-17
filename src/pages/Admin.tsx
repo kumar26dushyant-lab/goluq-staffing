@@ -1196,8 +1196,22 @@ function SettingsPanel() {
   const [publicWa, setPublicWa] = useState("");
   const [followups, setFollowups] = useState(true);
   const [saved, setSaved] = useState("");
-  useEffect(() => { adminGet("/api/admin/settings").then((d) => { setOwner(d.owner_whatsapp || ""); setPublicWa(d.public_whatsapp || ""); setFollowups(d.followups_enabled !== "0"); }); }, []);
+  // Saving before the current values have loaded would post empty strings and
+  // wipe them — which is exactly how the public WhatsApp number got blanked and
+  // silently disappeared from the site. Save stays disabled until loaded.
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    adminGet("/api/admin/settings").then((d) => {
+      setOwner(d.owner_whatsapp || "");
+      setPublicWa(d.public_whatsapp || "");
+      setFollowups(d.followups_enabled !== "0");
+      setLoaded(true);
+    });
+  }, []);
+
   const save = async () => {
+    if (!loaded) return;
     setSaved("");
     const d = await adminPost("/api/admin/settings", { owner_whatsapp: owner, public_whatsapp: publicWa, followups_enabled: followups });
     setSaved(d.ok ? "Saved ✅" : "Failed");
@@ -1219,7 +1233,8 @@ function SettingsPanel() {
           <input type="checkbox" checked={followups} onChange={(e) => setFollowups(e.target.checked)} className="h-5 w-5" />
           <span className="text-base font-semibold text-fg">Automatic follow-ups (day 3 / 5 / 7 / 12)</span>
         </label>
-        <div><Button onClick={save}><ShieldCheck size={16} /> Save settings</Button>
+        <div><Button onClick={save} disabled={!loaded}><ShieldCheck size={16} /> Save settings</Button>
+        {!loaded && <span className="ml-3 text-sm text-faint">Loading current values…</span>}
         {saved && <span className="ml-3 text-sm text-muted">{saved}</span>}</div>
       </div>
 

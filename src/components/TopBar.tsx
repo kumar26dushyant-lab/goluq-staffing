@@ -7,6 +7,7 @@ import { LanguageToggle } from "./LanguageToggle";
 import { ThemeToggle } from "./ThemeToggle";
 import { useVoice } from "../lib/voice";
 import { useSiteConfig } from "../lib/siteConfig";
+import { WhatsAppCta } from "./WhatsAppCta";
 
 function VoiceToggle() {
   const { supported, muted, toggleMute } = useVoice();
@@ -86,6 +87,9 @@ export function TopBar({
             {t("common.partner", { rate: Math.round((cfg?.affiliate?.year1 ?? 0.25) * 100) })}
           </Link>
         )}
+        {/* Always visible, mobile included — one tap to a real person is the
+            highest-converting route on the site and must never be buried. */}
+        <WhatsAppCta variant="chip" />
         <VoiceToggle />
         <LanguageToggle />
         <ThemeToggle />

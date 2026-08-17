@@ -8,6 +8,7 @@ import { recordTurn, requestHuman, syncChat } from "../lib/liveChat";
 import { submitLead } from "../lib/lead";
 import { useVoice } from "../lib/voice";
 import { WaveformOrb } from "./WaveformOrb";
+import { WhatsAppCta } from "./WhatsAppCta";
 
 /** How long a visitor sits before the guide walks over and says hello. */
 const TEASER_DELAY_MS = 20_000;
@@ -366,8 +367,14 @@ export function AssistantChat() {
               )}
             </div>
 
+            {/* Reaching a human is never more than one tap away, whatever the
+                guide is saying. */}
+            <div className="border-t border-hairline/10 px-3 pt-3">
+              <WhatsAppCta variant="bar" context="chat" />
+            </div>
+
             {/* Input */}
-            <div className="flex items-center gap-2 border-t border-hairline/10 p-3">
+            <div className="flex items-center gap-2 p-3">
               <input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}

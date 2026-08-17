@@ -1236,7 +1236,12 @@
     "title": "Prefer to just talk?",
     "subtitle": "Message us on WhatsApp — a real person replies",
     "aria": "Message GoLuQ on WhatsApp",
-    "prefill": "Hi GoLuQ — I saw your site and wanted to ask about"
+    "prefill": "Hi GoLuQ — I saw your site and wanted to ask about",
+    "talkNow": "Talk to us on WhatsApp",
+    "prefill_general": "Hi GoLuQ — I saw your site and wanted to ask about",
+    "prefill_build": "Hi GoLuQ — I'm looking at getting custom software built. I wanted to ask about",
+    "prefill_chat": "Hi GoLuQ — I was on your site and would rather talk to a person about",
+    "prefill_pricing": "Hi GoLuQ — I had a question about your pricing for"
   },
   "call": {
     "listen": "Listen to the call",
