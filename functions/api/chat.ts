@@ -1,9 +1,10 @@
 /// <reference types="@cloudflare/workers-types" />
 
 import { evoEnabled, sendText, type EvoEnv } from "../lib/evolution";
-import { getOwnerWhatsapp } from "../lib/settings";
+import { getOwnerWhatsapp, getOwnerEmail } from "../lib/settings";
+import { mailEnabled, sendMail, type MailEnv } from "../lib/mailer";
 
-interface Env extends EvoEnv {
+interface Env extends EvoEnv, MailEnv {
   DB: D1Database;
 }
 
@@ -70,20 +71,55 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         .bind(name, phone, sessionId)
         .run();
 
-      // Alert the owner on WhatsApp — the point is they don't have to be
-      // watching the cockpit for a live visitor to reach them.
+      // Recent turns, shared by both alert channels below.
+      const recentRows = await env.DB.prepare(
+        `SELECT role, content FROM chat_messages WHERE session_id = ? ORDER BY id DESC LIMIT 6`
+      )
+        .bind(sessionId)
+        .all<{ role: string; content: string }>();
+      const recentText = (recentRows.results ?? [])
+        .reverse()
+        .map((m) => `${m.role === "visitor" ? "Them" : "Guide"}: ${m.content}`)
+        .join("\n");
+
+      // Email the owner. WhatsApp is pending Meta review, so without this a
+      // visitor who explicitly asked for a human would wait unnoticed.
+      context.waitUntil(
+        (async () => {
+          try {
+            if (!mailEnabled(env)) return;
+            const to = await getOwnerEmail(env.DB);
+            if (!to) return;
+            await sendMail(env, {
+              to,
+              subject: `Someone on goluq.com wants to talk to you${name ? " — " + name : ""}`,
+              text: [
+                "A visitor asked to speak to a real person.",
+                "",
+                name ? `Name:  ${name}` : "",
+                phone ? `Phone: ${phone}` : "",
+                `Page:  ${clip(b.page, 40) || "home"}`,
+                "",
+                recentText ? `--- Conversation so far ---
+${recentText}` : "",
+                "",
+                "Reply from the cockpit: https://goluq.com/admin (Live chat)",
+              ]
+                .filter(Boolean)
+                .join("\n"),
+            });
+          } catch {
+            /* an alert failure must never break the chat */
+          }
+        })()
+      );
+
+      // Alert the owner on WhatsApp too, for when the instance is connected.
       if (evoEnabled(env)) {
         const owner = await getOwnerWhatsapp(env.DB, env);
         if (owner) {
-          const recent = await env.DB.prepare(
-            `SELECT role, content FROM chat_messages WHERE session_id = ? ORDER BY id DESC LIMIT 6`
-          )
-            .bind(sessionId)
-            .all<{ role: string; content: string }>();
-          const transcript = (recent.results ?? [])
-            .reverse()
-            .map((m) => `${m.role === "visitor" ? "Them" : "Guide"}: ${m.content}`)
-            .join("\n");
+          // Same six turns already fetched above for the email alert.
+          const transcript = recentText;
           const msg =
             `🔔 *A visitor wants to talk to you*\n` +
             (name ? `Name: ${name}\n` : "") +

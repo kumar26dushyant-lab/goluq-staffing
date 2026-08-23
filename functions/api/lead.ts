@@ -1,9 +1,10 @@
 /// <reference types="@cloudflare/workers-types" />
 
 import { evoEnabled, sendText, type EvoEnv } from "../lib/evolution";
-import { getOwnerWhatsapp } from "../lib/settings";
+import { getOwnerWhatsapp, getOwnerEmail } from "../lib/settings";
+import { mailEnabled, sendMail, type MailEnv } from "../lib/mailer";
 
-interface Env extends EvoEnv {
+interface Env extends EvoEnv, MailEnv {
   DB: D1Database;
 }
 
@@ -67,6 +68,52 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         sessionId, source, landing
       )
       .run();
+
+    // Email the owner. This is the alert channel that actually works today:
+    // the WhatsApp instance is pending Meta review, and a lead nobody is told
+    // about is a lead lost. Non-blocking — a mail failure must never fail the
+    // form submission the visitor is waiting on.
+    context.waitUntil(
+      (async () => {
+        try {
+          if (!mailEnabled(env)) return;
+          const to = await getOwnerEmail(env.DB);
+          if (!to) return;
+
+          const roleLabel = role ? ROLE_LABEL[role] ?? role : "—";
+          const indLabel = industry ? INDUSTRY_LABEL[industry] ?? industry : "—";
+          const dial = intl ? phone : `91${phone}`;
+
+          await sendMail(env, {
+            to,
+            subject: `New GoLuQ lead — ${name}${industry ? " · " + indLabel : ""}`,
+            replyTo: email || undefined,
+            text: [
+              `${name} just enquired on goluq.com.`,
+              "",
+              `Phone:    ${intl ? phone : "+91 " + phone}`,
+              `WhatsApp: https://wa.me/${dial}`,
+              email ? `Email:    ${email}` : "",
+              `Wants:    ${roleLabel}`,
+              `Industry: ${indLabel}`,
+              wantsTraining ? "Asked for the training walkthrough." : "",
+              crossSell.length ? `Also interested in: ${crossSell.join(", ")}` : "",
+              ref ? `Referred by partner: ${ref}` : "",
+              source ? `Came from: ${source}${landing ? " → " + landing : ""}` : "",
+              "",
+              message ? `--- What they wrote ---
+${message}` : "",
+              "",
+              "Open the cockpit: https://goluq.com/admin",
+            ]
+              .filter(Boolean)
+              .join("\n"),
+          });
+        } catch {
+          /* never let an alert failure affect the visitor */
+        }
+      })()
+    );
 
     // Fire WhatsApp notifications without blocking the response.
     if (evoEnabled(env)) {

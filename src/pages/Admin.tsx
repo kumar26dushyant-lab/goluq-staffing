@@ -1194,6 +1194,7 @@ function WhatsApp() {
 function SettingsPanel() {
   const [owner, setOwner] = useState("");
   const [publicWa, setPublicWa] = useState("");
+  const [ownerEmail, setOwnerEmail] = useState("");
   const [followups, setFollowups] = useState(true);
   const [saved, setSaved] = useState("");
   // Saving before the current values have loaded would post empty strings and
@@ -1205,6 +1206,7 @@ function SettingsPanel() {
     adminGet("/api/admin/settings").then((d) => {
       setOwner(d.owner_whatsapp || "");
       setPublicWa(d.public_whatsapp || "");
+      setOwnerEmail(d.owner_email || "");
       setFollowups(d.followups_enabled !== "0");
       setLoaded(true);
     });
@@ -1213,12 +1215,22 @@ function SettingsPanel() {
   const save = async () => {
     if (!loaded) return;
     setSaved("");
-    const d = await adminPost("/api/admin/settings", { owner_whatsapp: owner, public_whatsapp: publicWa, followups_enabled: followups });
+    const d = await adminPost("/api/admin/settings", { owner_whatsapp: owner, owner_email: ownerEmail, public_whatsapp: publicWa, followups_enabled: followups });
     setSaved(d.ok ? "Saved ✅" : "Failed");
   };
   return (
     <div className="max-w-lg space-y-5">
       <div className="glass space-y-5 rounded-2xl p-6">
+        <label className="block">
+          <span className="mb-1.5 block text-base font-semibold text-fg">Alert email (private)</span>
+          <span className="mb-2 block text-sm text-muted">
+            Every new lead and every "talk to a human" request is emailed here within seconds.
+            This is the alert channel that works today — WhatsApp alerts stay silent until the
+            number is linked. Never shown on the site.
+          </span>
+          <input className={inputClass} type="email" value={ownerEmail}
+            onChange={(e) => setOwnerEmail(e.target.value)} placeholder="you@example.com" />
+        </label>
         <label className="block">
           <span className="mb-1.5 block text-base font-semibold text-fg">Owner WhatsApp (private)</span>
           <span className="mb-2 block text-sm text-muted">Receives a WhatsApp alert for every new lead. Not shown on the site. 10-digit or 91XXXXXXXXXX.</span>

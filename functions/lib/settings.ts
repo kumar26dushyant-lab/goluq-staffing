@@ -35,3 +35,11 @@ export async function followupsEnabled(db: D1Database): Promise<boolean> {
   const v = await getSetting(db, "followups_enabled");
   return v === null ? true : v === "1";
 }
+
+/**
+ * Where lead alerts are sent. Kept separate from the public contact address:
+ * this one is the owner's real inbox and is never shown on the site.
+ */
+export async function getOwnerEmail(db: D1Database): Promise<string> {
+  return (await getSetting(db, "owner_email")) || "";
+}

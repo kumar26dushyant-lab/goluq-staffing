@@ -15,6 +15,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
   return Response.json({
     ok: true,
     owner_whatsapp: (await getSetting(env.DB, "owner_whatsapp")) ?? "",
+    owner_email: (await getSetting(env.DB, "owner_email")) ?? "",
     public_whatsapp: (await getSetting(env.DB, "public_whatsapp")) ?? "",
     followups_enabled: (await getSetting(env.DB, "followups_enabled")) ?? "1",
     bot_instructions: (await getSetting(env.DB, "bot_instructions")) ?? "",
@@ -26,9 +27,12 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
 export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   if (!(await checkAdmin(request, env))) return unauthorized();
   try {
-    const b = await request.json<{ owner_whatsapp?: string; public_whatsapp?: string; followups_enabled?: boolean | string; bot_instructions?: string; chat_enabled?: boolean | string; announcement?: string; aff_rate_year1?: number; aff_rate_lifetime?: number; aff_min_payout?: number; aff_attribution_days?: number }>();
+    const b = await request.json<{ owner_whatsapp?: string; public_whatsapp?: string; followups_enabled?: boolean | string; bot_instructions?: string; chat_enabled?: boolean | string; announcement?: string; aff_rate_year1?: number; aff_rate_lifetime?: number; aff_min_payout?: number; aff_attribution_days?: number; owner_email?: string }>();
     if (typeof b.owner_whatsapp === "string") {
       await setSetting(env.DB, "owner_whatsapp", b.owner_whatsapp.replace(/\D/g, ""));
+    }
+    if (typeof b.owner_email === "string") {
+      await setSetting(env.DB, "owner_email", b.owner_email.trim().toLowerCase().slice(0, 200));
     }
     if (typeof b.public_whatsapp === "string") {
       await setSetting(env.DB, "public_whatsapp", b.public_whatsapp.replace(/\D/g, ""));
