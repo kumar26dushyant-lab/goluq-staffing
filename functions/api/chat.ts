@@ -90,7 +90,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
             if (!mailEnabled(env)) return;
             const to = await getOwnerEmail(env.DB);
             if (!to) return;
-            await sendMail(env, {
+            const sent = await sendMail(env, {
               to,
               subject: `Someone on goluq.com wants to talk to you${name ? " — " + name : ""}`,
               text: [
@@ -108,6 +108,7 @@ ${recentText}` : "",
                 .filter(Boolean)
                 .join("\n"),
             });
+            if (!sent.ok) console.log("handoff alert email rejected:", sent.error);
           } catch (err) {
             // Logged, not swallowed — see the note in lead.ts. Still never
             // breaks the chat for the visitor.

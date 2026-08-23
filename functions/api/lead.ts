@@ -84,7 +84,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
           const indLabel = industry ? INDUSTRY_LABEL[industry] ?? industry : "—";
           const dial = intl ? phone : `91${phone}`;
 
-          await sendMail(env, {
+          // sendMail RETURNS { ok, error } — it does not throw. Awaiting it
+          // proves nothing, so the result must be checked explicitly.
+          const sent = await sendMail(env, {
             to,
             subject: `New GoLuQ lead — ${name}${industry ? " · " + indLabel : ""}`,
             replyTo: email || undefined,
@@ -109,6 +111,7 @@ ${message}` : "",
               .filter(Boolean)
               .join("\n"),
           });
+          if (!sent.ok) console.log("lead alert email rejected:", sent.error);
         } catch (err) {
           // Log rather than swallow: a silently broken alert channel is
           // indistinguishable from a working one, which is how leads go
