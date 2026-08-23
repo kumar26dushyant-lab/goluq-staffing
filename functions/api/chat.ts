@@ -108,8 +108,10 @@ ${recentText}` : "",
                 .filter(Boolean)
                 .join("\n"),
             });
-          } catch {
-            /* an alert failure must never break the chat */
+          } catch (err) {
+            // Logged, not swallowed — see the note in lead.ts. Still never
+            // breaks the chat for the visitor.
+            console.log("handoff alert email failed:", String(err));
           }
         })()
       );

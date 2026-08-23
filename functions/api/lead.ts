@@ -109,8 +109,11 @@ ${message}` : "",
               .filter(Boolean)
               .join("\n"),
           });
-        } catch {
-          /* never let an alert failure affect the visitor */
+        } catch (err) {
+          // Log rather than swallow: a silently broken alert channel is
+          // indistinguishable from a working one, which is how leads go
+          // unnoticed. It still never affects the visitor's submission.
+          console.log("lead alert email failed:", String(err));
         }
       })()
     );
