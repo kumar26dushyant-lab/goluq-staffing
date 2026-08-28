@@ -1352,6 +1352,10 @@
         ],
         "build": "We turn each missed call into a real lead record with the follow-up already scheduled."
       }
-    }
+    },
+    "homeTitle": "Toll-free numbers, WhatsApp API, voice and SMS — set up and wired into your business",
+    "homeSubtitle": "Get the line your customers call, and the system that handles what happens next. Most providers sell you only the first half.",
+    "homeCta": "See all services and prices",
+    "setupFrom": "Setup from"
   }
 }

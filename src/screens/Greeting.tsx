@@ -12,6 +12,7 @@ import { ProofStrip } from "../components/ProofStrip";
 import { WhatsAppCta } from "../components/WhatsAppCta";
 import { CaseStudyNidaan } from "../components/CaseStudyNidaan";
 import { ProductsShowcase } from "../components/ProductsShowcase";
+import { HomeServices } from "../components/HomeServices";
 import { HomeBuild } from "../components/HomeBuild";
 import { SecuritySection } from "../components/SecuritySection";
 import { AboutSection } from "../components/AboutSection";
@@ -139,6 +140,7 @@ export function Greeting({ onPickRole }: { onPickRole: (id: RoleId) => void }) {
 
       <PartnerCTA className="mt-16" />
       <HomeBuild className="mt-12" />
+      <HomeServices className="mt-12" />
       <SecuritySection className="mt-16" />
       <AboutSection className="mt-16" />
     </div>
