@@ -36,7 +36,7 @@
   /* Atmosphere strengths (dimmed in light mode) */
   --glass-fill: 0.55;
   --glass-blur: 18px;
-  --aurora-opacity: 0.55;
+  --aurora-opacity: 0.30;
   --particle-opacity: 0.65;
   --glow-strength: 1;
 }
@@ -67,7 +67,7 @@
 
   --glass-fill: 0.62;
   --glass-blur: 16px;
-  --aurora-opacity: 0.32;
+  --aurora-opacity: 0.18;
   --particle-opacity: 0.4;
   --glow-strength: 0.6;
 }

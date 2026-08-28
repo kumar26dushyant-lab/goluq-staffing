@@ -25,8 +25,11 @@ export function HoloBackground() {
 
   return (
     <div className="pointer-events-none fixed inset-0 -z-10" aria-hidden="true">
-      {/* Reactor dialed back to ambient depth so content reads on top of it */}
-      <div className="absolute inset-0 opacity-[0.7]">
+      {/* Reactor is atmosphere, not content. Dialled well back: on a phone in
+          daylight the animation was competing with the words, and the words are
+          what sell. If it ever needs to be more visible, raise this — not the
+          veil below, which is what guarantees contrast. */}
+      <div className="absolute inset-0 opacity-[0.28]">
         <WebGLBoundary>
           <Suspense fallback={null}>
             <HoloScene />
@@ -39,7 +42,7 @@ export function HoloBackground() {
         className="absolute inset-0"
         style={{
           background:
-            "radial-gradient(110% 80% at 50% 32%, transparent 0%, rgb(var(--c-base) / 0.6) 70%), linear-gradient(180deg, rgb(var(--c-base) / 0.45) 0%, rgb(var(--c-base) / 0.72) 100%)",
+            "radial-gradient(110% 80% at 50% 32%, rgb(var(--c-base) / 0.35) 0%, rgb(var(--c-base) / 0.82) 70%), linear-gradient(180deg, rgb(var(--c-base) / 0.7) 0%, rgb(var(--c-base) / 0.9) 100%)",
         }}
       />
     </div>
