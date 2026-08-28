@@ -65,6 +65,7 @@ CREATE TABLE IF NOT EXISTS pricing (
   offer_label TEXT,                    -- e.g. "Launch offer — this month only"
   offer_price_inr INTEGER,             -- optional promotional price
   sort_order INTEGER DEFAULT 0,
+  category TEXT DEFAULT 'build',   -- build = software we make · comms = telecom we provision
   updated_at TEXT
 );
 

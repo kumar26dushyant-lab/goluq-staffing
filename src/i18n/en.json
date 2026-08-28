@@ -1267,5 +1267,91 @@
     "spoken": "Welcome to GoLuQ. We build and run the software your business needs.",
     "unmute": "Unmute & listen",
     "tagline": "Software, apps and automations — built for your business."
+  },
+  "comms": {
+    "kicker": "Business communication",
+    "title": "The number, the messaging — and the software that runs on it.",
+    "subtitle": "Toll-free numbers, WhatsApp API, IVR, voice campaigns and SMS, provisioned and configured for you. Where most providers stop at handing you a login, we build the system that actually uses it.",
+    "edgeTitle": "Why buy this from a software company",
+    "edgeBody": "Anyone can resell you a toll-free number. The number on its own does nothing — the value is in what happens when it rings: how calls route, what gets logged, which follow-up fires, and where it lands in your records. We provision the service and build that part too, so you get one working system instead of a login and a manual.",
+    "setupLabel": "Setup",
+    "usageNote": "Setup is one-time. Call minutes, SMS and WhatsApp conversations are billed at cost on top — we never mark up usage or bundle it into a number that hides it.",
+    "goLive": "Typically live in",
+    "ctaQuote": "Get a quote",
+    "ctaTalk": "Ask on WhatsApp",
+    "complianceTitle": "What you should know before buying",
+    "complianceBody": "SMS in India requires DLT registration in your own company name, with each template approved by the operator — we handle the paperwork with you, but the registration and its fees belong to your business, not to us. WhatsApp requires a verified Business Manager and Meta-approved message templates. Anyone promising instant activation on either is skipping a step you will hear about later.",
+    "items": {
+      "tollfree": {
+        "name": "Toll-Free Number (1800)",
+        "desc": "One free-to-dial number for the whole country, so a customer never decides against calling you because of the cost.",
+        "b": [
+          "Routes to any number of phones, teams or branches",
+          "IVR menu, call recording and a live dashboard",
+          "Keeps working when a phone is busy, off or out of coverage"
+        ],
+        "build": "We wire it into your records so every call arrives already attached to the right customer."
+      },
+      "virtualNumber": {
+        "name": "Virtual Business Number & IVR",
+        "desc": "A single business number that fronts your whole team, with a menu that puts the caller in the right place first time.",
+        "b": [
+          "One number on your card, your van, your shopfront and your ads",
+          "Press-1-for-sales style menus, in Hindi or English",
+          "Staff answer on their own phones without exposing personal numbers"
+        ],
+        "build": "We add the missed-call follow-up so a call you couldn't take still turns into a conversation."
+      },
+      "waApi": {
+        "name": "WhatsApp Business API",
+        "desc": "The official API on a verified business account — green tick, unlimited agents, and automation your personal WhatsApp cannot do.",
+        "b": [
+          "Message templates approved and submitted for you",
+          "Several people answering one number without sharing a phone",
+          "Order updates, reminders and confirmations sent automatically"
+        ],
+        "build": "We build the flows themselves — the chatbot, the booking, the follow-up — not just the connection."
+      },
+      "voiceCampaign": {
+        "name": "Voice Campaigns (Press-1, Bulk, DTMF)",
+        "desc": "Reach thousands of customers with a recorded call and capture their answer with a single key press.",
+        "b": [
+          "Press 1 to confirm, press 2 to reschedule — captured instantly",
+          "Live transfer to a human the moment someone shows interest",
+          "Reports showing exactly who pressed what"
+        ],
+        "build": "We connect the responses to your system so a keypress updates a record instead of a spreadsheet."
+      },
+      "txnSms": {
+        "name": "Transactional SMS",
+        "desc": "OTPs, order updates, appointment reminders and account alerts — the messages that have to arrive.",
+        "b": [
+          "Delivered on the transactional route, so they land day or night",
+          "Sender ID in your business name",
+          "Simple API your existing software can call"
+        ],
+        "build": "We do the DLT registration with you and wire the sending into your workflow."
+      },
+      "promoSms": {
+        "name": "Promotional SMS",
+        "desc": "Offers, launches and festival campaigns sent to your own customer list.",
+        "b": [
+          "Targeted sends to the list you already own",
+          "Scheduling around the hours promotional SMS is permitted",
+          "Delivery reporting per campaign"
+        ],
+        "build": "We help you tell which campaign actually produced sales, rather than guessing."
+      },
+      "missedCall": {
+        "name": "Missed-Call Service",
+        "desc": "A number customers ring and hang up — free for them, an instant lead for you.",
+        "b": [
+          "Costs the customer nothing, so far more people use it",
+          "Automatic callback or WhatsApp reply the moment it rings",
+          "Works for enquiries, verification, voting and registrations"
+        ],
+        "build": "We turn each missed call into a real lead record with the follow-up already scheduled."
+      }
+    }
   }
 }

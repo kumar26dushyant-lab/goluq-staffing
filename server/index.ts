@@ -62,6 +62,8 @@ for (const sql of [
   `ALTER TABLE affiliates ADD COLUMN pass_hash TEXT`,
   `ALTER TABLE affiliates ADD COLUMN reset_token TEXT`,
   `ALTER TABLE affiliates ADD COLUMN reset_expires TEXT`,
+  // Communication services live alongside software builds in the same table.
+  `ALTER TABLE pricing ADD COLUMN category TEXT DEFAULT 'build'`,
 ]) {
   try {
     sqlite.exec(sql);

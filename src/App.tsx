@@ -14,6 +14,10 @@ import { WhatsAppCta } from "./components/WhatsAppCta";
 
 // The custom-build practice is a separate, lower-traffic funnel — keep it out of
 // the initial bundle so "/" stays inside the BUILD_SPEC ~200KB gzip budget.
+const Services = lazy(() =>
+  import("./pages/Services").then((m) => ({ default: m.Services }))
+);
+
 const BuildPractice = lazy(() =>
   import("./pages/BuildPractice").then((m) => ({ default: m.BuildPractice }))
 );
@@ -76,6 +80,14 @@ export default function App() {
           element={
             <Suspense fallback={<div className="min-h-dvh" />}>
               <BuildPractice region="global" />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/services"
+          element={
+            <Suspense fallback={<div className="min-h-dvh" />}>
+              <Services />
             </Suspense>
           }
         />
