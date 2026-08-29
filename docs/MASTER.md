@@ -164,8 +164,32 @@ chat-only, live calling starts at ₹4,999.
   reusing a single "platform app" is correct — the question is only *which* one.
 - Selling WhatsApp onward to other businesses requires **Tech Provider** status
   and Embedded Signup, which is a separate application to Meta. Not yet started.
-- **Display name** "GoLuQ Digital Consultancy" was rejected under WhatsApp's
-  Display Name Guidelines. Needs resubmission — see the to-do list.
+- **Display name** "GoLuQ - Digital Consultancy" is DECLINED (confirmed from
+  Meta: `name_status: DECLINED`). It does not block messaging — the number is
+  GREEN and sending works — customers simply see the number rather than a name.
+  Resubmit as plain **GoLuQ** or **GoLuQ.com**: a name matching the domain is
+  trivially substantiated, whereas an appended category like "Digital
+  Consultancy" has to be evidenced and usually is not.
+
+### Webhook diagnosis, 2026-08-30
+Everything on our side and in the app config is correct:
+- Meta verified the callback URL (200 to their `facebookplatform` GET).
+- App subscription is live: `whatsapp_business_account` →
+  `https://goluq.com/api/wa/meta`, active, field `messages`.
+- Number: +91 83495 04400, CLOUD_API, code VERIFIED, quality GREEN.
+- Token is valid, never expires, and belongs to the **GoLuQ.com app**
+  (839673715804540) — the System User is merely *named* "sarathi wa", so
+  nothing needs unplugging from Sarathi.
+
+And yet **Meta has never POSTed a single message**: nginx shows zero requests
+from Facebook to the webhook, `wa_events` is empty, and no `wa:` conversation
+exists. Outbound works; inbound has never happened. Remaining causes, in order:
+1. The app is in **Development mode**, which forwards webhooks only for
+   allow-listed test numbers. This fits: the outbound test to 8875674400
+   succeeded because that number is the registered test recipient.
+2. The **WABA is not subscribed to the app** — a separate switch from the app's
+   webhook field subscription, and the one most often missed.
+3. The test message went to a different number than 8349504400.
 
 ---
 
@@ -174,15 +198,11 @@ chat-only, live calling starts at ₹4,999.
 Kept in priority order. Done items stay for a while so the history is visible.
 
 ### Blocking
-- [ ] **Set `public_whatsapp` to 918349504400 in the cockpit.** Every WhatsApp
-      button on the site is invisible until this is set. Verified empty 2026-08-30.
-- [ ] Run **cockpit → Settings → WhatsApp Business → Check connection**. This is
-      in *our* admin at goluq.com/admin, not in Meta's dashboard.
-- [ ] Send a WhatsApp to the business number from a different phone and confirm
-      the guide replies.
-- [ ] Resubmit the WhatsApp display name (rejected). Try "GoLuQ" or "GoLuQ.com" —
-      a name that plainly matches the domain passes far more often than an
-      appended descriptor.
+- [ ] **Switch the Meta app from Development to Live**, and confirm the WhatsApp
+      account is subscribed to the app. Everything else is verified correct;
+      this is the only thing left that explains zero inbound. See section 6.
+- [ ] Resubmit the display name as **GoLuQ** or **GoLuQ.com** (currently
+      DECLINED). Does not block messaging.
 
 ### Next
 - [ ] Confirm real comms costs, then correct the prices in the cockpit.
@@ -197,6 +217,8 @@ Kept in priority order. Done items stay for a while so the history is visible.
 - [ ] Cloudflare inbound email routing (parked).
 
 ### Done
+- [x] Public WhatsApp number set and verified live on the site
+- [x] Cockpit shows inbound webhook health, not just "credentials valid"
 - [x] Comms-first homepage hero, real stats, live-price phone transcript
 - [x] Per-market pricing and currency, page and guide in step (section 3a)
 - [x] Communication catalogue at `/services`, sellable by the guide (Phase A)
