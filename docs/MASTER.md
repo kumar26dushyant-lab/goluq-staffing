@@ -198,6 +198,10 @@ exists. Outbound works; inbound has never happened. Remaining causes, in order:
 Kept in priority order. Done items stay for a while so the history is visible.
 
 ### Blocking
+- [ ] **Publish the Meta app (Development → Live).** URLs it asks for, all live:
+      Privacy Policy `https://goluq.com/privacy` · Terms `https://goluq.com/terms`
+      · Data deletion `https://goluq.com/privacy#deletion`. Also needs an app
+      icon (1024×1024) and a category.
 - [ ] **Switch the Meta app from Development to Live**, and confirm the WhatsApp
       account is subscribed to the app. Everything else is verified correct;
       this is the only thing left that explains zero inbound. See section 6.
@@ -217,6 +221,7 @@ Kept in priority order. Done items stay for a while so the history is visible.
 - [ ] Cloudflare inbound email routing (parked).
 
 ### Done
+- [x] Real Privacy Policy and Terms at /privacy and /terms (no-JS, reviewable)
 - [x] Public WhatsApp number set and verified live on the site
 - [x] Cockpit shows inbound webhook health, not just "credentials valid"
 - [x] Comms-first homepage hero, real stats, live-price phone transcript
