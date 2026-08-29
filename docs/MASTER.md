@@ -84,6 +84,31 @@ after any Settings save.**
 
 ---
 
+## 3a. Pricing by market
+
+Every visitor sees the price in their own money, resolved from the edge country
+header and converted **on the server**, so the page and the guide can never
+quote two different numbers. Verified live: AED 1,699 in Dubai, $449 in the US,
+£349 in the UK, A$699 in Australia, ₹9,999 in India.
+
+**These are price bands, not exchange rates.** Straight conversion would put the
+toll-free setup near $115, which in a developed market does not read as a
+bargain — it reads as amateur, and it caps what we could ever quote that buyer
+afterwards. India stays the base and is never altered. South Asia has its own
+lower band.
+
+The multiplier is `intl_multiplier` in cockpit settings (currently 4). Raising
+it raises every international price at once; India is unaffected.
+
+Constants live in `functions/lib/markets.ts`. They are pricing decisions, not a
+rate feed — review once or twice a year; nothing breaks if they drift.
+
+| | India | UAE | US | UK | Australia | South Asia |
+|---|---|---|---|---|---|---|
+| Toll-free | ₹9,999 | AED 1,699 | $449 | £349 | A$699 | $159 |
+| WhatsApp API | ₹7,999 | AED 1,299 | $349 | £299 | A$549 | $129 |
+| Voice plan /mo | ₹4,999 | AED 799 | $249 | £199 | A$349 | $79 |
+
 ## 4. What is built and live
 
 **Site** — Vite + React 18 + TypeScript + Tailwind (CSS-variable tokens) +
@@ -121,8 +146,7 @@ chat-only, live calling starts at ₹4,999.
   ₹3,999 missed call. Confirm against real Exotel/Meta wholesale before promoting.
 - **Exotel**: not paying until one customer signs. Agreed.
 - **The call channel**: see section 3.
-- **Homepage direction**: whether the communication proposition becomes the
-  homepage hero, or stays on `/services` with a strong homepage band.
+- ~~Homepage direction~~ — decided: comms-first hero, demo below it.
 - **Which Meta app is the platform app** (GoLuQ's or Sarathi's) — see section 6.
 
 ---
@@ -166,7 +190,12 @@ Kept in priority order. Done items stay for a while so the history is visible.
 - [ ] Create and submit WhatsApp message templates — nothing outbound can reach
       anyone outside the 24-hour window until these are approved.
 - [ ] "Client login" entry point so customers can find `/portal` without a link.
-- [ ] Homepage / hero direction (section 5).
+- [ ] **Homepage hero: comms-first.** Decided 2026-08-30 — lead with WhatsApp /
+      SMS / voice / toll-free, because a tier-2 owner already knows what those
+      are, while "Digital Receptionist" needs explaining first. The talking demo
+      moves below the fold rather than being removed.
+- [ ] Real hero stats, not invented ones. Use 2,000+ claims settled · 95%
+      success · 4 offices — all true and all citable.
 
 ### Later
 - [ ] Exotel provisioning, once a customer has paid.
@@ -174,6 +203,7 @@ Kept in priority order. Done items stay for a while so the history is visible.
 - [ ] Cloudflare inbound email routing (parked).
 
 ### Done
+- [x] Per-market pricing and currency, page and guide in step (section 3a)
 - [x] Communication catalogue at `/services`, sellable by the guide (Phase A)
 - [x] WhatsApp guide on the verified WABA (Phase B)
 - [x] Customer portal with SDLC stages (Phase C)
