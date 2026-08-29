@@ -18,6 +18,7 @@ import { HomeServices } from "../components/HomeServices";
 import { HomeBuild } from "../components/HomeBuild";
 import { SecuritySection } from "../components/SecuritySection";
 import { AboutSection } from "../components/AboutSection";
+import { SiteFooter } from "../components/SiteFooter";
 import type { RoleId } from "../state/useAppState";
 
 /**
@@ -158,6 +159,7 @@ export function Greeting({ onPickRole }: { onPickRole: (id: RoleId) => void }) {
       <HomeBuild className="mt-12" />
       <SecuritySection className="mt-16" />
       <AboutSection className="mt-16" />
+      <SiteFooter />
     </div>
   );
 }

@@ -257,6 +257,18 @@ app.all("/api/*", (c) => c.json({ ok: false, error: "not_found" }, 404));
 
 // ── Static SPA (dist) + client-route fallback ───────────────────────────────
 const indexHtml = readFileSync(join(DIST, "index.html"), "utf8");
+// Legal pages are served as plain HTML at clean URLs, NOT as SPA routes.
+// Meta, and every other reviewer, opens these to check they are real — and some
+// checkers do not run JavaScript at all. Behind the SPA fallback the URL
+// /privacy answered 200 with the marketing homepage, which is exactly the kind
+// of "working" link that fails a review.
+for (const [route, file] of [
+  ["/privacy", "privacy.html"],
+  ["/terms", "terms.html"],
+] as const) {
+  app.get(route, (c) => c.html(readFileSync(join(DIST, file), "utf8")));
+}
+
 app.use("/*", serveStatic({ root: "./dist" }));
 app.get("*", (c) => {
   // A request for a FILE that doesn't exist must 404, not fall through to the

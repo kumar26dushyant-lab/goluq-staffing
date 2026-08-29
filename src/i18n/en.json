@@ -1401,5 +1401,10 @@
       }
     },
     "ctaFallback": "Talk to us"
+  },
+  "footer": {
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "portal": "Client login"
   }
 }
