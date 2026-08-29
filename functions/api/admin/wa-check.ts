@@ -1,7 +1,9 @@
 /// <reference types="@cloudflare/workers-types" />
 
 import { checkAdmin, unauthorized } from "../../lib/admin";
-import { waConfig, waReady, waSendText, waNormalize, type WaEnv } from "../../lib/whatsapp";
+import {
+  waConfig, waReady, waSendText, waNormalize, waSubscribedApps, waSubscribe, type WaEnv,
+} from "../../lib/whatsapp";
 
 interface Env extends WaEnv {
   DB: D1Database;
@@ -43,6 +45,8 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
   // verifies happily while messages are never forwarded. "Never" here, after a
   // real test message, means the problem is on Meta's side of the wire, not ours.
   const inbound = await inboundHealth(env.DB);
+  // The account↔app link, which no amount of app-side configuration reveals.
+  const subscription = cfg.wabaId ? await waSubscribedApps(cfg) : null;
 
   try {
     const res = await fetch(
@@ -63,6 +67,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
         ok: false,
         checklist,
         inbound,
+        subscription,
         error: j?.error?.message || `Meta refused the request (HTTP ${res.status}).`,
       });
     }
@@ -70,6 +75,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
       ok: true,
       checklist,
       inbound,
+      subscription,
       number: j?.display_phone_number || "",
       name: j?.verified_name || "",
       quality: j?.quality_rating || "",
@@ -80,7 +86,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
       platform: j?.platform_type || "",
     });
   } catch (e) {
-    return Response.json({ ok: false, checklist, inbound, error: String(e).slice(0, 200) });
+    return Response.json({ ok: false, checklist, inbound, subscription, error: String(e).slice(0, 200) });
   }
 };
 
@@ -115,7 +121,19 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
     return Response.json({ ok: false, error: "WhatsApp is not configured yet." });
   }
   try {
-    const b = await request.json<{ to?: string }>();
+    const b = await request.json<{ to?: string; action?: string }>();
+
+    // One click for the switch that is otherwise buried: linking the WhatsApp
+    // account to this app is what makes inbound messages actually arrive.
+    if (b.action === "subscribe") {
+      const r = await waSubscribe(cfg);
+      return Response.json(
+        r.ok
+          ? { ok: true, note: "Account linked to the app. Send a test message now." }
+          : { ok: false, error: r.error }
+      );
+    }
+
     const to = waNormalize(String(b.to || ""));
     if (to.length < 10) return Response.json({ ok: false, error: "Enter a valid number." });
 

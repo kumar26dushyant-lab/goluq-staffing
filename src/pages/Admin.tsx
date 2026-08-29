@@ -1272,6 +1272,7 @@ function SettingsPanel() {
  */
 function WhatsAppBusiness() {
   const [phoneId, setPhoneId] = useState("");
+  const [wabaId, setWabaId] = useState("");
   const [verify, setVerify] = useState("");
   const [token, setToken] = useState("");
   const [secret, setSecret] = useState("");
@@ -1283,6 +1284,7 @@ function WhatsAppBusiness() {
   useEffect(() => {
     adminGet("/api/admin/settings").then((d) => {
       setPhoneId(d.wa_phone_number_id || "");
+      setWabaId(d.wa_waba_id || "");
       setVerify(d.wa_verify_token || "");
       setHasToken(Boolean(d.wa_access_token_set));
       setHasSecret(Boolean(d.wa_app_secret_set));
@@ -1295,6 +1297,7 @@ function WhatsAppBusiness() {
     setSaved("");
     const d = await adminPost("/api/admin/settings", {
       wa_phone_number_id: phoneId,
+      wa_waba_id: wabaId,
       wa_verify_token: verify,
       // Only sent when actually typed — see the note above.
       ...(token ? { wa_access_token: token } : {}),
@@ -1328,6 +1331,18 @@ function WhatsAppBusiness() {
           Meta → WhatsApp → API Setup. A long number — not your phone number itself.
         </span>
         <input className={inputClass} value={phoneId} onChange={(e) => setPhoneId(e.target.value)} placeholder="1234567890123456" />
+      </label>
+
+      <label className="block">
+        <span className="mb-1.5 block text-base font-semibold text-fg">
+          WhatsApp Business Account ID
+        </span>
+        <span className="mb-2 block text-sm text-muted">
+          Meta → WhatsApp → API Setup, directly under the phone number ID. Needed only so this page
+          can check whether your account is linked to the app — the switch that decides whether
+          incoming messages ever reach you.
+        </span>
+        <input className={inputClass} value={wabaId} onChange={(e) => setWabaId(e.target.value)} placeholder="1234567890123456" />
       </label>
 
       <label className="block">
@@ -1405,6 +1420,16 @@ function WhatsAppCheck() {
     setBusy(false);
   };
 
+  // Subscribes the WhatsApp account to the app, then re-checks so the panel
+  // reflects reality rather than an assumption about what the click did.
+  const link = async () => {
+    setBusy(true);
+    const d = await adminPost("/api/admin/wa-check", { action: "subscribe" });
+    setRes(await adminGet("/api/admin/wa-check"));
+    setBusy(false);
+    if (!d.ok) setTestMsg(d.error || "Could not link the account.");
+  };
+
   const sendTest = async () => {
     setTestMsg("Sending…");
     const d = await adminPost("/api/admin/wa-check", { to: testTo });
@@ -1445,6 +1470,42 @@ function WhatsAppCheck() {
             <div className="rounded-lg border border-warn/30 bg-warn/10 p-3">
               <p className="font-semibold text-warn">Not connected</p>
               <p className="mt-1 text-muted">{res.error}</p>
+            </div>
+          )}
+
+          {/* The account↔app link. Separate from the app's webhook settings, and
+              invisible from the app side — Meta reports no error when it is
+              missing, it simply forwards nothing. */}
+          {res.subscription && (
+            <div
+              className={`rounded-lg border p-3 ${
+                res.subscription.apps?.length
+                  ? "border-success/30 bg-success/10"
+                  : "border-warn/30 bg-warn/10"
+              }`}
+            >
+              {res.subscription.apps?.length ? (
+                <p className="font-semibold text-success">
+                  Account is linked to: {res.subscription.apps.join(", ")}
+                </p>
+              ) : (
+                <>
+                  <p className="font-semibold text-warn">
+                    Your WhatsApp account is not linked to this app.
+                  </p>
+                  <p className="mt-1 text-muted">
+                    {res.subscription.error === "no_waba_id"
+                      ? "Add your WhatsApp Business Account ID above and save, then check again."
+                      : res.subscription.error ||
+                        "This is why messages never arrive. Linking it takes one click."}
+                  </p>
+                  {res.subscription.error !== "no_waba_id" && (
+                    <Button className="mt-3" onClick={link} disabled={busy}>
+                      Link account to this app
+                    </Button>
+                  )}
+                </>
+              )}
             </div>
           )}
 

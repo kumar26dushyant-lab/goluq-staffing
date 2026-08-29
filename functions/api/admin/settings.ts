@@ -26,6 +26,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     // the server — the UI only needs to know whether they are set.
     wa_phone_number_id: (await getSetting(env.DB, "wa_phone_number_id")) ?? "",
     wa_verify_token: (await getSetting(env.DB, "wa_verify_token")) ?? "",
+    wa_waba_id: (await getSetting(env.DB, "wa_waba_id")) ?? "",
     wa_access_token_set: Boolean(await getSetting(env.DB, "wa_access_token")),
     wa_app_secret_set: Boolean(await getSetting(env.DB, "wa_app_secret")),
   });
@@ -34,7 +35,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
 export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   if (!(await checkAdmin(request, env))) return unauthorized();
   try {
-    const b = await request.json<{ owner_whatsapp?: string; public_whatsapp?: string; followups_enabled?: boolean | string; bot_instructions?: string; chat_enabled?: boolean | string; announcement?: string; aff_rate_year1?: number; aff_rate_lifetime?: number; aff_min_payout?: number; aff_attribution_days?: number; owner_email?: string; wa_phone_number_id?: string; wa_verify_token?: string; wa_access_token?: string; wa_app_secret?: string }>();
+    const b = await request.json<{ owner_whatsapp?: string; public_whatsapp?: string; followups_enabled?: boolean | string; bot_instructions?: string; chat_enabled?: boolean | string; announcement?: string; aff_rate_year1?: number; aff_rate_lifetime?: number; aff_min_payout?: number; aff_attribution_days?: number; owner_email?: string; wa_phone_number_id?: string; wa_waba_id?: string; wa_verify_token?: string; wa_access_token?: string; wa_app_secret?: string }>();
     if (typeof b.owner_whatsapp === "string") {
       await setSetting(env.DB, "owner_whatsapp", b.owner_whatsapp.replace(/\D/g, ""));
     }
@@ -63,6 +64,9 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
     });
     if (typeof b.wa_phone_number_id === "string") {
       await setSetting(env.DB, "wa_phone_number_id", b.wa_phone_number_id.replace(/\D/g, ""));
+    }
+    if (typeof b.wa_waba_id === "string") {
+      await setSetting(env.DB, "wa_waba_id", b.wa_waba_id.replace(/\D/g, ""));
     }
     if (typeof b.wa_verify_token === "string") {
       await setSetting(env.DB, "wa_verify_token", b.wa_verify_token.trim().slice(0, 200));

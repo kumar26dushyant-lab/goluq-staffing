@@ -94,6 +94,7 @@ const env = {
   // Official WhatsApp Business Platform. Env wins; anything omitted here is
   // read from the cockpit settings instead (functions/lib/whatsapp.ts).
   WA_PHONE_NUMBER_ID: process.env.WA_PHONE_NUMBER_ID,
+  WA_WABA_ID: process.env.WA_WABA_ID,
   WA_ACCESS_TOKEN: process.env.WA_ACCESS_TOKEN,
   WA_VERIFY_TOKEN: process.env.WA_VERIFY_TOKEN,
   WA_APP_SECRET: process.env.WA_APP_SECRET,

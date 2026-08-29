@@ -18,6 +18,7 @@ import { getSetting } from "./settings";
  */
 export interface WaEnv {
   WA_PHONE_NUMBER_ID?: string;
+  WA_WABA_ID?: string;
   WA_ACCESS_TOKEN?: string;
   WA_VERIFY_TOKEN?: string;
   WA_APP_SECRET?: string;
@@ -25,6 +26,8 @@ export interface WaEnv {
 
 export interface WaConfig {
   phoneNumberId: string;
+  /** WhatsApp Business Account id. Optional — only the subscription check needs it. */
+  wabaId: string;
   accessToken: string;
   verifyToken: string;
   appSecret: string;
@@ -37,6 +40,7 @@ export async function waConfig(db: D1Database, env: WaEnv): Promise<WaConfig> {
   const s = async (k: string) => (await getSetting(db, k)) || "";
   return {
     phoneNumberId: env.WA_PHONE_NUMBER_ID || (await s("wa_phone_number_id")),
+    wabaId: env.WA_WABA_ID || (await s("wa_waba_id")),
     accessToken: env.WA_ACCESS_TOKEN || (await s("wa_access_token")),
     verifyToken: env.WA_VERIFY_TOKEN || (await s("wa_verify_token")),
     appSecret: env.WA_APP_SECRET || (await s("wa_app_secret")),
@@ -151,4 +155,47 @@ export async function waVerifySignature(
   let diff = 0;
   for (let i = 0; i < expect.length; i++) diff |= expect.charCodeAt(i) ^ sig.charCodeAt(i);
   return diff === 0;
+}
+
+/**
+ * Is the WhatsApp Business Account actually subscribed to our app?
+ *
+ * This is a SEPARATE switch from the app's webhook-field subscription, and it is
+ * the one people miss: the app can be correctly configured, published, and
+ * pointing at the right callback, while the account itself was never linked — in
+ * which case Meta forwards nothing and reports no error anywhere.
+ */
+export async function waSubscribedApps(
+  c: WaConfig
+): Promise<{ ok: boolean; apps: string[]; error?: string }> {
+  if (!c.wabaId || !c.accessToken) return { ok: false, apps: [], error: "no_waba_id" };
+  try {
+    const res = await fetch(`${GRAPH}/${c.wabaId}/subscribed_apps`, {
+      headers: { Authorization: `Bearer ${c.accessToken}` },
+    });
+    const j: any = await res.json().catch(() => ({}));
+    if (!res.ok) return { ok: false, apps: [], error: j?.error?.message || `http_${res.status}` };
+    const apps = (j?.data || [])
+      .map((d: any) => d?.whatsapp_business_api_data?.name || d?.whatsapp_business_api_data?.id || "")
+      .filter(Boolean);
+    return { ok: true, apps };
+  } catch (e) {
+    return { ok: false, apps: [], error: String(e).slice(0, 160) };
+  }
+}
+
+/** Link the account to this app, which is what makes inbound messages arrive. */
+export async function waSubscribe(c: WaConfig): Promise<WaResult> {
+  if (!c.wabaId || !c.accessToken) return { ok: false, error: "whatsapp_not_configured" };
+  try {
+    const res = await fetch(`${GRAPH}/${c.wabaId}/subscribed_apps`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${c.accessToken}` },
+    });
+    const text = await res.text();
+    if (!res.ok) return { ok: false, error: `http_${res.status}: ${text.slice(0, 200)}` };
+    return { ok: true, id: "" };
+  } catch (e) {
+    return { ok: false, error: String(e).slice(0, 200) };
+  }
 }
