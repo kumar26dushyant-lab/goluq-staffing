@@ -29,6 +29,9 @@ import { onRequest as cronFollowups } from "../functions/api/cron/followups";
 import { onRequestPost as waWebhook } from "../functions/api/wa/webhook";
 import { onRequestGet as waMetaVerify, onRequestPost as waMetaInbound } from "../functions/api/wa/meta";
 import { onRequestGet as waCheckGet, onRequestPost as waCheckPost } from "../functions/api/admin/wa-check";
+import { onRequestGet as adminProjectsGet, onRequestPost as adminProjectsPost } from "../functions/api/admin/projects";
+import { onRequestGet as custAuthGet, onRequestPost as custAuthPost } from "../functions/api/customer/auth";
+import { onRequestGet as custProjectsGet, onRequestPost as custProjectsPost } from "../functions/api/customer/projects";
 import { onRequestPost as track } from "../functions/api/track";
 import { onRequestGet as adminVisitors } from "../functions/api/admin/visitors";
 import { onRequestPost as chat } from "../functions/api/chat";
@@ -192,7 +195,7 @@ app.use("/api/*", async (c, next) => {
   // Tighter caps on the write/abuse-prone endpoints; generous otherwise.
   let max = 120;
   const write = c.req.method === "POST";
-  if (write && (path === "/api/lead" || path === "/api/assistant" || path === "/api/affiliate/register" || path === "/api/affiliate/auth")) max = 15;
+  if (write && (path === "/api/lead" || path === "/api/assistant" || path === "/api/affiliate/register" || path === "/api/affiliate/auth" || path === "/api/customer/auth")) max = 15;
   else if (path === "/api/chat") max = 240;
   else if (path.startsWith("/api/admin/") || path.startsWith("/api/wa/")) max = 300;
   if (rateLimited(ip, path, max, 60_000)) {
@@ -218,6 +221,12 @@ app.post("/api/admin/wa-connect", (c) => callFn(waConnect as Handler, c.req.raw)
 app.get("/api/admin/wa-status", (c) => callFn(waStatus as Handler, c.req.raw));
 app.get("/api/admin/wa-check", (c) => callFn(waCheckGet as Handler, c.req.raw));
 app.post("/api/admin/wa-check", (c) => callFn(waCheckPost as Handler, c.req.raw));
+app.get("/api/admin/projects", (c) => callFn(adminProjectsGet as Handler, c.req.raw));
+app.post("/api/admin/projects", (c) => callFn(adminProjectsPost as Handler, c.req.raw));
+app.get("/api/customer/auth", (c) => callFn(custAuthGet as Handler, c.req.raw));
+app.post("/api/customer/auth", (c) => callFn(custAuthPost as Handler, c.req.raw));
+app.get("/api/customer/projects", (c) => callFn(custProjectsGet as Handler, c.req.raw));
+app.post("/api/customer/projects", (c) => callFn(custProjectsPost as Handler, c.req.raw));
 app.post("/api/admin/wa-send", (c) => callFn(waSend as Handler, c.req.raw));
 app.get("/api/admin/stats", (c) => callFn(adminStats as Handler, c.req.raw));
 app.get("/api/admin/leads", (c) => callFn(adminLeads as Handler, c.req.raw));

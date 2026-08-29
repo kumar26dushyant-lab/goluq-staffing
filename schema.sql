@@ -219,3 +219,68 @@ CREATE TABLE IF NOT EXISTS wa_events (
   created_at TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_waevents_at ON wa_events(created_at);
+
+-- ── Customer portal ─────────────────────────────────────────────────────────
+-- A customer who has bought something gets an account to watch their build move
+-- through the stages, read every update, and collect what has been delivered.
+-- The owner creates the account from the cockpit; the customer sets their own
+-- password from an emailed link, so no password is ever chosen for them.
+CREATE TABLE IF NOT EXISTS customers (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  phone TEXT NOT NULL,                 -- login username, digits only
+  email TEXT,
+  company TEXT,
+  pass_hash TEXT,                      -- PBKDF2-SHA256, null until they set one
+  setup_token TEXT,                    -- one-time link to choose the first password
+  setup_expires TEXT,
+  status TEXT NOT NULL DEFAULT 'active',
+  created_at TEXT NOT NULL
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_customers_phone ON customers(phone);
+
+CREATE TABLE IF NOT EXISTS customer_sessions (
+  token TEXT PRIMARY KEY,
+  customer_id INTEGER NOT NULL,
+  created_at TEXT NOT NULL,
+  expires_at TEXT NOT NULL
+);
+
+-- One row per thing being built. `stage` is the SDLC position; the wording the
+-- customer sees lives in the front-end so it can be translated.
+CREATE TABLE IF NOT EXISTS projects (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  customer_id INTEGER NOT NULL,
+  title TEXT NOT NULL,
+  service_id TEXT,                     -- pricing.id when it came from the catalogue
+  stage TEXT NOT NULL DEFAULT 'requirements',
+  status TEXT NOT NULL DEFAULT 'active',  -- active | on_hold | delivered | cancelled
+  price_inr INTEGER DEFAULT 0,
+  paid_inr INTEGER DEFAULT 0,
+  target_date TEXT,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_projects_customer ON projects(customer_id);
+
+-- The visible history. An update the customer cannot see is still recorded, so
+-- the owner can keep private notes on the same timeline.
+CREATE TABLE IF NOT EXISTS project_events (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  project_id INTEGER NOT NULL,
+  stage TEXT,
+  note TEXT NOT NULL,
+  author TEXT NOT NULL DEFAULT 'goluq',   -- goluq | customer
+  visible INTEGER NOT NULL DEFAULT 1,
+  created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_events_project ON project_events(project_id);
+
+CREATE TABLE IF NOT EXISTS project_files (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  project_id INTEGER NOT NULL,
+  label TEXT NOT NULL,
+  url TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_files_project ON project_files(project_id);

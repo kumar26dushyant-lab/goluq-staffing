@@ -18,6 +18,10 @@ const Services = lazy(() =>
   import("./pages/Services").then((m) => ({ default: m.Services }))
 );
 
+const Portal = lazy(() =>
+  import("./pages/Portal").then((m) => ({ default: m.Portal }))
+);
+
 const BuildPractice = lazy(() =>
   import("./pages/BuildPractice").then((m) => ({ default: m.BuildPractice }))
 );
@@ -28,7 +32,7 @@ const BuildPractice = lazy(() =>
  */
 function VisitorWhatsApp() {
   const { pathname } = useLocation();
-  if (pathname.startsWith("/admin") || pathname.startsWith("/partner")) return null;
+  if (pathname.startsWith("/admin") || pathname.startsWith("/partner") || pathname.startsWith("/portal")) return null;
   return <WhatsAppCta variant="fab" context={pathname.startsWith("/build") ? "build" : "general"} />;
 }
 
@@ -88,6 +92,14 @@ export default function App() {
           element={
             <Suspense fallback={<div className="min-h-dvh" />}>
               <Services />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/portal"
+          element={
+            <Suspense fallback={<div className="min-h-dvh" />}>
+              <Portal />
             </Suspense>
           }
         />

@@ -36,6 +36,9 @@ export function AssistantChat() {
   const { say } = useVoice();
   const { pathname } = useLocation();
   const page = pageFromPath(pathname);
+  // The portal is for customers who have already bought. A sales guide popping
+  // up at someone mid-project reads as a company that does not know who they are.
+  const hidden = pathname.startsWith("/portal");
 
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMsg[]>([]);
@@ -166,6 +169,10 @@ export function AssistantChat() {
     dismissTeaser();
     setOpen(true);
   };
+
+  // After every hook has run — bailing earlier would change the hook order
+  // between routes, which React treats as a fatal error.
+  if (hidden) return null;
 
   return (
     <>

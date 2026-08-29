@@ -2,9 +2,10 @@ import { Fragment, useCallback, useEffect, useState } from "react";
 import {
   LayoutDashboard, Users, TrendingUp, MessageSquare, Settings as SettingsIcon,
   LogOut, Search, Download, Trash2, RefreshCw, Send, ShieldCheck, Circle,
-  BarChart3, ChevronDown, IndianRupee, Bot, Radio, Mail, FileText,
+  BarChart3, ChevronDown, IndianRupee, Bot, Radio, Mail, FileText, Briefcase,
 } from "lucide-react";
 import { Button } from "../components/ui/Button";
+import { Projects } from "../components/admin/Projects";
 import { BrandMark } from "../components/BrandMark";
 import { useTranslation } from "react-i18next";
 import { inputClass } from "../lib/ui";
@@ -17,7 +18,7 @@ import {
 
 type Section =
   | "overview" | "leads" | "chat" | "visitors" | "pricing"
-  | "bot" | "content" | "inbox" | "affiliates" | "whatsapp" | "settings";
+  | "bot" | "content" | "inbox" | "affiliates" | "whatsapp" | "projects" | "settings";
 
 export function Admin() {
   const [authed, setAuthed] = useState(false);
@@ -53,6 +54,7 @@ export function Admin() {
     { id: "bot", label: "Bot", icon: Bot },
     { id: "affiliates", label: "Affiliates", icon: TrendingUp },
     { id: "whatsapp", label: "WhatsApp", icon: MessageSquare },
+    { id: "projects", label: "Projects", icon: Briefcase },
     { id: "settings", label: "Settings", icon: SettingsIcon },
   ];
 
@@ -98,6 +100,7 @@ export function Admin() {
         {section === "bot" && <BotPanel />}
         {section === "affiliates" && <Affiliates />}
         {section === "whatsapp" && <WhatsApp />}
+        {section === "projects" && <Projects />}
         {section === "settings" && <SettingsPanel />}
       </main>
     </div>
