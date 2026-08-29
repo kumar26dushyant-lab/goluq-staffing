@@ -1,0 +1,239 @@
+/// <reference types="@cloudflare/workers-types" />
+
+import { conciergeReply, type ConciergeEnv, type ConciergeMsg } from "../../lib/concierge";
+import { classifyReply } from "../../lib/gemini";
+import { sendMail, mailEnabled, type MailEnv } from "../../lib/mailer";
+import { getOwnerEmail } from "../../lib/settings";
+import {
+  waConfig, waReady, waSendText, waMarkRead, waVerifySignature, type WaEnv, type WaConfig,
+} from "../../lib/whatsapp";
+
+interface Env extends ConciergeEnv, WaEnv, MailEnv {
+  DB: D1Database;
+}
+
+/** One WhatsApp thread per phone number, stored beside the website chats. */
+const sessionFor = (phone: string) => `wa:${phone}`;
+
+interface Inbound {
+  id: string;
+  from: string;
+  text: string;
+  name: string;
+}
+
+/** Pull the text messages out of a Meta webhook payload; ignore everything else. */
+function parseInbound(body: any): Inbound[] {
+  const out: Inbound[] = [];
+  for (const entry of body?.entry || []) {
+    for (const change of entry?.changes || []) {
+      const v = change?.value;
+      // Delivery and read receipts arrive on this same hook and are not messages.
+      if (!v?.messages) continue;
+      const nameOf = (wa: string) =>
+        (v.contacts || []).find((c: any) => c?.wa_id === wa)?.profile?.name || "";
+      for (const m of v.messages) {
+        const text =
+          m?.text?.body ||
+          m?.button?.text ||
+          m?.interactive?.button_reply?.title ||
+          m?.interactive?.list_reply?.title ||
+          "";
+        if (!m?.id || !m?.from) continue;
+        out.push({ id: m.id, from: String(m.from), text: String(text), name: nameOf(m.from) });
+      }
+    }
+  }
+  return out;
+}
+
+/**
+ * Devanagari in the message is the only reliable signal available; a phone
+ * number says nothing about which language its owner writes in. Otherwise keep
+ * whatever the thread has been using, so one English word cannot flip it.
+ */
+function langFor(text: string, previous: string | null): string {
+  if (/[ऀ-ॿ]/.test(text)) return "hi";
+  return previous === "hi" && !/[a-zA-Z]{4,}/.test(text) ? "hi" : "en";
+}
+
+/** Meta retries a webhook until it gets a 200; without this the guide replies twice. */
+async function alreadyHandled(db: D1Database, id: string): Promise<boolean> {
+  try {
+    const r = await db
+      .prepare("INSERT OR IGNORE INTO wa_events (id, created_at) VALUES (?, datetime('now'))")
+      .bind(id)
+      .run();
+    // Zero rows changed → the id was already stored → this is a retry.
+    return (r as any)?.meta?.changes === 0;
+  } catch {
+    return false; // never drop a real customer message over bookkeeping
+  }
+}
+
+/**
+ * Webhook verification. Meta calls this once when the callback URL is saved and
+ * expects the challenge echoed back as plain text.
+ */
+export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
+  const u = new URL(request.url);
+  const mode = u.searchParams.get("hub.mode");
+  const token = u.searchParams.get("hub.verify_token");
+  const challenge = u.searchParams.get("hub.challenge") || "";
+  const cfg = await waConfig(env.DB, env);
+  if (mode === "subscribe" && cfg.verifyToken && token === cfg.verifyToken) {
+    return new Response(challenge, { status: 200, headers: { "content-type": "text/plain" } });
+  }
+  return new Response("forbidden", { status: 403 });
+};
+
+/**
+ * Inbound WhatsApp messages on the verified WABA → the same GoLuQ guide that
+ * answers on the website, replying 24x7 from the business number.
+ *
+ * Every path returns 200. A non-200 makes Meta retry the same payload for hours
+ * and can get the webhook disabled outright, so failures are logged and
+ * swallowed rather than surfaced.
+ */
+export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
+  const raw = await request.text();
+  const cfg = await waConfig(env.DB, env);
+
+  // Anyone who learned this URL could otherwise make the guide talk to strangers
+  // on our bill. Once an app secret is set, an unsigned request is refused.
+  if (cfg.appSecret) {
+    const ok = await waVerifySignature(cfg, raw, request.headers.get("x-hub-signature-256"));
+    if (!ok) return new Response("bad signature", { status: 403 });
+  }
+
+  let body: any = {};
+  try {
+    body = JSON.parse(raw);
+  } catch {
+    return new Response("ok");
+  }
+
+  const messages = parseInbound(body);
+  if (!messages.length || !waReady(cfg)) return new Response("ok");
+
+  for (const m of messages) {
+    try {
+      if (await alreadyHandled(env.DB, m.id)) continue;
+      await handleMessage(env, cfg, m);
+    } catch (e) {
+      console.log("wa inbound failed:", String(e).slice(0, 300));
+    }
+  }
+  return new Response("ok");
+};
+
+async function handleMessage(env: Env, cfg: WaConfig, m: Inbound): Promise<void> {
+  const sid = sessionFor(m.from);
+  const db = env.DB;
+
+  const prior = await db
+    .prepare("SELECT lang, closed, agent_joined FROM chat_sessions WHERE id = ?")
+    .bind(sid)
+    .first<{ lang: string | null; closed: number; agent_joined: number }>();
+  const isNew = !prior;
+  const lang = langFor(m.text, prior?.lang ?? null);
+
+  await db
+    .prepare(
+      `INSERT INTO chat_sessions (id, created_at, last_at, page, lang, visitor_name, visitor_phone)
+       VALUES (?, datetime('now'), datetime('now'), 'whatsapp', ?, ?, ?)
+       ON CONFLICT(id) DO UPDATE SET
+         last_at = datetime('now'),
+         lang = excluded.lang,
+         unread_for_agent = unread_for_agent + 1,
+         visitor_name = COALESCE(NULLIF(chat_sessions.visitor_name, ''), excluded.visitor_name)`
+    )
+    .bind(sid, lang, m.name, m.from)
+    .run();
+
+  await db
+    .prepare(
+      `INSERT INTO chat_messages (session_id, role, content, created_at)
+       VALUES (?, 'visitor', ?, datetime('now'))`
+    )
+    .bind(sid, m.text.slice(0, 2000))
+    .run();
+
+  await waMarkRead(cfg, m.id);
+
+  // Someone asking to be left alone is asking once. Honour it, confirm it, and
+  // never let the guide speak to them again.
+  if ((await classifyReply(env, m.text)) === "stop") {
+    await db.prepare("UPDATE chat_sessions SET closed = 1 WHERE id = ?").bind(sid).run();
+    await waSendText(
+      cfg,
+      m.from,
+      lang === "hi"
+        ? "ठीक है, अब आपको हमारी ओर से कोई संदेश नहीं आएगा। ज़रूरत हो तो कभी भी लिख दीजिए।"
+        : "Done — you won't hear from us again. Message any time if you need us."
+    );
+    return;
+  }
+
+  // A real person has taken this thread over; the guide must not talk over them.
+  if (prior?.agent_joined) {
+    await notifyOwner(env, m, "reply on a thread you joined");
+    return;
+  }
+  if (prior?.closed) return;
+
+  const history = await db
+    .prepare("SELECT role, content FROM chat_messages WHERE session_id = ? ORDER BY id DESC LIMIT 10")
+    .bind(sid)
+    .all<{ role: string; content: string }>();
+
+  const msgs: ConciergeMsg[] = (history.results || [])
+    .reverse()
+    .map((r) => ({ role: r.role === "visitor" ? "user" : "assistant", content: r.content }));
+
+  const reply = await conciergeReply(env, {
+    messages: msgs,
+    lang,
+    context:
+      "\nThe customer is messaging the GoLuQ business number on WhatsApp, so keep replies SHORT — two or three lines, the way people actually message. " +
+      "They came to us, which means they already have something in mind: find out what business they run and what they need, then name a price. " +
+      "You cannot show them a demo here, so close on either a quote or a call from a real person.",
+  });
+
+  const sent = await waSendText(cfg, m.from, reply);
+  if (!sent.ok) {
+    // Almost always the 24-hour window: free-form text is only deliverable
+    // within 24h of the customer's last message. Nothing here is retryable.
+    console.log("wa reply not delivered:", sent.error);
+    return;
+  }
+
+  await db
+    .prepare(
+      `INSERT INTO chat_messages (session_id, role, content, created_at)
+       VALUES (?, 'guide', ?, datetime('now'))`
+    )
+    .bind(sid, reply.slice(0, 2000))
+    .run();
+
+  if (isNew) await notifyOwner(env, m, "new WhatsApp conversation");
+}
+
+/** Tell the owner by email; a WhatsApp lead is worth interrupting someone for. */
+async function notifyOwner(env: Env, m: Inbound, why: string): Promise<void> {
+  const to = await getOwnerEmail(env.DB);
+  if (!to || !mailEnabled(env)) return;
+  const sent = await sendMail(env, {
+    to,
+    subject: `WhatsApp — ${why}${m.name ? ` (${m.name})` : ""}`,
+    text:
+      `${m.name || "Someone"} messaged the GoLuQ WhatsApp number.\n\n` +
+      `From: +${m.from}\n` +
+      `Message: ${m.text}\n\n` +
+      `Reply on WhatsApp: https://wa.me/${m.from}\n` +
+      `Or take over the thread in the cockpit: https://goluq.com/admin\n`,
+  });
+  // sendMail reports failure in its result rather than throwing — the same shape
+  // that has silently swallowed two bugs in this codebase already.
+  if (!sent.ok) console.log("wa owner alert not sent:", sent.error);
+}

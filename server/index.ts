@@ -27,6 +27,7 @@ import { onRequestGet as adminAffiliates } from "../functions/api/admin/affiliat
 import { onRequestGet as adminSettingsGet, onRequestPost as adminSettingsPost } from "../functions/api/admin/settings";
 import { onRequest as cronFollowups } from "../functions/api/cron/followups";
 import { onRequestPost as waWebhook } from "../functions/api/wa/webhook";
+import { onRequestGet as waMetaVerify, onRequestPost as waMetaInbound } from "../functions/api/wa/meta";
 import { onRequestPost as track } from "../functions/api/track";
 import { onRequestGet as adminVisitors } from "../functions/api/admin/visitors";
 import { onRequestPost as chat } from "../functions/api/chat";
@@ -86,6 +87,12 @@ const env = {
   MAIL_API_KEY: process.env.MAIL_API_KEY,
   MAIL_FROM: process.env.MAIL_FROM,
   MAIL_PROVIDER: process.env.MAIL_PROVIDER,
+  // Official WhatsApp Business Platform. Env wins; anything omitted here is
+  // read from the cockpit settings instead (functions/lib/whatsapp.ts).
+  WA_PHONE_NUMBER_ID: process.env.WA_PHONE_NUMBER_ID,
+  WA_ACCESS_TOKEN: process.env.WA_ACCESS_TOKEN,
+  WA_VERIFY_TOKEN: process.env.WA_VERIFY_TOKEN,
+  WA_APP_SECRET: process.env.WA_APP_SECRET,
 } as Record<string, unknown>;
 
 type Handler = (ctx: unknown) => Response | Promise<Response>;
@@ -229,6 +236,11 @@ app.get("/api/admin/settings", (c) => callFn(adminSettingsGet as Handler, c.req.
 app.post("/api/admin/settings", (c) => callFn(adminSettingsPost as Handler, c.req.raw));
 app.all("/api/cron/followups", (c) => callFn(cronFollowups as Handler, c.req.raw));
 app.post("/api/wa/webhook", (c) => callFn(waWebhook as Handler, c.req.raw));
+// Official WhatsApp Business Platform. GET is Meta verifying the callback URL,
+// POST is a real customer message. Both must live at the SAME path — that single
+// URL is what gets pasted into the Meta dashboard.
+app.get("/api/wa/meta", (c) => callFn(waMetaVerify as Handler, c.req.raw));
+app.post("/api/wa/meta", (c) => callFn(waMetaInbound as Handler, c.req.raw));
 app.all("/api/*", (c) => c.json({ ok: false, error: "not_found" }, 404));
 
 // ── Static SPA (dist) + client-route fallback ───────────────────────────────

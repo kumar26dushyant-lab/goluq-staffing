@@ -1250,7 +1250,131 @@ function SettingsPanel() {
         {saved && <span className="ml-3 text-sm text-muted">{saved}</span>}</div>
       </div>
 
+      <WhatsAppBusiness />
       <AffiliateRates />
+    </div>
+  );
+}
+
+/**
+ * The verified WhatsApp Business number (Meta Cloud API).
+ *
+ * Once these four values are in, the same guide that answers on the website
+ * answers on WhatsApp, 24x7, from the business number — and every conversation
+ * lands in Chats beside the website ones.
+ *
+ * The token and app secret are write-only: the server never sends them back, so
+ * this form shows whether each is set and leaves the box blank. Submitting an
+ * empty box therefore means "leave it alone", never "erase it".
+ */
+function WhatsAppBusiness() {
+  const [phoneId, setPhoneId] = useState("");
+  const [verify, setVerify] = useState("");
+  const [token, setToken] = useState("");
+  const [secret, setSecret] = useState("");
+  const [hasToken, setHasToken] = useState(false);
+  const [hasSecret, setHasSecret] = useState(false);
+  const [saved, setSaved] = useState("");
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    adminGet("/api/admin/settings").then((d) => {
+      setPhoneId(d.wa_phone_number_id || "");
+      setVerify(d.wa_verify_token || "");
+      setHasToken(Boolean(d.wa_access_token_set));
+      setHasSecret(Boolean(d.wa_app_secret_set));
+      setLoaded(true);
+    });
+  }, []);
+
+  const save = async () => {
+    if (!loaded) return;
+    setSaved("");
+    const d = await adminPost("/api/admin/settings", {
+      wa_phone_number_id: phoneId,
+      wa_verify_token: verify,
+      // Only sent when actually typed — see the note above.
+      ...(token ? { wa_access_token: token } : {}),
+      ...(secret ? { wa_app_secret: secret } : {}),
+    });
+    if (d.ok) {
+      if (token) setHasToken(true);
+      if (secret) setHasSecret(true);
+      setToken("");
+      setSecret("");
+    }
+    setSaved(d.ok ? "Saved ✅" : "Failed");
+  };
+
+  const live = Boolean(phoneId) && hasToken;
+
+  return (
+    <div className="glass space-y-5 rounded-2xl p-6">
+      <div>
+        <h3 className="font-display text-lg font-bold text-fg">WhatsApp Business (official)</h3>
+        <p className="mt-1 text-sm text-muted">
+          {live
+            ? "Connected. The guide answers customers on your verified number."
+            : "Not connected yet. Paste the four values from your Meta app below."}
+        </p>
+      </div>
+
+      <label className="block">
+        <span className="mb-1.5 block text-base font-semibold text-fg">Phone number ID</span>
+        <span className="mb-2 block text-sm text-muted">
+          Meta → WhatsApp → API Setup. A long number — not your phone number itself.
+        </span>
+        <input className={inputClass} value={phoneId} onChange={(e) => setPhoneId(e.target.value)} placeholder="1234567890123456" />
+      </label>
+
+      <label className="block">
+        <span className="mb-1.5 block text-base font-semibold text-fg">Verify token</span>
+        <span className="mb-2 block text-sm text-muted">
+          Any phrase you invent. Save it here first, then type the same phrase into Meta when it
+          asks — it is only used to prove the two ends belong to each other.
+        </span>
+        <input className={inputClass} value={verify} onChange={(e) => setVerify(e.target.value)} placeholder="a phrase only you know" />
+      </label>
+
+      <label className="block">
+        <span className="mb-1.5 block text-base font-semibold text-fg">
+          Permanent access token {hasToken && <span className="text-success">· set</span>}
+        </span>
+        <span className="mb-2 block text-sm text-muted">
+          From a System User in Business Settings. The temporary 24-hour test token will stop
+          working tomorrow — use the permanent one. Leave blank to keep the current token.
+        </span>
+        <input className={inputClass} type="password" value={token} onChange={(e) => setToken(e.target.value)} placeholder={hasToken ? "•••••••• (unchanged)" : "EAAG..."} />
+      </label>
+
+      <label className="block">
+        <span className="mb-1.5 block text-base font-semibold text-fg">
+          App secret {hasSecret && <span className="text-success">· set</span>}
+        </span>
+        <span className="mb-2 block text-sm text-muted">
+          Meta → App Settings → Basic. This proves an incoming message really came from Meta.
+          Until it is set, anyone who guesses the webhook address could make the guide reply to
+          strangers at your cost — so set it.
+        </span>
+        <input className={inputClass} type="password" value={secret} onChange={(e) => setSecret(e.target.value)} placeholder={hasSecret ? "•••••••• (unchanged)" : "app secret"} />
+      </label>
+
+      <div className="rounded-xl border border-hairline/15 bg-panel/40 p-4">
+        <p className="text-sm font-semibold text-fg">Callback URL to paste into Meta</p>
+        <code className="mt-1 block break-all text-sm text-brand-luq">https://goluq.com/api/wa/meta</code>
+        <p className="mt-2 text-sm text-muted">
+          Subscribe to the <b>messages</b> field. Save these settings before you verify in Meta,
+          or the check will fail.
+        </p>
+      </div>
+
+      <div>
+        <Button onClick={save} disabled={!loaded}>
+          <ShieldCheck size={16} /> Save WhatsApp settings
+        </Button>
+        {!loaded && <span className="ml-3 text-sm text-faint">Loading…</span>}
+        {saved && <span className="ml-3 text-sm text-muted">{saved}</span>}
+      </div>
     </div>
   );
 }

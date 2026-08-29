@@ -210,3 +210,12 @@ CREATE TABLE IF NOT EXISTS commissions (
 CREATE INDEX IF NOT EXISTS idx_hits_code ON ref_hits(code);
 CREATE INDEX IF NOT EXISTS idx_comm_code ON commissions(affiliate_code);
 CREATE INDEX IF NOT EXISTS idx_leads_ref ON leads(ref_code);
+
+-- Message ids already handled from the WhatsApp Cloud API. Meta retries a
+-- webhook until it receives a 200, so without this the guide answers the same
+-- customer message two or three times.
+CREATE TABLE IF NOT EXISTS wa_events (
+  id TEXT PRIMARY KEY,
+  created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_waevents_at ON wa_events(created_at);
