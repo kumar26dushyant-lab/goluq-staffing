@@ -185,17 +185,11 @@ Kept in priority order. Done items stay for a while so the history is visible.
       appended descriptor.
 
 ### Next
-- [ ] Decide the call channel (section 3).
 - [ ] Confirm real comms costs, then correct the prices in the cockpit.
 - [ ] Create and submit WhatsApp message templates — nothing outbound can reach
       anyone outside the 24-hour window until these are approved.
 - [ ] "Client login" entry point so customers can find `/portal` without a link.
-- [ ] **Homepage hero: comms-first.** Decided 2026-08-30 — lead with WhatsApp /
-      SMS / voice / toll-free, because a tier-2 owner already knows what those
-      are, while "Digital Receptionist" needs explaining first. The talking demo
-      moves below the fold rather than being removed.
-- [ ] Real hero stats, not invented ones. Use 2,000+ claims settled · 95%
-      success · 4 offices — all true and all citable.
+- [ ] Decide the call channel (section 3) — still open.
 
 ### Later
 - [ ] Exotel provisioning, once a customer has paid.
@@ -203,6 +197,7 @@ Kept in priority order. Done items stay for a while so the history is visible.
 - [ ] Cloudflare inbound email routing (parked).
 
 ### Done
+- [x] Comms-first homepage hero, real stats, live-price phone transcript
 - [x] Per-market pricing and currency, page and guide in step (section 3a)
 - [x] Communication catalogue at `/services`, sellable by the guide (Phase A)
 - [x] WhatsApp guide on the verified WABA (Phase B)
