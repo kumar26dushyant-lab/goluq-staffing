@@ -125,7 +125,7 @@ D1 shim over better-sqlite3.
 | Partner / affiliate programme | `/partner` | live |
 | Owner cockpit | `/admin` | live, installable as an app |
 | Customer portal (7 SDLC stages) | `/portal` | live |
-| WhatsApp guide (Meta Cloud API) | `/api/wa/meta` | live, awaiting live test |
+| WhatsApp guide (Meta Cloud API) | `/api/wa/meta` | **live and verified end to end** |
 
 **The guide** — one persona and one live price list shared by the website and
 WhatsApp, read per-request from the `pricing` table so a cockpit edit reaches
@@ -171,7 +171,7 @@ chat-only, live calling starts at ₹4,999.
   trivially substantiated, whereas an appended category like "Digital
   Consultancy" has to be evidenced and usually is not.
 
-### Webhook diagnosis, 2026-08-30
+### Webhook diagnosis, 2026-08-30 — RESOLVED
 Everything on our side and in the app config is correct:
 - Meta verified the callback URL (200 to their `facebookplatform` GET).
 - App subscription is live: `whatsapp_business_account` →
@@ -181,7 +181,19 @@ Everything on our side and in the app config is correct:
   (839673715804540) — the System User is merely *named* "sarathi wa", so
   nothing needs unplugging from Sarathi.
 
-And yet **Meta has never POSTed a single message**: nginx shows zero requests
+**Root cause: the WABA was subscribed to no app at all** —
+`GET /{waba-id}/subscribed_apps` returned an empty list. Meta reports this
+nowhere in the dashboard and raises no error; it simply forwards nothing. Fixed
+with `POST /{waba-id}/subscribed_apps`, and the cockpit now checks it on every
+"Check connection" so it can never be invisible again.
+
+WABA id: `1942085573135209` · phone number id: `1259819740549744`.
+
+The history below is kept because the sequence is what made the cause findable:
+app config was correct throughout, which is exactly why the account-level switch
+was the last place anyone looked.
+
+**Meta had never POSTed a single message**: nginx shows zero requests
 from Facebook to the webhook, `wa_events` is empty, and no `wa:` conversation
 exists. Outbound works; inbound has never happened. Remaining causes, in order:
 1. The app is in **Development mode**, which forwards webhooks only for
@@ -197,22 +209,16 @@ exists. Outbound works; inbound has never happened. Remaining causes, in order:
 
 Kept in priority order. Done items stay for a while so the history is visible.
 
-### Blocking
-- [ ] **Publish the Meta app (Development → Live).** URLs it asks for, all live:
-      Privacy Policy `https://goluq.com/privacy` · Terms `https://goluq.com/terms`
-      · Data deletion `https://goluq.com/privacy#deletion`. Also needs an app
-      icon (1024×1024) and a category.
-- [ ] **Switch the Meta app from Development to Live**, and confirm the WhatsApp
-      account is subscribed to the app. Everything else is verified correct;
-      this is the only thing left that explains zero inbound. See section 6.
-- [ ] Resubmit the display name as **GoLuQ** or **GoLuQ.com** (currently
-      DECLINED). Does not block messaging.
+### Blocking (none — WhatsApp is live)
+- [ ] Retry the display name as plain **GoLuQ** once the post-decline cooldown
+      lifts (the Edit control is unresponsive until then). Does not block
+      messaging — the number is GREEN and sending works; customers simply see
+      the number instead of a name.
 
 ### Next
 - [ ] Confirm real comms costs, then correct the prices in the cockpit.
 - [ ] Create and submit WhatsApp message templates — nothing outbound can reach
       anyone outside the 24-hour window until these are approved.
-- [ ] "Client login" entry point so customers can find `/portal` without a link.
 - [ ] Decide the call channel (section 3) — still open.
 
 ### Later
@@ -221,6 +227,10 @@ Kept in priority order. Done items stay for a while so the history is visible.
 - [ ] Cloudflare inbound email routing (parked).
 
 ### Done
+- [x] **WhatsApp guide live and verified** — real conversation received, answered
+      and stored, 2026-08-30
+- [x] Meta app published; WABA subscribed to the app
+- [x] Client login reachable from the site footer
 - [x] Real Privacy Policy and Terms at /privacy and /terms (no-JS, reviewable)
 - [x] Public WhatsApp number set and verified live on the site
 - [x] Cockpit shows inbound webhook health, not just "credentials valid"
