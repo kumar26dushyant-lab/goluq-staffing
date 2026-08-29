@@ -1,9 +1,17 @@
 import { useEffect, useState } from "react";
-import { CATALOGUE, type Offering, type TierId } from "../content/catalogue";
+import { CATALOGUE, type Offering } from "../content/catalogue";
 import { applyContentOverrides } from "./content";
 
 export interface LivePrice {
-  id: TierId;
+  /**
+   * Deliberately `string`, not `TierId`. This row comes from the server, where
+   * the owner can add services the front-end has never heard of — and did: the
+   * comms catalogue added seven ids outside the tier union. While this was typed
+   * `TierId`, every `SOMETHING[o.id]` lookup looked total to the compiler and
+   * silently produced `undefined` at runtime, which took the homepage down.
+   * Consumers must now narrow explicitly before indexing anything by id.
+   */
+  id: string;
   fromInr: number;
   recurring: boolean;
   leadTime: string;

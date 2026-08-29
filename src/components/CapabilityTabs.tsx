@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { CATALOGUE as SEED, inr, type TierId } from "../content/catalogue";
-import { usePricing } from "../lib/siteConfig";
+import { usePricing, type LivePrice } from "../lib/siteConfig";
 import { Button } from "./ui/Button";
 
 /** Which funnel each tier hands off to. Structural, so it stays in code. */
@@ -58,10 +58,18 @@ export function CapabilityTabs({
   const { t } = useTranslation();
   const reduced = useReducedMotion();
   // Live from /api/config so cockpit price + offer edits show up without a deploy.
-  const CATALOGUE = usePricing();
+  //
+  // Restricted to ids this component has an icon for. The server also returns
+  // the communication services (toll-free, SMS, WhatsApp API …), which belong on
+  // /services and have no tab here — before this filter they reached `ICONS[o.id]`
+  // as `undefined` and crashed the entire homepage. Anything the owner adds in
+  // the cockpit is now ignored here rather than fatal.
+  const CATALOGUE = usePricing().filter((o): o is LivePrice & { id: TierId } => o.id in ICONS);
   const [active, setActive] = useState<TierId>("automation");
 
   const offering = CATALOGUE.find((o) => o.id === active) ?? CATALOGUE[0];
+  // Nothing to show rather than a half-rendered panel off an undefined row.
+  if (!offering) return null;
   const Icon = ICONS[active];
   const bullets = t(`catalogue.items.${active}.b`, { returnObjects: true }) as string[];
 
