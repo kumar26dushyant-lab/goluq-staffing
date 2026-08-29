@@ -8,8 +8,7 @@ import { useTranslation } from "react-i18next";
 import { TopBar } from "../components/TopBar";
 import { Button } from "../components/ui/Button";
 import { WhatsAppCta } from "../components/WhatsAppCta";
-import { inr } from "../content/catalogue";
-import { usePricing } from "../lib/siteConfig";
+import { usePricing, useMoney } from "../lib/siteConfig";
 
 /** Service id → icon. Order here is the order on the page. */
 const ICONS: Record<string, LucideIcon> = {
@@ -39,6 +38,7 @@ export function Services() {
   const navigate = useNavigate();
   const reduced = useReducedMotion();
   const pricing = usePricing();
+  const money = useMoney();
 
   const ids = Object.keys(ICONS).filter((id) => pricing.some((p) => p.id === id));
   const priceOf = (id: string) => pricing.find((p) => p.id === id);
@@ -134,10 +134,10 @@ export function Services() {
                         {t("comms.setupLabel")}
                       </p>
                       <p className="text-gradient-accent font-display text-2xl font-bold tabular-nums">
-                        {inr(p.offerInr || p.fromInr)}
-                        {p.offerInr && (
+                        {money(p.offer ?? p.from)}
+                        {p.offer != null && (
                           <span className="ml-2 font-display text-base text-faint line-through">
-                            {inr(p.fromInr)}
+                            {money(p.from)}
                           </span>
                         )}
                       </p>

@@ -17,8 +17,8 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { CATALOGUE as SEED, inr, type TierId } from "../content/catalogue";
-import { usePricing, type LivePrice } from "../lib/siteConfig";
+import { CATALOGUE as SEED, type TierId } from "../content/catalogue";
+import { usePricing, useMoney, type LivePrice } from "../lib/siteConfig";
 import { Button } from "./ui/Button";
 
 /** Which funnel each tier hands off to. Structural, so it stays in code. */
@@ -64,6 +64,7 @@ export function CapabilityTabs({
   // /services and have no tab here — before this filter they reached `ICONS[o.id]`
   // as `undefined` and crashed the entire homepage. Anything the owner adds in
   // the cockpit is now ignored here rather than fatal.
+  const money = useMoney();
   const CATALOGUE = usePricing().filter((o): o is LivePrice & { id: TierId } => o.id in ICONS);
   const [active, setActive] = useState<TierId>("automation");
 
@@ -160,14 +161,14 @@ export function CapabilityTabs({
               </p>
               {/* An active offer strikes through the normal price rather than
                   replacing it — the saving has to be visible to do any work. */}
-              {offering.offerInr ? (
+              {offering.offer != null ? (
                 <>
                   <p className="mt-1 flex flex-wrap items-baseline gap-2">
                     <span className="text-gradient-accent font-display text-3xl font-bold tabular-nums sm:text-4xl">
-                      {inr(offering.offerInr)}
+                      {money(offering.offer ?? offering.from)}
                     </span>
                     <span className="font-display text-xl text-faint line-through tabular-nums">
-                      {inr(offering.fromInr)}
+                      {money(offering.from)}
                     </span>
                   </p>
                   {offering.offerLabel && (
@@ -178,7 +179,7 @@ export function CapabilityTabs({
                 </>
               ) : (
                 <p className="text-gradient-accent mt-1 font-display text-3xl font-bold tabular-nums sm:text-4xl">
-                  {inr(offering.fromInr)}
+                  {money(offering.from)}
                 </p>
               )}
               <p className="text-base font-semibold text-muted">

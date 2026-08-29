@@ -1,8 +1,9 @@
 /// <reference types="@cloudflare/workers-types" />
 
 import { getSetting } from "../lib/settings";
-import { getPricing } from "../lib/pricing";
+import { getPricing, EXTRA_PRICES } from "../lib/pricing";
 import { getRates } from "../lib/affiliateRates";
+import { resolveMarket, convert } from "../lib/markets";
 
 interface Env {
   DB: D1Database;
@@ -29,17 +30,26 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     getSetting(env.DB, "announcement"),
   ]);
 
+  // The visitor sees their own money. Converted HERE rather than in the browser
+  // so the guide quotes exactly what the page prints — a chat saying ₹9,999
+  // beside a page saying AED 1,699 loses the customer in one message.
+  const { market, multiplier, resolved } = await resolveMarket(env.DB, country);
+
   let pricing: unknown[] = [];
   try {
     pricing = (await getPricing(env.DB))
       .filter((r) => r.enabled)
       .map((r) => ({
         id: r.id,
+        // fromInr stays the rupee figure the owner typed in the cockpit;
+        // `from` is what this visitor should actually be shown.
         fromInr: r.price_inr,
+        from: convert(r.price_inr, market, multiplier),
         recurring: !!r.recurring,
         leadTime: r.lead_time,
         offerLabel: r.offer_label || null,
         offerInr: r.offer_price_inr || null,
+        offer: r.offer_price_inr ? convert(r.offer_price_inr, market, multiplier) : null,
       }));
   } catch {
     // Site must render even if the pricing table is unavailable.
@@ -64,6 +74,9 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     ok: true,
     whatsapp: whatsapp || "",
     country,
+    market: resolved,
+    // Converted server-side like every other price, for the same reason.
+    extras: { voiceLite: convert(EXTRA_PRICES.voiceLite, market, multiplier) },
     affiliate: rates,
     chatEnabled: chatEnabled !== "0",
     announcement: announcement || "",

@@ -4,7 +4,7 @@ import { CheckCircle2, ArrowRight, RotateCcw, Phone, MessageCircle, Users, India
 import { useTranslation } from "react-i18next";
 import { getScenario } from "../content/scenarios";
 import { planById } from "../content/affiliateConfig";
-import { inr } from "../content/catalogue";
+import { useSiteConfig, useMoney } from "../lib/siteConfig";
 import { getDialogue, type Turn } from "../content/dialogues";
 import { CallStage } from "../components/CallStage";
 import { StageAssistant } from "../components/StageAssistant";
@@ -48,6 +48,10 @@ export function Simulation({
   const { t, i18n } = useTranslation();
   const lang = i18n.language.startsWith("hi") ? "hi" : "en";
   const reduced = useReducedMotion();
+  // The voice plan in this visitor's currency; the server converts it, exactly
+  // like every catalogue price.
+  const cfg = useSiteConfig();
+  const money = useMoney();
   const scenario = getScenario(role, industry);
   const dialogue = getDialogue(role, industry);
   const channel = channelFor(role);
@@ -159,7 +163,7 @@ export function Simulation({
               <p className="font-display text-base font-bold text-fg">{t("call.pricingTitle")}</p>
               <p className="mt-1.5 text-sm leading-relaxed text-muted sm:text-base">
                 {t("call.pricingBody", {
-                  p: inr(VOICE_PLAN.priceInr),
+                  p: money(cfg?.extras.voiceLite ?? VOICE_PLAN.priceInr),
                   c: VOICE_PLAN.cap,
                 })}
               </p>

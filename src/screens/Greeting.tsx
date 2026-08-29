@@ -2,7 +2,8 @@ import { motion, useReducedMotion } from "framer-motion";
 import { GraduationCap, Zap } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { CapabilityTabs } from "../components/CapabilityTabs";
-import { ENTRY_PRICE_INR, inr } from "../content/catalogue";
+import { ENTRY_PRICE_INR } from "../content/catalogue";
+import { usePricing, useMoney } from "../lib/siteConfig";
 import { HeroWordmark } from "../components/HeroWordmark";
 import { StageAssistant } from "../components/StageAssistant";
 import { RoleSlots } from "../components/RoleSlots";
@@ -24,6 +25,12 @@ import type { RoleId } from "../state/useAppState";
  * assistant, then role deploy-slots beside a live instrument readout.
  */
 export function Greeting({ onPickRole }: { onPickRole: (id: RoleId) => void }) {
+  const money = useMoney();
+  const pricing = usePricing();
+  // Cheapest one-off thing we sell, in this visitor's money. Falls back to the
+  // bundled rupee figure only if the live list is unavailable.
+  const oneOff = pricing.filter((p) => !p.recurring).map((p) => p.from);
+  const entryPrice = oneOff.length ? Math.min(...oneOff) : ENTRY_PRICE_INR;
   const { t } = useTranslation();
   const reduced = useReducedMotion();
 
@@ -73,7 +80,7 @@ export function Greeting({ onPickRole }: { onPickRole: (id: RoleId) => void }) {
           <Zap size={18} className="shrink-0 text-brand-luq" />
           {t("catalogue.hook")}
           <span className="text-brand-luq">
-            {t("catalogue.hookPrice", { p: inr(ENTRY_PRICE_INR) })}
+            {t("catalogue.hookPrice", { p: money(entryPrice) })}
           </span>
         </motion.p>
       </div>

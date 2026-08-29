@@ -57,6 +57,27 @@ function langFor(text: string, previous: string | null): string {
   return previous === "hi" && !/[a-zA-Z]{4,}/.test(text) ? "hi" : "en";
 }
 
+/**
+ * A Meta webhook carries no cf-ipcountry, so the dialling code is the only clue
+ * to which market this person is in — and getting it wrong means quoting a
+ * Dubai customer in rupees. Only the codes we actually price for are mapped;
+ * anything else falls through to the default market rather than guessing.
+ */
+function countryFromPhone(phone: string): string {
+  const p = String(phone || "");
+  const CODES: [string, string][] = [
+    ["91", "IN"], ["971", "AE"], ["966", "SA"], ["974", "QA"], ["965", "KW"],
+    ["968", "OM"], ["973", "BH"], ["44", "GB"], ["61", "AU"], ["65", "SG"],
+    ["880", "BD"], ["92", "PK"], ["94", "LK"], ["977", "NP"],
+  ];
+  // Longest prefix first, so 971 is not swallowed by 91.
+  for (const [code, cc] of CODES.sort((x, y) => y[0].length - x[0].length)) {
+    if (p.startsWith(code)) return cc;
+  }
+  if (p.startsWith("1")) return "US";
+  return "";
+}
+
 /** Meta retries a webhook until it gets a 200; without this the guide replies twice. */
 async function alreadyHandled(db: D1Database, id: string): Promise<boolean> {
   try {
@@ -194,6 +215,7 @@ async function handleMessage(env: Env, cfg: WaConfig, m: Inbound): Promise<void>
   const reply = await conciergeReply(env, {
     messages: msgs,
     lang,
+    country: countryFromPhone(m.from),
     context:
       "\nThe customer is messaging the GoLuQ business number on WhatsApp, so keep replies SHORT — two or three lines, the way people actually message. " +
       "They came to us, which means they already have something in mind: find out what business they run and what they need, then name a price. " +

@@ -28,7 +28,12 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
             ? `\nThe visitor is on the communication services page, looking at toll-free numbers, WhatsApp API, voice and SMS. They have a concrete, budgeted need — find out what they want the number to DO, and close on a quote.`
             : `\nThe visitor is on the homepage, where a free live Digital Employee demo is available. The demo is usually the easiest first close.`;
 
-    const reply = await conciergeReply(env, { messages, lang, context });
+    // Same header /api/config reads, so the chat and the page agree on money.
+    const country = (
+      request.headers.get("cf-ipcountry") || request.headers.get("x-country") || ""
+    ).toUpperCase().slice(0, 2);
+
+    const reply = await conciergeReply(env, { messages, lang, context, country });
     return Response.json({ ok: true, reply });
   } catch {
     return Response.json({ ok: true, reply: conciergeFallback("en") });

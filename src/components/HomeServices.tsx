@@ -2,8 +2,7 @@ import { PhoneCall, MessageCircle, Megaphone, MessageSquare, ArrowRight, type Lu
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Button } from "./ui/Button";
-import { inr } from "../content/catalogue";
-import { usePricing } from "../lib/siteConfig";
+import { usePricing, useMoney } from "../lib/siteConfig";
 
 /** The four a business owner recognises instantly. The rest live on /services. */
 const ITEMS: { id: string; icon: LucideIcon }[] = [
@@ -26,6 +25,7 @@ const ITEMS: { id: string; icon: LucideIcon }[] = [
 export function HomeServices({ className = "" }: { className?: string }) {
   const { t } = useTranslation();
   const pricing = usePricing();
+  const money = useMoney();
   const items = ITEMS.filter((i) => pricing.some((p) => p.id === i.id));
   if (!items.length) return null;
 
@@ -59,7 +59,7 @@ export function HomeServices({ className = "" }: { className?: string }) {
                   <p className="mt-0.5 text-sm text-muted">
                     {t("comms.setupFrom")}{" "}
                     <span className="font-semibold text-brand-luq tabular-nums">
-                      {inr(p.offerInr || p.fromInr)}
+                      {money(p.offer ?? p.from)}
                     </span>
                   </p>
                 )}

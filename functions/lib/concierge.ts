@@ -3,6 +3,7 @@
 import { geminiText, geminiEnabled, type GeminiEnv } from "./gemini";
 import { getPricing, catalogueForPrompt } from "./pricing";
 import { getSetting } from "./settings";
+import { resolveMarket, convert, formatMoney } from "./markets";
 
 /**
  * The GoLuQ guide's brain — ONE definition, shared by every channel.
@@ -40,7 +41,7 @@ const PRICE_PREAMBLE = `Our prices are deliberately far below what agencies and 
  * The hard jargon ban is enforced here as well as in the UI — Gemini is under
  * the hood, but to the visitor this is a GoLuQ guide, never a chatbot.
  */
-const SYSTEM = (CATALOGUE: string, EXTRA: string) => `You are the GoLuQ guide on goluq.com — a warm, sharp, genuinely helpful salesperson for (mostly non-technical, mostly Indian) business owners. You behave like the best representative in a showroom: you greet people, work out what they actually need, show them the right thing, deal with their hesitation honestly, and gently close on a next step. You never wait passively to be asked a question.
+const SYSTEM = (CATALOGUE: string, EXTRA: string, M: (n: number) => string) => `You are the GoLuQ guide on goluq.com — a warm, sharp, genuinely helpful salesperson for (mostly non-technical, mostly Indian) business owners. You behave like the best representative in a showroom: you greet people, work out what they actually need, show them the right thing, deal with their hesitation honestly, and gently close on a next step. You never wait passively to be asked a question.
 
 WHAT GOLUQ IS
 GoLuQ builds and deploys anything that runs on a computer, a laptop, or a phone. Websites, mobile and desktop apps, WhatsApp automations, workflow automations, fully-offline software, Digital Employees, and complete multi-branch business platforms. One practice, the whole stack.
@@ -71,11 +72,11 @@ BE STRAIGHT ABOUT THE COMPLIANCE STEPS
 - Setup prices do NOT include usage. Call minutes, SMS and WhatsApp conversations are billed at cost on top. Say this plainly — a customer who discovers it later stops trusting everything else you told them.
 
 VOICE IS PRICED SEPARATELY FROM CHAT — NEVER CONFUSE THE TWO
-The Digital Employee price above is for CHAT and WhatsApp workers. **Live phone calling starts at ₹4,999/month and includes 1,200 call-minutes.** A phone line costs real money every single minute, so promising voice at the chat price is a promise we could not keep. If someone assumes the lower price covers phone calls, correct it kindly and straight away, for example: "₹799 is for chat and WhatsApp — those don't use call minutes. Live phone calling starts at ₹4,999 and includes 1,200 minutes a month." Never quote the chat price for anything involving answering or making calls.
+The Digital Employee price above is for CHAT and WhatsApp workers. **Live phone calling starts at ${M(4999)}/month and includes 1,200 call-minutes.** A phone line costs real money every single minute, so promising voice at the chat price is a promise we could not keep. If someone assumes the lower price covers phone calls, correct it kindly and straight away, for example: "${M(799)} is for chat and WhatsApp — those don't use call minutes. Live phone calling starts at ${M(4999)} and includes 1,200 minutes a month." Never quote the chat price for anything involving answering or making calls.
 
 HOW TO TALK ABOUT PRICE (get this right — it protects both sides)
 Every figure above is the STARTING price for a standard, industry-proven version built from initial requirements — the version most businesses actually need. Say this naturally and positively, never as a warning or a catch:
-- Good: "A standard version starts at ₹10,000 and takes about 7-10 days. If you later want something more tailored, we price that separately — but most businesses find the standard build already does the job."
+- Good: "A standard version starts at ${M(10000)} and takes about 7-10 days. If you later want something more tailored, we price that separately — but most businesses find the standard build already does the job."
 - Good: "That covers the industry-standard setup. Heavy customisation would add to it, and we'd tell you the exact number in writing before starting anything."
 - Bad: "prices may vary", "terms and conditions apply", "that's only a base price" — vague hedging kills trust.
 Frame it as protection FOR THE CUSTOMER: they always know the number before work begins, and there is never a surprise invoice. Never quote a final total for a project you haven't scoped, and never promise a price you'd have to walk back later. If they push for an exact figure, say the honest thing: it needs a ten-minute conversation about their requirements, then they get it in writing.
@@ -89,7 +90,7 @@ PROOF YOU CAN CITE
 HOW TO SELL (this is the important part)
 1. OPEN by finding out what business they run. Almost every good conversation starts there. If they've told you, do NOT ask again.
 2. Once you know the business, name ONE specific, concrete thing that is probably leaking time or money in that exact business — missed calls at a clinic, follow-ups a distributor forgets, manual GST entries at a trading firm, hearing dates a law office tracks by hand. Be specific enough that they think "how did you know that".
-3. Then connect that pain to ONE thing we build, with the starting price. Money makes it real. "That's usually a ₹3,000 automation" converts far better than "we can help with that".
+3. Then connect that pain to ONE thing we build, with the starting price. Money makes it real. "That's usually a ${M(3000)} automation" converts far better than "we can help with that".
 4. Handle hesitation honestly. If they say it's too expensive, go DOWN the ladder to an automation. If they say they aren't technical, tell them training in simple language is included and they are never left alone. If they say they'll think about it, ask one question that helps them decide — don't push.
 5. CLOSE softly on ONE of: see the free demonstration on this page, get a quote, or leave a name and WhatsApp number so a real person can call. Always the smallest next step, never a hard sell. If they seem to want a human rather than a conversation with you, offer WhatsApp — that is a win, not a failure.
 6. If they're clearly just browsing, be useful and stay warm. Don't chase.
@@ -108,10 +109,14 @@ STYLE
 ${EXTRA}`;
 
 
-export function conciergeFallback(lang: string): string {
+/** Rupees, formatted the way the cockpit shows them. The default everywhere. */
+export const inrLiteral = (n: number): string =>
+  new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(n);
+
+export function conciergeFallback(lang: string, money: (n: number) => string = inrLiteral): string {
   return lang === "hi"
-    ? "ज़रूर! पहले यह बताइए — आपका बिज़नेस किस चीज़ का है? फिर मैं बताऊँगा कि आपके जैसे कारोबार में सबसे ज़्यादा समय कहाँ बर्बाद होता है, और उसे ठीक करने में कितना ख़र्च आएगा। छोटे ऑटोमेशन ₹3,000 से शुरू होते हैं।"
-    : "Happy to help! First — what kind of business do you run? Once I know that, I can tell you where businesses like yours usually lose the most time, and what it costs to fix. Small automations start at ₹3,000.";
+    ? `ज़रूर! पहले यह बताइए — आपका बिज़नेस किस चीज़ का है? फिर मैं बताऊँगा कि आपके जैसे कारोबार में सबसे ज़्यादा समय कहाँ बर्बाद होता है, और उसे ठीक करने में कितना ख़र्च आएगा। छोटे ऑटोमेशन ${money(3000)} से शुरू होते हैं।`
+    : `Happy to help! First — what kind of business do you run? Once I know that, I can tell you where businesses like yours usually lose the most time, and what it costs to fix. Small automations start at ${money(3000)}.`;
 }
 
 /**
@@ -124,24 +129,42 @@ export function conciergeFallback(lang: string): string {
  */
 export async function conciergeReply(
   env: ConciergeEnv,
-  opts: { messages: ConciergeMsg[]; lang: string; context: string }
+  opts: { messages: ConciergeMsg[]; lang: string; context: string; country?: string }
 ): Promise<string> {
   const lang = opts.lang === "hi" ? "hi" : "en";
   const messages = (opts.messages || [])
     .slice(-10)
     .map((m) => ({ role: m.role, content: String(m.content || "").slice(0, 600) }));
 
-  if (!geminiEnabled(env) || messages.length === 0) return conciergeFallback(lang);
+  // The visitor's own currency, resolved from the same table and the same
+  // conversion the page uses. Every price the guide utters — the catalogue AND
+  // the worked examples inside the persona — goes through this one function, so
+  // there is no way for chat to quote a figure the page does not show.
+  let money = (n: number) => inrLiteral(n);
+  try {
+    const { market, multiplier } = await resolveMarket(env.DB, opts.country || "");
+    money = (n: number) => formatMoney(convert(n, market, multiplier), market);
+  } catch {
+    /* rupees are the safe default — they are what the owner actually typed */
+  }
+
+  if (!geminiEnabled(env) || messages.length === 0) return conciergeFallback(lang, money);
 
   // Live price list + any extra persona instructions the owner has set in the
   // cockpit. Both are read per-request so a change takes effect immediately.
   let catalogue = "";
   let extra = "";
   try {
-    catalogue = catalogueForPrompt(await getPricing(env.DB));
+    catalogue = catalogueForPrompt(await getPricing(env.DB), money);
+    const { market } = await resolveMarket(env.DB, opts.country || "");
+    if (market.currency !== "INR") {
+      extra += `\n\nTHIS VISITOR IS NOT IN INDIA. Every price above is already in ${market.currency} — quote them exactly as written, never convert, never mention rupees, and never suggest the price would be different in another country.`;
+    }
     const custom = await getSetting(env.DB, "bot_instructions");
     if (custom) {
-      extra = `\n\nADDITIONAL INSTRUCTIONS FROM THE OWNER (these override nothing above, but follow them):\n${custom.slice(0, 2000)}`;
+      // Appended, not assigned — an `=` here would silently drop the currency
+      // rule above and put the guide back to quoting rupees abroad.
+      extra += `\n\nADDITIONAL INSTRUCTIONS FROM THE OWNER (these override nothing above, but follow them):\n${custom.slice(0, 2000)}`;
     }
   } catch {
     /* fall back to an empty list rather than failing the reply */
@@ -150,7 +173,7 @@ export async function conciergeReply(
   const convo = messages
     .map((m) => `${m.role === "user" ? "Customer" : "Guide"}: ${m.content}`)
     .join("\n");
-  const prompt = `${SYSTEM(catalogue, extra)}\n${opts.context}\n\nReply in ${
+  const prompt = `${SYSTEM(catalogue, extra, money)}\n${opts.context}\n\nReply in ${
     lang === "hi" ? "Hindi" : "English"
   }.\n\n${convo}\nGuide:`;
 

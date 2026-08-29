@@ -96,6 +96,15 @@ export async function getPricing(db: D1Database): Promise<PriceRow[]> {
   return rows;
 }
 
+/**
+ * Prices the site quotes that do NOT live in the pricing table — the voice plan
+ * in particular. Kept here so they go through the same market conversion as
+ * everything else; a rupee constant formatted as dollars reads as $4,999.
+ */
+export const EXTRA_PRICES = {
+  voiceLite: 4999,
+} as const;
+
 const inr = (n: number) =>
   new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(n);
 
@@ -103,15 +112,15 @@ const inr = (n: number) =>
  * The price list the guide is allowed to quote, generated from the live table so
  * a cockpit edit reaches the conversation immediately.
  */
-export function catalogueForPrompt(rows: PriceRow[]): string {
+export function catalogueForPrompt(rows: PriceRow[], money: (n: number) => string = inr): string {
   return rows
     .filter((r) => r.enabled)
     .map((r) => {
       const label = TIER_LABELS[r.id] ?? r.id;
-      const base = r.recurring ? `from ${inr(r.price_inr)}/month` : `from ${inr(r.price_inr)} one-time`;
+      const base = r.recurring ? `from ${money(r.price_inr)}/month` : `from ${money(r.price_inr)} one-time`;
       const offer =
         r.offer_label && r.offer_price_inr
-          ? ` — CURRENT OFFER: ${r.offer_label}, ${inr(r.offer_price_inr)}. Mention this offer when it is relevant.`
+          ? ` — CURRENT OFFER: ${r.offer_label}, ${money(r.offer_price_inr)}. Mention this offer when it is relevant.`
           : r.offer_label
             ? ` — CURRENT OFFER: ${r.offer_label}.`
             : "";

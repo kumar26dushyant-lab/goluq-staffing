@@ -17,7 +17,26 @@ export interface LivePrice {
   leadTime: string;
   offerLabel: string | null;
   offerInr: number | null;
+  /**
+   * What to SHOW this visitor, already converted by the server. `fromInr` stays
+   * the rupee figure the owner typed in the cockpit; these are the same prices
+   * in the money the visitor thinks in. Always display these two.
+   */
+  from: number;
+  offer: number | null;
 }
+
+export interface MarketInfo {
+  country: string;
+  currency: string;
+  locale: string;
+  isIndia: boolean;
+}
+
+const INR_MARKET: MarketInfo = { country: "IN", currency: "INR", locale: "en-IN", isIndia: true };
+
+/** Rupee fallback for the voice plan when the server cannot be reached. */
+const VOICE_LITE_INR = 4999;
 
 export interface AffiliateRates {
   year1: number;
@@ -34,6 +53,10 @@ export interface SiteConfig {
   affiliate?: AffiliateRates;
   /** Two-letter country of the visitor, from the edge. "" when unknown. */
   country: string;
+  /** Which currency this visitor is priced in. */
+  market: MarketInfo;
+  /** Prices quoted outside the catalogue, already converted by the server. */
+  extras: { voiceLite: number };
 }
 
 /** Local catalogue as a LivePrice list — the fallback if /api/config fails. */
@@ -45,6 +68,8 @@ function fromLocal(): LivePrice[] {
     leadTime: o.leadTime,
     offerLabel: null,
     offerInr: null,
+    from: o.fromInr,
+    offer: null,
   }));
 }
 
@@ -68,8 +93,17 @@ export async function fetchSiteConfig(): Promise<SiteConfig> {
     try {
       const r = await fetch("/api/config");
       const d = await r.json();
+      // A server that predates market pricing sends no `from`, which would
+      // render as "undefined" in place of every price. Fall back to the rupee
+      // figure rather than showing nothing.
       const pricing: LivePrice[] =
-        Array.isArray(d?.pricing) && d.pricing.length ? d.pricing : fromLocal();
+        Array.isArray(d?.pricing) && d.pricing.length
+          ? d.pricing.map((p: LivePrice) => ({
+              ...p,
+              from: typeof p.from === "number" ? p.from : p.fromInr,
+              offer: typeof p.offer === "number" ? p.offer : p.offerInr,
+            }))
+          : fromLocal();
       // Owner-edited copy is applied before anything renders off it.
       applyContentOverrides(d?.content);
       cache = {
@@ -79,9 +113,15 @@ export async function fetchSiteConfig(): Promise<SiteConfig> {
         pricing,
         affiliate: d?.affiliate,
         country: String(d?.country || ""),
+        market: (d?.market as MarketInfo) || INR_MARKET,
+        extras: { voiceLite: Number(d?.extras?.voiceLite) || VOICE_LITE_INR },
       };
     } catch {
-      cache = { whatsapp: "", chatEnabled: true, announcement: "", pricing: fromLocal(), country: "" };
+      cache = {
+        whatsapp: "", chatEnabled: true, announcement: "",
+        pricing: fromLocal(), country: "", market: INR_MARKET,
+        extras: { voiceLite: VOICE_LITE_INR },
+      };
     }
     return cache;
   })();
@@ -107,4 +147,28 @@ export function useSiteConfig(): SiteConfig | null {
 export function usePricing(): LivePrice[] {
   const cfg = useSiteConfig();
   return cfg?.pricing ?? fromLocal();
+}
+
+/**
+ * Format a price for THIS visitor.
+ *
+ * Takes an amount the server has ALREADY converted (a `from` or `offer` field)
+ * and only decides how to print it. It deliberately cannot convert: doing the
+ * arithmetic in the browser as well as on the server is exactly how a page ends
+ * up disagreeing with the guide that just quoted it.
+ */
+export function useMoney(): (amount: number) => string {
+  const cfg = useSiteConfig();
+  const m = cfg?.market ?? INR_MARKET;
+  return (amount: number) => {
+    try {
+      return new Intl.NumberFormat(m.locale, {
+        style: "currency",
+        currency: m.currency,
+        maximumFractionDigits: 0,
+      }).format(amount);
+    } catch {
+      return m.currency + " " + Math.round(amount);
+    }
+  };
 }
