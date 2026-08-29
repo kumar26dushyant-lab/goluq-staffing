@@ -46,7 +46,10 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
   // real test message, means the problem is on Meta's side of the wire, not ours.
   const inbound = await inboundHealth(env.DB);
   // The account↔app link, which no amount of app-side configuration reveals.
-  const subscription = cfg.wabaId ? await waSubscribedApps(cfg) : null;
+  // Reported even with no account id stored, so the panel can say what is
+  // missing — silently hiding the card is how this check went unnoticed while
+  // the account sat subscribed to no app at all.
+  const subscription = await waSubscribedApps(cfg);
 
   try {
     const res = await fetch(

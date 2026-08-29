@@ -1456,7 +1456,9 @@ function WhatsAppCheck() {
             <div className="rounded-lg border border-success/30 bg-success/10 p-3">
               <p className="font-semibold text-success">Meta recognises your number.</p>
               <p className="mt-1 text-muted">
-                {res.name || "—"} · +{res.number || "—"}
+                {/* Meta already returns the number with its leading +, so adding
+                    one here produced "++91 …". */}
+                {res.name || "—"} · {res.number || "—"}
                 {res.quality ? ` · quality ${String(res.quality).toLowerCase()}` : ""}
               </p>
               {res.nameStatus === "DECLINED" && (
