@@ -217,8 +217,10 @@ Kept in priority order. Done items stay for a while so the history is visible.
 
 ### Next
 - [ ] Confirm real comms costs, then correct the prices in the cockpit.
-- [ ] Create and submit WhatsApp message templates — nothing outbound can reach
-      anyone outside the 24-hour window until these are approved.
+- [ ] Submit the WhatsApp templates — drafted and ready in
+      [whatsapp-templates.md](whatsapp-templates.md). Nothing outbound reaches
+      anyone outside the 24-hour window until these are approved, which includes
+      the day 3/5/7/12 follow-up engine.
 - [ ] Decide the call channel (section 3) — still open.
 
 ### Later
@@ -227,6 +229,7 @@ Kept in priority order. Done items stay for a while so the history is visible.
 - [ ] Cloudflare inbound email routing (parked).
 
 ### Done
+- [x] Cockpit replies to a WhatsApp thread now actually reach the customer
 - [x] **WhatsApp guide live and verified** — real conversation received, answered
       and stored, 2026-08-30
 - [x] Meta app published; WABA subscribed to the app
