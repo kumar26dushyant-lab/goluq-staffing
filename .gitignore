@@ -13,3 +13,8 @@ mockup
 mockup-hud
 mockup-v2
 accent-compare
+
+# Throwaway patch scripts used while editing; never part of the app.
+_patch.cjs
+_p.mjs
+_pkgcheck.mjs
