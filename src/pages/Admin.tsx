@@ -1375,6 +1375,97 @@ function WhatsAppBusiness() {
         {!loaded && <span className="ml-3 text-sm text-faint">Loading…</span>}
         {saved && <span className="ml-3 text-sm text-muted">{saved}</span>}
       </div>
+
+      <WhatsAppCheck />
+    </div>
+  );
+}
+
+/**
+ * Proves the connection instead of leaving the owner to guess.
+ *
+ * "Check connection" asks Meta who the phone number ID belongs to — which is the
+ * only way to tell a wrong id from an expired token from the outside. It cannot
+ * prove the webhook works; only a real message does that, so the panel says so
+ * rather than showing a green tick that means less than it looks like.
+ */
+function WhatsAppCheck() {
+  const [res, setRes] = useState<any>(null);
+  const [busy, setBusy] = useState(false);
+  const [testTo, setTestTo] = useState("");
+  const [testMsg, setTestMsg] = useState("");
+
+  const check = async () => {
+    setBusy(true);
+    setRes(null);
+    setRes(await adminGet("/api/admin/wa-check"));
+    setBusy(false);
+  };
+
+  const sendTest = async () => {
+    setTestMsg("Sending…");
+    const d = await adminPost("/api/admin/wa-check", { to: testTo });
+    setTestMsg(d.ok ? "Sent ✅ — check that phone." : d.error || "Failed");
+  };
+
+  const tick = (on: boolean) => (on ? "✅" : "⬜");
+
+  return (
+    <div className="rounded-xl border border-hairline/15 bg-panel/40 p-4">
+      <Button onClick={check} disabled={busy}>
+        <ShieldCheck size={16} /> {busy ? "Checking…" : "Check connection"}
+      </Button>
+
+      {res && (
+        <div className="mt-4 space-y-2 text-sm">
+          <p className="text-muted">
+            {tick(res.checklist?.phoneNumberId)} Phone number ID &nbsp;
+            {tick(res.checklist?.accessToken)} Access token &nbsp;
+            {tick(res.checklist?.verifyToken)} Verify token &nbsp;
+            {tick(res.checklist?.appSecret)} App secret
+          </p>
+          {res.ok ? (
+            <div className="rounded-lg border border-success/30 bg-success/10 p-3">
+              <p className="font-semibold text-success">Meta recognises your number.</p>
+              <p className="mt-1 text-muted">
+                {res.name || "—"} · +{res.number || "—"}
+                {res.quality ? ` · quality ${String(res.quality).toLowerCase()}` : ""}
+              </p>
+              <p className="mt-2 text-muted">
+                This proves your token and number are correct. It does <b>not</b> prove the webhook
+                is wired — for that, message the number from a different phone and see if the guide
+                replies.
+              </p>
+            </div>
+          ) : (
+            <div className="rounded-lg border border-warn/30 bg-warn/10 p-3">
+              <p className="font-semibold text-warn">Not connected</p>
+              <p className="mt-1 text-muted">{res.error}</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      <div className="mt-5 border-t border-hairline/10 pt-4">
+        <p className="text-sm font-semibold text-fg">Send a test message</p>
+        <p className="mt-1 text-sm text-muted">
+          Only works if that phone has messaged your business number in the last 24 hours — Meta
+          allows free typing only inside that window. Outside it, nothing but an approved template
+          gets through.
+        </p>
+        <div className="mt-2 flex flex-wrap gap-2">
+          <input
+            className={inputClass + " max-w-[16rem]"}
+            value={testTo}
+            onChange={(e) => setTestTo(e.target.value)}
+            placeholder="Number to test, e.g. 9198XXXXXXXX"
+          />
+          <Button onClick={sendTest} disabled={!testTo}>
+            Send test
+          </Button>
+        </div>
+        {testMsg && <p className="mt-2 text-sm text-muted">{testMsg}</p>}
+      </div>
     </div>
   );
 }

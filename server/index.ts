@@ -28,6 +28,7 @@ import { onRequestGet as adminSettingsGet, onRequestPost as adminSettingsPost } 
 import { onRequest as cronFollowups } from "../functions/api/cron/followups";
 import { onRequestPost as waWebhook } from "../functions/api/wa/webhook";
 import { onRequestGet as waMetaVerify, onRequestPost as waMetaInbound } from "../functions/api/wa/meta";
+import { onRequestGet as waCheckGet, onRequestPost as waCheckPost } from "../functions/api/admin/wa-check";
 import { onRequestPost as track } from "../functions/api/track";
 import { onRequestGet as adminVisitors } from "../functions/api/admin/visitors";
 import { onRequestPost as chat } from "../functions/api/chat";
@@ -215,6 +216,8 @@ app.post("/api/admin/commission", (c) => callFn(adminCommissionPost as Handler, 
 app.post("/api/affiliate/convert", (c) => callFn(affConvert as Handler, c.req.raw));
 app.post("/api/admin/wa-connect", (c) => callFn(waConnect as Handler, c.req.raw));
 app.get("/api/admin/wa-status", (c) => callFn(waStatus as Handler, c.req.raw));
+app.get("/api/admin/wa-check", (c) => callFn(waCheckGet as Handler, c.req.raw));
+app.post("/api/admin/wa-check", (c) => callFn(waCheckPost as Handler, c.req.raw));
 app.post("/api/admin/wa-send", (c) => callFn(waSend as Handler, c.req.raw));
 app.get("/api/admin/stats", (c) => callFn(adminStats as Handler, c.req.raw));
 app.get("/api/admin/leads", (c) => callFn(adminLeads as Handler, c.req.raw));
