@@ -2,6 +2,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { GraduationCap, Zap } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { CapabilityTabs } from "../components/CapabilityTabs";
+import { CommsHero } from "../components/CommsHero";
 import { ENTRY_PRICE_INR } from "../content/catalogue";
 import { usePricing, useMoney } from "../lib/siteConfig";
 import { HeroWordmark } from "../components/HeroWordmark";
@@ -36,8 +37,16 @@ export function Greeting({ onPickRole }: { onPickRole: (id: RoleId) => void }) {
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 pb-24 pt-2 sm:px-8">
-      {/* ── Cinematic hero (over the full-screen reactor background) ──── */}
-      <div className="flex min-h-[42vh] flex-col justify-center pt-8 sm:min-h-[48vh]">
+      <CommsHero className="pt-6 sm:pt-10" />
+
+      {/* The services band sits directly under the hero: the hero says what we
+          do, this says what it costs. */}
+      <HomeServices className="mt-16" />
+
+      {/* ── Brand moment + the Digital Employee demo ──────────────────────
+          No longer the first thing a visitor meets, so it reads as a section
+          rather than a competing hero, and no longer claims the fold. */}
+      <div className="flex flex-col justify-center pt-16">
         <motion.p
           initial={reduced ? false : { opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -147,7 +156,6 @@ export function Greeting({ onPickRole }: { onPickRole: (id: RoleId) => void }) {
 
       <PartnerCTA className="mt-16" />
       <HomeBuild className="mt-12" />
-      <HomeServices className="mt-12" />
       <SecuritySection className="mt-16" />
       <AboutSection className="mt-16" />
     </div>

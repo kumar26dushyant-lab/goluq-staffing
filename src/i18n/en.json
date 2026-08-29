@@ -1357,5 +1357,49 @@
     "homeSubtitle": "Get the line your customers call, and the system that handles what happens next. Most providers sell you only the first half.",
     "homeCta": "See all services and prices",
     "setupFrom": "Setup from"
+  },
+  "commsHero": {
+    "eyebrow": "WhatsApp API · SMS · Voice · Toll-free",
+    "title": "Most vendors hand you a login.",
+    "titleAccent": "We build what runs behind it.",
+    "subtitle": "We set up your WhatsApp Business API, toll-free number, voice campaigns and SMS — then build the software that decides what to send, who to call, and what happens next. One vendor for the number and the system that uses it.",
+    "ctaSecondary": "See services and prices",
+    "stats": {
+      "claims": {
+        "v": "2,000+",
+        "l": "claims settled on software we built"
+      },
+      "offices": {
+        "v": "4",
+        "l": "offices running on one system, pan-India"
+      },
+      "always": {
+        "v": "24×7",
+        "l": "our own WhatsApp answers in seconds"
+      }
+    },
+    "phone": {
+      "name": "GoLuQ on WhatsApp",
+      "status": "Answers in seconds",
+      "q": "Do you provide toll free number?",
+      "a1": "Yes — a toll-free 1800 number starts from {{price}}, live in 3–7 working days.",
+      "a2": "But the number is the easy part. What actually helps is what happens when it rings. What would you want the calls to do?",
+      "caption": "A real reply from our number. Message it and see."
+    },
+    "cards": {
+      "wa": {
+        "t": "WhatsApp Business API",
+        "d": "Verified account, approved templates, and the logic that decides what to send and when — not just a login and a manual."
+      },
+      "voice": {
+        "t": "Toll-free, Voice & SMS",
+        "d": "1800 numbers, IVR, press-1 campaigns and OTPs — wired into your business rather than parked in someone's dashboard."
+      },
+      "software": {
+        "t": "The software behind it",
+        "d": "The part every reseller skips: the app, dashboard or automation that connects your number to how your business actually works."
+      }
+    },
+    "ctaFallback": "Talk to us"
   }
 }
