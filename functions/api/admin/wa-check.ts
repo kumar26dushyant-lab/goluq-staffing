@@ -38,9 +38,15 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     });
   }
 
+  // Has Meta EVER delivered an inbound message? This is the half that a Graph
+  // call cannot answer, and the half that is usually broken: the callback URL
+  // verifies happily while messages are never forwarded. "Never" here, after a
+  // real test message, means the problem is on Meta's side of the wire, not ours.
+  const inbound = await inboundHealth(env.DB);
+
   try {
     const res = await fetch(
-      `${GRAPH}/${cfg.phoneNumberId}?fields=display_phone_number,verified_name,quality_rating`,
+      `${GRAPH}/${cfg.phoneNumberId}?fields=display_phone_number,verified_name,quality_rating,name_status,code_verification_status,platform_type`,
       { headers: { Authorization: `Bearer ${cfg.accessToken}` } }
     );
     const text = await res.text();
@@ -56,20 +62,44 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
       return Response.json({
         ok: false,
         checklist,
+        inbound,
         error: j?.error?.message || `Meta refused the request (HTTP ${res.status}).`,
       });
     }
     return Response.json({
       ok: true,
       checklist,
+      inbound,
       number: j?.display_phone_number || "",
       name: j?.verified_name || "",
       quality: j?.quality_rating || "",
+      // DECLINED here is why customers may see a bare number instead of the
+      // business name. It does not stop messages; it only weakens them.
+      nameStatus: j?.name_status || "",
+      verification: j?.code_verification_status || "",
+      platform: j?.platform_type || "",
     });
   } catch (e) {
-    return Response.json({ ok: false, checklist, error: String(e).slice(0, 200) });
+    return Response.json({ ok: false, checklist, inbound, error: String(e).slice(0, 200) });
   }
 };
+
+/** How many inbound WhatsApp messages have reached the webhook, and when last. */
+async function inboundHealth(
+  db: D1Database
+): Promise<{ count: number; lastAt: string | null; threads: number }> {
+  try {
+    const ev = await db
+      .prepare("SELECT COUNT(*) AS c, MAX(created_at) AS m FROM wa_events")
+      .first<{ c: number; m: string | null }>();
+    const th = await db
+      .prepare("SELECT COUNT(*) AS c FROM chat_sessions WHERE page = 'whatsapp'")
+      .first<{ c: number }>();
+    return { count: Number(ev?.c || 0), lastAt: ev?.m || null, threads: Number(th?.c || 0) };
+  } catch {
+    return { count: 0, lastAt: null, threads: 0 };
+  }
+}
 
 /**
  * Send a real message to a number you choose, to prove sending works.

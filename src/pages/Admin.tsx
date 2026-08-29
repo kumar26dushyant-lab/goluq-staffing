@@ -1434,16 +1434,50 @@ function WhatsAppCheck() {
                 {res.name || "—"} · +{res.number || "—"}
                 {res.quality ? ` · quality ${String(res.quality).toLowerCase()}` : ""}
               </p>
-              <p className="mt-2 text-muted">
-                This proves your token and number are correct. It does <b>not</b> prove the webhook
-                is wired — for that, message the number from a different phone and see if the guide
-                replies.
-              </p>
+              {res.nameStatus === "DECLINED" && (
+                <p className="mt-2 text-warn">
+                  Display name declined by Meta. Messages still work; customers just see the number
+                  instead of your name. Resubmit a name that matches the website exactly.
+                </p>
+              )}
             </div>
           ) : (
             <div className="rounded-lg border border-warn/30 bg-warn/10 p-3">
               <p className="font-semibold text-warn">Not connected</p>
               <p className="mt-1 text-muted">{res.error}</p>
+            </div>
+          )}
+
+          {/* The half a Graph call cannot answer. Meta will happily verify the
+              callback URL and then never forward a message, so "recognised" and
+              "receiving" are genuinely different questions. */}
+          {res.inbound && (
+            <div
+              className={`rounded-lg border p-3 ${
+                res.inbound.count > 0
+                  ? "border-success/30 bg-success/10"
+                  : "border-warn/30 bg-warn/10"
+              }`}
+            >
+              {res.inbound.count > 0 ? (
+                <>
+                  <p className="font-semibold text-success">Receiving messages.</p>
+                  <p className="mt-1 text-muted">
+                    {res.inbound.count} received · {res.inbound.threads} conversation
+                    {res.inbound.threads === 1 ? "" : "s"} · last {res.inbound.lastAt} UTC
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="font-semibold text-warn">No message has ever arrived.</p>
+                  <p className="mt-1 text-muted">
+                    Sending works, but nothing has come back. Message this number from another
+                    phone and press Check again. If it still says none, the gap is on Meta's side:
+                    check that your app is <b>Live</b> rather than in development, and that the
+                    WhatsApp account is subscribed to the app.
+                  </p>
+                </>
+              )}
             </div>
           )}
         </div>
