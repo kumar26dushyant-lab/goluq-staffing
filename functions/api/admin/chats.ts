@@ -1,11 +1,21 @@
 /// <reference types="@cloudflare/workers-types" />
 
 import { checkAdmin } from "../../lib/admin";
+import { waConfig, waReady, waSendText, type WaEnv } from "../../lib/whatsapp";
 
-interface Env {
+interface Env extends WaEnv {
   DB: D1Database;
   ADMIN_SECRET?: string;
 }
+
+/**
+ * A WhatsApp thread is stored as `wa:<phone>` beside the website chats. The
+ * website widget POLLS for agent replies, so writing one to the database is
+ * enough to deliver it. WhatsApp has nothing polling — a reply only reaches the
+ * customer if we actively send it back through the Cloud API.
+ */
+const waPhoneOf = (sessionId: string): string =>
+  sessionId.startsWith("wa:") ? sessionId.slice(3) : "";
 
 /**
  * Owner side of live chat.
@@ -79,6 +89,28 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
 
     const text = String(b.text ?? "").trim().slice(0, 2000);
     if (!text) return Response.json({ ok: false, error: "empty" }, { status: 400 });
+
+    // Send BEFORE recording. If WhatsApp refuses the message, the transcript
+    // must not end up showing a reply the customer never received — which is
+    // worse than an obvious failure, because it also silences the guide and
+    // leaves the customer with nothing at all.
+    const phone = waPhoneOf(id);
+    if (phone) {
+      const cfg = await waConfig(env.DB, env);
+      if (!waReady(cfg)) {
+        return Response.json({ ok: false, error: "WhatsApp is not configured, so this cannot be delivered." });
+      }
+      const sent = await waSendText(cfg, phone, text);
+      if (!sent.ok) {
+        const outsideWindow = /re-?engagement|24|template/i.test(sent.error);
+        return Response.json({
+          ok: false,
+          error: outsideWindow
+            ? "WhatsApp refused this: they last messaged you more than 24 hours ago, and outside that window only an approved template can be delivered."
+            : `WhatsApp refused this: ${sent.error}`,
+        });
+      }
+    }
 
     await env.DB.prepare(
       `INSERT INTO chat_messages (session_id, role, content, created_at)

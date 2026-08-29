@@ -606,6 +606,7 @@ function LiveChat() {
   const [msgs, setMsgs] = useState<any[]>([]);
   const [reply, setReply] = useState("");
   const [busy, setBusy] = useState(false);
+  const [sendErr, setSendErr] = useState("");
 
   const loadList = useCallback(async () => {
     const d = await adminGet("/api/admin/chats");
@@ -630,9 +631,17 @@ function LiveChat() {
   const send = async () => {
     if (!openChat || !reply.trim()) return;
     setBusy(true);
-    await adminPost("/api/admin/chats", { id: openChat, text: reply.trim() });
-    setReply("");
+    setSendErr("");
+    const d = await adminPost("/api/admin/chats", { id: openChat, text: reply.trim() });
     setBusy(false);
+    if (!d.ok) {
+      // Keep what was typed. Clearing the box on failure told the owner the
+      // message had gone when it had not — which is how a customer ended up
+      // being answered by nobody at all.
+      setSendErr(d.error || "Could not send.");
+      return;
+    }
+    setReply("");
     loadOne(openChat);
   };
 
@@ -656,6 +665,9 @@ function LiveChat() {
               <div className="flex items-center justify-between gap-2">
                 <span className="flex items-center gap-2 text-sm font-semibold text-fg">
                   {c.needs_human ? <Radio size={13} className="animate-pulse text-warn" /> : null}
+                  {c.page === "whatsapp" && (
+                    <MessageSquare size={12} className="shrink-0 text-brand-luq" aria-label="WhatsApp" />
+                  )}
                   {c.visitor_name || c.page || "Visitor"}
                 </span>
                 {c.unread_for_agent > 0 && (
@@ -687,10 +699,19 @@ function LiveChat() {
                   </div>
                 ))}
               </div>
-              <div className="mt-3 flex gap-2 border-t border-hairline/10 pt-3">
-                <input className={inputClass} value={reply} placeholder="Type your reply…"
-                  onChange={(e) => setReply(e.target.value)} onKeyDown={(e) => e.key === "Enter" && send()} />
-                <Button size="md" onClick={send} disabled={busy || !reply.trim()}><Send size={16} /></Button>
+              <div className="mt-3 border-t border-hairline/10 pt-3">
+                <div className="flex gap-2">
+                  <input className={inputClass} value={reply} placeholder="Type your reply…"
+                    onChange={(e) => setReply(e.target.value)} onKeyDown={(e) => e.key === "Enter" && send()} />
+                  <Button size="md" onClick={send} disabled={busy || !reply.trim()}><Send size={16} /></Button>
+                </div>
+                {sendErr && <p className="mt-2 text-sm text-warn">{sendErr}</p>}
+                {openChat.startsWith("wa:") && !sendErr && (
+                  <p className="mt-2 text-xs text-faint">
+                    Goes to their WhatsApp. Free typing works for 24 hours after their last
+                    message; after that only an approved template gets through.
+                  </p>
+                )}
               </div>
             </>
           )}
