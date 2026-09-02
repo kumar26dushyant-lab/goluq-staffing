@@ -285,3 +285,42 @@ CREATE TABLE IF NOT EXISTS project_files (
   created_at TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_files_project ON project_files(project_id);
+
+-- ── WhatsApp campaigns ──────────────────────────────────────────────────────
+-- A campaign is an approved MARKETING template sent to people who gave us their
+-- number themselves. Consent is the whole design: only leads from our own table,
+-- never a bought list, and anyone who opted out is excluded by the query itself.
+CREATE TABLE IF NOT EXISTS campaigns (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  template TEXT NOT NULL,              -- approved template name
+  lang TEXT NOT NULL DEFAULT 'en',
+  topic TEXT,                          -- fills {{2}} — what this campaign is about
+  status TEXT NOT NULL DEFAULT 'draft',-- draft | sending | paused | done | cancelled
+  total INTEGER DEFAULT 0,
+  sent INTEGER DEFAULT 0,
+  failed INTEGER DEFAULT 0,
+  delivered INTEGER DEFAULT 0,
+  read_count INTEGER DEFAULT 0,
+  replied INTEGER DEFAULT 0,
+  created_at TEXT NOT NULL,
+  finished_at TEXT
+);
+
+-- One row per recipient. `wamid` is what lets a delivery receipt find its way
+-- back here — without it a campaign can only report "we sent it", which is the
+-- least interesting thing about a campaign.
+CREATE TABLE IF NOT EXISTS campaign_targets (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  campaign_id INTEGER NOT NULL,
+  lead_id INTEGER,
+  phone TEXT NOT NULL,
+  name TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending', -- pending | sent | delivered | read | replied | failed
+  wamid TEXT,
+  error TEXT,
+  sent_at TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_ctargets_campaign ON campaign_targets(campaign_id, status);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_ctargets_unique ON campaign_targets(campaign_id, phone);
+CREATE INDEX IF NOT EXISTS idx_ctargets_wamid ON campaign_targets(wamid);

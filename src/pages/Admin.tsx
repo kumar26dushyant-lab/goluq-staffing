@@ -2,10 +2,11 @@ import { Fragment, useCallback, useEffect, useState } from "react";
 import {
   LayoutDashboard, Users, TrendingUp, MessageSquare, Settings as SettingsIcon,
   LogOut, Search, Download, Trash2, RefreshCw, Send, ShieldCheck, Circle,
-  BarChart3, ChevronDown, IndianRupee, Bot, Radio, Mail, FileText, Briefcase,
+  BarChart3, ChevronDown, IndianRupee, Bot, Radio, Mail, FileText, Briefcase, Megaphone,
 } from "lucide-react";
 import { Button } from "../components/ui/Button";
 import { Projects } from "../components/admin/Projects";
+import { Campaigns } from "../components/admin/Campaigns";
 import { BrandMark } from "../components/BrandMark";
 import { useTranslation } from "react-i18next";
 import { inputClass } from "../lib/ui";
@@ -18,7 +19,7 @@ import {
 
 type Section =
   | "overview" | "leads" | "chat" | "visitors" | "pricing"
-  | "bot" | "content" | "inbox" | "affiliates" | "whatsapp" | "projects" | "settings";
+  | "bot" | "content" | "inbox" | "affiliates" | "whatsapp" | "projects" | "campaigns" | "settings";
 
 export function Admin() {
   const [authed, setAuthed] = useState(false);
@@ -55,6 +56,7 @@ export function Admin() {
     { id: "affiliates", label: "Affiliates", icon: TrendingUp },
     { id: "whatsapp", label: "WhatsApp", icon: MessageSquare },
     { id: "projects", label: "Projects", icon: Briefcase },
+    { id: "campaigns", label: "Campaigns", icon: Megaphone },
     { id: "settings", label: "Settings", icon: SettingsIcon },
   ];
 
@@ -101,6 +103,7 @@ export function Admin() {
         {section === "affiliates" && <Affiliates />}
         {section === "whatsapp" && <WhatsApp />}
         {section === "projects" && <Projects />}
+        {section === "campaigns" && <Campaigns />}
         {section === "settings" && <SettingsPanel />}
       </main>
     </div>

@@ -152,6 +152,11 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
     return new Response("ok");
   }
 
+  // Delivery receipts ride the same hook. Without them a campaign can only
+  // report "we sent it", which is the least interesting thing about a campaign —
+  // delivered, read and replied are what say whether it worked.
+  await recordStatuses(env.DB, body);
+
   const messages = parseInbound(body);
   if (!messages.length || !waReady(cfg)) return new Response("ok");
 
@@ -199,6 +204,9 @@ async function handleMessage(env: Env, cfg: WaConfig, m: Inbound): Promise<void>
     .run();
 
   await waMarkRead(cfg, m.id);
+
+  // A reply to a campaign is the whole point of having sent one.
+  await markReplied(db, m.from);
 
   // Someone asking to be left alone is asking once. Honour it, confirm it, and
   // never let the guide speak to them again.
@@ -313,4 +321,70 @@ async function notifyOwner(env: Env, m: Inbound, why: string): Promise<void> {
   // sendMail reports failure in its result rather than throwing — the same shape
   // that has silently swallowed two bugs in this codebase already.
   if (!sent.ok) console.log("wa owner alert not sent:", sent.error);
+}
+
+/**
+ * Apply Meta's delivery receipts to campaign recipients.
+ *
+ * Statuses only ever move forward — sent → delivered → read. A late "delivered"
+ * arriving after a "read" must not walk the record backwards, which is why the
+ * update is guarded by the current status rather than applied blindly.
+ */
+async function recordStatuses(db: D1Database, body: any): Promise<void> {
+  const RANK: Record<string, number> = { pending: 0, sent: 1, delivered: 2, read: 3, replied: 4 };
+  try {
+    for (const entry of body?.entry || []) {
+      for (const change of entry?.changes || []) {
+        for (const st of change?.value?.statuses || []) {
+          const id = String(st?.id || "");
+          const raw = String(st?.status || "");
+          if (!id) continue;
+          const next = raw === "failed" ? "failed" : RANK[raw] ? raw : "";
+          if (!next) continue;
+
+          const row = await db
+            .prepare("SELECT id, campaign_id, status FROM campaign_targets WHERE wamid = ?")
+            .bind(id)
+            .first<{ id: number; campaign_id: number; status: string }>();
+          if (!row) continue;
+          if (next !== "failed" && (RANK[next] ?? 0) <= (RANK[row.status] ?? 0)) continue;
+
+          await db
+            .prepare("UPDATE campaign_targets SET status = ? WHERE id = ?")
+            .bind(next, row.id)
+            .run();
+
+          const col = next === "delivered" ? "delivered" : next === "read" ? "read_count" : "";
+          if (col) {
+            await db
+              .prepare(`UPDATE campaigns SET ${col} = ${col} + 1 WHERE id = ?`)
+              .bind(row.campaign_id)
+              .run();
+          }
+        }
+      }
+    }
+  } catch (e) {
+    // Metrics must never cost us a real customer message.
+    console.log("status receipt failed:", String(e).slice(0, 200));
+  }
+}
+
+/** Someone replying to a campaign is the outcome that matters — record it. */
+async function markReplied(db: D1Database, phone: string): Promise<void> {
+  try {
+    const row = await db
+      .prepare(
+        `SELECT id, campaign_id FROM campaign_targets
+          WHERE phone = ? AND status IN ('sent','delivered','read')
+          ORDER BY id DESC LIMIT 1`
+      )
+      .bind(phone)
+      .first<{ id: number; campaign_id: number }>();
+    if (!row) return;
+    await db.prepare("UPDATE campaign_targets SET status = 'replied' WHERE id = ?").bind(row.id).run();
+    await db.prepare("UPDATE campaigns SET replied = replied + 1 WHERE id = ?").bind(row.campaign_id).run();
+  } catch {
+    /* never block a customer message over bookkeeping */
+  }
 }
