@@ -1,10 +1,11 @@
 /// <reference types="@cloudflare/workers-types" />
 
-import { evoEnabled, sendText, type EvoEnv } from "../lib/evolution";
-import { getOwnerWhatsapp, getOwnerEmail } from "../lib/settings";
+import { waConfig, waReady, type WaEnv } from "../lib/whatsapp";
+import { WA_TEMPLATES, sendTemplate } from "../lib/waTemplates";
+import { getOwnerEmail } from "../lib/settings";
 import { mailEnabled, sendMail, type MailEnv } from "../lib/mailer";
 
-interface Env extends EvoEnv, MailEnv {
+interface Env extends WaEnv, MailEnv {
   DB: D1Database;
 }
 
@@ -121,35 +122,23 @@ ${message}` : "",
       })()
     );
 
-    // Fire WhatsApp notifications without blocking the response.
-    if (evoEnabled(env)) {
-      const roleLabel = role ? ROLE_LABEL[role] ?? role : "Digital Employee";
-      const indLabel = industry ? INDUSTRY_LABEL[industry] ?? industry : "—";
-
-      const customerMsg =
-        `Hi ${name}! 👋 Thanks for trying GoLuQ.\n\n` +
-        `We've received your request for a *${roleLabel}* for your business. ` +
-        `Our team will reach out right here on WhatsApp shortly to set up your free trial.\n\n` +
-        `— Team GoLuQ`;
-
-      const ownerMsg =
-        `🆕 *New GoLuQ lead*\n` +
-        `Name: ${name}\n` +
-        `Phone: ${intl ? phone : `+91 ${phone}`}\n` +
-        `Worker: ${roleLabel}\n` +
-        `Industry: ${indLabel}\n` +
-        `Wants training: ${wantsTraining ? "Yes" : "No"}\n` +
-        (crossSell.length ? `Also wants: ${crossSell.join(", ")}\n` : "") +
-        (email ? `Email: ${email}\n` : "") +
-        (ref ? `Referred by: ${ref}\n` : "") +
-        (message ? `\nNote: ${message}` : "");
-
-      // The Evolution instance is provisioned for Indian numbers — don't push an
-      // auto-reply at an arbitrary international number; just alert the owner.
-      const tasks: Promise<unknown>[] = intl ? [] : [sendText(env, phone, customerMsg)];
-      const owner = await getOwnerWhatsapp(env.DB, env);
-      if (owner) tasks.push(sendText(env, owner, ownerMsg));
-      context.waitUntil(Promise.allSettled(tasks));
+    // Confirm on WhatsApp that a person has the enquiry, without blocking the
+    // response. This goes as the approved `enquiry_received` TEMPLATE: the
+    // person has almost certainly never messaged our business number, so their
+    // 24-hour service window was never open and free text cannot be delivered.
+    const cfg = await waConfig(env.DB, env);
+    if (waReady(cfg)) {
+      const roleLabel = role ? ROLE_LABEL[role] ?? role : "a Digital Employee";
+      context.waitUntil(
+        (async () => {
+          const sent = await sendTemplate(cfg, phone, WA_TEMPLATES.enquiryReceived, "en", [
+            name,
+            roleLabel,
+          ]);
+          // Never throws; the result is the only place failure is visible.
+          if (!sent.ok) console.log("enquiry_received not delivered:", sent.error);
+        })()
+      );
     }
 
     return Response.json({ ok: true });

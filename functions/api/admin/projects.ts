@@ -4,8 +4,10 @@ import { checkAdmin, unauthorized } from "../../lib/admin";
 import { randomToken } from "../../lib/auth";
 import { mailEnabled, sendMail, type MailEnv } from "../../lib/mailer";
 import { isStage, STAGES } from "../../lib/portal";
+import { waConfig, waReady, type WaEnv } from "../../lib/whatsapp";
+import { WA_TEMPLATES, sendTemplate } from "../../lib/waTemplates";
 
-interface Env extends MailEnv {
+interface Env extends MailEnv, WaEnv {
   DB: D1Database;
   ADMIN_SECRET: string;
 }
@@ -236,23 +238,56 @@ async function invite(env: Env, customerId: number): Promise<boolean> {
   return sent.ok;
 }
 
-/** Tell the customer their project moved. Silent failure is fine; the portal shows it anyway. */
+/**
+ * Tell the customer their project moved — by email, and on WhatsApp where we
+ * have a number. Both are best-effort: the portal shows the change regardless,
+ * so a notification failure must never block the owner's workflow.
+ *
+ * WhatsApp goes as the approved `project_stage_update` template, because a
+ * customer mid-build has usually not messaged us in the last 24 hours and free
+ * text would simply be refused.
+ */
 async function notifyCustomer(env: Env, projectId: number, stage: string): Promise<void> {
-  if (!mailEnabled(env)) return;
   const row = await env.DB.prepare(
-    `SELECT p.title, c.name, c.email FROM projects p JOIN customers c ON c.id = p.customer_id
+    `SELECT p.title, c.name, c.email, c.phone FROM projects p JOIN customers c ON c.id = p.customer_id
       WHERE p.id = ?`
   )
     .bind(projectId)
-    .first<{ title: string; name: string; email: string | null }>();
-  if (!row?.email) return;
-  const sent = await sendMail(env, {
-    to: row.email,
-    subject: `${row.title} — now at ${stage}`,
-    text:
-      `Hello ${row.name},\n\n` +
-      `"${row.title}" has moved to the ${stage} stage.\n\n` +
-      `See the full history and anything delivered so far:\nhttps://goluq.com/portal\n\n— GoLuQ\n`,
-  });
-  if (!sent.ok) console.log("stage email not sent:", sent.error);
+    .first<{ title: string; name: string; email: string | null; phone: string | null }>();
+  if (!row) return;
+
+  if (row.email && mailEnabled(env)) {
+    const sent = await sendMail(env, {
+      to: row.email,
+      subject: `${row.title} — now at ${stage}`,
+      text:
+        `Hello ${row.name},\n\n` +
+        `"${row.title}" has moved to the ${stage} stage.\n\n` +
+        `See the full history and anything delivered so far:\nhttps://goluq.com/portal\n\n— GoLuQ\n`,
+    });
+    if (!sent.ok) console.log("stage email not sent:", sent.error);
+  }
+
+  if (row.phone) {
+    const cfg = await waConfig(env.DB, env);
+    if (waReady(cfg)) {
+      const sent = await sendTemplate(cfg, row.phone, WA_TEMPLATES.projectStage, "en", [
+        row.name,
+        row.title,
+        STAGE_WORDS[stage] ?? stage,
+      ]);
+      if (!sent.ok) console.log("stage whatsapp not sent:", sent.error);
+    }
+  }
 }
+
+/** Customer-facing stage wording, so the message reads like a sentence. */
+const STAGE_WORDS: Record<string, string> = {
+  requirements: "requirements",
+  blueprint: "blueprint and quote",
+  approval: "awaiting your approval",
+  build: "build",
+  testing: "testing",
+  delivery: "delivery",
+  support: "support",
+};
