@@ -60,7 +60,8 @@ a visitor we paid nothing to acquire and still lost.
 | **WhatsApp** (tap-to-chat) | needs the public number set | Opens WhatsApp to our verified business number. The message hits the Cloud API webhook, the GoLuQ guide answers in seconds, 24×7. The thread appears in cockpit → Chats; replying takes it over and silences the guide. |
 | **Website chat widget** | live | Same guide, same prices, same rules — one shared brain (`functions/lib/concierge.ts`). Can hand off to a human, which emails an alert. |
 | **Lead form** | live | Writes to `leads`, emails an alert with a tappable wa.me link, feeds the follow-up engine. |
-| **Email** | live outbound (Resend) | Alerts to the owner. Inbound routing is parked. |
+| **Email** | live outbound (Resend) | Alerts to the owner, portal invites, stage changes, and the daily follow-up summary. Inbound routing is parked. |
+| **Outbound WhatsApp** | live, template-only | Templates are the only thing that reaches someone outside their 24-hour window. Five approved: enquiry_received, quote_ready, project_stage_update, service_activated, followup_no_reply. |
 | **Phone call** | **NOT possible on the WABA number** | A WhatsApp Cloud API number cannot receive ordinary voice calls. See the constraint below. |
 
 ### The call constraint — decide this
@@ -217,10 +218,9 @@ Kept in priority order. Done items stay for a while so the history is visible.
 
 ### Next
 - [ ] Confirm real comms costs, then correct the prices in the cockpit.
-- [ ] Submit the WhatsApp templates — drafted and ready in
-      [whatsapp-templates.md](whatsapp-templates.md). Nothing outbound reaches
-      anyone outside the 24-hour window until these are approved, which includes
-      the day 3/5/7/12 follow-up engine.
+- [ ] Schedule the follow-up cron to run daily. It works now but nothing calls
+      it: `curl "https://goluq.com/api/cron/followups?secret=$ADMIN_SECRET"`
+      once a day from the VM's crontab.
 - [ ] Decide the call channel (section 3) — still open.
 
 ### Later
@@ -229,6 +229,9 @@ Kept in priority order. Done items stay for a while so the history is visible.
 - [ ] Cloudflare inbound email routing (parked).
 
 ### Done
+- [x] All 5 templates approved and WIRED — follow-ups, enquiry confirmation and
+      project-stage updates now deliver. Verified by real sends in both
+      languages, 2026-09-02.
 - [x] Cockpit replies to a WhatsApp thread now actually reach the customer
 - [x] **WhatsApp guide live and verified** — real conversation received, answered
       and stored, 2026-08-30
