@@ -218,10 +218,30 @@ Kept in priority order. Done items stay for a while so the history is visible.
 
 ### Next
 - [ ] Confirm real comms costs, then correct the prices in the cockpit.
-- [ ] Schedule the follow-up cron to run daily. It works now but nothing calls
-      it: `curl "https://goluq.com/api/cron/followups?secret=$ADMIN_SECRET"`
-      once a day from the VM's crontab.
+- [ ] **Give the VM a way to pull from GitHub.** It has no credentials at all and
+      has been pulling anonymously; GitHub now refuses ("expected flush after ref
+      listing" / asks for a username), so `deploy/update.sh` fails. Worked around
+      on 2026-09-02 with `git bundle`, which is fine once but not a deploy
+      process. Needs a read-only deploy key or a fine-grained token.
+- [ ] Build the campaigns tab — see below.
 - [ ] Decide the call channel (section 3) — still open.
+
+### Campaigns — what it takes
+Sending an approved MARKETING template to a list. The constraints are the design:
+- **Consent is required.** Only message people who gave you their number for
+  this. Bought lists are the fastest route to a blocked number.
+- **Messaging limits are tiered** — a new number starts low (250–1,000 unique
+  recipients per 24h) and rises with consistent quality. Blasting early is how
+  you stay at the bottom tier.
+- **Quality rating is the real budget.** Blocks and "report" taps drop it from
+  GREEN, and a low rating cuts the limit or suspends sending. Every other
+  message we send depends on it.
+- STOP is already honoured on inbound, permanently.
+
+The differentiator, and why this is worth building: a GoLuQ campaign is not a
+blast. Replies land in the same inbox and the guide answers them 24×7 — so the
+campaign starts conversations rather than just delivering impressions. No
+reseller can offer that, and it is the same wedge as everything else.
 
 ### Later
 - [ ] Exotel provisioning, once a customer has paid.
@@ -229,6 +249,9 @@ Kept in priority order. Done items stay for a while so the history is visible.
 - [ ] Cloudflare inbound email routing (parked).
 
 ### Done
+- [x] Follow-up cron scheduled daily on the VM (06:30 UTC / 10:00 IST)
+- [x] Guide no longer muted forever by one manual reply; 30-minute handover,
+      explicit on/off per conversation, and "talk to a human" detection
 - [x] All 5 templates approved and WIRED — follow-ups, enquiry confirmation and
       project-stage updates now deliver. Verified by real sends in both
       languages, 2026-09-02.
