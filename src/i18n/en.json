@@ -1356,7 +1356,8 @@
     "homeTitle": "Toll-free numbers, WhatsApp API, voice and SMS — set up and wired into your business",
     "homeSubtitle": "Get the line your customers call, and the system that handles what happens next. Most providers sell you only the first half.",
     "homeCta": "See all services and prices",
-    "setupFrom": "Setup from"
+    "setupFrom": "Setup from",
+    "nav": "Services"
   },
   "commsHero": {
     "eyebrow": "WhatsApp API · SMS · Voice · Toll-free",

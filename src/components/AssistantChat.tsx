@@ -188,7 +188,10 @@ export function AssistantChat() {
             style={{
               background: "rgb(var(--c-abyss) / 0.97)",
               backdropFilter: "blur(16px)",
-              bottom: "calc(max(1.25rem, env(safe-area-inset-bottom)) + 4.5rem)",
+              // Clears BOTH floating buttons: the chat launcher at 1.25rem and
+              // the WhatsApp button stacked above it at 6rem. Sitting at 4.5rem
+              // put this directly on top of WhatsApp, hiding it behind a tooltip.
+              bottom: "calc(max(1.25rem, env(safe-area-inset-bottom)) + 10rem)",
               right: "max(1.25rem, env(safe-area-inset-right))",
             }}
           >
@@ -237,7 +240,7 @@ export function AssistantChat() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 24, scale: 0.96 }}
             transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-            className="fixed bottom-24 right-3 left-3 z-50 flex max-h-[70vh] flex-col overflow-hidden rounded-3xl border border-teal-glow/30 shadow-glass sm:left-auto sm:w-[400px]"
+            className="fixed bottom-[11rem] right-3 left-3 z-50 flex max-h-[70vh] flex-col overflow-hidden rounded-3xl border border-teal-glow/30 shadow-glass sm:left-auto sm:w-[400px]"
             style={{ background: "rgb(var(--c-abyss) / 0.96)", backdropFilter: "blur(20px)" }}
           >
             {/* Header */}

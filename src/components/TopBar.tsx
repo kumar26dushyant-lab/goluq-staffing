@@ -41,7 +41,7 @@ export function TopBar({
       className="sticky top-0 z-30 mx-auto flex max-w-6xl items-center justify-between gap-2 px-3 py-3 sm:px-8 sm:py-4"
       style={{ paddingTop: "max(0.75rem, env(safe-area-inset-top))" }}
     >
-      <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+      <div className="flex shrink-0 items-center gap-2 sm:gap-3">
         <AnimatePresence mode="wait">
           {showBack && (
             <motion.button
@@ -68,7 +68,7 @@ export function TopBar({
           to="/services"
           className="hidden rounded-full px-3 py-2 text-sm font-semibold text-muted hover:text-fg lg:block"
         >
-          {t("comms.kicker")}
+          {t("comms.nav")}
         </Link>
         <Link
           to="/build"

@@ -83,7 +83,7 @@ export function WhatsAppCta({
         style={{ background: WA_GREEN }}
       >
         <MessageCircle size={16} />
-        <span className="hidden font-mono md:inline">{pretty}</span>
+        <span className="hidden font-mono xl:inline">{pretty}</span>
       </a>
     );
   }
