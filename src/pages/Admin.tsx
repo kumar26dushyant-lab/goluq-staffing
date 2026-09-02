@@ -19,7 +19,7 @@ import {
 
 type Section =
   | "overview" | "leads" | "chat" | "visitors" | "pricing"
-  | "bot" | "content" | "inbox" | "affiliates" | "whatsapp" | "projects" | "campaigns" | "settings";
+  | "bot" | "content" | "inbox" | "affiliates" | "projects" | "campaigns" | "settings";
 
 export function Admin() {
   const [authed, setAuthed] = useState(false);
@@ -54,7 +54,6 @@ export function Admin() {
     { id: "content", label: "Content", icon: FileText },
     { id: "bot", label: "Bot", icon: Bot },
     { id: "affiliates", label: "Affiliates", icon: TrendingUp },
-    { id: "whatsapp", label: "WhatsApp", icon: MessageSquare },
     { id: "projects", label: "Projects", icon: Briefcase },
     { id: "campaigns", label: "Campaigns", icon: Megaphone },
     { id: "settings", label: "Settings", icon: SettingsIcon },
@@ -101,7 +100,6 @@ export function Admin() {
         {section === "content" && <Content />}
         {section === "bot" && <BotPanel />}
         {section === "affiliates" && <Affiliates />}
-        {section === "whatsapp" && <WhatsApp />}
         {section === "projects" && <Projects />}
         {section === "campaigns" && <Campaigns />}
         {section === "settings" && <SettingsPanel />}
@@ -1180,68 +1178,6 @@ function Affiliates() {
           {rows.length === 0 && <tr><td colSpan={7} className="p-6 text-center text-muted">No affiliates yet.</td></tr>}
         </tbody>
       </table>
-    </div>
-  );
-}
-
-function WhatsApp() {
-  const [state, setState] = useState("…");
-  const [qr, setQr] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [to, setTo] = useState(""); const [text, setText] = useState("Test from GoLuQ ✅"); const [sent, setSent] = useState("");
-  const connected = state === "open";
-
-  const refresh = useCallback(async () => {
-    const d = await adminGet("/api/admin/wa-status");
-    setState(d.configured ? d.state : "not configured");
-  }, []);
-  useEffect(() => { refresh(); }, [refresh]);
-
-  const connect = async () => {
-    setBusy(true); setQr(null);
-    const d = await adminPost("/api/admin/wa-connect", {});
-    setBusy(false);
-    if (d.ok) {
-      setState(d.state || "connecting");
-      if (d.state !== "open") setQr(d.qr || null);
-      const iv = setInterval(async () => {
-        const s = await adminGet("/api/admin/wa-status");
-        setState(s.state);
-        if (s.state === "open") { setQr(null); clearInterval(iv); }
-      }, 3000);
-    }
-  };
-  const send = async () => {
-    setSent("");
-    const d = await adminPost("/api/admin/wa-send", { to, text });
-    setSent(d.ok ? "Sent ✅" : `Failed: ${d.error || "error"}`);
-  };
-
-  return (
-    <div className="space-y-6">
-      <div className="glass rounded-2xl p-6">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div><h2 className="font-display text-xl font-bold text-fg">Connection</h2>
-            <p className="mt-1 text-sm">State: <span className={connected ? "text-success" : "text-warn"}>{connected ? "connected ✅" : state}</span></p></div>
-          <Button variant={connected ? "secondary" : "ghost"} onClick={connect} disabled={busy}>{busy ? "Connecting…" : connected ? "Reconnect" : "Connect WhatsApp"}</Button>
-        </div>
-        {connected && !qr && (
-          <p className="mt-4 rounded-xl bg-success/10 px-4 py-3 text-sm text-success">Your WhatsApp number is linked. New leads will trigger alerts + auto-replies (once an owner number is set in Settings).</p>
-        )}
-        {!connected && qr && <div className="mt-5 flex flex-col items-center gap-2">
-          <img src={qr} alt="WhatsApp QR" className="h-56 w-56 rounded-xl bg-white p-2" />
-          <p className="text-sm text-muted">Scan with the GoLuQ number → WhatsApp → Linked devices.</p></div>}
-      </div>
-
-      <div className="glass rounded-2xl p-6">
-        <h2 className="font-display text-xl font-bold text-fg">Send a test message</h2>
-        <div className="mt-4 grid gap-3 sm:grid-cols-[200px_1fr_auto]">
-          <input className={inputClass} placeholder="Phone (10-digit)" value={to} onChange={(e) => setTo(e.target.value)} />
-          <input className={inputClass} placeholder="Message" value={text} onChange={(e) => setText(e.target.value)} />
-          <Button onClick={send} disabled={!to || !text}><Send size={16} /> Send</Button>
-        </div>
-        {sent && <p className="mt-2 text-sm text-muted">{sent}</p>}
-      </div>
     </div>
   );
 }

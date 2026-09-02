@@ -1,10 +1,9 @@
 /// <reference types="@cloudflare/workers-types" />
 
-import { evoEnabled, sendText, type EvoEnv } from "../lib/evolution";
-import { getOwnerWhatsapp, getOwnerEmail } from "../lib/settings";
+import { getOwnerEmail } from "../lib/settings";
 import { mailEnabled, sendMail, type MailEnv } from "../lib/mailer";
 
-interface Env extends EvoEnv, MailEnv {
+interface Env extends MailEnv {
   DB: D1Database;
 }
 
@@ -116,23 +115,6 @@ ${recentText}` : "",
           }
         })()
       );
-
-      // Alert the owner on WhatsApp too, for when the instance is connected.
-      if (evoEnabled(env)) {
-        const owner = await getOwnerWhatsapp(env.DB, env);
-        if (owner) {
-          // Same six turns already fetched above for the email alert.
-          const transcript = recentText;
-          const msg =
-            `🔔 *A visitor wants to talk to you*\n` +
-            (name ? `Name: ${name}\n` : "") +
-            (phone ? `Phone: ${phone}\n` : "") +
-            `Page: ${clip(b.page, 40) || "home"}\n\n` +
-            (transcript ? `${transcript}\n\n` : "") +
-            `Reply from the cockpit: https://goluq.com/admin (Live chat)`;
-          context.waitUntil(sendText(env, owner, msg).catch(() => {}));
-        }
-      }
     }
 
     // Anything the owner has said since the visitor last checked.
