@@ -12,6 +12,24 @@ interface Env extends ConciergeEnv, WaEnv, MailEnv {
   DB: D1Database;
 }
 
+/**
+ * How long the guide stays quiet after a person replies in a thread.
+ *
+ * Long enough that the guide never interrupts a live exchange; short enough that
+ * an unanswered customer is not left with nobody at all. The failure this
+ * replaces was unbounded: one manual reply silenced the guide on that thread for
+ * good.
+ */
+const HANDOVER_MS = 30 * 60 * 1000;
+
+/**
+ * Someone asking for a person, in the ways Indian customers actually write it.
+ * Deliberately narrow: a false positive needlessly pulls the owner in, so this
+ * matches explicit requests rather than any mention of a human.
+ */
+const WANTS_HUMAN =
+  /\b(talk|speak|chat)\s+(to|with)\s+(a\s+)?(human|person|someone|real|agent|expert)\b|\bhuman\b.*\b(please|chahiye)\b|\b(call me|call back|callback)\b|किसी\s*से\s*बात|इंसान\s*से\s*बात|बात\s*कर(नी|ना)\s*है/i;
+
 /** One WhatsApp thread per phone number, stored beside the website chats. */
 const sessionFor = (phone: string) => `wa:${phone}`;
 
@@ -153,9 +171,9 @@ async function handleMessage(env: Env, cfg: WaConfig, m: Inbound): Promise<void>
   const db = env.DB;
 
   const prior = await db
-    .prepare("SELECT lang, closed, agent_joined FROM chat_sessions WHERE id = ?")
+    .prepare("SELECT lang, closed, agent_joined, bot_off FROM chat_sessions WHERE id = ?")
     .bind(sid)
-    .first<{ lang: string | null; closed: number; agent_joined: number }>();
+    .first<{ lang: string | null; closed: number; agent_joined: number; bot_off: number }>();
   const isNew = !prior;
   const lang = langFor(m.text, prior?.lang ?? null);
 
@@ -196,12 +214,46 @@ async function handleMessage(env: Env, cfg: WaConfig, m: Inbound): Promise<void>
     return;
   }
 
-  // A real person has taken this thread over; the guide must not talk over them.
-  if (prior?.agent_joined) {
-    await notifyOwner(env, m, "reply on a thread you joined");
+  if (prior?.closed) return;
+
+  // The owner has switched the guide off for this person, deliberately.
+  if (prior?.bot_off) {
+    await notifyOwner(env, m, "message on a thread you are handling");
     return;
   }
-  if (prior?.closed) return;
+
+  // A person is actively in this conversation — stay out of their way, but only
+  // while they are actually there.
+  //
+  // This used to key off `agent_joined`, which is set forever by a single manual
+  // reply. One "what you like?" from the cockpit muted the guide on that thread
+  // permanently: nine later messages were stored, emailed, and never answered.
+  // Handing back after a quiet spell is the difference between a colleague
+  // stepping aside and a bot that silently quits.
+  const lastAgent = await db
+    .prepare(
+      `SELECT created_at FROM chat_messages
+        WHERE session_id = ? AND role = 'agent' ORDER BY id DESC LIMIT 1`
+    )
+    .bind(sid)
+    .first<{ created_at: string }>();
+  if (lastAgent?.created_at) {
+    const idleMs = Date.now() - Date.parse(lastAgent.created_at.replace(" ", "T") + "Z");
+    if (Number.isFinite(idleMs) && idleMs < HANDOVER_MS) {
+      await notifyOwner(env, m, "reply on a thread you are handling");
+      return;
+    }
+  }
+
+  // Asking for a person is not a question the guide should answer away. Flag it
+  // so the cockpit shows it as waiting, tell the owner, and let the guide say a
+  // person is coming rather than going silent — silence is what makes someone
+  // give up and message a competitor.
+  const wantsHuman = WANTS_HUMAN.test(m.text);
+  if (wantsHuman) {
+    await db.prepare("UPDATE chat_sessions SET needs_human = 1 WHERE id = ?").bind(sid).run();
+    await notifyOwner(env, m, "asked to speak to a person");
+  }
 
   const history = await db
     .prepare("SELECT role, content FROM chat_messages WHERE session_id = ? ORDER BY id DESC LIMIT 10")
@@ -219,7 +271,10 @@ async function handleMessage(env: Env, cfg: WaConfig, m: Inbound): Promise<void>
     context:
       "\nThe customer is messaging the GoLuQ business number on WhatsApp, so keep replies SHORT — two or three lines, the way people actually message. " +
       "They came to us, which means they already have something in mind: find out what business they run and what they need, then name a price. " +
-      "You cannot show them a demo here, so close on either a quote or a call from a real person.",
+      "You cannot show them a demo here, so close on either a quote or a call from a real person." +
+      (wantsHuman
+        ? " THEY HAVE ASKED TO SPEAK TO A PERSON. Say plainly that Dushyant has been told and will reply here himself shortly. Do not argue or try to handle it yourself — but do ask what they need, so he has it in front of him when he arrives."
+        : ""),
   });
 
   const sent = await waSendText(cfg, m.from, reply);

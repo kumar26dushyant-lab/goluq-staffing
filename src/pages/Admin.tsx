@@ -607,6 +607,7 @@ function LiveChat() {
   const [reply, setReply] = useState("");
   const [busy, setBusy] = useState(false);
   const [sendErr, setSendErr] = useState("");
+  const [botOff, setBotOff] = useState(false);
 
   const loadList = useCallback(async () => {
     const d = await adminGet("/api/admin/chats");
@@ -617,7 +618,16 @@ function LiveChat() {
   const loadOne = useCallback(async (id: string) => {
     const d = await adminGet(`/api/admin/chats?id=${encodeURIComponent(id)}`);
     setMsgs(d.messages || []);
+    setBotOff(Boolean(d.session?.bot_off));
   }, []);
+
+  // A manual reply only pauses the guide for half an hour; this is the switch
+  // for turning it off entirely, or handing the thread back when you are done.
+  const toggleBot = async () => {
+    if (!openChat) return;
+    const d = await adminPost("/api/admin/chats", { id: openChat, action: "bot", off: !botOff });
+    if (d.ok) setBotOff(Boolean(d.bot_off));
+  };
 
   useEffect(() => {
     loadList();
@@ -700,6 +710,24 @@ function LiveChat() {
                 ))}
               </div>
               <div className="mt-3 border-t border-hairline/10 pt-3">
+                <div className="mb-2 flex flex-wrap items-center gap-2 text-xs">
+                  <button
+                    type="button"
+                    onClick={toggleBot}
+                    className={`rounded-full px-3 py-1 font-semibold ring-1 ${
+                      botOff
+                        ? "bg-warn/15 text-warn ring-warn/40"
+                        : "bg-teal-glow/15 text-brand-luq ring-teal-glow/40"
+                    }`}
+                  >
+                    {botOff ? "Guide is OFF — tap to hand back" : "Guide is ON — tap to take over"}
+                  </button>
+                  <span className="text-faint">
+                    {botOff
+                      ? "Only you reply on this thread."
+                      : "Replying here pauses the guide for 30 minutes, then it resumes."}
+                  </span>
+                </div>
                 <div className="flex gap-2">
                   <input className={inputClass} value={reply} placeholder="Type your reply…"
                     onChange={(e) => setReply(e.target.value)} onKeyDown={(e) => e.key === "Enter" && send()} />

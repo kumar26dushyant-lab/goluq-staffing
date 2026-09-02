@@ -79,6 +79,7 @@ CREATE TABLE IF NOT EXISTS chat_sessions (
   agent_joined INTEGER DEFAULT 0,      -- owner has replied at least once
   closed INTEGER DEFAULT 0,
   unread_for_agent INTEGER DEFAULT 0,
+  bot_off INTEGER DEFAULT 0,          -- owner switched the guide off for this thread
   visitor_name TEXT,
   visitor_phone TEXT,
   page TEXT,

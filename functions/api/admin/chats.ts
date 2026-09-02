@@ -78,6 +78,15 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
     const id = String(b.id ?? "").slice(0, 40);
     if (!id) return Response.json({ ok: false, error: "no id" }, { status: 400 });
 
+    // Explicit control over the guide for one conversation. A manual reply
+    // only PAUSES it for a while; this is how the owner turns it off for good,
+    // or hands a thread back once they are done.
+    if (b.action === "bot") {
+      const off = b.off === true || b.off === "1" ? 1 : 0;
+      await env.DB.prepare("UPDATE chat_sessions SET bot_off = ? WHERE id = ?").bind(off, id).run();
+      return Response.json({ ok: true, bot_off: off });
+    }
+
     if (b.action === "close") {
       await env.DB.prepare(
         `UPDATE chat_sessions SET closed = 1, needs_human = 0 WHERE id = ?`

@@ -69,6 +69,8 @@ for (const sql of [
   `ALTER TABLE affiliates ADD COLUMN reset_expires TEXT`,
   // Communication services live alongside software builds in the same table.
   `ALTER TABLE pricing ADD COLUMN category TEXT DEFAULT 'build'`,
+  // Per-conversation switch for the guide, so a manual reply is a pause, not a mute.
+  `ALTER TABLE chat_sessions ADD COLUMN bot_off INTEGER DEFAULT 0`,
 ]) {
   try {
     sqlite.exec(sql);
