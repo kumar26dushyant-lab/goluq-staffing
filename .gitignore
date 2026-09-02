@@ -18,3 +18,8 @@ accent-compare
 _patch.cjs
 _p.mjs
 _pkgcheck.mjs
+
+# Source photos and reference material — large binaries, kept locally.
+# Optimised, web-ready images belong in public/ instead.
+"Business plan"/
+Business plan/
