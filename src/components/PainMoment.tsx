@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { PhoneMissed, Wallet, Smartphone, FileWarning, UserX, Check, type LucideIcon } from "lucide-react";
+import {
+  PhoneMissed, Wallet, Smartphone, FileWarning, UserX, Check, Volume2, VolumeX,
+  type LucideIcon,
+} from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useVoice } from "../lib/voice";
 
 /**
  * The recognition moment — "yehi to meri roz ki sir-dardi hai".
@@ -35,18 +39,61 @@ const SCENES: { id: string; icon: LucideIcon }[] = [
   { id: "claimstuck", icon: FileWarning },
 ];
 
-const SCENE_MS = 5200;
+/**
+ * Eight lines of story, staggered in, then time to actually read them.
+ *
+ * This was 5.2s, which was barely enough to finish REVEALING the beats, let
+ * alone read both columns — the scene changed under the reader mid-sentence.
+ * A carousel that outruns its reader is worse than no carousel: it teaches
+ * people to stop trying.
+ *
+ * Auto-advance also STOPS permanently the moment anyone interacts, because at
+ * that point they are reading deliberately and moving the page under them is
+ * simply rude.
+ */
+const SCENE_MS = 16000;
 
 export function PainMoment({ className = "" }: { className?: string }) {
   const { t } = useTranslation();
   const reduced = useReducedMotion();
+  const { say, stop, supported } = useVoice();
   const [i, setI] = useState(0);
+  const [held, setHeld] = useState(false);
+  const [speaking, setSpeaking] = useState(false);
 
   useEffect(() => {
-    if (reduced) return;
+    if (reduced || held) return;
     const iv = window.setInterval(() => setI((n) => (n + 1) % SCENES.length), SCENE_MS);
     return () => window.clearInterval(iv);
-  }, [reduced]);
+  }, [reduced, held]);
+
+  // Picking a scene, or asking to hear it, means the reader is now driving.
+  const pick = (n: number) => {
+    setHeld(true);
+    stop();
+    setSpeaking(false);
+    setI(n);
+  };
+
+  // Speak the commentary for whichever scene is showing. `force` is passed
+  // because this is an explicit tap: the browser's autoplay lock does not apply
+  // to speech the visitor just asked for.
+  const narrate = () => {
+    if (speaking) {
+      stop();
+      setSpeaking(false);
+      return;
+    }
+    setHeld(true);
+    say(
+      t(`pain.scenes.${scene.id}.voice`),
+      { onStart: () => setSpeaking(true), onEnd: () => setSpeaking(false) },
+      true
+    );
+  };
+
+  // Leaving the section, or unmounting, must not leave a voice talking to nobody.
+  useEffect(() => () => stop(), [stop]);
 
   const scene = SCENES[i];
   const Icon = scene.icon;
@@ -67,12 +114,12 @@ export function PainMoment({ className = "" }: { className?: string }) {
 
       {/* Scene picker — the labels alone do half the work, because one of them
           is almost certainly the reader's own Tuesday. */}
-      <div className="mt-6 flex flex-wrap gap-2">
+      <div className="mt-6 flex flex-wrap items-center gap-2">
         {SCENES.map((s, n) => (
           <button
             key={s.id}
             type="button"
-            onClick={() => setI(n)}
+            onClick={() => pick(n)}
             className={`rounded-full px-3.5 py-1.5 text-sm font-semibold transition-colors ${
               n === i
                 ? "bg-teal-glow/20 text-brand-luq ring-1 ring-teal-glow/45"
@@ -82,7 +129,43 @@ export function PainMoment({ className = "" }: { className?: string }) {
             {t(`pain.scenes.${s.id}.tab`)}
           </button>
         ))}
+
+        {/* Spoken commentary. Deliberately NOT a reading of the cards — it says
+            the part that is hard to put on screen without adding more text to a
+            page that already has too much: what this actually costs over a year,
+            and why it is worth fixing. Many owners here would rather listen than
+            read, and nobody wants a robot reciting what their eyes can see. */}
+        {supported && (
+          <button
+            type="button"
+            onClick={narrate}
+            aria-label={t("pain.listenAria")}
+            className={`ml-auto inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-sm font-semibold transition-colors ${
+              speaking
+                ? "bg-teal-glow/20 text-brand-luq ring-1 ring-teal-glow/45"
+                : "glass glass-interactive text-muted"
+            }`}
+          >
+            {speaking ? <Volume2 size={15} /> : <VolumeX size={15} />}
+            {speaking ? t("pain.listening") : t("pain.listen")}
+          </button>
+        )}
       </div>
+
+      {/* How long until this scene changes. A carousel that moves without
+          warning is what makes people stop reading it. Stops entirely once the
+          reader takes over. */}
+      {!held && !reduced && (
+        <div className="mt-3 h-0.5 w-full overflow-hidden rounded-full bg-hairline/15">
+          <motion.div
+            key={scene.id}
+            className="h-full bg-brand-luq/70"
+            initial={{ width: "0%" }}
+            animate={{ width: "100%" }}
+            transition={{ duration: SCENE_MS / 1000, ease: "linear" }}
+          />
+        </div>
+      )}
 
       <div className="mt-6 grid gap-4 lg:grid-cols-2">
         {/* Before — what happens today */}

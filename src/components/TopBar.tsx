@@ -8,6 +8,7 @@ import { ThemeToggle } from "./ThemeToggle";
 import { useVoice } from "../lib/voice";
 import { useSiteConfig } from "../lib/siteConfig";
 import { WhatsAppCta } from "./WhatsAppCta";
+import { CountryPicker } from "./CountryPicker";
 
 function VoiceToggle() {
   const { supported, muted, toggleMute } = useVoice();
@@ -97,6 +98,7 @@ export function TopBar({
             highest-converting route on the site and must never be buried. */}
         <WhatsAppCta variant="chip" />
         <VoiceToggle />
+        <CountryPicker />
         <LanguageToggle />
         <ThemeToggle />
       </div>

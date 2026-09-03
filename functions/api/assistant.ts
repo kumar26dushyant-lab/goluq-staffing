@@ -30,7 +30,7 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
 
     // Same header /api/config reads, so the chat and the page agree on money.
     const country = (
-      request.headers.get("cf-ipcountry") || request.headers.get("x-country") || ""
+      request.headers.get("x-country") || request.headers.get("cf-ipcountry") || ""
     ).toUpperCase().slice(0, 2);
 
     const reply = await conciergeReply(env, { messages, lang, context, country });

@@ -13,6 +13,15 @@ export function pageFromPath(pathname: string): GuidePage {
   return "home";
 }
 
+/** The country the visitor chose in the header picker, if any. */
+function pickedCountry(): string {
+  try {
+    return localStorage.getItem("goluq_country") || "";
+  } catch {
+    return "";
+  }
+}
+
 /** Ask the server-side assistant (Gemini proxy). Never holds the key client-side. */
 export async function askAssistant(
   messages: ChatMsg[],
@@ -22,7 +31,13 @@ export async function askAssistant(
   try {
     const res = await fetch("/api/assistant", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      // Carry any country the visitor picked, so the guide quotes the same
+      // currency the page is showing. Without this a visitor who switched to
+      // UAE reads AED prices and is then quoted rupees in chat.
+      headers: {
+        "Content-Type": "application/json",
+        ...(pickedCountry() ? { "x-country": pickedCountry() } : {}),
+      },
       body: JSON.stringify({ messages, lang, page }),
     });
     const data = await res.json();

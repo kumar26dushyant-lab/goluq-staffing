@@ -16,12 +16,15 @@ interface Env {
  * if this call fails outright.
  */
 export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
-  // Country drives the default language on a first visit: India gets Hindi,
-  // everywhere else English. Cloudflare sits in front of the origin, so
-  // cf-ipcountry is present in production.
+  // Country drives both the default language on a first visit (India gets
+  // Hindi, everywhere else English) and which currency prices are shown in.
+  //
+  // x-country FIRST: it is only ever set when the visitor picked a country
+  // themselves, and an explicit choice must beat an inferred one. Everyone else
+  // sends no such header and falls through to the edge's own geolocation.
   const country = (
-    request.headers.get("cf-ipcountry") ||
     request.headers.get("x-country") ||
+    request.headers.get("cf-ipcountry") ||
     ""
   ).toUpperCase().slice(0, 2);
   const [whatsapp, chatEnabled, announcement] = await Promise.all([

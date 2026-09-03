@@ -91,7 +91,16 @@ export async function fetchSiteConfig(): Promise<SiteConfig> {
 
   inflight = (async () => {
     try {
-      const r = await fetch("/api/config");
+      // A visitor who has explicitly picked a country overrides geography.
+      let picked = "";
+      try {
+        picked = localStorage.getItem("goluq_country") || "";
+      } catch {
+        /* private mode — geography still applies */
+      }
+      const r = await fetch("/api/config", {
+        headers: picked ? { "x-country": picked } : undefined,
+      });
       const d = await r.json();
       // A server that predates market pricing sends no `from`, which would
       // render as "undefined" in place of every price. Fall back to the rupee

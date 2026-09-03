@@ -1554,7 +1554,8 @@
           "You are not the backup for your own staff.",
           "When someone finally leaves, the work stays."
         ],
-        "gain": "If your main man does not come tomorrow, the day still runs — and you get no panic calls."
+        "gain": "If your main man does not come tomorrow, the day still runs — and you get no panic calls.",
+        "voice": "Think about what this really costs. It is not the two days. It is that you can never plan around your own staff, never say no to a leave request, and never grow past the number of people whose heads hold the business. Once the work lives in a system instead, a new person is useful in a week — and the old one leaving is an inconvenience, not an emergency."
       },
       "udhaar": {
         "tab": "The udhaar you hate chasing",
@@ -1571,7 +1572,8 @@
           "It comes from the business, not from you — no awkward phone call.",
           "You see who has paid and who has not, without opening the register."
         ],
-        "gain": "The money comes back without you ever having to ask for it yourself."
+        "gain": "The money comes back without you ever having to ask for it yourself.",
+        "voice": "Here is the part nobody says out loud. Most of that stuck money is not refused, it is simply forgotten, by people who like you and mean to pay. A polite reminder that arrives on time, from the business rather than from you, recovers most of it without anyone losing face. Owners who put this in tell us the same thing: the money came back, and not one relationship was damaged."
       },
       "personalwa": {
         "tab": "Business running on staff's personal WhatsApp",
@@ -1588,7 +1590,8 @@
           "Follow-ups fire on their own instead of depending on somebody remembering.",
           "Staff come and go. The customer list does not move."
         ],
-        "gain": "You own every contact and every conversation, whoever is working for you this year."
+        "gain": "You own every contact and every conversation, whoever is working for you this year.",
+        "voice": "Ask yourself one question. If your best salesman left tomorrow morning, what exactly would he take with him? In most businesses the honest answer is the customer list, the price conversations, and the trust. That is not disloyalty, it is just where the chats happen to live. Move them onto the company's own number and the relationship stays yours, whoever is working for you next year."
       },
       "awayfromshop": {
         "tab": "Forty-two calls at a family wedding",
@@ -1605,7 +1608,8 @@
           "Approvals that genuinely need you take one tap, not a ten-minute call.",
           "A summary of the day reaches you every evening, without you asking."
         ],
-        "gain": "You can be away for a day and the business does not notice."
+        "gain": "You can be away for a day and the business does not notice.",
+        "voice": "This one is not really about the phone calls. It is about what you have quietly given up: no proper holiday, no full day at a family function, no afternoon off without the business wobbling. When your rates, stock and approvals sit in a system your staff can reach themselves, you stop being the only person who knows. That is not a software upgrade, it is getting your evenings back."
       },
       "claimstuck": {
         "tab": "Four offices, and nobody knows the status",
@@ -1622,9 +1626,13 @@
           "The client gets the update automatically when the stage changes.",
           "You open one screen and see all four offices at once."
         ],
-        "gain": "This is exactly what we built for NidaanPartner: 4 offices, 2,000+ claims settled, 95%+ success."
+        "gain": "This is exactly what we built for NidaanPartner: 4 offices, 2,000+ claims settled, 95%+ success.",
+        "voice": "We did not read this in a book. We built exactly this for Nidaan Legal, who run claims across four offices. Before, the owner was the reporting system — every status question came to him. Now any office sees any case, live, and the client is updated automatically. Two thousand claims settled, ninety-five percent success, and nobody making phone calls to find out where a file has reached."
       }
-    }
+    },
+    "listen": "Hear this",
+    "listening": "Playing…",
+    "listenAria": "Play spoken commentary for this scene"
   },
   "savings": {
     "kicker": "Do the sum",
@@ -1641,5 +1649,9 @@
     "stayTitle": "Honestly? Stay where you are for now.",
     "stayBody": "At what you pay today, building your own would take too long to pay back. Come to us when you outgrow it, or when the price goes up — not before. We would rather say this than sell you something.",
     "cta": "Tell us what you are paying for"
+  },
+  "country": {
+    "title": "See prices for",
+    "aria": "Choose a country"
   }
 }
