@@ -17,7 +17,7 @@ export interface Plan {
 }
 
 export const PLANS: Plan[] = [
-  { id: "reception", priceInr: 799, cap: "1,500 conversations", labelKey: "plans.reception" },
+  { id: "reception", priceInr: 2999, cap: "1,500 conversations", labelKey: "plans.reception" },
   { id: "support", priceInr: 999, cap: "2,000 conversations", labelKey: "plans.support" },
   { id: "sales", priceInr: 1499, cap: "3,000 conversations", labelKey: "plans.sales" },
   { id: "voiceLite", priceInr: 4999, cap: "1,200 call-minutes", labelKey: "plans.voiceLite" },

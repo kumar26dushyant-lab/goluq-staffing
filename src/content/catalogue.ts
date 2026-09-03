@@ -52,7 +52,7 @@ export const CATALOGUE: Offering[] = [
   { id: "whatsapp", fromInr: 3_000, confirmed: true, leadTime: "4–8 days", cta: "enquiry" },
   {
     id: "digitalEmployee",
-    fromInr: 799,
+    fromInr: 2999,
     recurring: true,
     confirmed: true,
     // Built to order per business: requirements, build, then testing against the

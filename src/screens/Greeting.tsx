@@ -4,6 +4,8 @@ import { useTranslation } from "react-i18next";
 import { CapabilityTabs } from "../components/CapabilityTabs";
 import { CommsHero } from "../components/CommsHero";
 import { OfficeFlow } from "../components/OfficeFlow";
+import { PainMoment } from "../components/PainMoment";
+import { SavingsCalculator } from "../components/SavingsCalculator";
 import { WhoWeBuildFor } from "../components/WhoWeBuildFor";
 import { ENTRY_PRICE_INR } from "../content/catalogue";
 import { usePricing, useMoney } from "../lib/siteConfig";
@@ -44,6 +46,7 @@ export function Greeting({ onPickRole }: { onPickRole: (id: RoleId) => void }) {
 
       {/* The services band sits directly under the hero: the hero says what we
           do, this says what it costs. */}
+      <PainMoment className="mt-20" />
       <HomeServices className="mt-16" />
       <OfficeFlow className="mt-20" />
 
@@ -154,6 +157,7 @@ export function Greeting({ onPickRole }: { onPickRole: (id: RoleId) => void }) {
 
       {/* Below-the-fold: proof first, then the affiliate and cross-sell asks. */}
       <WhoWeBuildFor className="mt-20" />
+      <SavingsCalculator className="mt-16" />
 
       <div id="proof" className="scroll-mt-20">
         <ProductsShowcase className="mt-20" />

@@ -34,7 +34,11 @@ export interface PriceRow {
 const SEED: Omit<PriceRow, "offer_label" | "offer_price_inr">[] = [
   { id: "automation", price_inr: 3000, recurring: 0, lead_time: "4–8 days", enabled: 1, sort_order: 1, category: "build" },
   { id: "whatsapp", price_inr: 3000, recurring: 0, lead_time: "4–8 days", enabled: 1, sort_order: 2, category: "build" },
-  { id: "digitalEmployee", price_inr: 799, recurring: 1, lead_time: "2–4 weeks to build & test", enabled: 1, sort_order: 3, category: "build" },
+  // Raised from 799. At 30-60 hours to build one to order, 799/month paid back
+  // in four to six YEARS — the price implied an off-the-shelf product while the
+  // delivery was bespoke. 2,999 pays back in under a year and is still a fifth of
+  // what the receptionist it replaces costs. See docs/PRICING.md.
+  { id: "digitalEmployee", price_inr: 2999, recurring: 1, lead_time: "2–4 weeks to build & test", enabled: 1, sort_order: 3, category: "build" },
   { id: "website", price_inr: 10000, recurring: 0, lead_time: "7–10 days", enabled: 1, sort_order: 4, category: "build" },
   { id: "app", price_inr: 50000, recurring: 0, lead_time: "4–10 days", enabled: 1, sort_order: 5, category: "build" },
   { id: "offline", price_inr: 50000, recurring: 0, lead_time: "4–10 days", enabled: 1, sort_order: 6, category: "build" },

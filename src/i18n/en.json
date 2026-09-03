@@ -1531,5 +1531,98 @@
     },
     "rentClose": "We build the part you actually use, shaped to how you already work — and you own it. A one-time cost instead of a bill that never stops. Tell us what you pay now and we will tell you honestly whether replacing it is worth it. Sometimes it is not, and we will say so.",
     "cta": "Tell us what you are paying for"
+  },
+  "pain": {
+    "kicker": "Sound familiar?",
+    "title": "This happens in your business every week. It costs more than you think.",
+    "today": "What happens today",
+    "withGoluq": "What happens with GoLuQ",
+    "footnote": "Pick whichever one is closest to your week. If none of them are, tell us what your week looks like — that is the conversation we actually want.",
+    "scenes": {
+      "missedcall": {
+        "tab": "A missed call at 9pm",
+        "beats": [
+          "9:40pm. A customer calls. The shop is shut, nobody picks up.",
+          "He does not call back tomorrow.",
+          "He calls the next name on the list instead.",
+          "You never find out he called at all."
+        ],
+        "cost": "One customer, gone. And you cannot even count how often it happens.",
+        "fixed": [
+          "The call is answered on WhatsApp within seconds, at 9:40pm.",
+          "His question gets a real answer, with your price.",
+          "His number and what he wanted are waiting for you at 9am.",
+          "If he wanted a person, you already know before he asks twice."
+        ],
+        "gain": "You wake up to the enquiry instead of never hearing about it."
+      },
+      "followup": {
+        "tab": "The follow-up nobody made",
+        "beats": [
+          "Eleven people enquired this month. You spoke to all of them.",
+          "Four were serious. You meant to call them back on Friday.",
+          "Friday was busy. So was Monday.",
+          "Two weeks later you remember. They have already bought elsewhere."
+        ],
+        "cost": "Not a lead problem. A memory problem — and it repeats every month.",
+        "fixed": [
+          "Every enquiry is written down the moment it arrives.",
+          "The follow-up goes out on day 3, 5, 7 and 12 without you.",
+          "Anyone who replies is flagged for you, with the whole conversation.",
+          "Anyone who says stop is never messaged again."
+        ],
+        "gain": "The four serious ones hear from you while they still care."
+      },
+      "register": {
+        "tab": "The register and the Excel file",
+        "beats": [
+          "Attendance is in a register at the counter.",
+          "Salary is in an Excel file you rebuild every month.",
+          "Someone disputes their days. You count pages to check.",
+          "The month closes three days late, again."
+        ],
+        "cost": "Two days of your own month, every month, on arithmetic.",
+        "fixed": [
+          "Staff mark attendance from their own phone.",
+          "Leave is requested and approved in a tap.",
+          "The salary sheet adds itself up as the month goes.",
+          "Any dispute is answered by opening one screen."
+        ],
+        "gain": "Two days a month back, and no argument you cannot settle in ten seconds."
+      },
+      "newstaff": {
+        "tab": "Training the new joiner",
+        "beats": [
+          "A new person joins. You explain how things work.",
+          "Two weeks later they do it their own way, because nobody wrote it down.",
+          "A customer gets the wrong answer.",
+          "You explain it again. And again with the next joiner."
+        ],
+        "cost": "Your process lives in your head, so it leaves when people do.",
+        "fixed": [
+          "Your way of working is recorded once, in your own words.",
+          "Every new joiner gets the same thing, in the same order.",
+          "You can see who has finished what, without asking.",
+          "The system will not let them skip the step that matters."
+        ],
+        "gain": "New staff are useful in days, and your process stops depending on you."
+      }
+    }
+  },
+  "savings": {
+    "kicker": "Do the sum",
+    "title": "What are you paying for software every month?",
+    "question": "Move the slider to what you pay now — every subscription, together",
+    "perMonth": "per month",
+    "hint": "Count everything: the billing software, the booking app, the per-user fees, the annual renewal divided by twelve. Most owners are surprised by their own total.",
+    "renting": "Renting, over three years",
+    "rentingSub": "What you will have paid, and still own nothing",
+    "owning": "Owning it once",
+    "owningSub": "Built for how you work. Yours to keep.",
+    "saveTitle": "You would keep about {{amount}}",
+    "saveBody": "Owning it costs less than renting after about {{months}} months. Everything after that is money you keep.",
+    "stayTitle": "Honestly? Stay where you are for now.",
+    "stayBody": "At what you pay today, building your own would take too long to pay back. Come to us when you outgrow it, or when the price goes up — not before. We would rather say this than sell you something.",
+    "cta": "Tell us what you are paying for"
   }
 }
