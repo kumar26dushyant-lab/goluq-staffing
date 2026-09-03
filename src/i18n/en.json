@@ -1407,5 +1407,129 @@
     "privacy": "Privacy Policy",
     "terms": "Terms of Service",
     "portal": "Client login"
+  },
+  "officeFlow": {
+    "kicker": "One system, whole office",
+    "title": "Leads, sales, operations, HR, training — running as one thing, not six",
+    "subtitle": "Most businesses run on a pile of disconnected tools: enquiries in WhatsApp, quotes in Excel, attendance in a register, jobs on a whiteboard. We build the one system where all of it connects, so nothing is re-entered and nothing falls between the gaps.",
+    "window": "{{module}} — live",
+    "auto": "automatic",
+    "footnote": "Built to fit how your business already works. You own it outright, and it runs on the phone in your pocket as well as on a desk.",
+    "modules": {
+      "leads": {
+        "name": "Leads",
+        "desc": "Every enquiry, from every channel",
+        "note": "An enquiry from WhatsApp, the website or a missed call lands here, gets assigned, and follows itself up. Nobody has to remember.",
+        "rows": {
+          "enquiry": "New enquiry from WhatsApp",
+          "assigned": "Assigned to the right person",
+          "followup": "Follow-up scheduled"
+        }
+      },
+      "sales": {
+        "name": "Sales",
+        "desc": "Quote, approval, invoice",
+        "note": "The quote is built from your own price list, approved in one tap, and becomes an invoice without anyone retyping it.",
+        "rows": {
+          "quote": "Quote sent to customer",
+          "approved": "Approved by customer",
+          "invoice": "Invoice raised"
+        }
+      },
+      "ops": {
+        "name": "Operations",
+        "desc": "The actual work, tracked",
+        "note": "Whatever your business delivers — a claim, a repair, an order, a case — moves through its stages, visible to everyone who needs it.",
+        "rows": {
+          "job": "Job created",
+          "stage": "Moved to next stage",
+          "delivered": "Delivered and closed"
+        }
+      },
+      "hr": {
+        "name": "HR",
+        "desc": "Attendance, leave, payroll",
+        "note": "Attendance from the phone, leave approved in a tap, and payroll that adds itself up instead of being rebuilt in Excel every month.",
+        "rows": {
+          "attendance": "Attendance marked from phone",
+          "leave": "Leave approved",
+          "payroll": "Payroll calculated"
+        }
+      },
+      "training": {
+        "name": "Training",
+        "desc": "New staff, up to speed",
+        "note": "New joiners learn your process from your own material, and you can see who has finished what — instead of hoping someone explained it.",
+        "rows": {
+          "module": "Module assigned",
+          "progress": "Progress tracked",
+          "certified": "Marked complete"
+        }
+      },
+      "digital": {
+        "name": "Digital Employee",
+        "desc": "Answers while you sleep",
+        "note": "Sits on top of everything above. Because it can see your actual data, it answers real questions rather than reciting a script.",
+        "rows": {
+          "answers": "Customer question answered",
+          "books": "Appointment booked",
+          "escalates": "Handed to a person"
+        }
+      }
+    }
+  },
+  "whoFor": {
+    "kicker": "Who we build for",
+    "title": "If your business runs on software, we build it — whatever the business is",
+    "subtitle": "The demonstration above uses five industries as examples, because each one has a real conversation written behind it. It is not the list of who we serve. Almost none of our customers are technology businesses; they are ordinary businesses that depend on software every day.",
+    "andYours": "…and yours",
+    "trades": {
+      "clinic": "Clinics",
+      "dental": "Dental practices",
+      "diagnostic": "Diagnostic labs",
+      "pharmacy": "Pharmacies",
+      "hospital": "Hospitals",
+      "school": "Schools",
+      "coaching": "Coaching institutes",
+      "college": "Colleges",
+      "ca": "CA & accounting firms",
+      "law": "Law firms",
+      "realestate": "Real estate",
+      "insurance": "Insurance & claims",
+      "hotel": "Hotels & resorts",
+      "restaurant": "Restaurants",
+      "salon": "Salons & spas",
+      "gym": "Gyms & fitness",
+      "logistics": "Logistics",
+      "transport": "Transport & fleet",
+      "warehouse": "Warehousing",
+      "manufacturing": "Manufacturing units",
+      "retail": "Retail chains",
+      "distributor": "Distributors",
+      "jewellery": "Jewellers",
+      "autoservice": "Auto service centres",
+      "eventplanner": "Event planners",
+      "printing": "Printing presses",
+      "agri": "Agri & food processing",
+      "ngo": "NGOs & trusts"
+    },
+    "rentTitle": "You are probably already paying for software you barely use",
+    "rentBody": "Most businesses we meet are renting an expensive product for a handful of screens. They pay per user, per branch, per student or per vehicle — every month, forever — and use perhaps a fifth of what they are billed for. The rest is somebody else's roadmap.",
+    "signs": {
+      "seats": {
+        "t": "Billed per person",
+        "d": "Adding staff costs you software money before it earns you anything."
+      },
+      "features": {
+        "t": "Paying for the whole suite",
+        "d": "You needed four screens. You are billed for forty."
+      },
+      "forever": {
+        "t": "It never ends",
+        "d": "Stop paying and the work stops. Years of fees leave you owning nothing."
+      }
+    },
+    "rentClose": "We build the part you actually use, shaped to how you already work — and you own it. A one-time cost instead of a bill that never stops. Tell us what you pay now and we will tell you honestly whether replacing it is worth it. Sometimes it is not, and we will say so.",
+    "cta": "Tell us what you are paying for"
   }
 }

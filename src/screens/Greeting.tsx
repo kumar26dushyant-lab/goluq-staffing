@@ -3,6 +3,8 @@ import { GraduationCap, Zap } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { CapabilityTabs } from "../components/CapabilityTabs";
 import { CommsHero } from "../components/CommsHero";
+import { OfficeFlow } from "../components/OfficeFlow";
+import { WhoWeBuildFor } from "../components/WhoWeBuildFor";
 import { ENTRY_PRICE_INR } from "../content/catalogue";
 import { usePricing, useMoney } from "../lib/siteConfig";
 import { HeroWordmark } from "../components/HeroWordmark";
@@ -43,6 +45,7 @@ export function Greeting({ onPickRole }: { onPickRole: (id: RoleId) => void }) {
       {/* The services band sits directly under the hero: the hero says what we
           do, this says what it costs. */}
       <HomeServices className="mt-16" />
+      <OfficeFlow className="mt-20" />
 
       {/* ── Brand moment + the Digital Employee demo ──────────────────────
           No longer the first thing a visitor meets, so it reads as a section
@@ -150,6 +153,8 @@ export function Greeting({ onPickRole }: { onPickRole: (id: RoleId) => void }) {
       </div>
 
       {/* Below-the-fold: proof first, then the affiliate and cross-sell asks. */}
+      <WhoWeBuildFor className="mt-20" />
+
       <div id="proof" className="scroll-mt-20">
         <ProductsShowcase className="mt-20" />
         <CaseStudyNidaan className="mt-16" compact />

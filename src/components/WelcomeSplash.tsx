@@ -172,7 +172,7 @@ export function WelcomeSplash() {
               className="font-display font-bold leading-none tracking-tight"
               style={{ fontSize: "clamp(3.2rem, 17vw, 6.5rem)" }}
             >
-              <span className="brand-go">GO</span>
+              <span className="brand-go">Go</span>
               <span className="brand-luq ml-[0.06em]">LuQ</span>
             </motion.p>
 

@@ -15,7 +15,7 @@ export function HeroWordmark({ className = "" }: { className?: string }) {
   return (
     <div className={`select-none ${className}`} role="img" aria-label="GoLuQ — go look">
       <div className="flex items-baseline font-display font-bold leading-none">
-        <span className="brand-go">GO</span>
+        <span className="brand-go">Go</span>
         <span className="brand-luq brand-luq-scan ml-[0.06em]">LuQ</span>
       </div>
 
