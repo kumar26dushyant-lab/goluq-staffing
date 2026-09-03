@@ -36,10 +36,34 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!--
+      Loaded NON-BLOCKING, deliberately.
+
+      As a plain <link rel="stylesheet"> this was render-blocking: if
+      fonts.googleapis.com stalled, the browser painted nothing at all until it
+      timed out — a blank page with no JavaScript error, which is exactly the
+      intermittent failure seen in testing. One third-party host should not be
+      able to take the homepage down, least of all for visitors on Indian
+      mobile networks.
+
+      media="print" means the browser fetches it at low priority and does not
+      block on it; src/main.tsx flips it to "all" once it arrives. The swap is
+      done from our own module rather than an inline onload handler, because the
+      CSP here does not allow inline script. `display=swap` already covers the
+      font files themselves — the stylesheet was the blocking part.
+    -->
     <link
+      id="webfonts"
       href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap"
       rel="stylesheet"
+      media="print"
     />
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
 
     <title>GoLuQ — Software, apps &amp; automations built for your business</title>
   </head>
