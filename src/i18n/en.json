@@ -1534,78 +1534,95 @@
   },
   "pain": {
     "kicker": "Sound familiar?",
-    "title": "This happens in your business every week. It costs more than you think.",
+    "title": "Put the business on auto-pilot — whether you are at the counter or at a wedding",
     "today": "What happens today",
     "withGoluq": "What happens with GoLuQ",
     "footnote": "Pick whichever one is closest to your week. If none of them are, tell us what your week looks like — that is the conversation we actually want.",
     "scenes": {
-      "missedcall": {
-        "tab": "A missed call at 9pm",
+      "staffleave": {
+        "tab": "Your billing man takes two days off",
         "beats": [
-          "9:40pm. A customer calls. The shop is shut, nobody picks up.",
-          "He does not call back tomorrow.",
-          "He calls the next name on the list instead.",
-          "You never find out he called at all."
+          "Your senior billing man takes sudden leave. Two days.",
+          "Nobody knows what rate you promised the Gupta party.",
+          "Nobody knows whose dispatch went out yesterday, or where the GST file was saved.",
+          "You spend the day opening drawers and answering confused customers."
         ],
-        "cost": "One customer, gone. And you cannot even count how often it happens.",
+        "cost": "Your business is hostage to two or three people. That is the real risk, not the leave.",
         "fixed": [
-          "The call is answered on WhatsApp within seconds, at 9:40pm.",
-          "His question gets a real answer, with your price.",
-          "His number and what he wanted are waiting for you at 9am.",
-          "If he wanted a person, you already know before he asks twice."
+          "Every rate, every dispatch, every document sits in the system as it happens.",
+          "Whoever is on the counter can see it — no handover call needed.",
+          "You are not the backup for your own staff.",
+          "When someone finally leaves, the work stays."
         ],
-        "gain": "You wake up to the enquiry instead of never hearing about it."
+        "gain": "If your main man does not come tomorrow, the day still runs — and you get no panic calls."
       },
-      "followup": {
-        "tab": "The follow-up nobody made",
+      "udhaar": {
+        "tab": "The udhaar you hate chasing",
         "beats": [
-          "Eleven people enquired this month. You spoke to all of them.",
-          "Four were serious. You meant to call them back on Friday.",
-          "Friday was busy. So was Monday.",
-          "Two weeks later you remember. They have already bought elsewhere."
+          "8pm. You open the register. Four and a half lakh is stuck in the market.",
+          "These are old customers. Asking for money spoils the relationship.",
+          "The junior forgets to remind them, or sends a dry line that gets ignored.",
+          "Next month the number is bigger, not smaller."
         ],
-        "cost": "Not a lead problem. A memory problem — and it repeats every month.",
+        "cost": "Your money is funding someone else's business, and asking for it costs you goodwill.",
         "fixed": [
-          "Every enquiry is written down the moment it arrives.",
-          "The follow-up goes out on day 3, 5, 7 and 12 without you.",
-          "Anyone who replies is flagged for you, with the whole conversation.",
-          "Anyone who says stop is never messaged again."
+          "A polite reminder goes out on WhatsApp, in their own language, on schedule.",
+          "It carries your payment link, so they can settle it in one tap.",
+          "It comes from the business, not from you — no awkward phone call.",
+          "You see who has paid and who has not, without opening the register."
         ],
-        "gain": "The four serious ones hear from you while they still care."
+        "gain": "The money comes back without you ever having to ask for it yourself."
       },
-      "register": {
-        "tab": "The register and the Excel file",
+      "personalwa": {
+        "tab": "Business running on staff's personal WhatsApp",
         "beats": [
-          "Attendance is in a register at the counter.",
-          "Salary is in an Excel file you rebuild every month.",
-          "Someone disputes their days. You count pages to check.",
-          "The month closes three days late, again."
+          "An enquiry comes in. Your man says: send me the photo on my WhatsApp.",
+          "Two hours later it is buried under family forwards. No follow-up.",
+          "Six months later he joins a competitor.",
+          "Three hundred customer numbers and every conversation walk out with his phone."
         ],
-        "cost": "Two days of your own month, every month, on arithmetic.",
+        "cost": "Those are your customers. They are living on somebody else's handset.",
         "fixed": [
-          "Staff mark attendance from their own phone.",
-          "Leave is requested and approved in a tap.",
-          "The salary sheet adds itself up as the month goes.",
-          "Any dispute is answered by opening one screen."
+          "Every enquiry arrives on the company number, not a personal one.",
+          "The full chat history sits on your dashboard, permanently.",
+          "Follow-ups fire on their own instead of depending on somebody remembering.",
+          "Staff come and go. The customer list does not move."
         ],
-        "gain": "Two days a month back, and no argument you cannot settle in ten seconds."
+        "gain": "You own every contact and every conversation, whoever is working for you this year."
       },
-      "newstaff": {
-        "tab": "Training the new joiner",
+      "awayfromshop": {
+        "tab": "Forty-two calls at a family wedding",
         "beats": [
-          "A new person joins. You explain how things work.",
-          "Two weeks later they do it their own way, because nobody wrote it down.",
-          "A customer gets the wrong answer.",
-          "You explain it again. And again with the next joiner."
+          "You go to a cousin's wedding in another city.",
+          "Between 11am and 4pm the phone rings forty-two times.",
+          "How much discount for Gupta-ji? The party says goods have not reached. Where is the stock register?",
+          "You spend the wedding standing outside on the phone."
         ],
-        "cost": "Your process lives in your head, so it leaves when people do.",
+        "cost": "You have not actually left the counter in years. You just moved it into your pocket.",
         "fixed": [
-          "Your way of working is recorded once, in your own words.",
-          "Every new joiner gets the same thing, in the same order.",
-          "You can see who has finished what, without asking.",
-          "The system will not let them skip the step that matters."
+          "Rates and discount limits are already in the system — nobody has to ask.",
+          "Staff check stock and order status themselves, from their own phone.",
+          "Approvals that genuinely need you take one tap, not a ten-minute call.",
+          "A summary of the day reaches you every evening, without you asking."
         ],
-        "gain": "New staff are useful in days, and your process stops depending on you."
+        "gain": "You can be away for a day and the business does not notice."
+      },
+      "claimstuck": {
+        "tab": "Four offices, and nobody knows the status",
+        "beats": [
+          "A client calls to ask where his case has reached.",
+          "You do not know. The file is with an office in another city.",
+          "You ring two people to find out and call the client back an hour later.",
+          "Every new branch makes this worse, not better."
+        ],
+        "cost": "You are the reporting system. Nothing scales while that is true.",
+        "fixed": [
+          "Every case moves through its stages, with whoever touched it recorded.",
+          "Any office can see any case, live, without a phone call.",
+          "The client gets the update automatically when the stage changes.",
+          "You open one screen and see all four offices at once."
+        ],
+        "gain": "This is exactly what we built for NidaanPartner: 4 offices, 2,000+ claims settled, 95%+ success."
       }
     }
   },

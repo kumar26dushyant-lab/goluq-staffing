@@ -1,30 +1,38 @@
 import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { PhoneMissed, Clock, FileWarning, UserX, Check, type LucideIcon } from "lucide-react";
+import { PhoneMissed, Wallet, Smartphone, FileWarning, UserX, Check, type LucideIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 /**
- * The recognition moment — "that happens in my business too".
+ * The recognition moment — "yehi to meri roz ki sir-dardi hai".
  *
- * A tier-2 shop owner scrolling on a phone will not read three paragraphs about
- * automation. He will recognise 9:40pm, a missed call, and a customer who rang
- * the next shop instead. So each scene is a tiny story told in four beats, and
- * the beats animate in sequence: the problem happens, then the same moment is
- * replayed with the system in place.
+ * Abstract words do not sell here. "Automation" means nothing to a shop owner;
+ * his billing man taking two days off means everything. So each scene is a small
+ * story told in four beats, animated in sequence: the thing happens, it costs
+ * him something, then the same moment is replayed with the system in place.
  *
- * Two rules this follows:
- *  - Show the LOSS in his own terms (a customer gone, an evening wasted), not
- *    ours ("inefficient lead capture").
- *  - Every scene is a real, ordinary Tuesday. Nothing aspirational, nothing
- *    about transformation — the moment has to be familiar or it is worthless.
+ * Three rules this follows:
+ *  - The LOSS is stated in his terms — a customer gone, an evening on the phone
+ *    at someone else's wedding — never in ours ("inefficient lead capture").
+ *  - The FIX only claims what we actually build. The reminder carries HIS
+ *    payment link; the evening summary comes from HIS system. Nothing here
+ *    implies we collect money or plug into his accounts, because we do not.
+ *  - Every scene is an ordinary week. Nothing aspirational — if the moment is
+ *    not familiar it is worthless.
+ *
+ * Five scenes, all from the market rather than a whiteboard: the billing man's
+ * two-day leave, the udhaar he hates chasing, the business living on staff's
+ * personal WhatsApp, forty-two calls during a family wedding — and NidaanPartner's
+ * own, which is the one we can point at and say we already fixed exactly this.
  *
  * All motion is opacity and transform, so it stays smooth on a mid-range phone.
  */
 const SCENES: { id: string; icon: LucideIcon }[] = [
-  { id: "missedcall", icon: PhoneMissed },
-  { id: "followup", icon: Clock },
-  { id: "register", icon: FileWarning },
-  { id: "newstaff", icon: UserX },
+  { id: "staffleave", icon: UserX },
+  { id: "udhaar", icon: Wallet },
+  { id: "personalwa", icon: Smartphone },
+  { id: "awayfromshop", icon: PhoneMissed },
+  { id: "claimstuck", icon: FileWarning },
 ];
 
 const SCENE_MS = 5200;
