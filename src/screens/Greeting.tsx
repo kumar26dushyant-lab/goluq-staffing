@@ -33,9 +33,13 @@ import type { RoleId } from "../state/useAppState";
 export function Greeting({ onPickRole }: { onPickRole: (id: RoleId) => void }) {
   const money = useMoney();
   const pricing = usePricing();
-  // Cheapest one-off thing we sell, in this visitor's money. Falls back to the
-  // bundled rupee figure only if the live list is unavailable.
-  const oneOff = pricing.filter((p) => !p.recurring).map((p) => p.from);
+  // Cheapest one-off thing we BUILD, in this visitor's money. Comms services are
+  // excluded deliberately: the line beside this price talks about automations
+  // that save 20 hours a week, and pricing it at a missed-call service made the
+  // page contradict its own catalogue two screens later.
+  const oneOff = pricing
+    .filter((p) => !p.recurring && p.category !== "comms")
+    .map((p) => p.from);
   const entryPrice = oneOff.length ? Math.min(...oneOff) : ENTRY_PRICE_INR;
   const { t } = useTranslation();
   const reduced = useReducedMotion();

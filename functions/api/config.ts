@@ -48,6 +48,10 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
         // `from` is what this visitor should actually be shown.
         fromInr: r.price_inr,
         from: convert(r.price_inr, market, multiplier),
+        // 'build' vs 'comms'. Without it the SPA cannot tell a website from a
+        // toll-free number, and the homepage hook advertised "automations from"
+        // the price of a missed-call service.
+        category: r.category || "build",
         recurring: !!r.recurring,
         leadTime: r.lead_time,
         offerLabel: r.offer_label || null,

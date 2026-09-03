@@ -24,6 +24,8 @@ export interface LivePrice {
    */
   from: number;
   offer: number | null;
+  /** 'build' = software we make · 'comms' = telecom we provision. */
+  category: string;
 }
 
 export interface MarketInfo {
@@ -70,6 +72,7 @@ function fromLocal(): LivePrice[] {
     offerInr: null,
     from: o.fromInr,
     offer: null,
+    category: "build",
   }));
 }
 
@@ -111,6 +114,7 @@ export async function fetchSiteConfig(): Promise<SiteConfig> {
               ...p,
               from: typeof p.from === "number" ? p.from : p.fromInr,
               offer: typeof p.offer === "number" ? p.offer : p.offerInr,
+              category: p.category || "build",
             }))
           : fromLocal();
       // Owner-edited copy is applied before anything renders off it.
