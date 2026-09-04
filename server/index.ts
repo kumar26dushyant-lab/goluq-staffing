@@ -28,6 +28,7 @@ import { onRequestGet as waMetaVerify, onRequestPost as waMetaInbound } from "..
 import { onRequestGet as waCheckGet, onRequestPost as waCheckPost } from "../functions/api/admin/wa-check";
 import { onRequestGet as adminProjectsGet, onRequestPost as adminProjectsPost } from "../functions/api/admin/projects";
 import { onRequestGet as adminCampaignsGet, onRequestPost as adminCampaignsPost } from "../functions/api/admin/campaigns";
+import { onRequestPost as adminMarketing } from "../functions/api/admin/marketing";
 import { onRequestGet as custAuthGet, onRequestPost as custAuthPost } from "../functions/api/customer/auth";
 import { onRequestGet as custProjectsGet, onRequestPost as custProjectsPost } from "../functions/api/customer/projects";
 import { onRequestPost as track } from "../functions/api/track";
@@ -224,6 +225,7 @@ app.get("/api/admin/projects", (c) => callFn(adminProjectsGet as Handler, c.req.
 app.post("/api/admin/projects", (c) => callFn(adminProjectsPost as Handler, c.req.raw));
 app.get("/api/admin/campaigns", (c) => callFn(adminCampaignsGet as Handler, c.req.raw));
 app.post("/api/admin/campaigns", (c) => callFn(adminCampaignsPost as Handler, c.req.raw));
+app.post("/api/admin/marketing", (c) => callFn(adminMarketing as Handler, c.req.raw));
 app.get("/api/customer/auth", (c) => callFn(custAuthGet as Handler, c.req.raw));
 app.post("/api/customer/auth", (c) => callFn(custAuthPost as Handler, c.req.raw));
 app.get("/api/customer/projects", (c) => callFn(custProjectsGet as Handler, c.req.raw));

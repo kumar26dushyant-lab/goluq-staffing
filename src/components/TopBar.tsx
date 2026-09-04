@@ -102,7 +102,9 @@ export function TopBar({
         <span className="hidden sm:contents">
           <VoiceToggle />
         </span>
-        <CountryPicker />
+        <span className="hidden sm:contents">
+          <CountryPicker />
+        </span>
         <LanguageToggle />
         <ThemeToggle />
       </div>

@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { CountryPicker } from "./CountryPicker";
 
 /**
  * Footer with the legal links.
@@ -20,6 +21,11 @@ export function SiteFooter({ className = "" }: { className?: string }) {
     >
       <div className="flex flex-wrap items-center justify-between gap-4">
         <p>© {year} GoLuQ</p>
+        {/* Header-hidden on phones, so this is where a mobile visitor changes
+            the country their prices are shown in. */}
+        <span className="sm:hidden">
+          <CountryPicker />
+        </span>
         <nav className="flex flex-wrap items-center gap-x-5 gap-y-2">
           <a href="/privacy" className="hover:text-fg">
             {t("footer.privacy")}
