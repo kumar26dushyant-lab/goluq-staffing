@@ -1475,6 +1475,26 @@
           "books": "Appointment booked",
           "escalates": "Handed to a person"
         }
+      },
+      "finance": {
+        "name": "Finance",
+        "desc": "Money in, money out, money stuck",
+        "note": "Receivables, payables and daily collection in one place — so the number you check at 8pm is the real one, not a register you still have to add up.",
+        "rows": {
+          "invoice": "Payment received",
+          "pending": "Overdue flagged",
+          "ledger": "Ledger updated"
+        }
+      },
+      "revops": {
+        "name": "Revenue Ops",
+        "desc": "What is working, and what it costs",
+        "note": "Which source brings customers, what each one costs you, and where deals stall — measured from your own data rather than guessed at in a meeting.",
+        "rows": {
+          "source": "Enquiry source tracked",
+          "cost": "Cost per customer calculated",
+          "leak": "Stalled deals surfaced"
+        }
       }
     }
   },

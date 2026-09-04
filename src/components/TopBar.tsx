@@ -97,7 +97,11 @@ export function TopBar({
         {/* Always visible, mobile included — one tap to a real person is the
             highest-converting route on the site and must never be buried. */}
         <WhatsAppCta variant="chip" />
-        <VoiceToggle />
+        {/* Voice belongs beside the thing it narrates; in a 360px header it was
+            simply the control that pushed the theme toggle off screen. */}
+        <span className="hidden sm:contents">
+          <VoiceToggle />
+        </span>
         <CountryPicker />
         <LanguageToggle />
         <ThemeToggle />

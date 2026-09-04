@@ -265,6 +265,7 @@ const indexHtml = readFileSync(join(DIST, "index.html"), "utf8");
 for (const [route, file] of [
   ["/privacy", "privacy.html"],
   ["/terms", "terms.html"],
+  ["/social-kit", "social-kit.html"],
 ] as const) {
   app.get(route, (c) => c.html(readFileSync(join(DIST, file), "utf8")));
 }

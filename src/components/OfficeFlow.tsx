@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import {
-  Users, IndianRupee, Boxes, UserCog, GraduationCap, Bot,
+  Users, IndianRupee, Boxes, UserCog, GraduationCap, Bot, Wallet, LineChart,
   type LucideIcon,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -10,10 +10,14 @@ import { useTranslation } from "react-i18next";
  * The whole office as one system — the section that shows GoLuQ builds operational
  * software, not only WhatsApp automations.
  *
- * Six modules, cycling. It is deliberately NOT a static feature grid: the point
+ * Eight modules, cycling. It is deliberately NOT a static feature grid: the point
  * being made is that these connect, so the active module and the line feeding the
- * next one both move. A grid of six boxes says "we have six features"; this says
+ * next one both move. A grid of boxes says "we have eight features"; a chain says
  * "your office runs end to end".
+ *
+ * Finance and Revenue Ops sit in the middle because they are what an owner
+ * actually asks about — what came in, what is stuck, and what each customer
+ * costs to win — not an afterthought behind the operational modules.
  *
  * Motion is CSS transform and opacity only — no WebGL, no canvas. On the mid-range
  * Android most of our visitors hold, a heavy 3D scene reads as bad engineering,
@@ -23,23 +27,32 @@ const MODULES: { id: string; icon: LucideIcon; rows: string[] }[] = [
   { id: "leads", icon: Users, rows: ["enquiry", "assigned", "followup"] },
   { id: "sales", icon: IndianRupee, rows: ["quote", "approved", "invoice"] },
   { id: "ops", icon: Boxes, rows: ["job", "stage", "delivered"] },
+  { id: "finance", icon: Wallet, rows: ["invoice", "pending", "ledger"] },
   { id: "hr", icon: UserCog, rows: ["attendance", "leave", "payroll"] },
   { id: "training", icon: GraduationCap, rows: ["module", "progress", "certified"] },
+  { id: "revops", icon: LineChart, rows: ["source", "cost", "leak"] },
   { id: "digital", icon: Bot, rows: ["answers", "books", "escalates"] },
 ];
 
-const CYCLE_MS = 2600;
+/**
+ * Slow enough to read the three rows before they change. 2.6s was barely enough
+ * to finish animating them in, which is the same mistake the recognition
+ * carousel made — and it is more obvious here, with eight modules rather than
+ * five.
+ */
+const CYCLE_MS = 5200;
 
 export function OfficeFlow({ className = "" }: { className?: string }) {
   const { t } = useTranslation();
   const reduced = useReducedMotion();
   const [active, setActive] = useState(0);
+  const [held, setHeld] = useState(false);
 
   useEffect(() => {
-    if (reduced) return;
+    if (reduced || held) return;
     const iv = window.setInterval(() => setActive((i) => (i + 1) % MODULES.length), CYCLE_MS);
     return () => window.clearInterval(iv);
-  }, [reduced]);
+  }, [reduced, held]);
 
   const current = MODULES[active];
 
@@ -67,7 +80,10 @@ export function OfficeFlow({ className = "" }: { className?: string }) {
               <li key={m.id} className="relative">
                 <button
                   type="button"
-                  onClick={() => setActive(i)}
+                  onClick={() => {
+                    setHeld(true);
+                    setActive(i);
+                  }}
                   className={`flex w-full items-center gap-3 rounded-2xl border p-3.5 text-left transition-colors ${
                     on
                       ? "border-teal-glow/45 bg-teal-glow/[0.10]"

@@ -28,13 +28,13 @@ export function RoleSlots({ onPick }: { onPick: (id: RoleId) => void }) {
             <button
               type="button"
               onClick={() => onPick(role.id)}
-              className="group glass relative flex w-full items-center gap-4 overflow-hidden rounded-2xl px-5 py-5 text-left transition-transform duration-300 ease-cinematic hover:translate-x-1 sm:px-6"
+              className="group glass relative flex w-full items-center gap-3 overflow-hidden rounded-2xl px-4 py-4 text-left transition-transform duration-300 ease-cinematic hover:translate-x-1 sm:gap-4 sm:px-6 sm:py-5"
             >
               {/* Teal flood sweep on hover/focus */}
               <span className="pointer-events-none absolute inset-y-0 left-0 w-0 bg-gradient-to-r from-teal-glow/22 to-transparent transition-[width] duration-500 ease-cinematic group-hover:w-full group-focus-visible:w-full" />
 
               {/* Index → morphs to icon on hover */}
-              <span className="relative grid h-14 w-14 shrink-0 place-items-center rounded-xl bg-teal-glow/10 ring-1 ring-teal-glow/20">
+              <span className="relative grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-teal-glow/10 ring-1 ring-teal-glow/20 sm:h-14 sm:w-14">
                 <span className="font-mono text-base font-semibold text-faint transition-opacity duration-200 group-hover:opacity-0">
                   {idx}
                 </span>
@@ -46,10 +46,10 @@ export function RoleSlots({ onPick }: { onPick: (id: RoleId) => void }) {
               </span>
 
               <span className="relative min-w-0 flex-1">
-                <span className="block truncate font-display text-lg font-bold text-fg sm:text-xl">
+                <span className="block font-display text-lg font-bold leading-snug text-fg sm:truncate sm:text-xl">
                   {t(`roles.${role.id}.label`)}
                 </span>
-                <span className="block truncate text-base text-muted">
+                <span className="mt-0.5 block text-sm leading-snug text-muted sm:truncate sm:text-base">
                   {t(`roles.${role.id}.blurb`)}
                 </span>
               </span>
