@@ -28,6 +28,14 @@
   --c-indigo-glow: 79 70 229;/* #4F46E5 */
   --c-indigo-deep: 30 27 75; /* #1E1B4B */
 
+  /* Banner hues. The wordmark and display headings only — never UI state.
+     Functional colour (danger/success/warn) stays untouched so red still means
+     a problem and green still means a gain. */
+  --c-brand-blue: 96 165 250;   /* #60A5FA */
+  --c-brand-violet: 167 139 250;/* #A78BFA */
+  --c-brand-orange: 251 146 60; /* #FB923C */
+  --c-brand-pink: 244 114 182;  /* #F472B6 */
+
   /* Status */
   --c-success: 52 211 153;   /* emerald */
   --c-danger: 248 113 113;   /* red */
@@ -60,6 +68,12 @@
   --c-teal-neon: 13 148 136;
   --c-indigo-glow: 99 102 241;
   --c-indigo-deep: 79 70 229;
+
+  /* Same hues, weighted for a light surface. */
+  --c-brand-blue: 37 99 235;    /* #2563EB */
+  --c-brand-violet: 124 58 237; /* #7C3AED */
+  --c-brand-orange: 234 88 12;  /* #EA580C */
+  --c-brand-pink: 219 39 119;   /* #DB2777 */
 
   --c-success: 5 150 105;
   --c-danger: 220 38 38;
@@ -200,8 +214,10 @@
     background-image: linear-gradient(
       100deg,
       rgb(var(--c-teal-glow)) 0%,
-      #8b7cf6 48%,
-      rgb(var(--c-teal-neon)) 100%
+      rgb(var(--c-brand-blue)) 26%,
+      rgb(var(--c-brand-violet)) 50%,
+      rgb(var(--c-brand-pink)) 74%,
+      rgb(var(--c-brand-orange)) 100%
     );
     background-size: 220% auto;
     -webkit-background-clip: text;
@@ -226,50 +242,60 @@
     inset: 0;
     border-radius: inherit;
     padding: 1px;
-    background: linear-gradient(130deg, rgb(var(--c-teal-glow) / 0.7), #8b7cf6 50%, rgb(var(--c-teal-neon) / 0.6));
+    background: linear-gradient(
+      130deg,
+      rgb(var(--c-teal-glow) / 0.7),
+      rgb(var(--c-brand-violet) / 0.75) 45%,
+      rgb(var(--c-brand-pink) / 0.6) 75%,
+      rgb(var(--c-brand-orange) / 0.55)
+    );
     -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;
     pointer-events: none;
   }
 
-  /* ── Brand textures (two physically different materials) ───────────────── */
-  /* GO = carved / brushed matte stone. Fine directional grain + emboss. */
+  /* ── Brand wordmark — two colour groups, cool then warm ─────────────────
+     Taken from the GoLuQ.com banner. The split is not decoration: capitals at
+     G and L mark two word-starts, and two distinct colour families confirm it,
+     so a stranger reads "Go LuQ" without a caption explaining the pronunciation.
+     Deliberately scoped to the wordmark — the UI accent stays teal, because a
+     page where everything is a brand colour has no accent at all. */
+  /* Go = cool half: cyan into blue. */
   .brand-go {
     color: transparent;
-    background-image:
-      repeating-linear-gradient(
-        100deg,
-        rgb(var(--c-go)) 0px,
-        rgb(var(--c-go)) 2px,
-        rgb(var(--c-go) / 0.62) 3px,
-        rgb(var(--c-go)) 5px
-      ),
-      linear-gradient(180deg, rgb(var(--c-go)), rgb(var(--c-go) / 0.7));
-    background-blend-mode: multiply;
+    background-image: linear-gradient(
+      118deg,
+      rgb(var(--c-teal-glow)) 0%,
+      rgb(var(--c-brand-blue)) 62%,
+      rgb(var(--c-indigo-glow)) 100%
+    );
     -webkit-background-clip: text;
     background-clip: text;
-    filter: drop-shadow(0 2px 1px rgb(0 0 0 / 0.45))
-      drop-shadow(0 -1px 0 rgb(var(--c-go) / 0.25));
+    filter: drop-shadow(0 0 calc(14px * var(--glow-strength)) rgb(var(--c-brand-blue) / 0.35));
   }
 
-  /* LuQ = liquid iridescent chrome. On-brand cyan→teal→indigo sheen that flows. */
+  /* LuQ = warm half: orange into pink, flowing. */
   .brand-luq {
     color: transparent;
     background-image: linear-gradient(
       110deg,
-      rgb(var(--c-teal-neon)) 0%,
-      rgb(var(--c-teal-glow)) 22%,
-      #ffffff 38%,
-      rgb(var(--c-teal-glow)) 52%,
-      rgb(var(--c-indigo-glow)) 74%,
-      rgb(var(--c-teal-neon)) 100%
+      rgb(var(--c-brand-orange)) 0%,
+      rgb(var(--c-brand-pink)) 34%,
+      rgb(var(--c-brand-orange)) 58%,
+      rgb(var(--c-brand-pink)) 100%
     );
     background-size: 240% 100%;
     -webkit-background-clip: text;
     background-clip: text;
-    filter: drop-shadow(0 0 calc(22px * var(--glow-strength)) rgb(var(--c-teal-glow) / 0.55));
+    filter: drop-shadow(0 0 calc(20px * var(--glow-strength)) rgb(var(--c-brand-pink) / 0.45));
     animation: chrome-flow 6s linear infinite;
+  }
+
+  /* The header mark is small and always on screen; a looping shimmer up there
+     is a distraction rather than a flourish. */
+  .brand-still .brand-luq {
+    animation: none;
   }
 }
 
