@@ -2,12 +2,13 @@ import { Fragment, useCallback, useEffect, useState } from "react";
 import {
   LayoutDashboard, Users, TrendingUp, MessageSquare, Settings as SettingsIcon,
   LogOut, Search, Download, Trash2, RefreshCw, Send, ShieldCheck, Circle,
-  BarChart3, ChevronDown, IndianRupee, Bot, Radio, Mail, FileText, Briefcase, Megaphone, Image as ImageIcon,
+  BarChart3, ChevronDown, IndianRupee, Bot, Mail, FileText, Briefcase, Megaphone, Image as ImageIcon,
 } from "lucide-react";
 import { Button } from "../components/ui/Button";
 import { Projects } from "../components/admin/Projects";
 import { Campaigns } from "../components/admin/Campaigns";
 import { Marketing } from "../components/admin/Marketing";
+import { LiveChat } from "../components/admin/LiveChat";
 import { BrandMark } from "../components/BrandMark";
 import { useTranslation } from "react-i18next";
 import { inputClass } from "../lib/ui";
@@ -92,7 +93,7 @@ export function Admin() {
         })}
       </nav>
 
-      <main className="mx-auto max-w-5xl px-4 py-6 sm:px-8">
+      <main className="mx-auto max-w-5xl overflow-x-hidden px-4 py-6 sm:px-8">
         {section === "overview" && <Overview />}
         {section === "leads" && <Leads />}
         {section === "chat" && <LiveChat />}
@@ -593,161 +594,6 @@ function Visitors() {
         <BarList title="Top pages" rows={d.pages || []} />
         <BarList title="Sources" rows={d.sources || []} />
         <BarList title="Devices" rows={d.devices || []} />
-      </div>
-    </div>
-  );
-}
-
-/**
- * Live chat inbox. Polls every 5s so a waiting visitor surfaces without a
- * refresh — the WhatsApp alert is the primary notification, this is where the
- * conversation actually happens.
- */
-function LiveChat() {
-  const [chats, setChats] = useState<any[]>([]);
-  const [waiting, setWaiting] = useState(0);
-  const [openChat, setOpenChat] = useState<string | null>(null);
-  const [msgs, setMsgs] = useState<any[]>([]);
-  const [reply, setReply] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [sendErr, setSendErr] = useState("");
-  const [botOff, setBotOff] = useState(false);
-
-  const loadList = useCallback(async () => {
-    const d = await adminGet("/api/admin/chats");
-    setChats(d.chats || []);
-    setWaiting(d.waiting || 0);
-  }, []);
-
-  const loadOne = useCallback(async (id: string) => {
-    const d = await adminGet(`/api/admin/chats?id=${encodeURIComponent(id)}`);
-    setMsgs(d.messages || []);
-    setBotOff(Boolean(d.session?.bot_off));
-  }, []);
-
-  // A manual reply only pauses the guide for half an hour; this is the switch
-  // for turning it off entirely, or handing the thread back when you are done.
-  const toggleBot = async () => {
-    if (!openChat) return;
-    const d = await adminPost("/api/admin/chats", { id: openChat, action: "bot", off: !botOff });
-    if (d.ok) setBotOff(Boolean(d.bot_off));
-  };
-
-  useEffect(() => {
-    loadList();
-    const iv = setInterval(() => {
-      loadList();
-      if (openChat) loadOne(openChat);
-    }, 5000);
-    return () => clearInterval(iv);
-  }, [loadList, loadOne, openChat]);
-
-  const send = async () => {
-    if (!openChat || !reply.trim()) return;
-    setBusy(true);
-    setSendErr("");
-    const d = await adminPost("/api/admin/chats", { id: openChat, text: reply.trim() });
-    setBusy(false);
-    if (!d.ok) {
-      // Keep what was typed. Clearing the box on failure told the owner the
-      // message had gone when it had not — which is how a customer ended up
-      // being answered by nobody at all.
-      setSendErr(d.error || "Could not send.");
-      return;
-    }
-    setReply("");
-    loadOne(openChat);
-  };
-
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-muted">
-          {waiting > 0
-            ? <span className="font-semibold text-warn">{waiting} visitor{waiting === 1 ? "" : "s"} waiting for you</span>
-            : "No one waiting right now."}
-        </p>
-        <Button variant="secondary" size="md" onClick={loadList}><RefreshCw size={16} /></Button>
-      </div>
-
-      <div className="grid gap-4 lg:grid-cols-[300px_1fr]">
-        <div className="space-y-2">
-          {chats.length === 0 && <p className="text-sm text-muted">No conversations yet.</p>}
-          {chats.map((c) => (
-            <button key={c.id} type="button" onClick={() => { setOpenChat(c.id); loadOne(c.id); }}
-              className={`block w-full rounded-2xl p-3 text-left transition-colors ${openChat === c.id ? "bg-teal-glow/15 ring-1 ring-teal-glow/40" : "glass"}`}>
-              <div className="flex items-center justify-between gap-2">
-                <span className="flex items-center gap-2 text-sm font-semibold text-fg">
-                  {c.needs_human ? <Radio size={13} className="animate-pulse text-warn" /> : null}
-                  {c.page === "whatsapp" && (
-                    <MessageSquare size={12} className="shrink-0 text-brand-luq" aria-label="WhatsApp" />
-                  )}
-                  {c.visitor_name || c.page || "Visitor"}
-                </span>
-                {c.unread_for_agent > 0 && (
-                  <span className="rounded-full bg-danger px-2 py-0.5 text-xs font-bold text-white">{c.unread_for_agent}</span>
-                )}
-              </div>
-              <p className="mt-1 truncate text-xs text-muted">{c.last_message || "—"}</p>
-              <p className="mt-1 text-[11px] text-faint">{String(c.last_at || "").slice(0, 16)}</p>
-            </button>
-          ))}
-        </div>
-
-        <div className="glass flex min-h-[420px] flex-col rounded-2xl p-4">
-          {!openChat && <p className="m-auto text-sm text-muted">Pick a conversation.</p>}
-          {openChat && (
-            <>
-              <div className="flex-1 space-y-2 overflow-y-auto">
-                {msgs.map((m) => (
-                  <div key={m.id} className={`flex ${m.role === "visitor" ? "justify-start" : "justify-end"}`}>
-                    <div className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm ${
-                      m.role === "visitor" ? "bg-panel/60 text-fg"
-                      : m.role === "agent" ? "bg-teal-glow/25 text-fg"
-                      : "border border-hairline/15 text-muted"}`}>
-                      <span className="mb-0.5 block text-[10px] uppercase tracking-wider text-faint">
-                        {m.role === "visitor" ? "Visitor" : m.role === "agent" ? "You" : "Guide"}
-                      </span>
-                      {m.content}
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-3 border-t border-hairline/10 pt-3">
-                <div className="mb-2 flex flex-wrap items-center gap-2 text-xs">
-                  <button
-                    type="button"
-                    onClick={toggleBot}
-                    className={`rounded-full px-3 py-1 font-semibold ring-1 ${
-                      botOff
-                        ? "bg-warn/15 text-warn ring-warn/40"
-                        : "bg-teal-glow/15 text-brand-luq ring-teal-glow/40"
-                    }`}
-                  >
-                    {botOff ? "Guide is OFF — tap to hand back" : "Guide is ON — tap to take over"}
-                  </button>
-                  <span className="text-faint">
-                    {botOff
-                      ? "Only you reply on this thread."
-                      : "Replying here pauses the guide for 30 minutes, then it resumes."}
-                  </span>
-                </div>
-                <div className="flex gap-2">
-                  <input className={inputClass} value={reply} placeholder="Type your reply…"
-                    onChange={(e) => setReply(e.target.value)} onKeyDown={(e) => e.key === "Enter" && send()} />
-                  <Button size="md" onClick={send} disabled={busy || !reply.trim()}><Send size={16} /></Button>
-                </div>
-                {sendErr && <p className="mt-2 text-sm text-warn">{sendErr}</p>}
-                {openChat.startsWith("wa:") && !sendErr && (
-                  <p className="mt-2 text-xs text-faint">
-                    Goes to their WhatsApp. Free typing works for 24 hours after their last
-                    message; after that only an approved template gets through.
-                  </p>
-                )}
-              </div>
-            </>
-          )}
-        </div>
       </div>
     </div>
   );
