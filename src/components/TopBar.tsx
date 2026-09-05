@@ -9,6 +9,7 @@ import { useVoice } from "../lib/voice";
 import { useSiteConfig } from "../lib/siteConfig";
 import { WhatsAppCta } from "./WhatsAppCta";
 import { CountryPicker } from "./CountryPicker";
+import { MobileNav } from "./MobileNav";
 
 function VoiceToggle() {
   const { supported, muted, toggleMute } = useVoice();
@@ -107,6 +108,7 @@ export function TopBar({
         </span>
         <LanguageToggle />
         <ThemeToggle />
+        <MobileNav showPartnerCta={showPartnerCta} />
       </div>
     </header>
   );

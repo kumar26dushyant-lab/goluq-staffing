@@ -316,32 +316,30 @@
     "workforce": "Complete Digital Workforce"
   },
   "partner": {
-    "crossMention": "Know other business owners? You can earn 35% every month by referring them.",
+    "crossMention": "Know other business owners? Earn {{rate}}% of every project you bring in.",
     "becomePartner": "Become a Partner",
     "backHome": "See what you'll be selling",
     "assistant": "Digital Partner Guide",
-    "intro": "Welcome! Want to earn every single month — without any tech skills? Refer GoLuQ Digital Employees to businesses you already know. You earn 35% every month for the first year, and keep earning for as long as they stay. Many partners run a small YouTube channel and earn while they sleep. Want me to show you how much you could make?",
+    "intro": "Welcome! Want to earn from businesses you already know — without any tech skills? Refer them to GoLuQ. When a project you introduced is delivered and paid for, you earn {{rate}}% of it. If they later pay for new features, you earn on that too. Want me to show you what a typical referral is worth?",
     "showMe": "Show me the earnings",
     "calc": {
       "title": "Your earnings calculator",
-      "planLabel": "Which Digital Employee will you sell?",
-      "refsLabel": "How many businesses can you refer?",
-      "year1Monthly": "Per month (year 1)",
-      "year1Total": "Year-1 total",
-      "ongoingMonthly": "Per month (year 2+)",
-      "cumulative24m": "2-year projection",
-      "caveat": "Assumes referred businesses stay active. Real earnings vary.",
+      "refsLabel": "Projects you bring in a year",
+      "caveat": "Paid once the customer has paid us. Enhancements they order later earn the same share; ongoing support does not.",
       "perMonth": "/mo",
-      "ask": "Shall I guide you to register? It takes 2 minutes."
+      "ask": "Shall I guide you to register? It takes 2 minutes.",
+      "projectLabel": "What kind of project would you introduce?",
+      "perProject": "You earn, per project",
+      "perYear": "On {{n}} projects a year"
     },
     "questions": {
       "earn": {
         "q": "How much can I earn?",
-        "a": "35% of the plan price every month for the first year, then 12% for as long as the business stays. Use the calculator above to see your numbers."
+        "a": "{{rate}}% of what the customer actually pays for the project, once it is delivered and paid. New features and enhancements they order later earn you the same {{rate}}%. Ongoing support and maintenance is not commissioned."
       },
       "paid": {
         "q": "When & how do I get paid?",
-        "a": "Monthly via UPI, after a ₹500 minimum, following a quick review. We collect your PAN + UPI at sign-up."
+        "a": "By UPI, after the project is paid for and a quick review, once your approved balance reaches ₹500. We collect your PAN and UPI at sign-up."
       },
       "tech": {
         "q": "Do I need any tech knowledge?",
@@ -410,7 +408,7 @@
       "signOut": "Sign out",
       "referrals": "Businesses you referred",
       "ledger": "Commission history",
-      "ledgerNone": "Nothing yet. Commission appears here each month a business you referred pays.",
+      "ledgerNone": "Nothing yet. Commission appears here when a project you introduced is paid for.",
       "month": "Month",
       "customer": "Business",
       "rate": "Rate",
@@ -421,7 +419,7 @@
       "st_converted": "Paying customer",
       "st_done": "Closed",
       "st_opted_out": "Opted out",
-      "rateNote": "You earn {{y1}}% of the plan price every month for the first year, then {{lt}}% for as long as they stay. Payouts start once your approved balance reaches {{min}}."
+      "rateNote": "You earn {{y1}}% of every project you introduce, and the same on any enhancements that customer orders later. Payouts start once your approved balance reaches {{min}}."
     },
     "login": {
       "title": "Partner sign in",
@@ -1673,5 +1671,10 @@
   "country": {
     "title": "See prices for",
     "aria": "Choose a country"
+  },
+  "nav": {
+    "title": "Menu",
+    "open": "Open menu",
+    "close": "Close menu"
   }
 }
