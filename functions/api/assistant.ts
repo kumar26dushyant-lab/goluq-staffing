@@ -24,6 +24,10 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
         ? `\nThe visitor is on the custom-build page, reading about owning their software outright. They are likely a more serious buyer — lean toward the quote/architecture-call close rather than the free demo.`
         : page === "partner"
           ? `\nThe visitor is on the partner page and is interested in EARNING by referring GoLuQ, not buying. Guide them to register as a partner.`
+          : page === "office"
+            ? `\nThe visitor is on the WhatsApp Office product page — a firm's whole customer communication on WhatsApp, staff on Telegram, live in 21 days, with a managed monthly plan. This is a serious, higher-value buyer. Find out how many staff and offices they have and what runs on spreadsheets and phone calls today. Close on a 30-minute call, not a demo.`
+          : page === "store"
+            ? `\nThe visitor is on the WhatsApp Store product page — catalogue broadcast plus native WhatsApp ordering for a wholesaler, two-channel with Telegram. Ask how many customers, which countries, and how often they send. Be straight that broadcasts are metered by Meta and billed at cost, and that Iran cannot be reached on WhatsApp — which is why Telegram is included. Close on a 30-minute call.`
           : page === "services"
             ? `\nThe visitor is on the communication services page, looking at toll-free numbers, WhatsApp API, voice and SMS. They have a concrete, budgeted need — find out what they want the number to DO, and close on a quote.`
             : `\nThe visitor is on the homepage, where a free live Digital Employee demo is available. The demo is usually the easiest first close.`;

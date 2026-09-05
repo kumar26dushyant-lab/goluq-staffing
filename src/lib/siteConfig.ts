@@ -49,6 +49,8 @@ export interface AffiliateRates {
 
 export interface SiteConfig {
   whatsapp: string;
+  /** Calendar link for a 30-minute call, or "" until the owner sets one. */
+  bookingUrl: string;
   chatEnabled: boolean;
   announcement: string;
   pricing: LivePrice[];
@@ -121,6 +123,7 @@ export async function fetchSiteConfig(): Promise<SiteConfig> {
       applyContentOverrides(d?.content);
       cache = {
         whatsapp: String(d?.whatsapp || ""),
+        bookingUrl: /^https:\/\//i.test(String(d?.bookingUrl || "")) ? String(d.bookingUrl) : "",
         chatEnabled: d?.chatEnabled !== false,
         announcement: String(d?.announcement || ""),
         pricing,
@@ -131,7 +134,7 @@ export async function fetchSiteConfig(): Promise<SiteConfig> {
       };
     } catch {
       cache = {
-        whatsapp: "", chatEnabled: true, announcement: "",
+        whatsapp: "", bookingUrl: "", chatEnabled: true, announcement: "",
         pricing: fromLocal(), country: "", market: INR_MARKET,
         extras: { voiceLite: VOICE_LITE_INR },
       };

@@ -21,6 +21,8 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     bot_instructions: (await getSetting(env.DB, "bot_instructions")) ?? "",
     chat_enabled: (await getSetting(env.DB, "chat_enabled")) ?? "1",
     announcement: (await getSetting(env.DB, "announcement")) ?? "",
+    // A calendar link. A $2,900 sale is made on a call, not in a chat widget.
+    booking_url: (await getSetting(env.DB, "booking_url")) ?? "",
     // WhatsApp Business Platform. The two non-secret ids come back in full so
     // they can be checked at a glance; the token and the app secret never leave
     // the server — the UI only needs to know whether they are set.
@@ -35,7 +37,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
 export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   if (!(await checkAdmin(request, env))) return unauthorized();
   try {
-    const b = await request.json<{ owner_whatsapp?: string; public_whatsapp?: string; followups_enabled?: boolean | string; bot_instructions?: string; chat_enabled?: boolean | string; announcement?: string; aff_rate_year1?: number; aff_rate_lifetime?: number; aff_min_payout?: number; aff_attribution_days?: number; owner_email?: string; wa_phone_number_id?: string; wa_waba_id?: string; wa_verify_token?: string; wa_access_token?: string; wa_app_secret?: string }>();
+    const b = await request.json<{ owner_whatsapp?: string; public_whatsapp?: string; followups_enabled?: boolean | string; bot_instructions?: string; chat_enabled?: boolean | string; announcement?: string; aff_rate_year1?: number; aff_rate_lifetime?: number; aff_min_payout?: number; aff_attribution_days?: number; owner_email?: string; booking_url?: string; wa_phone_number_id?: string; wa_waba_id?: string; wa_verify_token?: string; wa_access_token?: string; wa_app_secret?: string }>();
     if (typeof b.owner_whatsapp === "string") {
       await setSetting(env.DB, "owner_whatsapp", b.owner_whatsapp.replace(/\D/g, ""));
     }
@@ -62,6 +64,12 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
       minPayoutInr: b.aff_min_payout !== undefined ? Number(b.aff_min_payout) : undefined,
       attributionDays: b.aff_attribution_days !== undefined ? Number(b.aff_attribution_days) : undefined,
     });
+    if (typeof b.booking_url === "string") {
+      const u = b.booking_url.trim().slice(0, 400);
+      // Only an https URL or nothing. A stray "calendly.com/x" would become a
+      // relative link to goluq.com/calendly.com/x.
+      await setSetting(env.DB, "booking_url", /^https:\/\//i.test(u) ? u : "");
+    }
     if (typeof b.wa_phone_number_id === "string") {
       await setSetting(env.DB, "wa_phone_number_id", b.wa_phone_number_id.replace(/\D/g, ""));
     }

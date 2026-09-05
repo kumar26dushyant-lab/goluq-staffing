@@ -67,8 +67,14 @@ export function TopBar({
 
       <div className="flex shrink-0 items-center gap-1.5 sm:gap-2.5">
         <Link
-          to="/services"
+          to="/whatsapp-office"
           className="hidden rounded-full px-3 py-2 text-sm font-semibold text-muted hover:text-fg lg:block"
+        >
+          {t("products.nav")}
+        </Link>
+        <Link
+          to="/services"
+          className="hidden rounded-full px-3 py-2 text-sm font-semibold text-muted hover:text-fg xl:block"
         >
           {t("comms.nav")}
         </Link>

@@ -4,12 +4,14 @@ export interface ChatMsg {
 }
 
 /** Which page the visitor is on — the guide pitches differently on each. */
-export type GuidePage = "home" | "build" | "partner" | "services";
+export type GuidePage = "home" | "build" | "partner" | "services" | "office" | "store";
 
 export function pageFromPath(pathname: string): GuidePage {
   if (pathname.startsWith("/build")) return "build";
   if (pathname.startsWith("/partner")) return "partner";
   if (pathname.startsWith("/services")) return "services";
+  if (pathname.startsWith("/whatsapp-office")) return "office";
+  if (pathname.startsWith("/whatsapp-store")) return "store";
   return "home";
 }
 

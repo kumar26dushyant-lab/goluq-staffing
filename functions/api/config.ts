@@ -27,10 +27,11 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     request.headers.get("cf-ipcountry") ||
     ""
   ).toUpperCase().slice(0, 2);
-  const [whatsapp, chatEnabled, announcement] = await Promise.all([
+  const [whatsapp, chatEnabled, announcement, bookingUrl] = await Promise.all([
     getSetting(env.DB, "public_whatsapp"),
     getSetting(env.DB, "chat_enabled"),
     getSetting(env.DB, "announcement"),
+    getSetting(env.DB, "booking_url"),
   ]);
 
   // The visitor sees their own money. Converted HERE rather than in the browser
@@ -81,6 +82,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
   return Response.json({
     ok: true,
     whatsapp: whatsapp || "",
+    bookingUrl: bookingUrl || "",
     country,
     market: resolved,
     // Converted server-side like every other price, for the same reason.

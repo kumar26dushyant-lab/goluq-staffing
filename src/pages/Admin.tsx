@@ -1048,6 +1048,7 @@ function SettingsPanel() {
   const [owner, setOwner] = useState("");
   const [publicWa, setPublicWa] = useState("");
   const [ownerEmail, setOwnerEmail] = useState("");
+  const [bookingUrl, setBookingUrl] = useState("");
   const [followups, setFollowups] = useState(true);
   const [saved, setSaved] = useState("");
   // Saving before the current values have loaded would post empty strings and
@@ -1060,6 +1061,7 @@ function SettingsPanel() {
       setOwner(d.owner_whatsapp || "");
       setPublicWa(d.public_whatsapp || "");
       setOwnerEmail(d.owner_email || "");
+      setBookingUrl(d.booking_url || "");
       setFollowups(d.followups_enabled !== "0");
       setLoaded(true);
     });
@@ -1068,7 +1070,7 @@ function SettingsPanel() {
   const save = async () => {
     if (!loaded) return;
     setSaved("");
-    const d = await adminPost("/api/admin/settings", { owner_whatsapp: owner, owner_email: ownerEmail, public_whatsapp: publicWa, followups_enabled: followups });
+    const d = await adminPost("/api/admin/settings", { owner_whatsapp: owner, owner_email: ownerEmail, public_whatsapp: publicWa, booking_url: bookingUrl, followups_enabled: followups });
     setSaved(d.ok ? "Saved ✅" : "Failed");
   };
   return (
@@ -1093,6 +1095,16 @@ function SettingsPanel() {
           <span className="mb-1.5 block text-base font-semibold text-fg">Public contact WhatsApp (shown on site)</span>
           <span className="mb-2 block text-sm text-muted">Optional. If set, visitors can reach you on WhatsApp from the booking form. Leave blank to hide it.</span>
           <input className={inputClass} value={publicWa} onChange={(e) => setPublicWa(e.target.value)} placeholder="Leave blank to hide" />
+        </label>
+        <label className="block">
+          <span className="mb-1.5 block text-base font-semibold text-fg">Booking link (product pages)</span>
+          <span className="mb-2 block text-sm text-muted">
+            A Google Calendar appointment page or Calendly link. When set, the WhatsApp Office and
+            Store pages lead with "Book a 30-minute call"; until then they lead with WhatsApp. A sale
+            that size is made on a call.
+          </span>
+          <input className={inputClass} type="url" value={bookingUrl}
+            onChange={(e) => setBookingUrl(e.target.value)} placeholder="https://calendar.app.google/…" />
         </label>
         <label className="flex items-center gap-3">
           <input type="checkbox" checked={followups} onChange={(e) => setFollowups(e.target.checked)} className="h-5 w-5" />

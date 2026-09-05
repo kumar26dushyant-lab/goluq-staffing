@@ -38,6 +38,8 @@ export function MobileNav({ showPartnerCta = true }: { showPartnerCta?: boolean 
   const rate = Math.round((cfg?.affiliate?.year1 ?? 0.2) * 100);
 
   const links: { to: string; label: string }[] = [
+    { to: "/whatsapp-office", label: t("products.office.shortName") },
+    { to: "/whatsapp-store", label: t("products.store.shortName") },
     { to: "/services", label: t("comms.nav") },
     { to: "/build", label: t("buildIn.nav") },
     ...(showPartnerCta ? [{ to: "/about", label: t("about.navTitle") }] : []),

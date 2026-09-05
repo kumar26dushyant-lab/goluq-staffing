@@ -18,6 +18,10 @@ const Services = lazy(() =>
   import("./pages/Services").then((m) => ({ default: m.Services }))
 );
 
+const ProductPage = lazy(() =>
+  import("./pages/ProductPage").then((m) => ({ default: m.ProductPage }))
+);
+
 const Portal = lazy(() =>
   import("./pages/Portal").then((m) => ({ default: m.Portal }))
 );
@@ -92,6 +96,23 @@ export default function App() {
           element={
             <Suspense fallback={<div className="min-h-dvh" />}>
               <Services />
+            </Suspense>
+          }
+        />
+        {/* The two productised offers — the revenue, as opposed to the wedge. */}
+        <Route
+          path="/whatsapp-office"
+          element={
+            <Suspense fallback={<div className="min-h-dvh" />}>
+              <ProductPage product="office" />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/whatsapp-store"
+          element={
+            <Suspense fallback={<div className="min-h-dvh" />}>
+              <ProductPage product="store" />
             </Suspense>
           }
         />

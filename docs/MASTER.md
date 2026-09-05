@@ -251,9 +251,6 @@ Kept in priority order. Done items stay for a while so the history is visible.
       the number instead of a name.
 
 ### Next
-- [ ] **Product pages** /whatsapp-office and /whatsapp-store — hero, proof, six
-      cards, 21-day timeline, two pricing cards (live), FAQ, booking CTA. No AI
-      language. No data-residency claim until true.
 - [ ] **Booking link** — Google Calendar appointment schedule or Calendly. A
       $2,900 sale is not made from a chat widget.
 - [ ] **Monthly ROI report** in the managed plan.
@@ -318,6 +315,14 @@ stated rather than omitted, because a partner who discovers an exclusion after
 the fact stops believing every other term.
 
 ### Done
+- [x] Productised offers in the catalogue with explicit international prices;
+      site, chat and WhatsApp move together on one cockpit edit
+- [x] Product pages /whatsapp-office and /whatsapp-store, live-priced, with a
+      cockpit booking link that leads the CTA once set
+- [x] Testimonials: cockpit upload (self-hosted /media), live toggle, homepage
+      and per-product rendering
+- [x] Partner page corrected — project-based, rate interpolated, no monthly claim
+- [x] Mobile nav sheet; live chat rebuilt mobile-first with timestamps
 - [x] Follow-up cron scheduled daily on the VM (06:30 UTC / 10:00 IST)
 - [x] Guide no longer muted forever by one manual reply; 30-minute handover,
       explicit on/off per conversation, and "talk to a human" detection

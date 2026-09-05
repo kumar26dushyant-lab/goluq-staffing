@@ -131,24 +131,273 @@
     "demoNote": "A demonstration of how this would work in your business — we build and test yours before it goes live."
   },
   "products": {
-    "kicker": "Already built · already working",
-    "title": "Real software we've delivered — live and in use today",
-    "subtitle": "Each one ships with Digital Employee capabilities built right in.",
-    "visit": "Visit site",
-    "stripCta": "Jump to the work we've already delivered",
-    "tag": "Digital Employee inside",
-    "eagleeye": {
-      "name": "EagleEye.work",
-      "desc": "Decision intelligence for teams — plugs into Asana & Slack, filters out the noise, and delivers a daily audio brief of only the risks that need you."
+    "common": {
+      "book": "Book a 30-minute call",
+      "seePrice": "See the price",
+      "whatYouGet": "What you get",
+      "howItWorks": "How it works",
+      "pricing": "Pricing",
+      "faq": "Questions people ask",
+      "from": "From",
+      "oneTime": "One-time. You own everything at handover.",
+      "perMonth": "/ month",
+      "cancelAnytime": "Optional. Cancel any time.",
+      "onRequest": "On request"
     },
-    "sarathi": {
-      "name": "Sarathi-AI.com",
-      "desc": "A voice-first CRM for financial advisors — it follows up, nurtures, and guides every client across WhatsApp & Telegram, like your sharpest relationship manager."
+    "office": {
+      "shortName": "The WhatsApp Office",
+      "meta": {
+        "title": "The WhatsApp Office — GoLuQ"
+      },
+      "kicker": "The WhatsApp Office",
+      "title": "Your whole office,",
+      "titleAccent": "running on WhatsApp.",
+      "subtitle": "Every customer conversation on one business number. Your staff run it from their phones. Enquiries, documents, follow-ups and appointments handle themselves until a person is needed. Live in 21 days — and you own it.",
+      "who": [
+        "Clinics & hospitals",
+        "Insurance & claims",
+        "Law & CA firms",
+        "Real estate",
+        "Coaching institutes",
+        "Trading & advisory",
+        "Any firm with 10–100 staff"
+      ],
+      "proof": {
+        "kicker": "Built and running",
+        "a": {
+          "v": "2,000+",
+          "l": "claims settled on this system"
+        },
+        "b": {
+          "v": "4",
+          "l": "offices on one screen, pan-India"
+        },
+        "c": {
+          "v": "95%+",
+          "l": "success rate"
+        },
+        "body": "Built for NidaanPartner, an insurance claim dispute firm. Intake, document collection, case tracking and every customer update run on it. The owner opens one screen and sees all four offices; the client gets his update without anyone making a phone call."
+      },
+      "cards": [
+        {
+          "t": "One business number",
+          "d": "Every enquiry lands on the company's WhatsApp, never on someone's personal phone. Staff come and go; the customer list does not."
+        },
+        {
+          "t": "Staff run it from Telegram",
+          "d": "Approve, assign, reply and check status from a phone — no laptop, no login screen, no training manual."
+        },
+        {
+          "t": "Documents collected properly",
+          "d": "The customer is guided through what to send, files are checked, named and filed. No more 'bhaiya photo saaf nahi hai'."
+        },
+        {
+          "t": "Follow-ups that happen",
+          "d": "No reply after 3, 5, 7 and 12 days triggers a polite nudge for one-tap approval. Nobody has to remember."
+        },
+        {
+          "t": "Appointments without the back-and-forth",
+          "d": "Books, reminds and reschedules on your calendar. Missed slots get offered to the next person."
+        },
+        {
+          "t": "One screen for the owner",
+          "d": "Every conversation, every case, every staff action, live. You stop being the reporting system."
+        }
+      ],
+      "steps": [
+        {
+          "t": "Intro call — 30 minutes",
+          "d": "You describe how the office actually runs today. We tell you honestly whether this fits."
+        },
+        {
+          "t": "Blueprint — 3 days",
+          "d": "We map your real workflow: who does what, what gets sent when, where things get stuck. You approve it in writing."
+        },
+        {
+          "t": "Build — 2 weeks",
+          "d": "A working demo every week on a shared WhatsApp group. You see it before it touches a customer."
+        },
+        {
+          "t": "Handover & training",
+          "d": "Code, data and every account are yours. Staff are trained in plain language. Then we stay on if you want us to."
+        }
+      ],
+      "pricing": {
+        "setupTitle": "Setup",
+        "setupIncludes": [
+          "Blueprint of your actual workflow",
+          "WhatsApp Business API on your own verified number",
+          "Telegram control for your staff",
+          "Document, follow-up and scheduling flows",
+          "Owner dashboard",
+          "Training, and 30 days of fixes"
+        ],
+        "managedTitle": "Managed",
+        "managedIncludes": [
+          "Monitoring and fixes",
+          "New flows as your business changes",
+          "Template changes handled with Meta",
+          "Priority support",
+          "A monthly report of what it did for you — calls answered, follow-ups sent, hours removed"
+        ],
+        "note": "Setup excludes usage: WhatsApp conversations are metered by Meta and billed at cost, never marked up. WhatsApp needs a verified business; we help with the paperwork. Prices shown are for your region; the exact figure is agreed in writing before any work starts."
+      },
+      "faq": [
+        {
+          "q": "Do we own it, or are we renting?",
+          "a": "You own it. Code, data, the WhatsApp number, every account. Most customers keep us on the managed plan; some run it themselves. Either is fine."
+        },
+        {
+          "q": "What if our staff aren't technical?",
+          "a": "They already use WhatsApp and Telegram. That is the whole point — there is no new software to learn. We train in plain language and stay reachable."
+        },
+        {
+          "q": "Does it work with what we already use?",
+          "a": "Yes — Google Workspace, Microsoft 365, existing CRMs, Zoom, Meet, and anything with an API. We build around your tools, not instead of them."
+        },
+        {
+          "q": "How do you deliver in 21 days?",
+          "a": "Because we build the same system every time and only change the parts that are yours. You see a working demo every week, so nothing is a surprise at the end."
+        },
+        {
+          "q": "What about time zones?",
+          "a": "We are in India — 1.5 hours ahead of the Gulf, overlapping US and UK mornings. You get a shared WhatsApp group with same-day replies."
+        },
+        {
+          "q": "How do we pay?",
+          "a": "In your own currency. In India by UPI or bank transfer; abroad by card, bank transfer or Wise. Half at blueprint approval, half at handover."
+        }
+      ],
+      "finalTitle": "Thirty minutes tells us both whether this fits.",
+      "finalBody": "Describe how your office runs today. If this is not the right thing for you, we will say so — that is worth more to us than a sale that goes wrong."
     },
-    "nidaan": {
-      "name": "NidaanPartner.com",
-      "desc": "Insurance claim help, done right — when a claim is denied or stuck, Nidaan's experts review it and fight for what you're rightfully owed."
-    }
+    "store": {
+      "shortName": "The WhatsApp Store",
+      "meta": {
+        "title": "The WhatsApp Store — GoLuQ"
+      },
+      "kicker": "The WhatsApp Store",
+      "title": "Upload the catalogue once.",
+      "titleAccent": "Every customer gets it. Orders come back.",
+      "subtitle": "For wholesalers, distributors and traders who sell over WhatsApp. You add a video or a catalogue; it reaches every customer, in their language, on WhatsApp or Telegram. They browse and order inside the chat. You approve from your phone. Live in 21 days — and you own it.",
+      "who": [
+        "Garment & textile wholesalers",
+        "Jewellers",
+        "FMCG & pharma distributors",
+        "Electronics & mobile traders",
+        "Exporters with overseas buyers",
+        "Anyone selling on WhatsApp Status today"
+      ],
+      "proof": {
+        "kicker": "How it works today, and how it will",
+        "a": {
+          "v": "1",
+          "l": "upload replaces messaging every customer by hand"
+        },
+        "b": {
+          "v": "2",
+          "l": "channels: WhatsApp for Gulf, Africa, India — Telegram for Russia, Uzbekistan, Iran"
+        },
+        "c": {
+          "v": "0",
+          "l": "orders typed out by hand — they arrive as data"
+        },
+        "body": "Most traders post a video on WhatsApp Status and wait. Half their contacts never open it, and every order arrives as a voice note to be retyped. The Store sends the catalogue straight into each customer's inbox, lets them order inside WhatsApp itself, and hands you the order as a card with quantities already filled in."
+      },
+      "cards": [
+        {
+          "t": "Catalogue inside WhatsApp",
+          "d": "Your products, photos and prices in WhatsApp's own catalogue. Customers browse and tap to order without leaving the chat."
+        },
+        {
+          "t": "One upload, everyone reached",
+          "d": "Add a video or a new range from your phone. It goes to every customer — segmented by country, language and what they last bought."
+        },
+        {
+          "t": "Two channels, not one",
+          "d": "WhatsApp for the Gulf, Africa and India. Telegram for Russia, Uzbekistan and Iran, where WhatsApp is weak or unavailable. One upload feeds both."
+        },
+        {
+          "t": "Orders arrive as orders",
+          "d": "Items and quantities come in as structured data, not a voice note. You approve or hold from your phone; the customer gets confirmation instantly."
+        },
+        {
+          "t": "Answers in their language",
+          "d": "A customer asks about sizes, price or delivery in Russian at 2am and gets a correct answer from your catalogue. You see the thread in the morning."
+        },
+        {
+          "t": "Your number, protected",
+          "d": "Sensible frequency, one-tap opt-out, and sending limits respected — because one blocked number is your whole business."
+        }
+      ],
+      "steps": [
+        {
+          "t": "Intro call — 30 minutes",
+          "d": "How many customers, which countries, how often you send. We give you a real cost estimate, not a range."
+        },
+        {
+          "t": "Blueprint — 3 days",
+          "d": "Your catalogue structure, customer segments, languages and order flow, mapped and approved in writing."
+        },
+        {
+          "t": "Build — 2 weeks",
+          "d": "Catalogue live, both channels connected, first broadcast to a test group you choose. A demo every week."
+        },
+        {
+          "t": "Handover & training",
+          "d": "You own the catalogue, the numbers and the data. We show you the two things you will do daily: upload, and approve."
+        }
+      ],
+      "pricing": {
+        "setupTitle": "Setup",
+        "setupIncludes": [
+          "Catalogue built on WhatsApp Business",
+          "Segmented broadcast with throttling and opt-out",
+          "Telegram channel for CIS customers",
+          "Native ordering with approve/hold from your phone",
+          "Multilingual customer replies from your catalogue",
+          "Training, and 30 days of fixes"
+        ],
+        "managedTitle": "Managed",
+        "managedIncludes": [
+          "Monitoring and quality protection",
+          "New templates as your range changes",
+          "Segment and language tuning",
+          "Priority support",
+          "A monthly report — reached, opened, ordered"
+        ],
+        "note": "Setup excludes usage: each WhatsApp broadcast is a metered marketing conversation billed by Meta per recipient country, roughly $100–400 a month for 1,000 customers weekly, passed through at cost. Telegram is free. WhatsApp cannot reach Iranian numbers under sanctions and is restricted in Russia — which is exactly why the Store is two-channel. Prices shown are for your region; the exact figure is agreed in writing first."
+      },
+      "faq": [
+        {
+          "q": "Can it post to my WhatsApp Status?",
+          "a": "No — nothing can, by design of WhatsApp. But Status is passive and half your contacts never open it. The Store sends the video straight into each customer's inbox, which lands. Different mechanism, better result."
+        },
+        {
+          "q": "What about my customers in Iran and Russia?",
+          "a": "WhatsApp's platform cannot serve Iranian numbers under US sanctions, and Russia is at risk. Telegram is the main channel in both, and the Store publishes to it from the same upload. You lose nobody."
+        },
+        {
+          "q": "Will my number get blocked?",
+          "a": "Only if you spam. The engine paces sends, respects Meta's limits, and gives every customer a one-tap opt-out — because your number is your business and we build to protect it."
+        },
+        {
+          "q": "How do orders actually arrive?",
+          "a": "As WhatsApp order messages: product, quantity, customer — structured data, not a voice note. They appear on your Telegram as a card to approve or hold, and the customer gets a confirmation the moment you tap."
+        },
+        {
+          "q": "What does a broadcast cost me?",
+          "a": "Meta charges per recipient country, roughly two to ten cents a conversation. For 1,000 customers weekly that is about $100–400 a month, billed at cost. We estimate it on the intro call from your real numbers."
+        },
+        {
+          "q": "How do we pay?",
+          "a": "In your own currency. Card, bank transfer or Wise abroad; UPI or transfer in India. Half at blueprint approval, half at handover."
+        }
+      ],
+      "finalTitle": "Tell us how many customers, and where.",
+      "finalBody": "That is enough for a real cost estimate and an honest answer on whether this pays for itself for you. Most traders find the time it saves is worth it before the first extra order."
+    },
+    "nav": "Products"
   },
   "homeBuild": {
     "kicker": "Beyond Digital Employees",
@@ -1692,5 +1941,16 @@
   "testimonials": {
     "kicker": "In their words",
     "title": "What the people running on it say"
+  },
+  "productsBand": {
+    "kicker": "Two complete systems",
+    "title": "Not a menu. One product, one price, live in 21 days.",
+    "subtitle": "For owners who are done renting software they cannot change. You own what we build.",
+    "office": "A professional-services firm's whole customer communication on WhatsApp, run by staff from Telegram.",
+    "store": "Catalogue broadcast and native WhatsApp ordering for wholesalers — two channels, one upload.",
+    "setup": "Setup",
+    "managed": "Managed",
+    "days": "Live in 21 days · you own it at handover",
+    "cta": "See how it works"
   }
 }

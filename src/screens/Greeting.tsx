@@ -5,6 +5,7 @@ import { CapabilityTabs } from "../components/CapabilityTabs";
 import { CommsHero } from "../components/CommsHero";
 import { OfficeFlow } from "../components/OfficeFlow";
 import { PainMoment } from "../components/PainMoment";
+import { ProductsBand } from "../components/ProductsBand";
 import { SavingsCalculator } from "../components/SavingsCalculator";
 import { WhoWeBuildFor } from "../components/WhoWeBuildFor";
 import { ENTRY_PRICE_INR } from "../content/catalogue";
@@ -51,6 +52,7 @@ export function Greeting({ onPickRole }: { onPickRole: (id: RoleId) => void }) {
 
       {/* The services band sits directly under the hero: the hero says what we
           do, this says what it costs. */}
+      <ProductsBand className="mt-16" />
       <PainMoment className="mt-20" />
       <HomeServices className="mt-16" />
       <OfficeFlow className="mt-20" />
