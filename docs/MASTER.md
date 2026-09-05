@@ -110,6 +110,40 @@ rate feed — review once or twice a year; nothing breaks if they drift.
 | WhatsApp API | ₹7,999 | AED 1,299 | $349 | £299 | A$549 | $129 |
 | Voice plan /mo | ₹4,999 | AED 799 | $249 | £199 | A$349 | $79 |
 
+## 3b. The two products — decided 2026-09-05
+
+Everything built for tier-2 India is the WEDGE and the PROOF. The revenue is two
+productised offers sold at a real price to firms with 10–100 staff, in India and
+abroad, plus a managed plan that stacks monthly.
+
+| | India | International |
+|---|---|---|
+| **WhatsApp Office** — a professional-services firm's whole customer communication on WhatsApp, staff on Telegram, live in 21 days | ₹1,00,000 setup · ₹10,000/mo managed | $2,900 · $490/mo |
+| **WhatsApp Store** — catalogue broadcast + native WhatsApp ordering for a wholesaler, two-channel (WhatsApp + Telegram) | ₹1,00,000 · ₹10,000/mo | $2,900 · $490/mo |
+
+International prices are explicit per row (`price_intl_usd`), not derived — ₹1L
+through the 4× band is $4,500 and the decision was $2,900. Cockpit-editable, and
+the guide quotes the same figure the page prints. Verified: AED 10,599 in UAE.
+
+**Who buys this:** owners fed up with standard software — bug queues, per-seat
+pricing, usage meters, no autonomy. Not a segment; a state of mind. The wedge
+serves everyone else.
+
+**Retention:** the managed plan must include a monthly ROI report from the
+customer's own system (calls answered after hours, follow-ups sent, hours
+removed). Tier-2 owners unplug anything without visible ROI.
+
+**The Store's constraints** (say them before promising): Iran cannot be on the
+WhatsApp API (sanctions); Russia is at risk — so the Store is two-channel from
+day one with Telegram for CIS. WhatsApp Status cannot be automated; direct media
+templates replace it. Every broadcast is a paid marketing conversation
+(~$100–400/mo at 1,000 customers weekly), passed through at cost; quality rating
+protection is part of the engine.
+
+**Dubai garment client:** discounted first Store build in exchange for a
+testimonial, warm leads into his customer base, and partner commission on what
+converts. A Dubai reference does more for Indian trust than an Indian one.
+
 ## 4. What is built and live
 
 **Site** — Vite + React 18 + TypeScript + Tailwind (CSS-variable tokens) +
@@ -217,6 +251,15 @@ Kept in priority order. Done items stay for a while so the history is visible.
       the number instead of a name.
 
 ### Next
+- [ ] **Product pages** /whatsapp-office and /whatsapp-store — hero, proof, six
+      cards, 21-day timeline, two pricing cards (live), FAQ, booking CTA. No AI
+      language. No data-residency claim until true.
+- [ ] **Booking link** — Google Calendar appointment schedule or Calendly. A
+      $2,900 sale is not made from a chat widget.
+- [ ] **Monthly ROI report** in the managed plan.
+- [ ] **Store engine** for the Dubai client: catalogue sync, segmented media
+      broadcast with throttling and opt-out, native order webhook → Telegram
+      approve/hold, Telegram channel for CIS customers.
 - [ ] **Affiliate model revamp.** The copy and calculator are now project-based
       (see the correction below), but the stored rates are still `year1` /
       `lifetime` and the commission ledger still assumes a monthly accrual.
