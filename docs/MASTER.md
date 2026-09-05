@@ -217,6 +217,19 @@ Kept in priority order. Done items stay for a while so the history is visible.
       the number instead of a name.
 
 ### Next
+- [ ] **Affiliate model revamp.** The copy and calculator are now project-based
+      (see the correction below), but the stored rates are still `year1` /
+      `lifetime` and the commission ledger still assumes a monthly accrual.
+      Needs: a single project-commission rate, an enhancement window (how long
+      after delivery a customer's new work still earns the partner), and payout
+      triggered on customer payment rather than on order.
+- [ ] **Avatar video vendor** — HeyGen under evaluation by the founder. Once
+      chosen and an API key exists: a Video tab in the cockpit that turns a
+      brief into a script and the script into a finished MP4 with the founder's
+      avatar. Roughly a day's work; blocked only on the vendor decision.
+- [ ] **Telegram cockpit bot** — the answer to "how do I know a customer is
+      waiting". WhatsApp cannot notify the owner unprompted outside 24 hours;
+      Telegram can, free and instantly, with buttons to reply from the phone.
 - [ ] Confirm real comms costs, then correct the prices in the cockpit.
 - [ ] **Give the VM a way to pull from GitHub.** It has no credentials at all and
       has been pulling anonymously; GitHub now refuses ("expected flush after ref
@@ -247,6 +260,19 @@ reseller can offer that, and it is the same wedge as everything else.
 - [ ] Exotel provisioning, once a customer has paid.
 - [ ] Tech Provider application, if reselling WhatsApp becomes real.
 - [ ] Cloudflare inbound email routing (parked).
+
+### Correction, 2026-09-05 — the partner programme promised revenue we do not earn
+The page advertised "35% every month for the first year, then 12% for as long as
+the business stays", with a calculator projecting two years of it. That is a
+subscription model. GoLuQ builds software once and hands it over; there is no
+recurring plan revenue to pay a trail out of, so the promise could not have been
+honoured. The rate was also hardcoded at 35% in the copy while the cockpit said
+20 — a partner read one number and would have been paid another.
+
+Now: a share of each project once the customer has paid, the same share on
+enhancements they later order, and maintenance explicitly not commissioned —
+stated rather than omitted, because a partner who discovers an exclusion after
+the fact stops believing every other term.
 
 ### Done
 - [x] Follow-up cron scheduled daily on the VM (06:30 UTC / 10:00 IST)
