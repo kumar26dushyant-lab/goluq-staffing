@@ -3,7 +3,7 @@
 import { geminiText, geminiEnabled, type GeminiEnv } from "./gemini";
 import { getPricing, catalogueForPrompt } from "./pricing";
 import { getSetting } from "./settings";
-import { resolveMarket, convert, formatMoney } from "./markets";
+import { resolveMarket, convert, convertRow, formatMoney } from "./markets";
 
 /**
  * The GoLuQ guide's brain — ONE definition, shared by every channel.
@@ -155,8 +155,12 @@ export async function conciergeReply(
   let catalogue = "";
   let extra = "";
   try {
-    catalogue = catalogueForPrompt(await getPricing(env.DB), money);
-    const { market } = await resolveMarket(env.DB, opts.country || "");
+    const { market, multiplier } = await resolveMarket(env.DB, opts.country || "");
+    // Row-aware, so a product with an explicit international price is quoted
+    // at that price abroad — the same number the page prints.
+    catalogue = catalogueForPrompt(await getPricing(env.DB), (row, n) =>
+      formatMoney(convertRow(row, n, market, multiplier), market)
+    );
     if (market.currency !== "INR") {
       extra += `\n\nTHIS VISITOR IS NOT IN INDIA. Every price above is already in ${market.currency} — quote them exactly as written, never convert, never mention rupees, and never suggest the price would be different in another country.`;
     }

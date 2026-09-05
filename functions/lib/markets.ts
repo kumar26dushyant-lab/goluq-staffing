@@ -102,6 +102,39 @@ export function convert(inrAmount: number, m: Market, multiplier: number): numbe
   return stepped - 1;
 }
 
+/**
+ * Convert a pricing ROW for a market.
+ *
+ * Most rows are rupee-priced and derive their international price from the
+ * band multiplier. The productised offers carry an explicit USD figure instead,
+ * because "$2,900" was a decision and INR × 4 lands at $4,500. When one is set
+ * and the visitor is outside India, it becomes the base and is converted into
+ * the visitor's currency at the USD ratio — so a UAE visitor sees the AED
+ * equivalent of $2,900, not of ₹1L × 4.
+ *
+ * An offer price on such a row is scaled by the same ratio the list price was,
+ * so a discount stays the same percentage in every currency.
+ */
+export function convertRow(
+  row: { price_inr: number; price_intl_usd: number | null },
+  inrAmount: number,
+  m: Market,
+  multiplier: number
+): number {
+  if (m.currency === "INR" || !row.price_intl_usd || row.price_inr <= 0) {
+    return convert(inrAmount, m, multiplier);
+  }
+  // USD → this market. perInr values are units-per-rupee, so the ratio between
+  // two of them is the exchange between those currencies.
+  const usdPerInr = 1 / 88;
+  const share = inrAmount / row.price_inr; // 1 for the list price, <1 for an offer
+  const raw = row.price_intl_usd * share * (m.perInr / usdPerInr);
+  if (raw <= 0) return 0;
+  if (m.currency === "USD") return Math.round(raw);
+  const stepped = Math.max(m.round, Math.round(raw / m.round) * m.round);
+  return stepped - 1;
+}
+
 /** Everything the SPA and the guide need to show one consistent price. */
 export interface ResolvedMarket {
   country: string;

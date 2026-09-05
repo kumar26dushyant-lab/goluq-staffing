@@ -39,10 +39,13 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
       const offerPrice = Number.isFinite(offerPriceRaw) && offerPriceRaw > 0
         ? Math.round(offerPriceRaw)
         : null;
+      // Empty means "derive it from the INR price"; a number means "charge this".
+      const intlRaw = Number(r.price_intl_usd);
+      const intlUsd = Number.isFinite(intlRaw) && intlRaw > 0 ? Math.round(intlRaw) : null;
       await env.DB.prepare(
         `UPDATE pricing
             SET price_inr = ?, recurring = ?, lead_time = ?, enabled = ?,
-                offer_label = ?, offer_price_inr = ?, updated_at = datetime('now')
+                offer_label = ?, offer_price_inr = ?, price_intl_usd = ?, updated_at = datetime('now')
           WHERE id = ?`
       )
         .bind(
@@ -52,6 +55,7 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
           r.enabled === false ? 0 : 1,
           r.offer_label ? String(r.offer_label).slice(0, 80) : null,
           offerPrice,
+          intlUsd,
           id
         )
         .run();

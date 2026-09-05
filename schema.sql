@@ -65,7 +65,8 @@ CREATE TABLE IF NOT EXISTS pricing (
   offer_label TEXT,                    -- e.g. "Launch offer — this month only"
   offer_price_inr INTEGER,             -- optional promotional price
   sort_order INTEGER DEFAULT 0,
-  category TEXT DEFAULT 'build',   -- build = software we make · comms = telecom we provision
+  category TEXT DEFAULT 'build',   -- build = software we make · comms = telecom we provision · product = productised offers
+  price_intl_usd INTEGER,          -- optional. When set, international markets price FROM this rather than INR × multiplier
   updated_at TEXT
 );
 
@@ -324,3 +325,22 @@ CREATE TABLE IF NOT EXISTS campaign_targets (
 CREATE INDEX IF NOT EXISTS idx_ctargets_campaign ON campaign_targets(campaign_id, status);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_ctargets_unique ON campaign_targets(campaign_id, phone);
 CREATE INDEX IF NOT EXISTS idx_ctargets_wamid ON campaign_targets(wamid);
+
+-- ── Testimonials ────────────────────────────────────────────────────────────
+-- Real customers in their own words. Nothing is live until the owner flips it:
+-- a testimonial is a promise made on someone else's behalf and must never
+-- appear by accident. The video is a self-hosted file under /media.
+CREATE TABLE IF NOT EXISTS testimonials (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  title TEXT,
+  company TEXT,
+  quote TEXT NOT NULL,
+  video_path TEXT,                     -- /media/<file>.mp4
+  poster_path TEXT,                    -- /media/<file>.jpg, shown before play
+  lang TEXT NOT NULL DEFAULT 'en',
+  product TEXT,                        -- null = everywhere · office · store
+  sort_order INTEGER DEFAULT 0,
+  live INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL
+);

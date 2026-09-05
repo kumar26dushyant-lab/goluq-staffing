@@ -17,8 +17,14 @@ export interface PriceRow {
   offer_label: string | null;
   offer_price_inr: number | null;
   sort_order: number;
-  /** 'build' = software we make · 'comms' = telecom/messaging we provision. */
+  /** 'build' = software we make · 'comms' = telecom we provision · 'product' = productised offers. */
   category: string;
+  /**
+   * Explicit international price in USD, or null to derive one from INR × the
+   * market multiplier. Set on the productised offers, where the international
+   * figure is a decision rather than a conversion.
+   */
+  price_intl_usd: number | null;
 }
 
 /**
@@ -31,7 +37,7 @@ export interface PriceRow {
  * Meta wholesale costs. Usage (call minutes, SMS, WhatsApp conversations) is
  * billed separately at cost — never fold it into the setup price.
  */
-const SEED: Omit<PriceRow, "offer_label" | "offer_price_inr">[] = [
+const SEED: Omit<PriceRow, "offer_label" | "offer_price_inr" | "price_intl_usd">[] = [
   { id: "automation", price_inr: 3000, recurring: 0, lead_time: "4–8 days", enabled: 1, sort_order: 1, category: "build" },
   { id: "whatsapp", price_inr: 3000, recurring: 0, lead_time: "4–8 days", enabled: 1, sort_order: 2, category: "build" },
   // Raised from 799. At 30-60 hours to build one to order, 799/month paid back
@@ -52,7 +58,26 @@ const SEED: Omit<PriceRow, "offer_label" | "offer_price_inr">[] = [
   { id: "txnSms", price_inr: 5999, recurring: 0, lead_time: "3–7 working days", enabled: 1, sort_order: 15, category: "comms" },
   { id: "promoSms", price_inr: 5999, recurring: 0, lead_time: "3–7 working days", enabled: 1, sort_order: 16, category: "comms" },
   { id: "missedCall", price_inr: 3999, recurring: 0, lead_time: "1–3 working days", enabled: 1, sort_order: 17, category: "comms" },
+
+  // ── Productised offers — the revenue, as opposed to the wedge ─────────────
+  // One product, one price, one delivery date. The Office is workflow for a
+  // professional-services firm; the Store is catalogue broadcast plus native
+  // WhatsApp ordering for a wholesaler. Same engine, same price band. Each has
+  // a managed plan, which is the only recurring revenue in the business and the
+  // thing that makes a partner trail commission honest.
+  { id: "whatsappOffice", price_inr: 100000, recurring: 0, lead_time: "21 days", enabled: 1, sort_order: 21, category: "product" },
+  { id: "officeManaged", price_inr: 10000, recurring: 1, lead_time: "from handover", enabled: 1, sort_order: 22, category: "product" },
+  { id: "whatsappStore", price_inr: 100000, recurring: 0, lead_time: "21 days", enabled: 1, sort_order: 23, category: "product" },
+  { id: "storeManaged", price_inr: 10000, recurring: 1, lead_time: "from handover", enabled: 1, sort_order: 24, category: "product" },
 ];
+
+/** International prices for the productised offers. Decisions, not conversions. */
+const SEED_INTL_USD: Record<string, number> = {
+  whatsappOffice: 2900,
+  officeManaged: 490,
+  whatsappStore: 2900,
+  storeManaged: 490,
+};
 
 /** English labels for the guide's prompt — the SPA has its own i18n copies. */
 export const TIER_LABELS: Record<string, string> = {
@@ -70,6 +95,10 @@ export const TIER_LABELS: Record<string, string> = {
   txnSms: "Transactional SMS",
   promoSms: "Promotional SMS",
   missedCall: "Missed-Call Service",
+  whatsappOffice: "The WhatsApp Office (complete setup, 21 days)",
+  officeManaged: "WhatsApp Office — managed plan",
+  whatsappStore: "The WhatsApp Store (catalogue + ordering, 21 days)",
+  storeManaged: "WhatsApp Store — managed plan",
 };
 
 export async function getPricing(db: D1Database): Promise<PriceRow[]> {
@@ -88,10 +117,10 @@ export async function getPricing(db: D1Database): Promise<PriceRow[]> {
       await db
         .prepare(
           `INSERT OR IGNORE INTO pricing
-             (id, price_inr, recurring, lead_time, enabled, sort_order, category, updated_at)
-           VALUES (?,?,?,?,?,?,?,datetime('now'))`
+             (id, price_inr, recurring, lead_time, enabled, sort_order, category, price_intl_usd, updated_at)
+           VALUES (?,?,?,?,?,?,?,?,datetime('now'))`
         )
-        .bind(s.id, s.price_inr, s.recurring, s.lead_time, s.enabled, s.sort_order, s.category)
+        .bind(s.id, s.price_inr, s.recurring, s.lead_time, s.enabled, s.sort_order, s.category, SEED_INTL_USD[s.id] ?? null)
         .run();
     }
     rows = (await db.prepare(`SELECT * FROM pricing ORDER BY sort_order, id`).all<PriceRow>())
@@ -116,15 +145,20 @@ const inr = (n: number) =>
  * The price list the guide is allowed to quote, generated from the live table so
  * a cockpit edit reaches the conversation immediately.
  */
-export function catalogueForPrompt(rows: PriceRow[], money: (n: number) => string = inr): string {
+export function catalogueForPrompt(
+  rows: PriceRow[],
+  money: (row: PriceRow, inrAmount: number) => string = (_r, n) => inr(n)
+): string {
   return rows
     .filter((r) => r.enabled)
     .map((r) => {
       const label = TIER_LABELS[r.id] ?? r.id;
-      const base = r.recurring ? `from ${money(r.price_inr)}/month` : `from ${money(r.price_inr)} one-time`;
+      const base = r.recurring
+        ? `from ${money(r, r.price_inr)}/month`
+        : `from ${money(r, r.price_inr)} one-time`;
       const offer =
         r.offer_label && r.offer_price_inr
-          ? ` — CURRENT OFFER: ${r.offer_label}, ${money(r.offer_price_inr)}. Mention this offer when it is relevant.`
+          ? ` — CURRENT OFFER: ${r.offer_label}, ${money(r, r.offer_price_inr)}. Mention this offer when it is relevant.`
           : r.offer_label
             ? ` — CURRENT OFFER: ${r.offer_label}.`
             : "";

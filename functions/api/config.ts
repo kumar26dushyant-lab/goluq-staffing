@@ -3,7 +3,7 @@
 import { getSetting } from "../lib/settings";
 import { getPricing, EXTRA_PRICES } from "../lib/pricing";
 import { getRates } from "../lib/affiliateRates";
-import { resolveMarket, convert } from "../lib/markets";
+import { resolveMarket, convert, convertRow } from "../lib/markets";
 
 interface Env {
   DB: D1Database;
@@ -47,7 +47,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
         // fromInr stays the rupee figure the owner typed in the cockpit;
         // `from` is what this visitor should actually be shown.
         fromInr: r.price_inr,
-        from: convert(r.price_inr, market, multiplier),
+        from: convertRow(r, r.price_inr, market, multiplier),
         // 'build' vs 'comms'. Without it the SPA cannot tell a website from a
         // toll-free number, and the homepage hook advertised "automations from"
         // the price of a missed-call service.
@@ -56,7 +56,8 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
         leadTime: r.lead_time,
         offerLabel: r.offer_label || null,
         offerInr: r.offer_price_inr || null,
-        offer: r.offer_price_inr ? convert(r.offer_price_inr, market, multiplier) : null,
+        offer: r.offer_price_inr ? convertRow(r, r.offer_price_inr, market, multiplier) : null,
+        intlUsd: r.price_intl_usd ?? null,
       }));
   } catch {
     // Site must render even if the pricing table is unavailable.

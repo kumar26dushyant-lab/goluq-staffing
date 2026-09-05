@@ -523,6 +523,18 @@
           "Unlimited users, because there are no seats to licence",
           "Full source code and IP transferred to you on delivery"
         ]
+      },
+      "whatsappOffice": {
+        "name": "The WhatsApp Office"
+      },
+      "officeManaged": {
+        "name": "WhatsApp Office — managed"
+      },
+      "whatsappStore": {
+        "name": "The WhatsApp Store"
+      },
+      "storeManaged": {
+        "name": "WhatsApp Store — managed"
       }
     },
     "disclaimerShort": "Starting price for a standard build on initial requirements. Heavy customisation can change scope, timeline and cost — always agreed in writing first.",
@@ -1676,5 +1688,9 @@
     "title": "Menu",
     "open": "Open menu",
     "close": "Close menu"
+  },
+  "testimonials": {
+    "kicker": "In their words",
+    "title": "What the people running on it say"
   }
 }

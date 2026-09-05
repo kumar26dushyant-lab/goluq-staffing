@@ -2,13 +2,14 @@ import { Fragment, useCallback, useEffect, useState } from "react";
 import {
   LayoutDashboard, Users, TrendingUp, MessageSquare, Settings as SettingsIcon,
   LogOut, Search, Download, Trash2, RefreshCw, Send, ShieldCheck, Circle,
-  BarChart3, ChevronDown, IndianRupee, Bot, Mail, FileText, Briefcase, Megaphone, Image as ImageIcon,
+  BarChart3, ChevronDown, IndianRupee, Bot, Mail, FileText, Briefcase, Megaphone, Image as ImageIcon, Video,
 } from "lucide-react";
 import { Button } from "../components/ui/Button";
 import { Projects } from "../components/admin/Projects";
 import { Campaigns } from "../components/admin/Campaigns";
 import { Marketing } from "../components/admin/Marketing";
 import { LiveChat } from "../components/admin/LiveChat";
+import { Testimonials as TestimonialsPanel } from "../components/admin/Testimonials";
 import { BrandMark } from "../components/BrandMark";
 import { useTranslation } from "react-i18next";
 import { inputClass } from "../lib/ui";
@@ -21,7 +22,7 @@ import {
 
 type Section =
   | "overview" | "leads" | "chat" | "visitors" | "pricing"
-  | "bot" | "content" | "inbox" | "affiliates" | "projects" | "campaigns" | "marketing" | "settings";
+  | "bot" | "content" | "inbox" | "affiliates" | "projects" | "campaigns" | "marketing" | "testimonials" | "settings";
 
 export function Admin() {
   const [authed, setAuthed] = useState(false);
@@ -59,6 +60,7 @@ export function Admin() {
     { id: "projects", label: "Projects", icon: Briefcase },
     { id: "campaigns", label: "Campaigns", icon: Megaphone },
     { id: "marketing", label: "Marketing", icon: ImageIcon },
+    { id: "testimonials", label: "Testimonials", icon: Video },
     { id: "settings", label: "Settings", icon: SettingsIcon },
   ];
 
@@ -106,6 +108,7 @@ export function Admin() {
         {section === "projects" && <Projects />}
         {section === "campaigns" && <Campaigns />}
         {section === "marketing" && <Marketing />}
+        {section === "testimonials" && <TestimonialsPanel />}
         {section === "settings" && <SettingsPanel />}
       </main>
     </div>
@@ -657,7 +660,17 @@ function Pricing() {
                 <input className={inputClass} type="number" value={r.offer_price_inr || ""}
                   onChange={(e) => set(i, "offer_price_inr", e.target.value)} />
               </label>
+              <label className="block">
+                <span className="mb-1 block text-xs text-faint">International price (US$, optional)</span>
+                <input className={inputClass} type="number" value={r.price_intl_usd || ""} placeholder="blank = derive from ₹"
+                  onChange={(e) => set(i, "price_intl_usd", e.target.value)} />
+              </label>
             </div>
+            {r.price_intl_usd ? (
+              <p className="mt-2 text-xs text-faint">
+                Abroad this is priced from US${r.price_intl_usd} and converted to the visitor's currency; the ₹ figure applies in India only.
+              </p>
+            ) : null}
           </div>
         ))}
       </div>

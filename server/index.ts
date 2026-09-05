@@ -29,6 +29,12 @@ import { onRequestGet as waCheckGet, onRequestPost as waCheckPost } from "../fun
 import { onRequestGet as adminProjectsGet, onRequestPost as adminProjectsPost } from "../functions/api/admin/projects";
 import { onRequestGet as adminCampaignsGet, onRequestPost as adminCampaignsPost } from "../functions/api/admin/campaigns";
 import { onRequestPost as adminMarketing } from "../functions/api/admin/marketing";
+import { onRequestGet as adminTestimonialsGet, onRequestPost as adminTestimonialsPost } from "../functions/api/admin/testimonials";
+import { onRequestGet as publicTestimonials } from "../functions/api/testimonials";
+import { checkAdmin } from "../functions/lib/admin";
+import { writeFileSync, existsSync, statSync, createReadStream } from "node:fs";
+import { extname, basename } from "node:path";
+import { randomBytes } from "node:crypto";
 import { onRequestGet as custAuthGet, onRequestPost as custAuthPost } from "../functions/api/customer/auth";
 import { onRequestGet as custProjectsGet, onRequestPost as custProjectsPost } from "../functions/api/customer/projects";
 import { onRequestPost as track } from "../functions/api/track";
@@ -70,6 +76,9 @@ for (const sql of [
   `ALTER TABLE pricing ADD COLUMN category TEXT DEFAULT 'build'`,
   // Per-conversation switch for the guide, so a manual reply is a pause, not a mute.
   `ALTER TABLE chat_sessions ADD COLUMN bot_off INTEGER DEFAULT 0`,
+  // Productised offers carry an explicit USD price; the INR × multiplier band
+  // gives ~$4,500 for ₹1L, and the agreed international price is $2,900.
+  `ALTER TABLE pricing ADD COLUMN price_intl_usd INTEGER`,
 ]) {
   try {
     sqlite.exec(sql);
@@ -226,6 +235,75 @@ app.post("/api/admin/projects", (c) => callFn(adminProjectsPost as Handler, c.re
 app.get("/api/admin/campaigns", (c) => callFn(adminCampaignsGet as Handler, c.req.raw));
 app.post("/api/admin/campaigns", (c) => callFn(adminCampaignsPost as Handler, c.req.raw));
 app.post("/api/admin/marketing", (c) => callFn(adminMarketing as Handler, c.req.raw));
+app.get("/api/admin/testimonials", (c) => callFn(adminTestimonialsGet as Handler, c.req.raw));
+app.post("/api/admin/testimonials", (c) => callFn(adminTestimonialsPost as Handler, c.req.raw));
+app.get("/api/testimonials", (c) => callFn(publicTestimonials as Handler, c.req.raw));
+
+// ── Uploads ──────────────────────────────────────────────────────────────────
+// Native to this server on purpose: the portable handlers cannot touch a disk.
+// Files land in data/uploads under a random name (never the client's filename,
+// which is attacker-controlled) and are served back read-only from /media.
+const UPLOAD_DIR = join(DATA_DIR, "uploads");
+mkdirSync(UPLOAD_DIR, { recursive: true });
+const UPLOAD_MAX = 200 * 1024 * 1024;
+const UPLOAD_TYPES: Record<string, string> = {
+  "video/mp4": ".mp4", "video/webm": ".webm",
+  "image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp",
+};
+
+app.post("/api/admin/upload", async (c) => {
+  if (!(await checkAdmin(c.req.raw, env as { DB: unknown; ADMIN_SECRET?: string }))) {
+    return c.json({ ok: false, error: "unauthorised" }, 401);
+  }
+  const body = await c.req.parseBody();
+  const file = body["file"];
+  if (!(file instanceof File)) return c.json({ ok: false, error: "No file." }, 400);
+  const ext = UPLOAD_TYPES[file.type];
+  if (!ext) return c.json({ ok: false, error: "Only MP4/WebM video or JPG/PNG/WebP images." }, 400);
+  if (file.size > UPLOAD_MAX) return c.json({ ok: false, error: "Keep it under 200 MB." }, 400);
+  const name = randomBytes(12).toString("hex") + ext;
+  writeFileSync(join(UPLOAD_DIR, name), Buffer.from(await file.arrayBuffer()));
+  return c.json({ ok: true, path: "/media/" + name });
+});
+
+const MEDIA_TYPES: Record<string, string> = {
+  ".mp4": "video/mp4", ".webm": "video/webm",
+  ".jpg": "image/jpeg", ".png": "image/png", ".webp": "image/webp",
+};
+app.get("/media/:name", (c) => {
+  // basename() strips any path the URL tried to smuggle in.
+  const name = basename(c.req.param("name"));
+  const file = join(UPLOAD_DIR, name);
+  const type = MEDIA_TYPES[extname(name).toLowerCase()];
+  if (!type || !existsSync(file)) return c.notFound();
+  const size = statSync(file).size;
+  // Range support so a phone can seek inside a video instead of reloading it.
+  const range = c.req.header("range");
+  if (range) {
+    const m = /bytes=(\d*)-(\d*)/.exec(range);
+    const start = m && m[1] ? Number(m[1]) : 0;
+    const end = m && m[2] ? Math.min(Number(m[2]), size - 1) : size - 1;
+    const stream = createReadStream(file, { start, end });
+    return new Response(stream as unknown as ReadableStream, {
+      status: 206,
+      headers: {
+        "content-type": type,
+        "content-range": `bytes ${start}-${end}/${size}`,
+        "accept-ranges": "bytes",
+        "content-length": String(end - start + 1),
+        "cache-control": "public, max-age=31536000, immutable",
+      },
+    });
+  }
+  return new Response(createReadStream(file) as unknown as ReadableStream, {
+    headers: {
+      "content-type": type,
+      "content-length": String(size),
+      "accept-ranges": "bytes",
+      "cache-control": "public, max-age=31536000, immutable",
+    },
+  });
+});
 app.get("/api/customer/auth", (c) => callFn(custAuthGet as Handler, c.req.raw));
 app.post("/api/customer/auth", (c) => callFn(custAuthPost as Handler, c.req.raw));
 app.get("/api/customer/projects", (c) => callFn(custProjectsGet as Handler, c.req.raw));
