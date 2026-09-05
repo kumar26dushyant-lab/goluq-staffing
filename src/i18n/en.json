@@ -397,7 +397,25 @@
       "finalTitle": "Tell us how many customers, and where.",
       "finalBody": "That is enough for a real cost estimate and an honest answer on whether this pays for itself for you. Most traders find the time it saves is worth it before the first extra order."
     },
-    "nav": "Products"
+    "nav": "Products",
+    "kicker": "Already built · already working",
+    "title": "Real software we've delivered — live and in use today",
+    "subtitle": "Each one ships with Digital Employee capabilities built right in.",
+    "visit": "Visit site",
+    "stripCta": "Jump to the work we've already delivered",
+    "tag": "Digital Employee inside",
+    "eagleeye": {
+      "name": "EagleEye.work",
+      "desc": "Decision intelligence for teams — plugs into Asana & Slack, filters out the noise, and delivers a daily audio brief of only the risks that need you."
+    },
+    "sarathi": {
+      "name": "Sarathi-AI.com",
+      "desc": "A voice-first CRM for financial advisors — it follows up, nurtures, and guides every client across WhatsApp & Telegram, like your sharpest relationship manager."
+    },
+    "nidaan": {
+      "name": "NidaanPartner.com",
+      "desc": "Insurance claim help, done right — when a claim is denied or stuck, Nidaan's experts review it and fight for what you're rightfully owed."
+    }
   },
   "homeBuild": {
     "kicker": "Beyond Digital Employees",
