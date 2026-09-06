@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { HelpCircle, ArrowRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { KineticText } from "../KineticText";
+import { usePartnerRate } from "../../lib/partnerRate";
 
 const QKEYS = ["earn", "paid", "tech", "find", "fee", "track"] as const;
 
@@ -14,6 +15,7 @@ const QKEYS = ["earn", "paid", "tech", "find", "fee", "track"] as const;
 export function QuestionChips({ onRegister }: { onRegister: () => void }) {
   const { t } = useTranslation();
   const [active, setActive] = useState<(typeof QKEYS)[number] | null>(null);
+  const rate = usePartnerRate();
 
   return (
     <div>
@@ -49,7 +51,7 @@ export function QuestionChips({ onRegister }: { onRegister: () => void }) {
           >
             <KineticText
               key={active}
-              text={t(`partner.questions.${active}.a`)}
+              text={t(`partner.questions.${active}.a`, { rate })}
               className="text-[0.95rem] font-medium leading-relaxed text-fg"
             />
             <div className="mt-4 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">

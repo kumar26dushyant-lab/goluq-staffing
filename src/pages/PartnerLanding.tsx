@@ -11,6 +11,7 @@ import { QuestionChips } from "../components/partner/QuestionChips";
 import { AffiliateRegisterForm } from "../components/partner/AffiliateRegisterForm";
 import { NudgeBubble } from "../components/NudgeBubble";
 import type { AffiliateRegisterResult } from "../lib/affiliate";
+import { usePartnerRate } from "../lib/partnerRate";
 
 type PartnerStep = "intro" | "calculator" | "questions" | "register" | "done";
 
@@ -20,6 +21,7 @@ export function PartnerLanding() {
   const reduced = useReducedMotion();
   const [step, setStep] = useState<PartnerStep>("intro");
   const [result, setResult] = useState<AffiliateRegisterResult | null>(null);
+  const rate = usePartnerRate();
 
   const fade = reduced
     ? {}
@@ -31,7 +33,7 @@ export function PartnerLanding() {
 
       <main className="mx-auto w-full max-w-3xl px-5 pb-28 pt-2 sm:px-8">
         {/* Bot guide (always present, auto-speaks) */}
-        <StageAssistant line={t("partner.intro")} />
+        <StageAssistant line={t("partner.intro", { rate })} />
 
         <AnimatePresence mode="wait">
           {/* INTRO → reveal calculator */}
@@ -83,6 +85,7 @@ export function PartnerLanding() {
 
 function DonePanel({ result }: { result: AffiliateRegisterResult }) {
   const { t } = useTranslation();
+  const rate = usePartnerRate();
   return (
     <div className="glass-bright rounded-3xl p-6 sm:p-8">
       <h2 className="font-display text-2xl font-bold text-fg">{t("partner.done.title")}</h2>
@@ -91,7 +94,7 @@ function DonePanel({ result }: { result: AffiliateRegisterResult }) {
       <CopyRow label={t("partner.done.dashLabel")} value={result.dashboardUrl ?? ""} warn />
 
       <a
-        href={`https://wa.me/?text=${encodeURIComponent((result.shareUrl ?? "") + " — " + t("partner.crossMention"))}`}
+        href={`https://wa.me/?text=${encodeURIComponent((result.shareUrl ?? "") + " — " + t("partner.crossMention", { rate }))}`}
         target="_blank"
         rel="noreferrer"
         className="mt-5 inline-flex items-center gap-2 rounded-full bg-teal-glow/15 px-4 py-2.5 text-sm font-semibold text-brand-luq ring-1 ring-teal-glow/30"

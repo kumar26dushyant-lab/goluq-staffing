@@ -2,11 +2,13 @@ import { motion, useReducedMotion } from "framer-motion";
 import { TrendingUp, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { usePartnerRate } from "../lib/partnerRate";
 
 /** Homepage → affiliate bridge (BUILD_SPEC bot cross-mention). */
 export function PartnerCTA({ className = "" }: { className?: string }) {
   const { t } = useTranslation();
   const reduced = useReducedMotion();
+  const rate = usePartnerRate();
   return (
     <motion.div
       initial={reduced ? false : { opacity: 0, y: 14 }}
@@ -16,7 +18,7 @@ export function PartnerCTA({ className = "" }: { className?: string }) {
     >
       <p className="flex items-start gap-2.5 text-sm text-muted">
         <TrendingUp size={18} className="mt-0.5 shrink-0 text-brand-luq" />
-        {t("partner.crossMention")}
+        {t("partner.crossMention", { rate })}
       </p>
       <Link
         to="/partner"
