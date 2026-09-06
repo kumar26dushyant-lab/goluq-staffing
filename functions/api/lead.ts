@@ -4,8 +4,9 @@ import { waConfig, waReady, type WaEnv } from "../lib/whatsapp";
 import { WA_TEMPLATES, sendTemplate } from "../lib/waTemplates";
 import { getOwnerEmail } from "../lib/settings";
 import { mailEnabled, sendMail, type MailEnv } from "../lib/mailer";
+import { tgAlertOwner, tgEscape, type TgEnv } from "../lib/telegram";
 
-interface Env extends WaEnv, MailEnv {
+interface Env extends WaEnv, MailEnv, TgEnv {
   DB: D1Database;
 }
 
@@ -58,7 +59,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     const source = body.source ? String(body.source).slice(0, 80) : null;
     const landing = body.landing ? String(body.landing).slice(0, 200) : null;
 
-    await env.DB.prepare(
+    const ins = await env.DB.prepare(
       `INSERT INTO leads (name, phone, email, message, role, industry, cross_sell, wants_training, ref_code, created_at,
                           followup_stage, next_followup_at, opted_out, status, session_id, source, landing)
        VALUES (?,?,?,?,?,?,?,?,?,datetime('now'),
@@ -69,6 +70,44 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         sessionId, source, landing
       )
       .run();
+    const leadId = Number((ins as any)?.meta?.last_row_id || 0);
+
+    // Telegram first — it is the channel that reaches a phone in the pocket.
+    // Three buttons because a new enquiry needs exactly one decision: call
+    // them, come back to them next week, or let it go.
+    context.waitUntil(
+      (async () => {
+        const roleLabel = role ? ROLE_LABEL[role] ?? role : "";
+        const indLabel = industry ? INDUSTRY_LABEL[industry] ?? industry : "";
+        const dial = intl ? phone.replace(/\D/g, "") : `91${phone}`;
+        const details = [
+          `📱 +${tgEscape(dial)}`,
+          email ? `✉️ ${tgEscape(email)}` : "",
+          roleLabel ? `Wants: ${tgEscape(roleLabel)}` : "",
+          wantsTraining ? "Asked for the training walkthrough." : "",
+          crossSell.length ? `Also: ${tgEscape(crossSell.join(", "))}` : "",
+          ref ? `Partner: ${tgEscape(ref)}` : "",
+          source ? `From: ${tgEscape(source)}${landing ? " → " + tgEscape(landing) : ""}` : "",
+        ].filter((l) => l !== "");
+        const html =
+          `🟢 <b>New enquiry</b> · ${tgEscape(name)}${indLabel ? ` · ${tgEscape(indLabel)}` : ""}\n\n` +
+          details.join("\n") +
+          (message ? `\n\n<i>${tgEscape(message.slice(0, 1000))}</i>` : "") +
+          "\n\n<i>Reply to this message to WhatsApp them.</i>";
+        await tgAlertOwner(env.DB, env, html, {
+          kind: "lead",
+          ref: String(leadId),
+          buttons: [
+            [
+              { text: "📞 Book", data: `lead:book:${leadId}` },
+              { text: "⏸ Park", data: `lead:park:${leadId}` },
+              { text: "🗑 Drop", data: `lead:drop:${leadId}` },
+            ],
+            [{ text: "Open WhatsApp", url: `https://wa.me/${dial}` }],
+          ],
+        });
+      })()
+    );
 
     // Email the owner. This is the alert channel that actually works today:
     // the WhatsApp instance is pending Meta review, and a lead nobody is told

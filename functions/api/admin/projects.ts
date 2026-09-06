@@ -6,6 +6,7 @@ import { mailEnabled, sendMail, type MailEnv } from "../../lib/mailer";
 import { isStage, STAGES } from "../../lib/portal";
 import { waConfig, waReady, type WaEnv } from "../../lib/whatsapp";
 import { WA_TEMPLATES, sendTemplate } from "../../lib/waTemplates";
+import { commissionFor, getRates, PROJECT_KINDS, type ProjectKind } from "../../lib/affiliateRates";
 
 interface Env extends MailEnv, WaEnv {
   DB: D1Database;
@@ -40,13 +41,20 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     `SELECT id, project_id, label, url, created_at FROM project_files ORDER BY id DESC LIMIT 300`
   ).all<Record<string, unknown>>();
 
+  const commissions = await env.DB.prepare(
+    `SELECT id, project_id, affiliate_code, rate, basis_inr, amount_inr, status, created_at
+       FROM commissions WHERE project_id IS NOT NULL ORDER BY id DESC LIMIT 300`
+  ).all<Record<string, unknown>>();
+
   return Response.json({
     ok: true,
     stages: STAGES,
+    kinds: PROJECT_KINDS,
     customers: customers.results || [],
     projects: projects.results || [],
     events: events.results || [],
     files: files.results || [],
+    commissions: commissions.results || [],
   });
 };
 
@@ -56,7 +64,13 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
  *   addCustomer   { name, phone, email?, company? }  → creates the account and
  *                                                      emails a set-password link
  *   inviteAgain   { customerId }                     → fresh link
- *   addProject    { customerId, title, serviceId?, priceInr?, targetDate? }
+ *   addProject    { customerId, title, serviceId?, priceInr?, costInr?, kind?, refCode?, targetDate? }
+ *                                                    kind: build | enhancement | maintenance;
+ *                                                    refCode defaults to the partner on the
+ *                                                    customer's original lead, if any
+ *   setMoney      { projectId, priceInr?, costInr?, refCode? }
+ *   recordPayment { projectId, amountInr, note? }    → adds to paid, accrues partner
+ *                                                    commission on the profit share
  *   setStage      { projectId, stage, note? }        → moves it, logs it, emails
  *   addUpdate     { projectId, note, visible }
  *   addFile       { projectId, label, url }
@@ -107,15 +121,20 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
       if (!title || !customerId) {
         return Response.json({ ok: false, error: "Pick a customer and give the project a title." }, { status: 400 });
       }
+      const kind = (PROJECT_KINDS as string[]).includes(String(b.kind)) ? (String(b.kind) as ProjectKind) : "build";
+      const refCode = clip(b.refCode, 40).toUpperCase() || (await partnerForCustomer(env.DB, customerId));
       const r = await env.DB.prepare(
-        `INSERT INTO projects (customer_id, title, service_id, price_inr, target_date, created_at, updated_at)
-         VALUES (?,?,?,?,?,datetime('now'),datetime('now'))`
+        `INSERT INTO projects (customer_id, title, service_id, kind, price_inr, cost_inr, ref_code, target_date, created_at, updated_at)
+         VALUES (?,?,?,?,?,?,?,?,datetime('now'),datetime('now'))`
       )
         .bind(
           customerId,
           title,
           clip(b.serviceId, 40) || null,
+          kind,
           Number(b.priceInr) || 0,
+          Number(b.costInr) || 0,
+          refCode || null,
           clip(b.targetDate, 20) || null
         )
         .run();
@@ -183,12 +202,98 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
       return Response.json({ ok: true });
     }
 
+    if (action === "setMoney") {
+      const projectId = Number(b.projectId);
+      if (!projectId) return Response.json({ ok: false, error: "missing" }, { status: 400 });
+      if (b.priceInr !== undefined) {
+        await env.DB.prepare("UPDATE projects SET price_inr = ? WHERE id = ?")
+          .bind(Math.max(0, Number(b.priceInr) || 0), projectId).run();
+      }
+      if (b.costInr !== undefined) {
+        await env.DB.prepare("UPDATE projects SET cost_inr = ? WHERE id = ?")
+          .bind(Math.max(0, Number(b.costInr) || 0), projectId).run();
+      }
+      if (b.refCode !== undefined) {
+        await env.DB.prepare("UPDATE projects SET ref_code = ? WHERE id = ?")
+          .bind(clip(b.refCode, 40).toUpperCase() || null, projectId).run();
+      }
+      await env.DB.prepare("UPDATE projects SET updated_at = datetime('now') WHERE id = ?").bind(projectId).run();
+      return Response.json({ ok: true });
+    }
+
+    // Money arrived. This is the ONLY place partner commission is created: a
+    // share of the profit, in proportion to how much of the price this payment
+    // is. Nothing is booked before the customer has actually paid.
+    if (action === "recordPayment") {
+      const projectId = Number(b.projectId);
+      const amount = Math.round(Number(b.amountInr) || 0);
+      if (!projectId || amount <= 0) {
+        return Response.json({ ok: false, error: "A payment amount is required." }, { status: 400 });
+      }
+      const p = await env.DB.prepare(
+        `SELECT id, customer_id, kind, price_inr, cost_inr, paid_inr, ref_code, created_at FROM projects WHERE id = ?`
+      )
+        .bind(projectId)
+        .first<{ id: number; customer_id: number; kind: string | null; price_inr: number; cost_inr: number | null; paid_inr: number; ref_code: string | null; created_at: string }>();
+      if (!p) return Response.json({ ok: false, error: "Project not found." }, { status: 404 });
+
+      await env.DB.prepare("UPDATE projects SET paid_inr = COALESCE(paid_inr,0) + ?, updated_at = datetime('now') WHERE id = ?")
+        .bind(amount, projectId)
+        .run();
+      const note = clip(b.note, 200);
+      await logEvent(env.DB, projectId, null, `Payment received: ₹${amount.toLocaleString("en-IN")}${note ? " — " + note : ""}`, 0);
+
+      let commission: Record<string, unknown> = { eligible: false, reason: "No partner on this project." };
+      if (p.ref_code) {
+        const first = await env.DB.prepare(
+          `SELECT created_at FROM projects WHERE customer_id = ? AND kind = 'build' AND id <> ? ORDER BY id ASC LIMIT 1`
+        )
+          .bind(p.customer_id, projectId)
+          .first<{ created_at: string }>();
+        const verdict = commissionFor(await getRates(env.DB), {
+          kind: (p.kind as ProjectKind) || "build",
+          priceInr: Number(p.price_inr) || 0,
+          costInr: Number(p.cost_inr) || 0,
+          paymentInr: amount,
+          firstProjectAt: first?.created_at ?? null,
+          projectAt: p.created_at,
+        });
+        commission = verdict;
+        if (verdict.eligible && verdict.amountInr > 0) {
+          const period = new Date().toISOString().slice(0, 7);
+          await env.DB.prepare(
+            `INSERT INTO commissions
+               (affiliate_code, lead_id, project_id, customer_ref, period_month, rate, basis_inr, amount_inr, note, status, created_at)
+             VALUES (?,?,?,?,?,?,?,?,?,'pending',datetime('now'))`
+          )
+            .bind(p.ref_code, null, projectId, `customer-${p.customer_id}`, period, verdict.rate, amount, verdict.amountInr, note || null)
+            .run();
+        }
+      }
+      return Response.json({ ok: true, paidInr: (Number(p.paid_inr) || 0) + amount, commission });
+    }
+
     return Response.json({ ok: false, error: "unknown_action" }, { status: 400 });
   } catch (e) {
     console.log("admin projects failed:", String(e).slice(0, 300));
     return Response.json({ ok: false, error: "server" }, { status: 500 });
   }
 };
+
+/**
+ * The partner who introduced this customer, if any — read from the lead they
+ * originally arrived as, matched on the last ten digits of the phone.
+ */
+async function partnerForCustomer(db: D1Database, customerId: number): Promise<string> {
+  const c = await db.prepare("SELECT phone FROM customers WHERE id = ?").bind(customerId).first<{ phone: string }>();
+  const last10 = String(c?.phone || "").replace(/\D/g, "").slice(-10);
+  if (last10.length < 10) return "";
+  const l = await db
+    .prepare(`SELECT ref_code FROM leads WHERE ref_code IS NOT NULL AND ref_code <> '' AND phone LIKE ? ORDER BY id DESC LIMIT 1`)
+    .bind(`%${last10}`)
+    .first<{ ref_code: string }>();
+  return l?.ref_code || "";
+}
 
 async function logEvent(
   db: D1Database,

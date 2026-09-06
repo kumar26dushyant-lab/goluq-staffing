@@ -1018,8 +1018,19 @@ function LeadCommission({ lead, onDone }: { lead: any; onDone: () => void }) {
 
 function Affiliates() {
   const [rows, setRows] = useState<any[]>([]);
-  useEffect(() => { adminGet("/api/admin/affiliates").then((d) => setRows(d.affiliates || [])); }, []);
+  const [ledger, setLedger] = useState<any[]>([]);
+  const load = useCallback(() => {
+    adminGet("/api/admin/affiliates").then((d) => setRows(d.affiliates || []));
+    adminGet("/api/admin/commission").then((d) => setLedger(d.commissions || []));
+  }, []);
+  useEffect(() => { load(); }, [load]);
+  const setStatus = async (id: number, status: string) => {
+    const r = await adminPost("/api/admin/commission", { action: "status", id, status });
+    if (r.ok) load();
+  };
+  const inr = (n: unknown) => `₹${Math.round(Number(n) || 0).toLocaleString("en-IN")}`;
   return (
+    <div className="space-y-5">
     <div className="overflow-x-auto rounded-2xl glass">
       <table className="w-full min-w-[680px] text-left text-sm">
         <thead className="text-faint"><tr className="border-b border-hairline/15">
@@ -1040,6 +1051,37 @@ function Affiliates() {
           {rows.length === 0 && <tr><td colSpan={7} className="p-6 text-center text-muted">No affiliates yet.</td></tr>}
         </tbody>
       </table>
+    </div>
+
+    {/* Commission is booked in Projects → Record payment; this is where it is
+        reviewed and marked paid. "Approved" is the owner's check; "Paid" is
+        the UPI transfer having gone out. */}
+    <div className="overflow-x-auto rounded-2xl glass">
+      <p className="border-b border-hairline/10 p-4 font-display text-base font-bold text-fg">Commission ledger</p>
+      <table className="w-full min-w-[760px] text-left text-sm">
+        <thead className="text-faint"><tr className="border-b border-hairline/15">
+          {["Date", "Partner", "Project", "Payment", "Rate", "Commission", "Status", ""].map((h) => <th key={h} className="p-3 font-semibold">{h}</th>)}
+        </tr></thead>
+        <tbody>
+          {ledger.map((c) => (
+            <tr key={c.id} className="border-b border-hairline/8">
+              <td className="p-3 font-mono text-xs text-muted">{String(c.created_at).slice(0, 10)}</td>
+              <td className="p-3"><span className="font-mono text-brand-luq">{c.affiliate_code}</span>{c.partner ? <span className="ml-2 text-muted">{c.partner}</span> : null}{c.upi_id ? <span className="block text-xs text-faint">{c.upi_id}</span> : null}</td>
+              <td className="p-3 text-fg">{c.project || c.customer || "—"}</td>
+              <td className="p-3 text-muted">{c.basis_inr ? inr(c.basis_inr) : "—"}</td>
+              <td className="p-3 text-muted">{Math.round((c.rate || 0) * 100)}% of profit</td>
+              <td className="p-3 font-semibold text-fg">{inr(c.amount_inr)}</td>
+              <td className="p-3 text-muted">{c.status}</td>
+              <td className="p-3 whitespace-nowrap">
+                {c.status === "pending" && <button type="button" onClick={() => setStatus(c.id, "approved")} className="font-semibold text-brand-luq hover:underline">Approve</button>}
+                {c.status === "approved" && <button type="button" onClick={() => setStatus(c.id, "paid")} className="font-semibold text-success hover:underline">Mark paid</button>}
+              </td>
+            </tr>
+          ))}
+          {ledger.length === 0 && <tr><td colSpan={8} className="p-6 text-center text-muted">Nothing booked yet. Commission appears here when you record a payment on a project that has a partner code.</td></tr>}
+        </tbody>
+      </table>
+    </div>
     </div>
   );
 }
@@ -1116,7 +1158,103 @@ function SettingsPanel() {
       </div>
 
       <WhatsAppBusiness />
+      <TelegramCockpit />
       <AffiliateRates />
+    </div>
+  );
+}
+
+/**
+ * The cockpit on the owner's phone. One bot, paired to one chat by a short
+ * code, so a stranger who finds the bot gets nothing. The token is written
+ * here and never read back.
+ */
+function TelegramCockpit() {
+  const [token, setToken] = useState("");
+  const [st, setSt] = useState<any>(null);
+  const [pair, setPair] = useState<any>(null);
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState("");
+
+  const refresh = useCallback(() => adminGet("/api/admin/tg-check").then(setSt).catch(() => {}), []);
+  useEffect(() => { refresh(); }, [refresh]);
+
+  const saveToken = async () => {
+    if (!token.trim()) return;
+    setBusy(true); setMsg("");
+    const d = await adminPost("/api/admin/settings", { tg_bot_token: token.trim() });
+    setMsg(d.ok ? "Token saved. Now press Connect." : "Failed to save.");
+    setToken("");
+    setBusy(false);
+    refresh();
+  };
+  const connect = async () => {
+    setBusy(true); setMsg(""); setPair(null);
+    const d = await adminPost("/api/admin/tg-check", { action: "connect" });
+    if (d.ok) setPair(d); else setMsg(d.error || "Failed.");
+    setBusy(false);
+    refresh();
+  };
+  const test = async () => {
+    setBusy(true); setMsg("");
+    const d = await adminPost("/api/admin/tg-check", { action: "test" });
+    setMsg(d.ok ? "Sent — check your Telegram." : d.error || "Failed.");
+    setBusy(false);
+  };
+  const unpair = async () => {
+    if (!confirm("Forget the paired chat? Alerts stop until you pair again.")) return;
+    await adminPost("/api/admin/tg-check", { action: "unpair" });
+    setPair(null); refresh();
+  };
+
+  return (
+    <div className="glass space-y-4 rounded-2xl p-6">
+      <div>
+        <h3 className="font-display text-lg font-bold text-fg">Telegram cockpit</h3>
+        <p className="mt-1 text-sm text-muted">
+          Every enquiry, every WhatsApp message and every website chat lands in your Telegram the
+          moment it happens — with the guide's answer, and buttons to take over. Reply to an alert on
+          your phone and the reply goes to that customer.
+        </p>
+      </div>
+
+      <ol className="space-y-1 text-sm text-muted">
+        <li>1. In Telegram open <b className="text-fg">@BotFather</b> → <code className="font-mono">/newbot</code> → name it (e.g. GoLuQ Cockpit) → copy the token.</li>
+        <li>2. Paste the token below and save. 3. Press Connect and open the link it gives you. Done.</li>
+      </ol>
+
+      <div className="flex flex-wrap items-end gap-2">
+        <label className="block min-w-[240px] flex-1">
+          <span className="mb-1 block text-sm font-semibold text-fg">Bot token {st?.configured && <span className="ml-1 text-xs font-normal text-success">· set{st.tokenValid ? ", valid" : st.tokenError ? ` — ${st.tokenError}` : ""}</span>}</span>
+          <input className={inputClass} type="password" value={token} onChange={(e) => setToken(e.target.value)}
+            placeholder={st?.configured ? "Paste a new token to replace" : "123456789:AAH…"} autoComplete="off" />
+        </label>
+        <Button onClick={saveToken} disabled={busy || !token.trim()}><ShieldCheck size={16} /> Save token</Button>
+      </div>
+
+      {st?.configured && (
+        <div className="space-y-3 rounded-xl border border-hairline/12 bg-panel/30 p-4 text-sm">
+          <p className="text-muted">
+            Bot: <span className="font-mono text-fg">{st.username ? `@${st.username}` : "—"}</span>
+            {" · "}Webhook: <span className={st.webhookOk ? "text-success" : "text-warn"}>{st.webhookOk ? "registered" : "not registered"}</span>
+            {st.webhookError ? <span className="block text-xs text-warn">Last error from Telegram: {st.webhookError}</span> : null}
+            {" · "}Paired: <span className={st.paired ? "text-success" : "text-warn"}>{st.paired ? `yes (chat ${st.chatId})` : "not yet"}</span>
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Button onClick={connect} disabled={busy}><MessageSquare size={16} /> {st.paired ? "Reconnect / re-pair" : "Connect"}</Button>
+            {st.paired && <Button onClick={test} disabled={busy}>Send test</Button>}
+            {st.paired && <button type="button" onClick={unpair} className="text-sm font-semibold text-muted hover:text-fg">Unpair</button>}
+          </div>
+          {pair && (
+            <div className="rounded-lg border border-teal-glow/35 bg-teal-glow/[0.08] p-3">
+              <p className="font-semibold text-fg">Open this on your phone and press Start:</p>
+              <a href={pair.deepLink} target="_blank" rel="noreferrer" className="break-all font-mono text-brand-luq underline">{pair.deepLink}</a>
+              <p className="mt-1 text-xs text-muted">Or send the bot the code <span className="font-mono text-fg">{pair.pairCode}</span>. Valid for {pair.expiresInMin} minutes. Then press "Send test" here.</p>
+            </div>
+          )}
+        </div>
+      )}
+      {msg && <p className="text-sm text-muted">{msg}</p>}
     </div>
   );
 }
@@ -1438,15 +1576,16 @@ function WhatsAppCheck() {
  * money earned from here on.
  */
 function AffiliateRates() {
-  const [r, setR] = useState({ year1: 25, lifetime: 12, minPayoutInr: 500, attributionDays: 90 });
+  const [r, setR] = useState({ rate: 20, enhancementMonths: 24, typicalMargin: 40, minPayoutInr: 500, attributionDays: 90 });
   const [saved, setSaved] = useState("");
 
   useEffect(() => {
     fetch("/api/config").then((x) => x.json()).then((d) => {
       if (d?.affiliate) {
         setR({
-          year1: Math.round(d.affiliate.year1 * 100),
-          lifetime: Math.round(d.affiliate.lifetime * 100),
+          rate: Math.round((d.affiliate.rate ?? 0.2) * 100),
+          enhancementMonths: d.affiliate.enhancementMonths ?? 24,
+          typicalMargin: Math.round((d.affiliate.typicalMargin ?? 0.4) * 100),
           minPayoutInr: d.affiliate.minPayoutInr,
           attributionDays: d.affiliate.attributionDays,
         });
@@ -1457,8 +1596,9 @@ function AffiliateRates() {
   const save = async () => {
     setSaved("");
     const d = await adminPost("/api/admin/settings", {
-      aff_rate_year1: r.year1 / 100,
-      aff_rate_lifetime: r.lifetime / 100,
+      aff_rate: r.rate / 100,
+      aff_enh_months: r.enhancementMonths,
+      aff_typical_margin: r.typicalMargin / 100,
       aff_min_payout: r.minPayoutInr,
       aff_attribution_days: r.attributionDays,
     });
@@ -1481,13 +1621,17 @@ function AffiliateRates() {
       <div>
         <h2 className="font-display text-lg font-bold text-fg">Partner commission</h2>
         <p className="mt-1 text-sm text-muted">
-          Drives the partner page, the earnings calculator and every future accrual.
+          A partner earns a share of your <b>profit</b> on each project they introduced — price minus
+          your cost to deliver — booked when you record a payment in Projects. Enhancements that
+          customer orders within the window earn the same; maintenance never does. The typical margin
+          is only what the public calculator assumes; real commission uses the real cost you enter.
           Existing commission rows keep the rate they were created at.
         </p>
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
-        {F("First year", "year1", "% per month")}
-        {F("After year one", "lifetime", "% per month")}
+        {F("Share of profit", "rate", "%")}
+        {F("Enhancement window", "enhancementMonths", "months")}
+        {F("Typical margin (calculator only)", "typicalMargin", "%")}
         {F("Minimum payout", "minPayoutInr", "₹")}
         {F("Attribution window", "attributionDays", "days")}
       </div>

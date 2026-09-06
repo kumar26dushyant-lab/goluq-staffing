@@ -344,3 +344,16 @@ CREATE TABLE IF NOT EXISTS testimonials (
   live INTEGER NOT NULL DEFAULT 0,
   created_at TEXT NOT NULL
 );
+
+-- ── Telegram cockpit ────────────────────────────────────────────────────────
+-- Every alert sent to the owner's Telegram is remembered by its message id, so
+-- that a reply to it on the phone can be routed back to the right customer.
+CREATE TABLE IF NOT EXISTS tg_outbox (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  message_id INTEGER NOT NULL,
+  chat_id TEXT NOT NULL,
+  kind TEXT NOT NULL,                  -- chat | lead
+  ref TEXT NOT NULL,                   -- chat session id, or lead id
+  created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_tg_outbox_msg ON tg_outbox(message_id);

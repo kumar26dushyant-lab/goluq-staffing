@@ -146,6 +146,33 @@ converts. A Dubai reference does more for Indian trust than an Indian one.
 
 ## 4. What is built and live
 
+### Telegram cockpit (2026-09-06)
+The answer to "how do I know a customer is waiting". One bot, paired to the
+owner's chat by a 6-digit code minted in the cockpit (15-minute life); anyone
+else who finds the bot is ignored. Every new enquiry, every inbound WhatsApp
+message (with the guide's reply) and the first message of every website chat
+arrive on the phone. **Replying to an alert replies to that customer** — the
+same code path as the cockpit's Live chat, so the transcript shows it and the
+guide steps aside for 30 minutes. Buttons: leads get Book / Park (7 days) /
+Drop; conversations get Guide off / Guide on / Close. Commands: /leads,
+/waiting, /help; reply `/off` `/on` `/close` act on that thread. Webhook is
+`/api/tg/webhook`, verified by Telegram's secret-token header. Token is
+write-only in the cockpit or `TELEGRAM_BOT_TOKEN` in the env.
+
+### Partner commission — profit share (2026-09-06)
+Decided: a partner earns **X% of GoLuQ's profit** on a project they introduced
+(price − cost to deliver), not X% of the price. The commission comes out of the
+margin; the customer's price is the same with or without a partner. Booked ONLY
+when a payment is recorded on the project (Projects → Money → Record payment),
+proportionally — instalments add up to exactly rate × profit once fully paid.
+Enhancements for that customer within `aff_enh_months` (default 24) earn the
+same; maintenance never does. The public calculator cannot know a real cost, so
+it shows an estimate at `aff_typical_margin` (default 40%) and says so. Ledger
+with Approve → Mark paid lives in the Affiliates tab. Settings: `aff_rate`,
+`aff_enh_months`, `aff_typical_margin`, `aff_min_payout`,
+`aff_attribution_days`; the old `year1`/`lifetime` pair and the hardcoded-35%
+`/api/affiliate/convert` are gone.
+
 **Site** — Vite + React 18 + TypeScript + Tailwind (CSS-variable tokens) +
 Framer Motion + i18next (EN/HI) + Three.js background. Deployed on a Contabo VM
 (`/opt/goluq`, systemd `goluq`, nginx → 127.0.0.1:8090, `bash deploy/update.sh`).
@@ -251,25 +278,29 @@ Kept in priority order. Done items stay for a while so the history is visible.
       the number instead of a name.
 
 ### Next
-- [ ] **Booking link** — Google Calendar appointment schedule or Calendly. A
-      $2,900 sale is not made from a chat widget.
+- [ ] **Booking link** — the setting exists (cockpit → Settings). Needs a Google
+      Calendar **appointment schedule** URL (Create → Appointment schedule → Open
+      booking page), NOT the calendar settings page, which is behind a login.
 - [ ] **Monthly ROI report** in the managed plan.
 - [ ] **Store engine** for the Dubai client: catalogue sync, segmented media
       broadcast with throttling and opt-out, native order webhook → Telegram
       approve/hold, Telegram channel for CIS customers.
-- [ ] **Affiliate model revamp.** The copy and calculator are now project-based
-      (see the correction below), but the stored rates are still `year1` /
-      `lifetime` and the commission ledger still assumes a monthly accrual.
-      Needs: a single project-commission rate, an enhancement window (how long
-      after delivery a customer's new work still earns the partner), and payout
-      triggered on customer payment rather than on order.
-- [ ] **Avatar video vendor** — HeyGen under evaluation by the founder. Once
-      chosen and an API key exists: a Video tab in the cockpit that turns a
-      brief into a script and the script into a finished MP4 with the founder's
-      avatar. Roughly a day's work; blocked only on the vendor decision.
-- [ ] **Telegram cockpit bot** — the answer to "how do I know a customer is
-      waiting". WhatsApp cannot notify the owner unprompted outside 24 hours;
-      Telegram can, free and instantly, with buttons to reply from the phone.
+- [ ] **Store engine** is parked until the founder has understood the Dubai
+      client's use case in detail (customer count, countries, broadcast
+      frequency). TikTok is part of his marketing and cannot be built or tested
+      from India; all testing would depend on him, and he has little time.
+- [ ] **Avatar video vendor** — HeyGen, decision 2026-09-06: start on the FREE
+      tier (3 videos/month, 1 min, watermarked) purely to test whether the
+      founder's avatar and voice convince in Hindi/Hinglish. Nothing watermarked
+      goes out under the brand. If convinced → Creator (~$288/yr) for watermark
+      removal and voice cloning, which matters more than resolution. No Video
+      tab until then — the API is priced separately from the web plans. For
+      clients this is a SERVICE, not a feature: "your own avatar explaining your
+      product, one promo video a month" as a Managed-plan add-on, built after the
+      first client asks. Founder still shoots one real 60-second intro himself.
+- [ ] **Telegram: pair the bot.** Code is live (see §4); the founder creates the
+      bot with @BotFather, pastes the token in cockpit → Settings → Telegram,
+      presses Connect and opens the link. Until then alerts are email-only.
 - [ ] Confirm real comms costs, then correct the prices in the cockpit.
 - [ ] **Give the VM a way to pull from GitHub.** It has no credentials at all and
       has been pulling anonymously; GitHub now refuses ("expected flush after ref
@@ -315,6 +346,9 @@ stated rather than omitted, because a partner who discovers an exclusion after
 the fact stops believing every other term.
 
 ### Done
+- [x] Telegram cockpit bot — alerts, reply-from-phone, lead and chat buttons (§4)
+- [x] Affiliate model rebuilt as a profit share booked on payment; ledger UI (§4)
+- [x] Cockpit and Telegram replies share one code path (`lib/agentReply.ts`)
 - [x] Productised offers in the catalogue with explicit international prices;
       site, chat and WhatsApp move together on one cockpit edit
 - [x] Product pages /whatsapp-office and /whatsapp-store, live-priced, with a

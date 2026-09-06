@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { motion, useSpring, useReducedMotion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { useSiteConfig, usePricing, useMoney } from "../../lib/siteConfig";
-import { RATE_YEAR1 } from "../../content/affiliateConfig";
+import { RATE, TYPICAL_MARGIN } from "../../content/affiliateConfig";
 import { formatINR } from "../../lib/format";
 
 function AnimatedINR({ value }: { value: number }) {
@@ -38,9 +38,14 @@ export function EarningsCalculator() {
   const { t } = useTranslation();
   const [n, setN] = useState(4);
 
-  // Live rate, so a cockpit change reaches this without a deploy.
+  // Live terms, so a cockpit change reaches this without a deploy. The share is
+  // of GoLuQ's PROFIT on the project, which the public page cannot know — so
+  // the figure shown is an estimate at the margin the owner says is typical,
+  // and the caveat below says so in as many words.
   const cfg = useSiteConfig();
-  const rate = cfg?.affiliate?.year1 ?? RATE_YEAR1;
+  const rate = cfg?.affiliate?.rate ?? RATE;
+  const margin = cfg?.affiliate?.typicalMargin ?? TYPICAL_MARGIN;
+  const months = cfg?.affiliate?.enhancementMonths ?? 24;
 
   // One-off builds only — nobody refers a toll-free number for commission, and
   // a monthly plan is not what this model pays on.
@@ -49,7 +54,7 @@ export function EarningsCalculator() {
   const project = projects.find((p) => p.id === projectId) ?? projects[0];
   const price = project?.from ?? 0;
 
-  const perProject = price * rate;
+  const perProject = price * margin * rate;
   const perYear = perProject * n;
 
   const cards = [
@@ -117,7 +122,9 @@ export function EarningsCalculator() {
         ))}
       </div>
 
-      <p className="mt-4 text-xs text-faint">{t("partner.calc.caveat")}</p>
+      <p className="mt-4 text-xs text-faint">
+        {t("partner.calc.caveat", { rate: Math.round(rate * 100), margin: Math.round(margin * 100), months })}
+      </p>
     </div>
   );
 }

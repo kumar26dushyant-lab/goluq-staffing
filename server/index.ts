@@ -16,7 +16,6 @@ import { onRequestPost as affTrack } from "../functions/api/affiliate/track";
 import { onRequestGet as affStats } from "../functions/api/affiliate/stats";
 import { onRequestPost as affAuth } from "../functions/api/affiliate/auth";
 import { onRequestGet as adminCommissionGet, onRequestPost as adminCommissionPost } from "../functions/api/admin/commission";
-import { onRequestPost as affConvert } from "../functions/api/affiliate/convert";
 import { onRequestGet as adminLeads } from "../functions/api/admin/leads";
 import { onRequestGet as adminStats } from "../functions/api/admin/stats";
 import { onRequestPost as adminLead } from "../functions/api/admin/lead";
@@ -31,6 +30,8 @@ import { onRequestGet as adminCampaignsGet, onRequestPost as adminCampaignsPost 
 import { onRequestPost as adminMarketing } from "../functions/api/admin/marketing";
 import { onRequestGet as adminTestimonialsGet, onRequestPost as adminTestimonialsPost } from "../functions/api/admin/testimonials";
 import { onRequestGet as publicTestimonials } from "../functions/api/testimonials";
+import { onRequestPost as tgWebhook } from "../functions/api/tg/webhook";
+import { onRequestGet as tgCheckGet, onRequestPost as tgCheckPost } from "../functions/api/admin/tg-check";
 import { checkAdmin } from "../functions/lib/admin";
 import { writeFileSync, existsSync, statSync, createReadStream } from "node:fs";
 import { extname, basename } from "node:path";
@@ -79,6 +80,14 @@ for (const sql of [
   // Productised offers carry an explicit USD price; the INR × multiplier band
   // gives ~$4,500 for ₹1L, and the agreed international price is $2,900.
   `ALTER TABLE pricing ADD COLUMN price_intl_usd INTEGER`,
+  // Profit-based partner commission: a project knows what it cost, which kind
+  // of work it is, and which partner introduced the customer.
+  `ALTER TABLE projects ADD COLUMN kind TEXT DEFAULT 'build'`,
+  `ALTER TABLE projects ADD COLUMN cost_inr INTEGER DEFAULT 0`,
+  `ALTER TABLE projects ADD COLUMN ref_code TEXT`,
+  `ALTER TABLE commissions ADD COLUMN project_id INTEGER`,
+  `ALTER TABLE commissions ADD COLUMN basis_inr REAL`,
+  `ALTER TABLE commissions ADD COLUMN note TEXT`,
 ]) {
   try {
     sqlite.exec(sql);
@@ -97,6 +106,7 @@ const env = {
   GEMINI_API_KEY: process.env.GEMINI_API_KEY,
   GEMINI_MODEL: process.env.GEMINI_MODEL,
   ADMIN_SECRET: process.env.ADMIN_SECRET || "",
+  TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN,
   INBOUND_SECRET: process.env.INBOUND_SECRET,
   MAIL_API_KEY: process.env.MAIL_API_KEY,
   MAIL_FROM: process.env.MAIL_FROM,
@@ -208,7 +218,7 @@ app.use("/api/*", async (c, next) => {
   const write = c.req.method === "POST";
   if (write && (path === "/api/lead" || path === "/api/assistant" || path === "/api/affiliate/register" || path === "/api/affiliate/auth" || path === "/api/customer/auth")) max = 15;
   else if (path === "/api/chat") max = 240;
-  else if (path.startsWith("/api/admin/") || path.startsWith("/api/wa/")) max = 300;
+  else if (path.startsWith("/api/admin/") || path.startsWith("/api/wa/") || path.startsWith("/api/tg/")) max = 300;
   if (rateLimited(ip, path, max, 60_000)) {
     return c.json({ ok: false, error: "rate_limited" }, 429);
   }
@@ -227,7 +237,6 @@ app.get("/api/affiliate/stats", (c) => callFn(affStats as Handler, c.req.raw));
 app.post("/api/affiliate/auth", (c) => callFn(affAuth as Handler, c.req.raw));
 app.get("/api/admin/commission", (c) => callFn(adminCommissionGet as Handler, c.req.raw));
 app.post("/api/admin/commission", (c) => callFn(adminCommissionPost as Handler, c.req.raw));
-app.post("/api/affiliate/convert", (c) => callFn(affConvert as Handler, c.req.raw));
 app.get("/api/admin/wa-check", (c) => callFn(waCheckGet as Handler, c.req.raw));
 app.post("/api/admin/wa-check", (c) => callFn(waCheckPost as Handler, c.req.raw));
 app.get("/api/admin/projects", (c) => callFn(adminProjectsGet as Handler, c.req.raw));
@@ -238,6 +247,9 @@ app.post("/api/admin/marketing", (c) => callFn(adminMarketing as Handler, c.req.
 app.get("/api/admin/testimonials", (c) => callFn(adminTestimonialsGet as Handler, c.req.raw));
 app.post("/api/admin/testimonials", (c) => callFn(adminTestimonialsPost as Handler, c.req.raw));
 app.get("/api/testimonials", (c) => callFn(publicTestimonials as Handler, c.req.raw));
+app.post("/api/tg/webhook", (c) => callFn(tgWebhook as Handler, c.req.raw));
+app.get("/api/admin/tg-check", (c) => callFn(tgCheckGet as Handler, c.req.raw));
+app.post("/api/admin/tg-check", (c) => callFn(tgCheckPost as Handler, c.req.raw));
 
 // ── Uploads ──────────────────────────────────────────────────────────────────
 // Native to this server on purpose: the portable handlers cannot touch a disk.

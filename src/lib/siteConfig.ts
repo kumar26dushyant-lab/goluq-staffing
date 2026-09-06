@@ -41,8 +41,12 @@ const INR_MARKET: MarketInfo = { country: "IN", currency: "INR", locale: "en-IN"
 const VOICE_LITE_INR = 4999;
 
 export interface AffiliateRates {
-  year1: number;
-  lifetime: number;
+  /** Partner's share of GoLuQ's profit on a project they introduced, 0–1. */
+  rate: number;
+  /** Months after the first project during which enhancements still earn. */
+  enhancementMonths: number;
+  /** Margin the public calculator assumes — it cannot know a real cost. */
+  typicalMargin: number;
   minPayoutInr: number;
   attributionDays: number;
 }

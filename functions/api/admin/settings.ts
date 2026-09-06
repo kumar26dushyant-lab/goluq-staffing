@@ -31,13 +31,17 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     wa_waba_id: (await getSetting(env.DB, "wa_waba_id")) ?? "",
     wa_access_token_set: Boolean(await getSetting(env.DB, "wa_access_token")),
     wa_app_secret_set: Boolean(await getSetting(env.DB, "wa_app_secret")),
+    // Telegram cockpit bot. Token is write-only, like the WhatsApp secrets.
+    tg_bot_token_set: Boolean(await getSetting(env.DB, "tg_bot_token")),
+    tg_owner_chat_id: (await getSetting(env.DB, "tg_owner_chat_id")) ?? "",
+    tg_bot_username: (await getSetting(env.DB, "tg_bot_username")) ?? "",
   });
 };
 
 export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   if (!(await checkAdmin(request, env))) return unauthorized();
   try {
-    const b = await request.json<{ owner_whatsapp?: string; public_whatsapp?: string; followups_enabled?: boolean | string; bot_instructions?: string; chat_enabled?: boolean | string; announcement?: string; aff_rate_year1?: number; aff_rate_lifetime?: number; aff_min_payout?: number; aff_attribution_days?: number; owner_email?: string; booking_url?: string; wa_phone_number_id?: string; wa_waba_id?: string; wa_verify_token?: string; wa_access_token?: string; wa_app_secret?: string }>();
+    const b = await request.json<{ owner_whatsapp?: string; public_whatsapp?: string; followups_enabled?: boolean | string; bot_instructions?: string; chat_enabled?: boolean | string; announcement?: string; aff_rate?: number; aff_enh_months?: number; aff_typical_margin?: number; aff_min_payout?: number; aff_attribution_days?: number; owner_email?: string; booking_url?: string; wa_phone_number_id?: string; wa_waba_id?: string; wa_verify_token?: string; wa_access_token?: string; wa_app_secret?: string; tg_bot_token?: string }>();
     if (typeof b.owner_whatsapp === "string") {
       await setSetting(env.DB, "owner_whatsapp", b.owner_whatsapp.replace(/\D/g, ""));
     }
@@ -59,8 +63,9 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
     }
     // Partner commission terms live alongside the other runtime settings.
     await saveRates(env.DB, {
-      year1: b.aff_rate_year1 !== undefined ? Number(b.aff_rate_year1) : undefined,
-      lifetime: b.aff_rate_lifetime !== undefined ? Number(b.aff_rate_lifetime) : undefined,
+      rate: b.aff_rate !== undefined ? Number(b.aff_rate) : undefined,
+      enhancementMonths: b.aff_enh_months !== undefined ? Number(b.aff_enh_months) : undefined,
+      typicalMargin: b.aff_typical_margin !== undefined ? Number(b.aff_typical_margin) : undefined,
       minPayoutInr: b.aff_min_payout !== undefined ? Number(b.aff_min_payout) : undefined,
       attributionDays: b.aff_attribution_days !== undefined ? Number(b.aff_attribution_days) : undefined,
     });
@@ -88,6 +93,12 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
     }
     if (b.wa_app_secret) {
       await setSetting(env.DB, "wa_app_secret", b.wa_app_secret.trim());
+    }
+    if (b.tg_bot_token) {
+      // A new bot means a new identity: forget the old username so the next
+      // Connect re-reads it, but keep the pairing — it is the owner's chat either way.
+      await setSetting(env.DB, "tg_bot_token", b.tg_bot_token.trim());
+      await setSetting(env.DB, "tg_bot_username", "");
     }
     if (b.chat_enabled !== undefined) {
       const on = b.chat_enabled === true || b.chat_enabled === "1";

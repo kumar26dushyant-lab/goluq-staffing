@@ -1,7 +1,6 @@
 /// <reference types="@cloudflare/workers-types" />
 
 import { checkAdmin } from "../../lib/admin";
-import { getRates, rateForMonth } from "../../lib/affiliateRates";
 
 interface Env {
   DB: D1Database;
@@ -9,40 +8,31 @@ interface Env {
 }
 
 /**
- * Commission accrual — the step that was missing entirely.
+ * The commission ledger, and moving rows through it.
  *
- * The old /api/affiliate/convert forward-booked N months of commission the
- * moment a customer converted, which books money that has not been earned and
- * cannot be undone if they cancel in month two. This accrues **one month per
- * recorded payment** instead, which is what actually happened.
+ * Accrual itself happens in api/admin/projects.ts when a payment is recorded
+ * against a project — commission is a consequence of money arriving, so it is
+ * booked at the moment the owner records that money, never forward-booked.
  *
- * There is no payment gateway yet, so the owner records payments from the
- * cockpit. When one is added later, it calls this same endpoint per invoice and
- * nothing else changes.
- *
- *   POST { action: "convert", leadId, planId, planPriceInr }  → mark converted
- *   POST { action: "accrue",  leadId, period }                → one month's commission
- *   POST { action: "status",  id, status }                    → pending|approved|paid
- *   GET  ?code=<affiliate>                                    → ledger for one partner
+ *   GET  ?code=<affiliate>                    → ledger (all partners when omitted)
+ *   POST { action: "status",  id, status }    → pending | approved | paid
+ *   POST { action: "convert", leadId }        → mark a lead as a paying customer
  */
 export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
   if (!(await checkAdmin(request, env))) {
     return Response.json({ ok: false, error: "unauthorized" }, { status: 401 });
   }
   const code = new URL(request.url).searchParams.get("code");
-  const rows = code
-    ? await env.DB.prepare(
-        `SELECT c.*, l.name AS lead_name FROM commissions c
-           LEFT JOIN leads l ON l.id = c.lead_id
-          WHERE c.affiliate_code = ? ORDER BY c.id DESC LIMIT 200`
-      )
-        .bind(code)
-        .all()
-    : await env.DB.prepare(
-        `SELECT c.*, l.name AS lead_name FROM commissions c
-           LEFT JOIN leads l ON l.id = c.lead_id
-          ORDER BY c.id DESC LIMIT 200`
-      ).all();
+  const sql = `SELECT c.*, COALESCE(cu.name, l.name) AS customer, p.title AS project, a.name AS partner, a.upi_id
+                 FROM commissions c
+                 LEFT JOIN leads l ON l.id = c.lead_id
+                 LEFT JOIN projects p ON p.id = c.project_id
+                 LEFT JOIN customers cu ON cu.id = p.customer_id
+                 LEFT JOIN affiliates a ON a.code = c.affiliate_code
+                ${code ? "WHERE c.affiliate_code = ?" : ""}
+                ORDER BY c.id DESC LIMIT 200`;
+  const stmt = env.DB.prepare(sql);
+  const rows = code ? await stmt.bind(code).all() : await stmt.all();
   return Response.json({ ok: true, commissions: rows.results ?? [] });
 };
 
@@ -54,80 +44,22 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
     const b = await request.json<Record<string, unknown>>();
     const action = String(b.action ?? "");
 
-    // ── Mark a lead as a paying customer ───────────────────────────────
     if (action === "convert") {
       const leadId = Number(b.leadId);
-      const planId = String(b.planId ?? "");
-      const price = Number(b.planPriceInr);
-      if (!leadId || !price) {
-        return Response.json({ ok: false, error: "leadId and planPriceInr required" }, { status: 400 });
-      }
+      if (!leadId) return Response.json({ ok: false, error: "leadId required" }, { status: 400 });
       await env.DB.prepare(
         `UPDATE leads
-            SET status = 'converted',
-                converted_at = COALESCE(converted_at, datetime('now')),
-                plan_id = ?, plan_price_inr = ?
+            SET status = 'converted', next_followup_at = NULL,
+                converted_at = COALESCE(converted_at, datetime('now'))
           WHERE id = ?`
       )
-        .bind(planId || null, price, leadId)
+        .bind(leadId)
         .run();
       return Response.json({ ok: true });
     }
 
-    // ── Record one month's payment → one commission row ────────────────
-    if (action === "accrue") {
-      const leadId = Number(b.leadId);
-      const period = String(b.period ?? ""); // YYYY-MM
-      if (!leadId || !/^\d{4}-\d{2}$/.test(period)) {
-        return Response.json({ ok: false, error: "leadId and period (YYYY-MM) required" }, { status: 400 });
-      }
-
-      const lead = await env.DB.prepare(
-        `SELECT id, ref_code, converted_at, plan_price_inr FROM leads WHERE id = ?`
-      )
-        .bind(leadId)
-        .first<{ id: number; ref_code: string | null; converted_at: string | null; plan_price_inr: number | null }>();
-
-      if (!lead) return Response.json({ ok: false, error: "lead not found" }, { status: 404 });
-      if (!lead.ref_code) {
-        return Response.json(
-          { ok: false, error: "This customer wasn't referred by a partner — no commission is due." },
-          { status: 400 }
-        );
-      }
-      if (!lead.plan_price_inr) {
-        return Response.json(
-          { ok: false, error: "Mark the customer converted with a plan price first." },
-          { status: 400 }
-        );
-      }
-
-      // Idempotent: recording the same month twice must not pay twice.
-      const dupe = await env.DB.prepare(
-        `SELECT 1 AS x FROM commissions WHERE lead_id = ? AND period_month = ?`
-      )
-        .bind(leadId, period)
-        .first<{ x: number }>();
-      if (dupe) {
-        return Response.json({ ok: false, error: `${period} is already recorded for this customer.` }, { status: 409 });
-      }
-
-      const rates = await getRates(env.DB);
-      const rate = rateForMonth(rates, lead.converted_at, period);
-      const amount = Math.round(rate * lead.plan_price_inr);
-
-      await env.DB.prepare(
-        `INSERT INTO commissions
-           (affiliate_code, lead_id, customer_ref, period_month, rate, amount_inr, status, created_at)
-         VALUES (?,?,?,?,?,?, 'pending', datetime('now'))`
-      )
-        .bind(lead.ref_code, leadId, `lead-${leadId}`, period, rate, amount)
-        .run();
-
-      return Response.json({ ok: true, rate, amount });
-    }
-
-    // ── Move a commission through pending → approved → paid ────────────
+    // pending → approved → paid. Approving is the owner's review; paid is the
+    // UPI transfer having gone out.
     if (action === "status") {
       const id = Number(b.id);
       const status = String(b.status ?? "");

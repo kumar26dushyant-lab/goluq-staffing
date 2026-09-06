@@ -39,7 +39,7 @@ export interface AffiliateStats {
   earnings: { pending: number; approved: number; paid: number };
   referrals: Referral[];
   ledger: LedgerRow[];
-  rates: { year1: number; lifetime: number; minPayoutInr: number; attributionDays: number };
+  rates: { rate: number; enhancementMonths: number; typicalMargin: number; minPayoutInr: number; attributionDays: number };
 }
 
 async function post(body: Record<string, unknown>) {

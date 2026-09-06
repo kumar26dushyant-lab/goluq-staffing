@@ -4,11 +4,12 @@ import { conciergeReply, type ConciergeEnv, type ConciergeMsg } from "../../lib/
 import { classifyReply } from "../../lib/gemini";
 import { sendMail, mailEnabled, type MailEnv } from "../../lib/mailer";
 import { getOwnerEmail } from "../../lib/settings";
+import { tgAlertOwner, tgEscape, type TgButton, type TgEnv } from "../../lib/telegram";
 import {
   waConfig, waReady, waSendText, waMarkRead, waVerifySignature, type WaEnv, type WaConfig,
 } from "../../lib/whatsapp";
 
-interface Env extends ConciergeEnv, WaEnv, MailEnv {
+interface Env extends ConciergeEnv, WaEnv, MailEnv, TgEnv {
   DB: D1Database;
 }
 
@@ -219,6 +220,7 @@ async function handleMessage(env: Env, cfg: WaConfig, m: Inbound): Promise<void>
         ? "ठीक है, अब आपको हमारी ओर से कोई संदेश नहीं आएगा। ज़रूरत हो तो कभी भी लिख दीजिए।"
         : "Done — you won't hear from us again. Message any time if you need us."
     );
+    await tgPush(env, m, sid, { why: "asked to stop — conversation closed", buttons: false });
     return;
   }
 
@@ -226,7 +228,7 @@ async function handleMessage(env: Env, cfg: WaConfig, m: Inbound): Promise<void>
 
   // The owner has switched the guide off for this person, deliberately.
   if (prior?.bot_off) {
-    await notifyOwner(env, m, "message on a thread you are handling");
+    await notifyOwner(env, m, "message on a thread you are handling", { botOff: true });
     return;
   }
 
@@ -260,7 +262,9 @@ async function handleMessage(env: Env, cfg: WaConfig, m: Inbound): Promise<void>
   const wantsHuman = WANTS_HUMAN.test(m.text);
   if (wantsHuman) {
     await db.prepare("UPDATE chat_sessions SET needs_human = 1 WHERE id = ?").bind(sid).run();
-    await notifyOwner(env, m, "asked to speak to a person");
+    // Email now; Telegram once the guide has answered, so the alert carries
+    // both what they said and what they were told.
+    await notifyOwner(env, m, "asked to speak to a person", { telegram: false });
   }
 
   const history = await db
@@ -285,11 +289,14 @@ async function handleMessage(env: Env, cfg: WaConfig, m: Inbound): Promise<void>
         : ""),
   });
 
+  const why = wantsHuman ? "asked to speak to a person" : isNew ? "new WhatsApp conversation" : "";
+
   const sent = await waSendText(cfg, m.from, reply);
   if (!sent.ok) {
     // Almost always the 24-hour window: free-form text is only deliverable
     // within 24h of the customer's last message. Nothing here is retryable.
     console.log("wa reply not delivered:", sent.error);
+    await tgPush(env, m, sid, { why, note: `Guide could not reply: ${sent.error}` });
     return;
   }
 
@@ -301,11 +308,22 @@ async function handleMessage(env: Env, cfg: WaConfig, m: Inbound): Promise<void>
     .bind(sid, reply.slice(0, 2000))
     .run();
 
-  if (isNew) await notifyOwner(env, m, "new WhatsApp conversation");
+  if (isNew && !wantsHuman) await notifyOwner(env, m, "new WhatsApp conversation", { telegram: false });
+  await tgPush(env, m, sid, { why, reply });
 }
 
-/** Tell the owner by email; a WhatsApp lead is worth interrupting someone for. */
-async function notifyOwner(env: Env, m: Inbound, why: string): Promise<void> {
+/**
+ * Tell the owner. Email for the events that were always emailed; Telegram for
+ * the same event unless the caller is about to push a richer Telegram message
+ * itself (the guide's reply is not known yet at the point email goes out).
+ */
+async function notifyOwner(
+  env: Env,
+  m: Inbound,
+  why: string,
+  opts: { telegram?: boolean; botOff?: boolean } = {}
+): Promise<void> {
+  if (opts.telegram !== false) await tgPush(env, m, sessionFor(m.from), { why, botOff: opts.botOff });
   const to = await getOwnerEmail(env.DB);
   if (!to || !mailEnabled(env)) return;
   const sent = await sendMail(env, {
@@ -321,6 +339,38 @@ async function notifyOwner(env: Env, m: Inbound, why: string): Promise<void> {
   // sendMail reports failure in its result rather than throwing — the same shape
   // that has silently swallowed two bugs in this codebase already.
   if (!sent.ok) console.log("wa owner alert not sent:", sent.error);
+}
+
+/**
+ * Every inbound WhatsApp message, on the owner's phone, with what the guide
+ * answered — and buttons to take the thread over or hand it back. Replying to
+ * the Telegram message replies to the customer (see api/tg/webhook.ts).
+ */
+async function tgPush(
+  env: Env,
+  m: Inbound,
+  sid: string,
+  o: { why?: string; reply?: string; note?: string; botOff?: boolean; buttons?: boolean }
+): Promise<void> {
+  const head = `💬 <b>WhatsApp</b> · ${tgEscape(m.name || "Unknown")} · +${tgEscape(m.from)}`;
+  const lines = [head];
+  if (o.why) lines.push(`🔔 ${tgEscape(o.why)}`);
+  lines.push("", `<i>${tgEscape(m.text.slice(0, 1200))}</i>`);
+  if (o.reply) lines.push("", `↩︎ <b>Guide:</b> ${tgEscape(o.reply.slice(0, 1200))}`);
+  if (o.note) lines.push("", `⚠️ ${tgEscape(o.note)}`);
+  lines.push("", "<i>Reply to this message to answer them.</i>");
+
+  const buttons: TgButton[][] | undefined =
+    o.buttons === false
+      ? undefined
+      : [[
+          o.botOff
+            ? { text: "▶️ Guide on", data: `chat:on:${sid}` }
+            : { text: "✋ Guide off", data: `chat:off:${sid}` },
+          { text: "✔️ Close", data: `chat:close:${sid}` },
+          { text: "Open WhatsApp", url: `https://wa.me/${m.from}` },
+        ]];
+  await tgAlertOwner(env.DB, env, lines.join("\n"), { buttons, kind: "chat", ref: sid });
 }
 
 /**

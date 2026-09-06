@@ -105,8 +105,8 @@ export function PartnerDashboard() {
         </div>
         <p className="mt-3 text-xs leading-relaxed text-faint">
           {t("partner.dash.rateNote", {
-            y1: Math.round(stats.rates.year1 * 100),
-            lt: Math.round(stats.rates.lifetime * 100),
+            rate: Math.round(stats.rates.rate * 100),
+            months: stats.rates.enhancementMonths,
             min: inr(stats.rates.minPayoutInr),
           })}
         </p>

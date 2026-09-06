@@ -2,8 +2,9 @@
 
 import { getOwnerEmail } from "../lib/settings";
 import { mailEnabled, sendMail, type MailEnv } from "../lib/mailer";
+import { tgAlertOwner, tgEscape, type TgEnv } from "../lib/telegram";
 
-interface Env extends MailEnv {
+interface Env extends MailEnv, TgEnv {
   DB: D1Database;
 }
 
@@ -53,6 +54,31 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
           )
             .bind(sessionId)
             .run();
+          // The first thing a visitor types is worth a glance on the phone —
+          // it says who is on the site and what they came for. Later turns are
+          // not repeated; the handoff below covers the moment they want a person.
+          const n = await env.DB.prepare(
+            `SELECT COUNT(*) AS n FROM chat_messages WHERE session_id = ? AND role = 'visitor'`
+          )
+            .bind(sessionId)
+            .first<{ n: number }>();
+          if ((n?.n ?? 0) === 1) {
+            context.waitUntil(
+              tgAlertOwner(
+                env.DB,
+                env,
+                `🌐 <b>Website chat</b> · ${tgEscape(clip(b.page, 40) || "home")} · ${tgEscape(clip(b.lang, 8) || "en")}\n\n<i>${tgEscape(content)}</i>\n\n<i>Reply to this message to join the chat.</i>`,
+                {
+                  kind: "chat",
+                  ref: sessionId,
+                  buttons: [[
+                    { text: "✋ Guide off", data: `chat:off:${sessionId}` },
+                    { text: "✔️ Close", data: `chat:close:${sessionId}` },
+                  ]],
+                }
+              ).then(() => undefined)
+            );
+          }
         }
       }
     }
@@ -81,8 +107,27 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         .map((m) => `${m.role === "visitor" ? "Them" : "Guide"}: ${m.content}`)
         .join("\n");
 
-      // Email the owner. WhatsApp is pending Meta review, so without this a
-      // visitor who explicitly asked for a human would wait unnoticed.
+      context.waitUntil(
+        tgAlertOwner(
+          env.DB,
+          env,
+          `🙋 <b>Website visitor wants a person</b>${name ? ` · ${tgEscape(name)}` : ""}\n` +
+            (phone ? `📱 ${tgEscape(phone)}\n` : "") +
+            `Page: ${tgEscape(clip(b.page, 40) || "home")}` +
+            (recentText ? `\n\n${tgEscape(recentText.slice(0, 1500))}` : "") +
+            "\n\n<i>Reply to this message to answer them.</i>",
+          {
+            kind: "chat",
+            ref: sessionId,
+            buttons: [[
+              { text: "✋ Guide off", data: `chat:off:${sessionId}` },
+              { text: "✔️ Close", data: `chat:close:${sessionId}` },
+            ]],
+          }
+        ).then(() => undefined)
+      );
+
+      // Email as well. It is the record that survives a phone left in a drawer.
       context.waitUntil(
         (async () => {
           try {

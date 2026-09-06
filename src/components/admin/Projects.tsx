@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { ChevronDown, Send } from "lucide-react";
+import { ChevronDown, IndianRupee, Send } from "lucide-react";
 import { Button } from "../ui/Button";
 import { inputClass } from "../../lib/ui";
 import { adminGet, adminPost } from "../../lib/adminApi";
@@ -15,17 +15,31 @@ const STAGE_LABEL: Record<string, string> = {
   support: "Support",
 };
 
+const KIND_LABEL: Record<string, string> = {
+  build: "Build (commissionable)",
+  enhancement: "Enhancement (commissionable within the window)",
+  maintenance: "Maintenance (never commissioned)",
+};
+
+const inr = (n: unknown) => `₹${Math.round(Number(n) || 0).toLocaleString("en-IN")}`;
+
 type Act = (b: Record<string, unknown>) => Promise<any>;
 
 /**
- * Projects — the owner's side of the customer portal.
+ * Projects — the owner's side of the customer portal, and the place money is
+ * recorded.
  *
  * Everything a customer sees at /portal is driven from here: their account, the
  * stage their work is at, each update, and what has been delivered. Moving a
  * stage emails them, so a customer never has to ask where things stand.
+ *
+ * Money is recorded here too, because partner commission is a share of the
+ * PROFIT on a project and only exists once a payment has actually arrived. So a
+ * project carries its price, its cost and the partner who introduced the
+ * customer, and "Record payment" is what books the commission.
  */
 export function Projects() {
-  const [d, setD] = useState<any>({ customers: [], projects: [], events: [], files: [], stages: [] });
+  const [d, setD] = useState<any>({ customers: [], projects: [], events: [], files: [], stages: [], kinds: [], commissions: [] });
   const [msg, setMsg] = useState("");
   const [openId, setOpenId] = useState<number | null>(null);
 
@@ -47,7 +61,7 @@ export function Projects() {
   return (
     <div className="space-y-6">
       <NewCustomer act={act} />
-      <NewProject customers={d.customers || []} act={act} />
+      <NewProject customers={d.customers || []} kinds={d.kinds || []} act={act} />
 
       {msg && <p className="text-sm text-muted">{msg}</p>}
 
@@ -60,6 +74,7 @@ export function Projects() {
         {(d.projects || []).map((p: any) => {
           const events = (d.events || []).filter((e: any) => e.project_id === p.id);
           const files = (d.files || []).filter((f: any) => f.project_id === p.id);
+          const commissions = (d.commissions || []).filter((c: any) => c.project_id === p.id);
           const open = openId === p.id;
           return (
             <div key={p.id} className="glass rounded-2xl p-5">
@@ -72,6 +87,11 @@ export function Projects() {
                   <p className="font-display text-lg font-bold text-fg">{p.title}</p>
                   <p className="text-sm text-muted">
                     {p.customer_name} · {STAGE_LABEL[p.stage] || p.stage} · {p.status}
+                    {p.kind && p.kind !== "build" ? ` · ${p.kind}` : ""}
+                  </p>
+                  <p className="mt-0.5 text-xs text-faint">
+                    {inr(p.paid_inr)} paid of {inr(p.price_inr)}
+                    {p.ref_code ? ` · partner ${p.ref_code}` : ""}
                   </p>
                 </div>
                 <ChevronDown
@@ -104,6 +124,7 @@ export function Projects() {
                     </div>
                   </div>
 
+                  <Money project={p} commissions={commissions} act={act} />
                   <AddUpdate projectId={p.id} act={act} />
                   <AddFile projectId={p.id} act={act} />
 
@@ -176,6 +197,100 @@ export function Projects() {
   );
 }
 
+/**
+ * Price, cost, partner — and the button that records a payment. The commission
+ * verdict comes back from the server and is shown as-is, including the reason
+ * when nothing was booked, so the owner is never left guessing why a partner's
+ * ledger did or did not move.
+ */
+function Money({ project: p, commissions, act }: { project: any; commissions: any[]; act: Act }) {
+  const [price, setPrice] = useState(String(p.price_inr ?? ""));
+  const [cost, setCost] = useState(String(p.cost_inr ?? ""));
+  const [ref, setRef] = useState(String(p.ref_code ?? ""));
+  const [pay, setPay] = useState("");
+  const [payNote, setPayNote] = useState("");
+  const [verdict, setVerdict] = useState("");
+
+  useEffect(() => {
+    setPrice(String(p.price_inr ?? ""));
+    setCost(String(p.cost_inr ?? ""));
+    setRef(String(p.ref_code ?? ""));
+  }, [p.id, p.price_inr, p.cost_inr, p.ref_code]);
+
+  const profit = Math.max(0, (Number(price) || 0) - (Number(cost) || 0));
+  const dirty = String(p.price_inr ?? "") !== price || String(p.cost_inr ?? "") !== cost || String(p.ref_code ?? "") !== ref;
+
+  return (
+    <div className="rounded-xl border border-hairline/12 bg-panel/30 p-4">
+      <p className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-fg">
+        <IndianRupee size={14} /> Money
+      </p>
+      <div className="grid gap-2 sm:grid-cols-3">
+        <label className="text-xs text-muted">
+          Price
+          <input className={inputClass + " mt-1"} value={price} onChange={(e) => setPrice(e.target.value)} inputMode="numeric" />
+        </label>
+        <label className="text-xs text-muted">
+          Cost to deliver
+          <input className={inputClass + " mt-1"} value={cost} onChange={(e) => setCost(e.target.value)} inputMode="numeric" placeholder="Your cost" />
+        </label>
+        <label className="text-xs text-muted">
+          Partner code
+          <input className={inputClass + " mt-1"} value={ref} onChange={(e) => setRef(e.target.value.toUpperCase())} placeholder="None" />
+        </label>
+      </div>
+      <p className="mt-2 text-xs text-faint">
+        Profit {inr(profit)} · {inr(p.paid_inr)} paid so far
+        {p.kind ? ` · ${KIND_LABEL[p.kind] || p.kind}` : ""}
+      </p>
+      {dirty && (
+        <Button
+          className="mt-2"
+          onClick={() => act({ action: "setMoney", projectId: p.id, priceInr: Number(price) || 0, costInr: Number(cost) || 0, refCode: ref })}
+        >
+          Save money details
+        </Button>
+      )}
+
+      <div className="mt-4 grid gap-2 sm:grid-cols-[1fr_2fr_auto]">
+        <input className={inputClass} value={pay} onChange={(e) => setPay(e.target.value)} placeholder="Payment received (₹)" inputMode="numeric" />
+        <input className={inputClass} value={payNote} onChange={(e) => setPayNote(e.target.value)} placeholder="Note (UPI ref, instalment…)" />
+        <Button
+          disabled={!(Number(pay) > 0) || dirty}
+          onClick={async () => {
+            const r = await act({ action: "recordPayment", projectId: p.id, amountInr: Number(pay), note: payNote });
+            if (r.ok) {
+              const c = r.commission || {};
+              setVerdict(
+                c.eligible
+                  ? `Recorded. Partner commission booked: ${inr(c.amountInr)} (${Math.round(c.rate * 100)}% of the profit share of this payment).`
+                  : `Recorded. No commission: ${c.reason || "—"}`
+              );
+              setPay("");
+              setPayNote("");
+            }
+          }}
+        >
+          Record payment
+        </Button>
+      </div>
+      {dirty && <p className="mt-1 text-xs text-warn">Save the money details before recording a payment, so the commission is worked out on the right figures.</p>}
+      {verdict && <p className="mt-2 text-sm text-muted">{verdict}</p>}
+
+      {commissions.length > 0 && (
+        <ul className="mt-3 space-y-1 text-xs text-muted">
+          {commissions.map((c: any) => (
+            <li key={c.id}>
+              <span className="font-mono text-faint">{String(c.created_at).slice(0, 10)}</span> · {c.affiliate_code} earned{" "}
+              <span className="font-semibold text-fg">{inr(c.amount_inr)}</span> on {inr(c.basis_inr)} · {c.status}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 function NewCustomer({ act }: { act: Act }) {
   const [f, setF] = useState({ name: "", phone: "", email: "", company: "" });
   const [note, setNote] = useState("");
@@ -214,8 +329,9 @@ function NewCustomer({ act }: { act: Act }) {
   );
 }
 
-function NewProject({ customers, act }: { customers: any[]; act: Act }) {
-  const [f, setF] = useState({ customerId: "", title: "", priceInr: "", targetDate: "" });
+function NewProject({ customers, kinds, act }: { customers: any[]; kinds: string[]; act: Act }) {
+  const blank = { customerId: "", title: "", priceInr: "", costInr: "", kind: "build", refCode: "", targetDate: "" };
+  const [f, setF] = useState(blank);
   const set = (k: string) => (e: any) => setF({ ...f, [k]: e.target.value });
   return (
     <div className="glass space-y-3 rounded-2xl p-5">
@@ -231,12 +347,19 @@ function NewProject({ customers, act }: { customers: any[]; act: Act }) {
         </select>
         <input className={inputClass} value={f.title} onChange={set("title")} placeholder="What is being built" />
         <input className={inputClass} value={f.priceInr} onChange={set("priceInr")} placeholder="Agreed price (₹)" inputMode="numeric" />
+        <input className={inputClass} value={f.costInr} onChange={set("costInr")} placeholder="Your cost to deliver (₹) — for partner commission" inputMode="numeric" />
+        <select className={inputClass} value={f.kind} onChange={set("kind")}>
+          {(kinds.length ? kinds : ["build", "enhancement", "maintenance"]).map((k) => (
+            <option key={k} value={k}>{KIND_LABEL[k] || k}</option>
+          ))}
+        </select>
+        <input className={inputClass} value={f.refCode} onChange={(e) => setF({ ...f, refCode: e.target.value.toUpperCase() })} placeholder="Partner code (auto-filled from their lead if blank)" />
         <input className={inputClass} value={f.targetDate} onChange={set("targetDate")} placeholder="Target date (optional)" />
       </div>
       <Button
         onClick={async () => {
           const r = await act({ action: "addProject", ...f });
-          if (r.ok) setF({ customerId: "", title: "", priceInr: "", targetDate: "" });
+          if (r.ok) setF(blank);
         }}
         disabled={!f.customerId || !f.title}
       >

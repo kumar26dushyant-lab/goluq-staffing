@@ -1,6 +1,6 @@
 {
   "common": {
-    "partner": "Become a Partner · Earn {{rate}}%",
+    "partner": "Become a Partner · Earn {{rate}}% of our profit",
     "back": "Back",
     "english": "English",
     "hindi": "हिन्दी",
@@ -583,26 +583,26 @@
     "workforce": "Complete Digital Workforce"
   },
   "partner": {
-    "crossMention": "Know other business owners? Earn {{rate}}% of every project you bring in.",
+    "crossMention": "Know other business owners? Introduce them and earn {{rate}}% of GoLuQ's profit on every project they order.",
     "becomePartner": "Become a Partner",
     "backHome": "See what you'll be selling",
     "assistant": "Digital Partner Guide",
-    "intro": "Welcome! Want to earn from businesses you already know — without any tech skills? Refer them to GoLuQ. When a project you introduced is delivered and paid for, you earn {{rate}}% of it. If they later pay for new features, you earn on that too. Want me to show you what a typical referral is worth?",
+    "intro": "Welcome! Want to earn from businesses you already know — without any tech skills? Introduce them to GoLuQ. When a project you introduced is delivered and paid for, you earn {{rate}}% of GoLuQ's profit on it. Enhancements they order later earn you the same. Want me to show you what a typical referral is worth?",
     "showMe": "Show me the earnings",
     "calc": {
       "title": "Your earnings calculator",
       "refsLabel": "Projects you bring in a year",
-      "caveat": "Paid once the customer has paid us. Enhancements they order later earn the same share; ongoing support does not.",
+      "caveat": "An estimate. Your share is {{rate}}% of GoLuQ's profit on the project — the price minus what it cost us to deliver — and this calculator assumes a typical {{margin}}% margin. Paid once the customer has paid us. Enhancements ordered within {{months}} months earn the same share; ongoing support does not.",
       "perMonth": "/mo",
       "ask": "Shall I guide you to register? It takes 2 minutes.",
       "projectLabel": "What kind of project would you introduce?",
-      "perProject": "You earn, per project",
-      "perYear": "On {{n}} projects a year"
+      "perProject": "Your estimated share, per project",
+      "perYear": "On {{n}} projects a year (estimate)"
     },
     "questions": {
       "earn": {
         "q": "How much can I earn?",
-        "a": "{{rate}}% of what the customer actually pays for the project, once it is delivered and paid. New features and enhancements they order later earn you the same {{rate}}%. Ongoing support and maintenance is not commissioned."
+        "a": "{{rate}}% of GoLuQ's profit on each project you introduce — the price minus what it cost us to deliver — paid as the customer pays. Example: a ₹1,00,000 project that cost ₹60,000 to deliver leaves ₹40,000 profit; your share is {{rate}}% of that ₹40,000. Enhancements they order later earn the same; ongoing support and maintenance do not."
       },
       "paid": {
         "q": "When & how do I get paid?",
@@ -686,7 +686,8 @@
       "st_converted": "Paying customer",
       "st_done": "Closed",
       "st_opted_out": "Opted out",
-      "rateNote": "You earn {{y1}}% of every project you introduce, and the same on any enhancements that customer orders later. Payouts start once your approved balance reaches {{min}}."
+      "rateNote": "You earn {{rate}}% of GoLuQ's profit on every project you introduce, and the same on enhancements that customer orders within {{months}} months. Payouts start once your approved balance reaches {{min}}.",
+      "project": "Project"
     },
     "login": {
       "title": "Partner sign in",

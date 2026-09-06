@@ -56,9 +56,15 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
       if (r.status in earnings) earnings[r.status as keyof typeof earnings] = r.total ?? 0;
     }
 
+    // A row is one payment on one project. The business name comes from the
+    // project's customer when there is one, else from the original lead.
     const ledger = await env.DB.prepare(
-      `SELECT c.period_month, c.rate, c.amount_inr, c.status, c.created_at, l.name AS customer
-         FROM commissions c LEFT JOIN leads l ON l.id = c.lead_id
+      `SELECT c.period_month, c.rate, c.amount_inr, c.status, c.created_at,
+              COALESCE(cu.name, l.name) AS customer, p.title AS project
+         FROM commissions c
+         LEFT JOIN leads l ON l.id = c.lead_id
+         LEFT JOIN projects p ON p.id = c.project_id
+         LEFT JOIN customers cu ON cu.id = p.customer_id
         WHERE c.affiliate_code = ? ORDER BY c.id DESC LIMIT 50`
     )
       .bind(code)

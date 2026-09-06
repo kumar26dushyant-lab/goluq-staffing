@@ -12,7 +12,6 @@ import { onRequestPost as lead } from "./functions/api/lead";
 import { onRequestPost as affRegister } from "./functions/api/affiliate/register";
 import { onRequestPost as affTrack } from "./functions/api/affiliate/track";
 import { onRequestGet as affStats } from "./functions/api/affiliate/stats";
-import { onRequestPost as affConvert } from "./functions/api/affiliate/convert";
 import { onRequestPost as waConnect } from "./functions/api/admin/wa-connect";
 import { onRequestGet as waStatus } from "./functions/api/admin/wa-status";
 import { onRequestPost as waSend } from "./functions/api/admin/wa-send";
@@ -91,7 +90,6 @@ export default {
       if (path === "/api/affiliate/register" && method === "POST") return run(affRegister);
       if (path === "/api/affiliate/track" && method === "POST") return run(affTrack);
       if (path === "/api/affiliate/stats" && method === "GET") return run(affStats);
-      if (path === "/api/affiliate/convert" && method === "POST") return run(affConvert);
       if (path === "/api/admin/wa-connect" && method === "POST") return run(waConnect);
       if (path === "/api/admin/wa-status" && method === "GET") return run(waStatus);
       if (path === "/api/admin/wa-send" && method === "POST") return run(waSend);
