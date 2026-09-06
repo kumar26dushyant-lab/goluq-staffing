@@ -278,9 +278,12 @@ Kept in priority order. Done items stay for a while so the history is visible.
       the number instead of a name.
 
 ### Next
-- [ ] **Booking link** — the setting exists (cockpit → Settings). Needs a Google
-      Calendar **appointment schedule** URL (Create → Appointment schedule → Open
-      booking page), NOT the calendar settings page, which is behind a login.
+- [x] **Booking link** set 2026-09-06 — `https://calendar.app.google/ntCZxLnkDbo1FodJ6`
+      (a Google Calendar appointment schedule). Product pages now lead with
+      "Book a 30-minute call". Schedule settings to keep aligned: 30 min, Google
+      Meet on, booking form asks name + email + phone + "what does your business
+      do", ≥4 h minimum notice, 15-min buffer, cap 3–4 calls/day, reminders 24 h
+      and 1 h, time zone Asia/Kolkata with "let the booker pick their zone".
 - [ ] **Monthly ROI report** in the managed plan.
 - [ ] **Store engine** for the Dubai client: catalogue sync, segmented media
       broadcast with throttling and opt-out, native order webhook → Telegram
@@ -298,9 +301,8 @@ Kept in priority order. Done items stay for a while so the history is visible.
       clients this is a SERVICE, not a feature: "your own avatar explaining your
       product, one promo video a month" as a Managed-plan add-on, built after the
       first client asks. Founder still shoots one real 60-second intro himself.
-- [ ] **Telegram: pair the bot.** Code is live (see §4); the founder creates the
-      bot with @BotFather, pastes the token in cockpit → Settings → Telegram,
-      presses Connect and opens the link. Until then alerts are email-only.
+- [x] **Telegram paired** 2026-09-06 — @GoLuQ_Bot, webhook registered, test
+      message delivered. Alerts now reach the phone.
 - [ ] Confirm real comms costs, then correct the prices in the cockpit.
 - [ ] **Give the VM a way to pull from GitHub.** It has no credentials at all and
       has been pulling anonymously; GitHub now refuses ("expected flush after ref
