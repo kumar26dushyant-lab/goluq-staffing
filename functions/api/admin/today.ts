@@ -28,9 +28,9 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
      WHERE (SELECT COUNT(*) FROM chat_messages m WHERE m.session_id = s.id) > 0 ${where}
      ORDER BY s.last_at DESC LIMIT ${limit}`;
 
-  const waiting = await db.prepare(sessionsSql("AND s.needs_human = 1 AND s.closed = 0", 20)).all();
+  const waiting = await db.prepare(sessionsSql("AND s.needs_human = 1 AND s.closed = 0 AND s.last_at >= datetime('now','-7 days')", 20)).all();
   const unread = await db
-    .prepare(sessionsSql("AND s.needs_human = 0 AND s.closed = 0 AND s.unread_for_agent > 0", 20))
+    .prepare(sessionsSql("AND s.needs_human = 0 AND s.closed = 0 AND s.unread_for_agent > 0 AND s.last_at >= datetime('now','-7 days')", 20))
     .all();
   const recent = await db.prepare(sessionsSql("", 15)).all();
 
