@@ -61,6 +61,21 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
        FROM visits WHERE created_at >= datetime('now','-14 days')
        GROUP BY k ORDER BY k`
     );
+    // Where visitors are — the number that decides whether translating the
+    // product pages is worth it, and which markets the guide is being asked
+    // about. Country comes from the edge header; "unknown" is honest.
+    const countries = await all(
+      env.DB,
+      `SELECT COALESCE(NULLIF(country,''), 'unknown') AS k, COUNT(DISTINCT session_id) AS sessions
+       FROM visits WHERE created_at >= datetime('now','-30 days')
+       GROUP BY k ORDER BY sessions DESC LIMIT 15`
+    );
+    // Which channel actually produces enquiries, not just visits.
+    const leadSources = await all(
+      env.DB,
+      `SELECT COALESCE(NULLIF(source,''), 'direct') AS k, COUNT(*) AS sessions
+       FROM leads GROUP BY k ORDER BY sessions DESC LIMIT 12`
+    );
 
     // Funnel: reach → intent → conversion.
     const [buildViews] = await all<{ n: number }>(
@@ -92,6 +107,8 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
       sources,
       devices,
       daily,
+      countries,
+      leadSources,
     });
   } catch (e) {
     return Response.json({ ok: false, error: String(e) }, { status: 500 });

@@ -493,8 +493,12 @@ function Visitors() {
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
+        <BarList title="Enquiries by source" rows={d.leadSources || []} />
+        <BarList title="Visitors by country · 30 days" rows={d.countries || []} />
+        <BarList title="Visit sources" rows={d.sources || []} />
+      </div>
+      <div className="grid gap-4 lg:grid-cols-2">
         <BarList title="Top pages" rows={d.pages || []} />
-        <BarList title="Sources" rows={d.sources || []} />
         <BarList title="Devices" rows={d.devices || []} />
       </div>
     </div>
