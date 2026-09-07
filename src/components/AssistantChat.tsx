@@ -38,7 +38,7 @@ export function AssistantChat() {
   const page = pageFromPath(pathname);
   // The portal is for customers who have already bought. A sales guide popping
   // up at someone mid-project reads as a company that does not know who they are.
-  const hidden = pathname.startsWith("/portal");
+  const hidden = pathname.startsWith("/portal") || pathname.startsWith("/admin");
 
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMsg[]>([]);

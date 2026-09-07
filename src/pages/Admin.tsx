@@ -1,7 +1,7 @@
-import { Fragment, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   LayoutDashboard, Users, TrendingUp, MessageSquare, Settings as SettingsIcon,
-  LogOut, Search, Download, Trash2, RefreshCw, Send, ShieldCheck,
+  LogOut, Download, RefreshCw, Send, ShieldCheck,
   BarChart3, ChevronDown, IndianRupee, Bot, Mail, FileText, Briefcase, Megaphone, Image as ImageIcon, Video,
 } from "lucide-react";
 import { Button } from "../components/ui/Button";
@@ -11,13 +11,13 @@ import { Marketing } from "../components/admin/Marketing";
 import { LiveChat } from "../components/admin/LiveChat";
 import { Testimonials as TestimonialsPanel } from "../components/admin/Testimonials";
 import { Today } from "../components/admin/Today";
+import { Enquiries } from "../components/admin/Enquiries";
 import { BrandMark } from "../components/BrandMark";
 import { useTranslation } from "react-i18next";
 import { inputClass } from "../lib/ui";
 import { EDITABLE_COPY, EDITABLE_KEYS } from "../content/editableCopy";
-import { PLANS } from "../content/affiliateConfig";
 import {
-  getToken, setToken, clearToken, adminGet, adminPost, leadsCsvUrl,
+  getToken, setToken, clearToken, adminGet, adminPost,
   login, logout, setPasswordWithToken, checkSetupToken,
 } from "../lib/adminApi";
 
@@ -108,7 +108,7 @@ export function Admin() {
 
           <main className="mx-auto max-w-5xl overflow-x-hidden px-4 py-5 sm:px-6">
             {section === "today" && <Today onOpenChat={openChat} onOpenLeads={() => setSection("leads")} />}
-            {section === "leads" && <Leads />}
+            {section === "leads" && <Enquiries />}
             {section === "chat" && <LiveChat initialId={chatId} />}
             {section === "inbox" && <Inbox />}
             {section === "visitors" && <Visitors />}
@@ -401,135 +401,6 @@ function Card({ label, value, accent }: { label: string; value: React.ReactNode;
     <div className={`rounded-2xl p-5 ${accent ? "glass-bright" : "glass"}`}>
       <p className="text-sm text-muted">{label}</p>
       <p className="mt-1 font-display text-3xl font-bold text-fg">{value}</p>
-    </div>
-  );
-}
-
-function Detail({ label, value }: { label: string; value: unknown }) {
-  const v = String(value ?? "").trim();
-  if (!v || v === "null") return null;
-  return (
-    <p className="text-sm">
-      <span className="text-faint">{label}: </span>
-      <span className="text-fg">{v}</span>
-    </p>
-  );
-}
-
-/** cross_sell is stored as a JSON array string; show it readably or not at all. */
-function safeList(raw: unknown): string {
-  try {
-    const a = JSON.parse(String(raw ?? "[]"));
-    return Array.isArray(a) && a.length ? a.join(", ") : "";
-  } catch {
-    return "";
-  }
-}
-
-function Leads() {
-  const [rows, setRows] = useState<any[]>([]);
-  const [total, setTotal] = useState(0);
-  const [q, setQ] = useState("");
-  const [status, setStatus] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [openId, setOpenId] = useState<number | null>(null);
-
-  const load = useCallback(async () => {
-    setLoading(true);
-    const p = new URLSearchParams();
-    if (q) p.set("q", q); if (status) p.set("status", status);
-    const d = await adminGet(`/api/admin/leads?${p.toString()}`);
-    setRows(d.leads || []); setTotal(d.total || 0); setLoading(false);
-  }, [q, status]);
-  useEffect(() => { load(); }, [load]);
-
-  const act = async (id: number, action: string, extra: any = {}) => {
-    if (action === "delete" && !confirm("Delete this lead?")) return;
-    await adminPost("/api/admin/lead", { id, action, ...extra });
-    load();
-  };
-
-  return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-2">
-        <div className="relative flex-1 min-w-[180px]">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-faint" />
-          <input className={`${inputClass} pl-9`} placeholder="Search name / phone / email" value={q}
-            onChange={(e) => setQ(e.target.value)} onKeyDown={(e) => e.key === "Enter" && load()} />
-        </div>
-        <select className={`${inputClass} w-auto`} value={status} onChange={(e) => setStatus(e.target.value)}>
-          <option value="">All statuses</option>
-          {["new", "engaged", "converted", "opted_out", "done"].map((s) => <option key={s} value={s}>{s}</option>)}
-        </select>
-        <Button variant="secondary" size="md" onClick={load}><RefreshCw size={16} /></Button>
-        <a href={leadsCsvUrl(q, status)}><Button variant="ghost" size="md"><Download size={16} /> CSV</Button></a>
-      </div>
-      <p className="text-sm text-muted">{total} lead{total === 1 ? "" : "s"}</p>
-
-      <div className="overflow-x-auto rounded-2xl glass">
-        <table className="w-full min-w-[720px] text-left text-sm">
-          <thead className="text-faint">
-            <tr className="border-b border-hairline/15">
-              {["", "When", "Name", "Phone", "Source", "Status", ""].map((h, i) => <th key={i} className="p-3 font-semibold">{h}</th>)}
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((l) => (
-              <Fragment key={l.id}>
-                <tr className="border-b border-hairline/8 align-middle">
-                  <td className="p-3">
-                    <button type="button" onClick={() => setOpenId(openId === l.id ? null : l.id)}
-                      aria-label={openId === l.id ? "Collapse" : "Expand"} aria-expanded={openId === l.id}
-                      className="text-faint hover:text-fg">
-                      <ChevronDown size={16} className={`transition-transform ${openId === l.id ? "rotate-180" : ""}`} />
-                    </button>
-                  </td>
-                  <td className="p-3 text-muted">{String(l.created_at).slice(0, 16)}</td>
-                  <td className="p-3 font-semibold text-fg">{l.name}</td>
-                  <td className="p-3"><a className="text-brand-luq" href={`https://wa.me/91${l.phone}`} target="_blank" rel="noreferrer">+91 {l.phone}</a></td>
-                  <td className="p-3 text-muted">{l.source || "—"}</td>
-                  <td className="p-3">
-                    <select value={l.status || "new"} onChange={(e) => act(l.id, "status", { status: e.target.value })}
-                      className="rounded-lg border border-hairline/20 bg-panel/40 px-2 py-1 text-xs text-fg">
-                      {["new", "engaged", "converted", "opted_out", "done"].map((s) => <option key={s} value={s}>{s}</option>)}
-                    </select>
-                  </td>
-                  <td className="p-3">
-                    <button type="button" onClick={() => act(l.id, "delete")} className="text-faint hover:text-danger" aria-label="Delete"><Trash2 size={16} /></button>
-                  </td>
-                </tr>
-                {openId === l.id && (
-                  <tr className="border-b border-hairline/8 bg-panel/30">
-                    <td colSpan={7} className="p-4">
-                      <div className="grid gap-3 sm:grid-cols-2">
-                        <Detail label="Email" value={l.email} />
-                        <Detail label="Worker" value={l.role} />
-                        <Detail label="Industry" value={l.industry} />
-                        <Detail label="Landed on" value={l.landing} />
-                        <Detail label="Referred by" value={l.ref_code} />
-                        <Detail label="Wants training" value={l.wants_training ? "Yes" : "No"} />
-                        <Detail label="Also wants" value={safeList(l.cross_sell)} />
-                      </div>
-                      {/* Chat transcripts and build enquiries land here — this is
-                          the most useful field on the record and it was previously
-                          not shown anywhere in the admin at all. */}
-                      <LeadCommission lead={l} onDone={load} />
-
-                      {l.message && (
-                        <div className="mt-3">
-                          <p className="mb-1 font-mono text-xs uppercase tracking-wider text-faint">Message / conversation</p>
-                          <pre className="max-h-72 overflow-auto whitespace-pre-wrap rounded-xl border border-hairline/15 bg-ink/40 p-3 text-sm text-fg">{l.message}</pre>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                )}
-              </Fragment>
-            ))}
-            {!loading && rows.length === 0 && <tr><td colSpan={7} className="p-6 text-center text-muted">No leads.</td></tr>}
-          </tbody>
-        </table>
-      </div>
     </div>
   );
 }
@@ -981,69 +852,6 @@ function Content() {
  * brought in. Accrual is one month per recorded payment — never forward-booked,
  * because money that hasn't been collected isn't owed to anyone.
  */
-function LeadCommission({ lead, onDone }: { lead: any; onDone: () => void }) {
-  const [price, setPrice] = useState(String(lead.plan_price_inr || ""));
-  const [planId, setPlanId] = useState(lead.plan_id || "");
-  const [period, setPeriod] = useState(new Date().toISOString().slice(0, 7));
-  const [msg, setMsg] = useState("");
-  const [busy, setBusy] = useState(false);
-
-  const call = async (body: any) => {
-    setBusy(true); setMsg("");
-    const d = await adminPost("/api/admin/commission", body);
-    setBusy(false);
-    setMsg(d.ok ? (d.amount !== undefined ? `Recorded ₹${d.amount} at ${Math.round(d.rate * 100)}%` : "Saved ✅") : d.error || "Failed");
-    if (d.ok) onDone();
-  };
-
-  if (!lead.ref_code) {
-    return <p className="text-xs text-faint">Not referred by a partner — no commission applies.</p>;
-  }
-
-  return (
-    <div className="mt-3 rounded-xl border border-teal-glow/25 bg-teal-glow/[0.05] p-3">
-      <p className="text-xs font-semibold uppercase tracking-wider text-brand-luq">
-        Partner {lead.ref_code}
-        {lead.converted_at ? ` · customer since ${String(lead.converted_at).slice(0, 10)}` : ""}
-      </p>
-
-      {!lead.converted_at ? (
-        <div className="mt-2 flex flex-wrap items-end gap-2">
-          <label className="block">
-            <span className="mb-1 block text-[11px] text-faint">Plan</span>
-            <select className={`${inputClass} w-auto`} value={planId} onChange={(e) => setPlanId(e.target.value)}>
-              <option value="">—</option>
-              {PLANS.map((p) => <option key={p.id} value={p.id}>{p.id} · ₹{p.priceInr}</option>)}
-            </select>
-          </label>
-          <label className="block">
-            <span className="mb-1 block text-[11px] text-faint">Monthly ₹</span>
-            <input className={`${inputClass} w-28`} type="number" value={price}
-              onChange={(e) => setPrice(e.target.value)} />
-          </label>
-          <Button size="md" disabled={busy || !price}
-            onClick={() => call({ action: "convert", leadId: lead.id, planId, planPriceInr: Number(price) })}>
-            Mark as customer
-          </Button>
-        </div>
-      ) : (
-        <div className="mt-2 flex flex-wrap items-end gap-2">
-          <label className="block">
-            <span className="mb-1 block text-[11px] text-faint">Payment received for</span>
-            <input className={`${inputClass} w-36`} type="month" value={period}
-              onChange={(e) => setPeriod(e.target.value)} />
-          </label>
-          <Button size="md" disabled={busy}
-            onClick={() => call({ action: "accrue", leadId: lead.id, period })}>
-            Record payment
-          </Button>
-        </div>
-      )}
-      {msg && <p className="mt-2 text-xs text-muted">{msg}</p>}
-    </div>
-  );
-}
-
 function Affiliates() {
   const [rows, setRows] = useState<any[]>([]);
   const [ledger, setLedger] = useState<any[]>([]);
