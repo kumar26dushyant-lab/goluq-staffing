@@ -380,3 +380,20 @@ the fact stops believing every other term.
 - [x] Customer portal with SDLC stages (Phase C)
 - [x] Homepage crash fix — `CapabilityTabs` rendered an undefined icon for the
       new comms ids and took the whole page down
+
+### Cockpit redesign and the language decision (2026-09-08)
+- Cockpit now opens on a **Today** board: waiting-for-a-person, upcoming calls
+  (once bookings flow), new enquiries, unread and recent conversations, with
+  tiles for the day. Fourteen tabs became four groups — Inbox / Sell / Deliver /
+  Setup — sidebar on desktop, bottom bar + chips on a phone. Tapping a
+  conversation on the board opens it in Conversations.
+- Languages for the Dubai network (Gulf, Jordan, Iran, Russia, Kazakhstan,
+  Armenia, Romania, Hungary): NOT translating the site yet. Lightest route first:
+  `<html lang>` is set correctly so Chrome/Safari offer their built-in
+  translation, and the guide now answers in whatever language the customer
+  writes (Arabic, Russian, Persian…). Measure visits and chats by country on the
+  Visitors tab; translate the two product pages into Arabic/Russian/Persian only
+  if those countries actually show up. Both WhatsApp (via VPN where blocked) and
+  Telegram are used there — publish the same content on both.
+- Next: booking bridge (Apps Script → Telegram alert, WhatsApp confirmation and
+  24 h / 1 h reminders), then `/book` in the visitor's local time.
