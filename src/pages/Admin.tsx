@@ -1,7 +1,7 @@
 import { Fragment, useCallback, useEffect, useState } from "react";
 import {
   LayoutDashboard, Users, TrendingUp, MessageSquare, Settings as SettingsIcon,
-  LogOut, Search, Download, Trash2, RefreshCw, Send, ShieldCheck, Circle,
+  LogOut, Search, Download, Trash2, RefreshCw, Send, ShieldCheck,
   BarChart3, ChevronDown, IndianRupee, Bot, Mail, FileText, Briefcase, Megaphone, Image as ImageIcon, Video,
 } from "lucide-react";
 import { Button } from "../components/ui/Button";
@@ -10,6 +10,7 @@ import { Campaigns } from "../components/admin/Campaigns";
 import { Marketing } from "../components/admin/Marketing";
 import { LiveChat } from "../components/admin/LiveChat";
 import { Testimonials as TestimonialsPanel } from "../components/admin/Testimonials";
+import { Today } from "../components/admin/Today";
 import { BrandMark } from "../components/BrandMark";
 import { useTranslation } from "react-i18next";
 import { inputClass } from "../lib/ui";
@@ -21,13 +22,15 @@ import {
 } from "../lib/adminApi";
 
 type Section =
-  | "overview" | "leads" | "chat" | "visitors" | "pricing"
+  | "today" | "leads" | "chat" | "visitors" | "pricing"
   | "bot" | "content" | "inbox" | "affiliates" | "projects" | "campaigns" | "marketing" | "testimonials" | "settings";
 
 export function Admin() {
   const [authed, setAuthed] = useState(false);
   const [checking, setChecking] = useState(true);
-  const [section, setSection] = useState<Section>("overview");
+  const [section, setSection] = useState<Section>("today");
+  // A conversation chosen on the Today board opens directly in Conversations.
+  const [chatId, setChatId] = useState<string | null>(null);
   // Waiting-visitor count, polled globally so the badge shows from any tab.
   const [waiting, setWaiting] = useState(0);
 
@@ -47,73 +50,134 @@ export function Admin() {
   if (checking) return <Screen><p className="text-muted">Loading…</p></Screen>;
   if (!authed) return <SignIn onIn={() => setAuthed(true)} />;
 
-  const NAV: { id: Section; label: string; icon: typeof Users }[] = [
-    { id: "overview", label: "Overview", icon: LayoutDashboard },
-    { id: "leads", label: "Leads", icon: Users },
-    { id: "chat", label: "Live chat", icon: MessageSquare },
-    { id: "inbox", label: "Inbox", icon: Mail },
-    { id: "visitors", label: "Visitors", icon: BarChart3 },
-    { id: "pricing", label: "Pricing & offers", icon: IndianRupee },
-    { id: "content", label: "Content", icon: FileText },
-    { id: "bot", label: "Bot", icon: Bot },
-    { id: "affiliates", label: "Affiliates", icon: TrendingUp },
-    { id: "projects", label: "Projects", icon: Briefcase },
-    { id: "campaigns", label: "Campaigns", icon: Megaphone },
-    { id: "marketing", label: "Marketing", icon: ImageIcon },
-    { id: "testimonials", label: "Testimonials", icon: Video },
-    { id: "settings", label: "Settings", icon: SettingsIcon },
-  ];
+  const group = GROUPS.find((g) => g.sections.some((x) => x.id === section)) ?? GROUPS[0];
+  const openChat = (id: string) => { setChatId(id); setSection("chat"); };
 
   return (
-    <div className="min-h-dvh">
-      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-hairline/10 bg-abyss/80 px-5 py-3 backdrop-blur-xl sm:px-8">
+    <div className="min-h-dvh pb-20 lg:pb-0">
+      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-hairline/10 bg-abyss/80 px-4 py-3 backdrop-blur-xl sm:px-6">
         <div className="flex items-center gap-3">
           <BrandMark className="text-xl" />
-          <span className="rounded-full bg-teal-glow/10 px-2.5 py-1 text-xs font-semibold uppercase tracking-wider text-brand-luq">Admin</span>
+          <span className="hidden rounded-full bg-teal-glow/10 px-2.5 py-1 text-xs font-semibold uppercase tracking-wider text-brand-luq sm:inline">Cockpit</span>
         </div>
         <div className="flex items-center gap-2">
           <InstallApp />
           <button type="button" onClick={async () => { await logout(); setAuthed(false); }}
-            className="inline-flex items-center gap-2 rounded-full glass px-4 py-2 text-sm font-semibold text-muted hover:text-fg">
+            className="inline-flex items-center gap-2 rounded-full glass px-3 py-2 text-sm font-semibold text-muted hover:text-fg">
             <LogOut size={15} /> <span className="hidden sm:inline">Sign out</span>
           </button>
         </div>
       </header>
 
-      <nav className="sticky top-[57px] z-20 flex gap-1 overflow-x-auto border-b border-hairline/10 bg-abyss/70 px-3 py-2 backdrop-blur-xl sm:px-8">
-        {NAV.map((n) => {
-          const Icon = n.icon; const on = section === n.id;
+      <div className="mx-auto flex w-full max-w-7xl">
+        {/* Desktop: a sidebar with the four groups spelled out. */}
+        <aside className="sticky top-[57px] hidden h-[calc(100dvh-57px)] w-60 shrink-0 overflow-y-auto border-r border-hairline/10 px-3 py-4 lg:block">
+          {GROUPS.map((g) => (
+            <div key={g.id} className="mb-4">
+              {g.label && <p className="mb-1 px-3 font-mono text-[11px] uppercase tracking-wider text-faint">{g.label}</p>}
+              {g.sections.map((n) => {
+                const Icon = n.icon; const on = section === n.id;
+                return (
+                  <button key={n.id} type="button" onClick={() => setSection(n.id)}
+                    className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-sm font-semibold transition-colors ${on ? "bg-teal-glow/15 text-brand-luq" : "text-muted hover:bg-panel/40 hover:text-fg"}`}>
+                    <Icon size={16} /> <span className="flex-1">{n.label}</span>
+                    {n.id === "chat" && waiting > 0 && <Badge n={waiting} />}
+                  </button>
+                );
+              })}
+            </div>
+          ))}
+        </aside>
+
+        <div className="min-w-0 flex-1">
+          {/* Phone: the sections of the current group as chips under the header. */}
+          {group.sections.length > 1 && (
+            <nav className="sticky top-[57px] z-20 flex gap-1 overflow-x-auto border-b border-hairline/10 bg-abyss/70 px-3 py-2 backdrop-blur-xl lg:hidden">
+              {group.sections.map((n) => {
+                const Icon = n.icon; const on = section === n.id;
+                return (
+                  <button key={n.id} type="button" onClick={() => setSection(n.id)}
+                    className={`inline-flex shrink-0 items-center gap-2 rounded-full px-3.5 py-2 text-sm font-semibold transition-colors ${on ? "bg-teal-glow/20 text-brand-luq" : "text-muted hover:text-fg"}`}>
+                    <Icon size={15} /> {n.label}
+                    {n.id === "chat" && waiting > 0 && <Badge n={waiting} />}
+                  </button>
+                );
+              })}
+            </nav>
+          )}
+
+          <main className="mx-auto max-w-5xl overflow-x-hidden px-4 py-5 sm:px-6">
+            {section === "today" && <Today onOpenChat={openChat} onOpenLeads={() => setSection("leads")} />}
+            {section === "leads" && <Leads />}
+            {section === "chat" && <LiveChat initialId={chatId} />}
+            {section === "inbox" && <Inbox />}
+            {section === "visitors" && <Visitors />}
+            {section === "pricing" && <Pricing />}
+            {section === "content" && <Content />}
+            {section === "bot" && <BotPanel />}
+            {section === "affiliates" && <Affiliates />}
+            {section === "projects" && <Projects />}
+            {section === "campaigns" && <Campaigns />}
+            {section === "marketing" && <Marketing />}
+            {section === "testimonials" && <TestimonialsPanel />}
+            {section === "settings" && <SettingsPanel />}
+          </main>
+        </div>
+      </div>
+
+      {/* Phone: five thumbs-reach destinations. Tapping a group opens its first section. */}
+      <nav className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-hairline/10 bg-abyss/90 backdrop-blur-xl lg:hidden"
+        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
+        {GROUPS.map((g) => {
+          const Icon = g.icon; const on = group.id === g.id;
+          const badge = g.id === "inbox" ? waiting : 0;
           return (
-            <button key={n.id} type="button" onClick={() => setSection(n.id)}
-              className={`inline-flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${on ? "bg-teal-glow/20 text-brand-luq" : "text-muted hover:text-fg"}`}>
-              <Icon size={16} /> {n.label}
-              {n.id === "chat" && waiting > 0 && (
-                <span className="ml-1 rounded-full bg-danger px-1.5 py-0.5 text-[10px] font-bold text-white">{waiting}</span>
-              )}
+            <button key={g.id} type="button" onClick={() => setSection(g.sections[0].id)}
+              className={`relative flex flex-col items-center gap-0.5 py-2.5 text-[11px] font-semibold ${on ? "text-brand-luq" : "text-muted"}`}>
+              <Icon size={20} />
+              {g.label || "Today"}
+              {badge > 0 && <span className="absolute right-1/4 top-1.5"><Badge n={badge} /></span>}
             </button>
           );
         })}
       </nav>
-
-      <main className="mx-auto max-w-5xl overflow-x-hidden px-4 py-6 sm:px-8">
-        {section === "overview" && <Overview />}
-        {section === "leads" && <Leads />}
-        {section === "chat" && <LiveChat />}
-        {section === "inbox" && <Inbox />}
-        {section === "visitors" && <Visitors />}
-        {section === "pricing" && <Pricing />}
-        {section === "content" && <Content />}
-        {section === "bot" && <BotPanel />}
-        {section === "affiliates" && <Affiliates />}
-        {section === "projects" && <Projects />}
-        {section === "campaigns" && <Campaigns />}
-        {section === "marketing" && <Marketing />}
-        {section === "testimonials" && <TestimonialsPanel />}
-        {section === "settings" && <SettingsPanel />}
-      </main>
     </div>
   );
 }
+
+function Badge({ n }: { n: number }) {
+  return <span className="rounded-full bg-danger px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">{n}</span>;
+}
+
+/**
+ * Fourteen tabs in a row was a list of tables. Four groups is how the owner
+ * thinks about the day: who is talking to me, what am I selling, what am I
+ * delivering, and how is it set up.
+ */
+const GROUPS: { id: string; label: string; icon: typeof Users; sections: { id: Section; label: string; icon: typeof Users }[] }[] = [
+  { id: "today", label: "", icon: LayoutDashboard, sections: [{ id: "today", label: "Today", icon: LayoutDashboard }] },
+  { id: "inbox", label: "Inbox", icon: MessageSquare, sections: [
+    { id: "chat", label: "Conversations", icon: MessageSquare },
+    { id: "leads", label: "Enquiries", icon: Users },
+    { id: "inbox", label: "Email", icon: Mail },
+  ] },
+  { id: "sell", label: "Sell", icon: Megaphone, sections: [
+    { id: "pricing", label: "Pricing & offers", icon: IndianRupee },
+    { id: "campaigns", label: "Campaigns", icon: Megaphone },
+    { id: "testimonials", label: "Testimonials", icon: Video },
+    { id: "marketing", label: "Marketing", icon: ImageIcon },
+    { id: "visitors", label: "Visitors", icon: BarChart3 },
+  ] },
+  { id: "deliver", label: "Deliver", icon: Briefcase, sections: [
+    { id: "projects", label: "Projects", icon: Briefcase },
+    { id: "affiliates", label: "Partners", icon: TrendingUp },
+  ] },
+  { id: "setup", label: "Setup", icon: SettingsIcon, sections: [
+    { id: "settings", label: "Settings", icon: SettingsIcon },
+    { id: "bot", label: "Guide", icon: Bot },
+    { id: "content", label: "Content", icon: FileText },
+  ] },
+];
 
 function Screen({ children }: { children: React.ReactNode }) {
   return <div className="grid min-h-dvh place-items-center px-6">{children}</div>;
@@ -337,42 +401,6 @@ function Card({ label, value, accent }: { label: string; value: React.ReactNode;
     <div className={`rounded-2xl p-5 ${accent ? "glass-bright" : "glass"}`}>
       <p className="text-sm text-muted">{label}</p>
       <p className="mt-1 font-display text-3xl font-bold text-fg">{value}</p>
-    </div>
-  );
-}
-
-function Overview() {
-  const [s, setS] = useState<any>(null);
-  const [err, setErr] = useState("");
-  useEffect(() => { adminGet("/api/admin/stats").then(setS).catch(() => setErr("Failed to load")); }, []);
-  if (err) return <p className="text-danger">{err}</p>;
-  if (!s) return <p className="text-muted">Loading…</p>;
-  const flag = (on: boolean, label: string) => (
-    <span className="inline-flex items-center gap-1.5 rounded-full glass px-3 py-1.5 text-sm">
-      <Circle size={9} className={on ? "fill-success text-success" : "fill-danger text-danger"} /> {label}
-    </span>
-  );
-  return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <Card label="Total leads" value={s.leads.total} accent />
-        <Card label="Today" value={s.leads.today} />
-        <Card label="This week" value={s.leads.week} />
-        <Card label="Want training" value={s.leads.trainingWanted} />
-        <Card label="Affiliates" value={s.affiliates} />
-        <Card label="Referral clicks" value={s.clicks} />
-        <Card label="Opted out" value={s.leads.optedOut} />
-        <Card label="WhatsApp" value={<span className="text-lg">{s.wa.state}</span>} />
-      </div>
-      <div>
-        <p className="mb-2 font-mono text-xs uppercase tracking-wider text-faint">System status</p>
-        <div className="flex flex-wrap gap-2">
-          {flag(s.config.gemini, "Smart assistant (Gemini)")}
-          {flag(s.config.evolution, "WhatsApp (Evolution)")}
-          {flag(s.config.ownerSet, "Owner number set")}
-          {flag(s.config.followups, "Follow-ups on")}
-        </div>
-      </div>
     </div>
   );
 }

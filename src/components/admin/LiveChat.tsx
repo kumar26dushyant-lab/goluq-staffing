@@ -81,10 +81,10 @@ function agoOf(s: string): string {
  * Every message carries a time, and days are separated, because "who said what
  * when" is the entire point of reading a transcript afterwards.
  */
-export function LiveChat() {
+export function LiveChat({ initialId = null }: { initialId?: string | null }) {
   const [chats, setChats] = useState<ChatRow[]>([]);
   const [waiting, setWaiting] = useState(0);
-  const [openChat, setOpenChat] = useState<string | null>(null);
+  const [openChat, setOpenChat] = useState<string | null>(initialId);
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [reply, setReply] = useState("");
   const [busy, setBusy] = useState(false);
@@ -103,6 +103,11 @@ export function LiveChat() {
     setMsgs(d.messages || []);
     setBotOff(Boolean(d.session?.bot_off));
   }, []);
+
+  // Arriving from the Today board with a conversation already chosen.
+  useEffect(() => {
+    if (initialId) { setOpenChat(initialId); loadOne(initialId); }
+  }, [initialId, loadOne]);
 
   useEffect(() => {
     loadList();
