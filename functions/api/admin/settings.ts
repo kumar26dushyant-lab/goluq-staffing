@@ -3,6 +3,7 @@
 import { checkAdmin, unauthorized } from "../../lib/admin";
 import { getSetting, setSetting } from "../../lib/settings";
 import { saveRates } from "../../lib/affiliateRates";
+import { randomToken } from "../../lib/auth";
 
 interface Env {
   DB: D1Database;
@@ -12,8 +13,16 @@ interface Env {
 /** GET → current settings. POST { owner_whatsapp?, followups_enabled? } → save. */
 export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
   if (!(await checkAdmin(request, env))) return unauthorized();
+  // The calendar bridge (docs/booking-bridge) authenticates with this. Minted
+  // the first time the cockpit asks for it, then stable.
+  let bookingSecret = (await getSetting(env.DB, "booking_secret")) ?? "";
+  if (!bookingSecret) {
+    bookingSecret = randomToken(18);
+    await setSetting(env.DB, "booking_secret", bookingSecret);
+  }
   return Response.json({
     ok: true,
+    booking_secret: bookingSecret,
     owner_whatsapp: (await getSetting(env.DB, "owner_whatsapp")) ?? "",
     owner_email: (await getSetting(env.DB, "owner_email")) ?? "",
     public_whatsapp: (await getSetting(env.DB, "public_whatsapp")) ?? "",

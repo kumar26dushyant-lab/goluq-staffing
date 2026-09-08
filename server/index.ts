@@ -33,6 +33,7 @@ import { onRequestGet as publicTestimonials } from "../functions/api/testimonial
 import { onRequestPost as tgWebhook } from "../functions/api/tg/webhook";
 import { onRequestGet as tgCheckGet, onRequestPost as tgCheckPost } from "../functions/api/admin/tg-check";
 import { onRequestGet as adminToday } from "../functions/api/admin/today";
+import { onRequestPost as bookingsInbound } from "../functions/api/bookings/inbound";
 import { checkAdmin } from "../functions/lib/admin";
 import { writeFileSync, existsSync, statSync, createReadStream } from "node:fs";
 import { extname, basename } from "node:path";
@@ -251,6 +252,7 @@ app.get("/api/testimonials", (c) => callFn(publicTestimonials as Handler, c.req.
 app.post("/api/tg/webhook", (c) => callFn(tgWebhook as Handler, c.req.raw));
 app.get("/api/admin/tg-check", (c) => callFn(tgCheckGet as Handler, c.req.raw));
 app.get("/api/admin/today", (c) => callFn(adminToday as Handler, c.req.raw));
+app.post("/api/bookings/inbound", (c) => callFn(bookingsInbound as Handler, c.req.raw));
 app.post("/api/admin/tg-check", (c) => callFn(tgCheckPost as Handler, c.req.raw));
 
 // ── Uploads ──────────────────────────────────────────────────────────────────

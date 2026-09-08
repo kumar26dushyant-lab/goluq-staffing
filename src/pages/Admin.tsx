@@ -786,6 +786,7 @@ function SettingsPanel() {
   const [publicWa, setPublicWa] = useState("");
   const [ownerEmail, setOwnerEmail] = useState("");
   const [bookingUrl, setBookingUrl] = useState("");
+  const [bookingSecret, setBookingSecret] = useState("");
   const [followups, setFollowups] = useState(true);
   const [saved, setSaved] = useState("");
   const [tab, setTab] = useState<"general" | "telegram" | "wa">("general");
@@ -800,6 +801,7 @@ function SettingsPanel() {
       setPublicWa(d.public_whatsapp || "");
       setOwnerEmail(d.owner_email || "");
       setBookingUrl(d.booking_url || "");
+      setBookingSecret(d.booking_secret || "");
       setFollowups(d.followups_enabled !== "0");
       setLoaded(true);
     });
@@ -853,6 +855,20 @@ function SettingsPanel() {
           <input className={inputClass} type="url" value={bookingUrl}
             onChange={(e) => setBookingUrl(e.target.value)} placeholder="https://calendar.app.google/…" />
         </label>
+        <div className="rounded-xl border border-hairline/12 bg-panel/30 p-4">
+          <p className="text-base font-semibold text-fg">Calendar bridge</p>
+          <p className="mt-1 text-sm text-muted">
+            Makes each booking appear on Today, on Telegram, and eligible for WhatsApp reminders. A small
+            script in your Google account posts bookings here. Install once: open{" "}
+            <span className="font-mono text-brand-luq">docs/booking-bridge/Code.gs</span> from the repo,
+            paste it at script.google.com, and set this secret as the SECRET property.
+          </p>
+          <div className="mt-2 flex items-center gap-2">
+            <code className="flex-1 truncate rounded-lg bg-base px-3 py-2 font-mono text-sm text-fg">{bookingSecret || "…"}</code>
+            <button type="button" onClick={() => navigator.clipboard?.writeText(bookingSecret)}
+              className="rounded-lg glass px-3 py-2 text-sm font-semibold text-muted hover:text-fg">Copy</button>
+          </div>
+        </div>
         <label className="flex items-center gap-3">
           <input type="checkbox" checked={followups} onChange={(e) => setFollowups(e.target.checked)} className="h-5 w-5" />
           <span className="text-base font-semibold text-fg">Automatic follow-ups (day 3 / 5 / 7 / 12)</span>

@@ -357,3 +357,26 @@ CREATE TABLE IF NOT EXISTS tg_outbox (
   created_at TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_tg_outbox_msg ON tg_outbox(message_id);
+
+-- ── Bookings ────────────────────────────────────────────────────────────────
+-- Discovery calls booked on the Google Calendar appointment page, mirrored here
+-- by a small Apps Script in the owner's Google account (docs/booking-bridge).
+-- The calendar stays the source of truth; this is what lets the cockpit show
+-- "Upcoming calls", Telegram announce a booking, and reminders go out.
+CREATE TABLE IF NOT EXISTS bookings (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  event_id TEXT UNIQUE NOT NULL,       -- Google Calendar event id
+  name TEXT NOT NULL,
+  email TEXT,
+  phone TEXT,
+  starts_at TEXT NOT NULL,             -- UTC, 'YYYY-MM-DD HH:MM:SS'
+  ends_at TEXT,
+  meet_url TEXT,
+  note TEXT,                           -- the booking-form answer
+  status TEXT NOT NULL DEFAULT 'booked',  -- booked | cancelled | done
+  reminded_24h INTEGER DEFAULT 0,
+  reminded_1h INTEGER DEFAULT 0,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_bookings_start ON bookings(starts_at);
