@@ -421,3 +421,15 @@ the fact stops believing every other term.
   images (the catalog carries the live price). Export PNG per card → Meta
   Commerce Manager catalog attached to the WABA; product messages via API
   later. Founder photo: Business plan/New/20241031_191618.jpg (not in git).
+
+### Catalogue cards, rendered (2026-09-09)
+- The design-canvas draft was rejected (alignment). Replaced by a render
+  pipeline I can see the output of: scene illustration per product from
+  Gemini's image model (text-free, brand palette; script in scratchpad
+  `catalog/scenes.mjs`, run on the VM with the project key) + exact HTML text
+  layer + headless Edge screenshot at 1080×1080 (`catalog/build.mjs`). Every
+  card was inspected before publishing. 16 cards live at
+  `goluq.com/catalog/<pricing id>.jpg` — one per catalogue row (7 comms, 7
+  builds, 2 products). Founder card pending the three new photos as files.
+- Rule learned: a headless Edge launch needs its own --user-data-dir per run
+  or it attaches to the open browser and takes no screenshot.
