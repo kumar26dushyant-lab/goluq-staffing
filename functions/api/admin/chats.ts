@@ -46,12 +46,12 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
             (SELECT COUNT(*) FROM chat_messages m WHERE m.session_id = s.id) AS msg_count
        FROM chat_sessions s
       WHERE (SELECT COUNT(*) FROM chat_messages m WHERE m.session_id = s.id) > 0
-      ORDER BY s.needs_human DESC, s.last_at DESC
+      ORDER BY (s.needs_human = 1 AND s.last_at >= datetime('now','-7 days')) DESC, s.last_at DESC
       LIMIT 60`
   ).all();
 
   const waiting = await env.DB.prepare(
-    `SELECT COUNT(*) AS n FROM chat_sessions WHERE needs_human = 1 AND closed = 0`
+    `SELECT COUNT(*) AS n FROM chat_sessions WHERE needs_human = 1 AND closed = 0 AND last_at >= datetime('now','-7 days')`
   ).first<{ n: number }>();
 
   return Response.json({

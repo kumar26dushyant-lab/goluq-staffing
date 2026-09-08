@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
+import { Fragment, useCallback, useEffect, useState } from "react";
 import {
   LayoutDashboard, Users, TrendingUp, MessageSquare, Settings as SettingsIcon,
-  LogOut, Download, RefreshCw, Send, ShieldCheck,
+  LogOut, Download, RefreshCw, ShieldCheck,
   BarChart3, ChevronDown, IndianRupee, Bot, Mail, FileText, Briefcase, Megaphone, Image as ImageIcon, Video,
 } from "lucide-react";
 import { Button } from "../components/ui/Button";
@@ -12,6 +12,8 @@ import { LiveChat } from "../components/admin/LiveChat";
 import { Testimonials as TestimonialsPanel } from "../components/admin/Testimonials";
 import { Today } from "../components/admin/Today";
 import { Enquiries } from "../components/admin/Enquiries";
+import { Partners } from "../components/admin/Partners";
+import { EmailInbox } from "../components/admin/EmailInbox";
 import { BrandMark } from "../components/BrandMark";
 import { useTranslation } from "react-i18next";
 import { inputClass } from "../lib/ui";
@@ -54,11 +56,11 @@ export function Admin() {
   const openChat = (id: string) => { setChatId(id); setSection("chat"); };
 
   return (
-    <div className="min-h-dvh pb-20 lg:pb-0">
+    <div className="cockpit min-h-dvh pb-20 lg:pb-0">
       <header className="sticky top-0 z-30 flex items-center justify-between border-b border-hairline/10 bg-abyss/80 px-4 py-3 backdrop-blur-xl sm:px-6">
         <div className="flex items-center gap-3">
           <BrandMark className="text-xl" />
-          <span className="hidden rounded-full bg-teal-glow/10 px-2.5 py-1 text-xs font-semibold uppercase tracking-wider text-brand-luq sm:inline">Cockpit</span>
+          <span className="truncate text-sm font-semibold text-muted">{SECTION_META[section].title}</span>
         </div>
         <div className="flex items-center gap-2">
           <InstallApp />
@@ -107,15 +109,25 @@ export function Admin() {
           )}
 
           <main className="mx-auto max-w-5xl overflow-x-hidden px-4 py-5 sm:px-6">
+            <div className="mb-5 flex items-end justify-between gap-3">
+              <div>
+                <h1 className="font-display text-2xl font-bold text-fg">
+                  {section === "today"
+                    ? new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" })
+                    : SECTION_META[section].title}
+                </h1>
+                <p className="mt-0.5 text-sm text-muted">{SECTION_META[section].desc}</p>
+              </div>
+            </div>
             {section === "today" && <Today onOpenChat={openChat} onOpenLeads={() => setSection("leads")} />}
             {section === "leads" && <Enquiries />}
             {section === "chat" && <LiveChat initialId={chatId} />}
-            {section === "inbox" && <Inbox />}
+            {section === "inbox" && <EmailInbox />}
             {section === "visitors" && <Visitors />}
             {section === "pricing" && <Pricing />}
             {section === "content" && <Content />}
             {section === "bot" && <BotPanel />}
-            {section === "affiliates" && <Affiliates />}
+            {section === "affiliates" && <Partners />}
             {section === "projects" && <Projects />}
             {section === "campaigns" && <Campaigns />}
             {section === "marketing" && <Marketing />}
@@ -144,6 +156,24 @@ export function Admin() {
     </div>
   );
 }
+
+/** One line each: what the screen is for. Shown under the title on every screen. */
+const SECTION_META: Record<Section, { title: string; desc: string }> = {
+  today: { title: "Today", desc: "Who is waiting, what came in, what is due." },
+  chat: { title: "Conversations", desc: "WhatsApp and website chats, together. Reply here or from Telegram." },
+  leads: { title: "Enquiries", desc: "Everyone who left a number. WhatsApp, call, and mark where it stands." },
+  inbox: { title: "Email", desc: "Mail to the business address, answered as the domain." },
+  pricing: { title: "Pricing & offers", desc: "One list drives the site, the guide and WhatsApp. Live on save." },
+  campaigns: { title: "Campaigns", desc: "Approved templates to people who gave you their number." },
+  testimonials: { title: "Testimonials", desc: "Real customers, in their words. Nothing shows until you switch it live." },
+  marketing: { title: "Marketing", desc: "Social cards from a prompt." },
+  visitors: { title: "Visitors", desc: "Where people come from and which channel turns into enquiries." },
+  projects: { title: "Projects", desc: "Each customer's build, its stage, and the money on it." },
+  affiliates: { title: "Partners", desc: "Who brings customers, what they are owed, and the terms." },
+  settings: { title: "Settings", desc: "Alerts, booking link, WhatsApp Business API and Telegram." },
+  bot: { title: "Guide", desc: "The assistant that answers on the site and on WhatsApp." },
+  content: { title: "Content", desc: "Site copy you can change without a deploy." },
+};
 
 function Badge({ n }: { n: number }) {
   return <span className="rounded-full bg-danger px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">{n}</span>;
@@ -513,7 +543,10 @@ function Pricing() {
 
   const load = useCallback(async () => {
     const d = await adminGet("/api/admin/pricing");
-    setRows(d.pricing || []); setLabels(d.labels || {});
+    const order: Record<string, number> = { product: 0, comms: 1, build: 2 };
+    const rows = [...(d.pricing || [])].sort((a: any, b: any) =>
+      (order[a.category] ?? 9) - (order[b.category] ?? 9) || (a.sort_order ?? 0) - (b.sort_order ?? 0));
+    setRows(rows); setLabels(d.labels || {});
   }, []);
   useEffect(() => { load(); }, [load]);
 
@@ -529,12 +562,15 @@ function Pricing() {
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-muted">
-        These drive the homepage price list <em>and</em> the prices the guide quotes in chat. Changes are live immediately — no deploy.
-      </p>
       <div className="space-y-3">
         {rows.map((r, i) => (
-          <div key={r.id} className="glass rounded-2xl p-4">
+          <Fragment key={r.id}>
+          {(i === 0 || rows[i - 1].category !== r.category) && (
+            <p className="pt-3 font-mono text-xs uppercase tracking-wider text-faint">
+              {({ product: "Products — the two complete systems", comms: "Communication services", build: "Software builds" } as Record<string, string>)[r.category] || r.category || "Other"}
+            </p>
+          )}
+          <div className="glass rounded-2xl p-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="font-display text-base font-bold text-fg">{labels[r.id] || r.id}</p>
               <label className="flex items-center gap-2 text-sm text-muted">
@@ -575,6 +611,7 @@ function Pricing() {
               </p>
             ) : null}
           </div>
+          </Fragment>
         ))}
       </div>
       <div className="flex items-center gap-3">
@@ -631,118 +668,6 @@ function BotPanel() {
         <div>
           <Button onClick={save}><ShieldCheck size={16} /> Save</Button>
           {saved && <span className="ml-3 text-sm text-muted">{saved}</span>}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/**
- * Inbox — email sent to dushyant@goluq.com, mirrored here by the Cloudflare
- * Email Worker. Replying sends AS the domain, so the personal Gmail address is
- * never exposed to the visitor.
- */
-function Inbox() {
-  const [threads, setThreads] = useState<any[]>([]);
-  const [openId, setOpenId] = useState<number | null>(null);
-  const [msgs, setMsgs] = useState<any[]>([]);
-  const [reply, setReply] = useState("");
-  const [canSend, setCanSend] = useState(true);
-  const [from, setFrom] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [err, setErr] = useState("");
-
-  const loadList = useCallback(async () => {
-    const d = await adminGet("/api/admin/emails");
-    setThreads(d.threads || []);
-    setCanSend(!!d.canSend);
-    setFrom(d.from || "");
-  }, []);
-  const loadOne = useCallback(async (id: number) => {
-    const d = await adminGet(`/api/admin/emails?id=${id}`);
-    setMsgs(d.messages || []);
-  }, []);
-
-  useEffect(() => {
-    loadList();
-    const iv = setInterval(loadList, 30000);
-    return () => clearInterval(iv);
-  }, [loadList]);
-
-  const send = async () => {
-    if (!openId || !reply.trim()) return;
-    setBusy(true); setErr("");
-    const d = await adminPost("/api/admin/emails", { id: openId, text: reply.trim() });
-    setBusy(false);
-    if (d.ok) { setReply(""); loadOne(openId); loadList(); }
-    else setErr(d.error || "Could not send.");
-  };
-
-  return (
-    <div className="space-y-4">
-      {!canSend && (
-        <p className="rounded-2xl border border-warn/30 bg-warn/10 p-4 text-sm text-fg">
-          <strong>Receiving only.</strong> Replies are disabled until a sending provider is
-          configured — set <code className="font-mono text-brand-luq">MAIL_API_KEY</code> and{" "}
-          <code className="font-mono text-brand-luq">MAIL_FROM</code> in the server .env. Until then
-          you can read here and reply from Gmail (which would expose your personal address).
-        </p>
-      )}
-      {canSend && from && (
-        <p className="text-sm text-muted">Replies are sent as <span className="font-mono text-brand-luq">{from}</span>.</p>
-      )}
-
-      <div className="grid gap-4 lg:grid-cols-[300px_1fr]">
-        <div className="space-y-2">
-          {threads.length === 0 && <p className="text-sm text-muted">No email yet.</p>}
-          {threads.map((t) => (
-            <button key={t.id} type="button" onClick={() => { setOpenId(t.id); loadOne(t.id); }}
-              className={`block w-full rounded-2xl p-3 text-left ${openId === t.id ? "bg-teal-glow/15 ring-1 ring-teal-glow/40" : "glass"}`}>
-              <div className="flex items-center justify-between gap-2">
-                <span className="truncate text-sm font-semibold text-fg">{t.counterparty}</span>
-                {t.unread > 0 && <span className="rounded-full bg-danger px-2 py-0.5 text-[10px] font-bold text-white">new</span>}
-              </div>
-              <p className="mt-0.5 truncate text-xs font-medium text-muted">{t.subject}</p>
-              <p className="mt-1 truncate text-[11px] text-faint">{t.preview}</p>
-            </button>
-          ))}
-        </div>
-
-        <div className="glass flex min-h-[420px] flex-col rounded-2xl p-4">
-          {!openId && <p className="m-auto text-sm text-muted">Pick a conversation.</p>}
-          {openId && (
-            <>
-              <div className="flex-1 space-y-3 overflow-y-auto">
-                {msgs.map((m) => (
-                  <div key={m.id} className={`rounded-2xl p-3 ${m.direction === "in" ? "bg-panel/60" : "bg-teal-glow/15"}`}>
-                    <p className="mb-1 flex flex-wrap items-center gap-2 text-[11px] text-faint">
-                      <span className="font-semibold uppercase tracking-wider">
-                        {m.direction === "in" ? "Received" : "Sent"}
-                      </span>
-                      <span>{String(m.created_at).slice(0, 16)}</span>
-                    </p>
-                    <p className="text-sm font-semibold text-fg">{m.subject}</p>
-                    <pre className="mt-1.5 whitespace-pre-wrap font-sans text-sm text-muted">{m.body}</pre>
-                  </div>
-                ))}
-              </div>
-              {err && <p className="mt-2 text-sm text-danger">{err}</p>}
-              <div className="mt-3 space-y-2 border-t border-hairline/10 pt-3">
-                <textarea className={`${inputClass} min-h-[90px]`} value={reply} disabled={!canSend}
-                  placeholder={canSend ? "Type your reply…" : "Sending not configured"}
-                  onChange={(e) => setReply(e.target.value)} />
-                <div className="flex gap-2">
-                  <Button size="md" onClick={send} disabled={busy || !canSend || !reply.trim()}>
-                    <Send size={16} /> {busy ? "Sending…" : "Send reply"}
-                  </Button>
-                  <Button size="md" variant="secondary"
-                    onClick={async () => { await adminPost("/api/admin/emails", { id: openId, action: "archive" }); setOpenId(null); loadList(); }}>
-                    Archive
-                  </Button>
-                </div>
-              </div>
-            </>
-          )}
         </div>
       </div>
     </div>
@@ -856,76 +781,6 @@ function Content() {
  * brought in. Accrual is one month per recorded payment — never forward-booked,
  * because money that hasn't been collected isn't owed to anyone.
  */
-function Affiliates() {
-  const [rows, setRows] = useState<any[]>([]);
-  const [ledger, setLedger] = useState<any[]>([]);
-  const load = useCallback(() => {
-    adminGet("/api/admin/affiliates").then((d) => setRows(d.affiliates || []));
-    adminGet("/api/admin/commission").then((d) => setLedger(d.commissions || []));
-  }, []);
-  useEffect(() => { load(); }, [load]);
-  const setStatus = async (id: number, status: string) => {
-    const r = await adminPost("/api/admin/commission", { action: "status", id, status });
-    if (r.ok) load();
-  };
-  const inr = (n: unknown) => `₹${Math.round(Number(n) || 0).toLocaleString("en-IN")}`;
-  return (
-    <div className="space-y-5">
-    <div className="overflow-x-auto rounded-2xl glass">
-      <table className="w-full min-w-[680px] text-left text-sm">
-        <thead className="text-faint"><tr className="border-b border-hairline/15">
-          {["Code", "Name", "Phone", "Clicks", "Leads", "Earnings", "Status"].map((h) => <th key={h} className="p-3 font-semibold">{h}</th>)}
-        </tr></thead>
-        <tbody>
-          {rows.map((a) => (
-            <tr key={a.id} className="border-b border-hairline/8">
-              <td className="p-3 font-mono text-brand-luq">{a.code}</td>
-              <td className="p-3 font-semibold text-fg">{a.name}</td>
-              <td className="p-3 text-muted">{a.phone}</td>
-              <td className="p-3">{a.clicks}</td>
-              <td className="p-3">{a.leads}</td>
-              <td className="p-3 font-semibold text-fg">₹{Math.round(a.earnings || 0).toLocaleString("en-IN")}</td>
-              <td className="p-3 text-muted">{a.status}</td>
-            </tr>
-          ))}
-          {rows.length === 0 && <tr><td colSpan={7} className="p-6 text-center text-muted">No affiliates yet.</td></tr>}
-        </tbody>
-      </table>
-    </div>
-
-    {/* Commission is booked in Projects → Record payment; this is where it is
-        reviewed and marked paid. "Approved" is the owner's check; "Paid" is
-        the UPI transfer having gone out. */}
-    <div className="overflow-x-auto rounded-2xl glass">
-      <p className="border-b border-hairline/10 p-4 font-display text-base font-bold text-fg">Commission ledger</p>
-      <table className="w-full min-w-[760px] text-left text-sm">
-        <thead className="text-faint"><tr className="border-b border-hairline/15">
-          {["Date", "Partner", "Project", "Payment", "Rate", "Commission", "Status", ""].map((h) => <th key={h} className="p-3 font-semibold">{h}</th>)}
-        </tr></thead>
-        <tbody>
-          {ledger.map((c) => (
-            <tr key={c.id} className="border-b border-hairline/8">
-              <td className="p-3 font-mono text-xs text-muted">{String(c.created_at).slice(0, 10)}</td>
-              <td className="p-3"><span className="font-mono text-brand-luq">{c.affiliate_code}</span>{c.partner ? <span className="ml-2 text-muted">{c.partner}</span> : null}{c.upi_id ? <span className="block text-xs text-faint">{c.upi_id}</span> : null}</td>
-              <td className="p-3 text-fg">{c.project || c.customer || "—"}</td>
-              <td className="p-3 text-muted">{c.basis_inr ? inr(c.basis_inr) : "—"}</td>
-              <td className="p-3 text-muted">{Math.round((c.rate || 0) * 100)}% of profit</td>
-              <td className="p-3 font-semibold text-fg">{inr(c.amount_inr)}</td>
-              <td className="p-3 text-muted">{c.status}</td>
-              <td className="p-3 whitespace-nowrap">
-                {c.status === "pending" && <button type="button" onClick={() => setStatus(c.id, "approved")} className="font-semibold text-brand-luq hover:underline">Approve</button>}
-                {c.status === "approved" && <button type="button" onClick={() => setStatus(c.id, "paid")} className="font-semibold text-success hover:underline">Mark paid</button>}
-              </td>
-            </tr>
-          ))}
-          {ledger.length === 0 && <tr><td colSpan={8} className="p-6 text-center text-muted">Nothing booked yet. Commission appears here when you record a payment on a project that has a partner code.</td></tr>}
-        </tbody>
-      </table>
-    </div>
-    </div>
-  );
-}
-
 function SettingsPanel() {
   const [owner, setOwner] = useState("");
   const [publicWa, setPublicWa] = useState("");
@@ -933,6 +788,7 @@ function SettingsPanel() {
   const [bookingUrl, setBookingUrl] = useState("");
   const [followups, setFollowups] = useState(true);
   const [saved, setSaved] = useState("");
+  const [tab, setTab] = useState<"general" | "telegram" | "wa">("general");
   // Saving before the current values have loaded would post empty strings and
   // wipe them — which is exactly how the public WhatsApp number got blanked and
   // silently disappeared from the site. Save stays disabled until loaded.
@@ -955,22 +811,31 @@ function SettingsPanel() {
     const d = await adminPost("/api/admin/settings", { owner_whatsapp: owner, owner_email: ownerEmail, public_whatsapp: publicWa, booking_url: bookingUrl, followups_enabled: followups });
     setSaved(d.ok ? "Saved ✅" : "Failed");
   };
+  const TABS = [["general", "Contact & alerts"], ["telegram", "Telegram"], ["wa", "WhatsApp Business API"]] as const;
   return (
-    <div className="max-w-lg space-y-5">
-      <div className="glass space-y-5 rounded-2xl p-6">
+    <div className="max-w-2xl space-y-5">
+      <div className="flex gap-1.5 overflow-x-auto pb-1">
+        {TABS.map(([id, label]) => (
+          <button key={id} type="button" onClick={() => setTab(id)}
+            className={`shrink-0 rounded-full px-3.5 py-1.5 text-sm font-semibold ${tab === id ? "bg-teal-glow/20 text-brand-luq ring-1 ring-teal-glow/40" : "glass text-muted hover:text-fg"}`}>
+            {label}
+          </button>
+        ))}
+      </div>
+      {tab === "general" && (
+      <div className="glass space-y-5 rounded-2xl p-5">
         <label className="block">
           <span className="mb-1.5 block text-base font-semibold text-fg">Alert email (private)</span>
           <span className="mb-2 block text-sm text-muted">
-            Every new lead and every "talk to a human" request is emailed here within seconds.
-            This is the alert channel that works today — WhatsApp alerts stay silent until the
-            number is linked. Never shown on the site.
+            Every new enquiry and every "talk to a person" request is emailed here — the paper
+            trail behind the Telegram alerts. Never shown on the site.
           </span>
           <input className={inputClass} type="email" value={ownerEmail}
             onChange={(e) => setOwnerEmail(e.target.value)} placeholder="you@example.com" />
         </label>
         <label className="block">
           <span className="mb-1.5 block text-base font-semibold text-fg">Owner WhatsApp (private)</span>
-          <span className="mb-2 block text-sm text-muted">Receives a WhatsApp alert for every new lead. Not shown on the site. 10-digit or 91XXXXXXXXXX.</span>
+          <span className="mb-2 block text-sm text-muted">Your own number, for the guide to hand people to. Not shown on the site. 10-digit or 91XXXXXXXXXX.</span>
           <input className={inputClass} value={owner} onChange={(e) => setOwner(e.target.value)} placeholder="9198XXXXXXXX" />
         </label>
         <label className="block">
@@ -996,10 +861,10 @@ function SettingsPanel() {
         {!loaded && <span className="ml-3 text-sm text-faint">Loading current values…</span>}
         {saved && <span className="ml-3 text-sm text-muted">{saved}</span>}</div>
       </div>
+      )}
 
-      <WhatsAppBusiness />
-      <TelegramCockpit />
-      <AffiliateRates />
+      {tab === "wa" && <WhatsAppBusiness />}
+      {tab === "telegram" && <TelegramCockpit />}
     </div>
   );
 }
@@ -1405,79 +1270,6 @@ function WhatsAppCheck() {
           </Button>
         </div>
         {testMsg && <p className="mt-2 text-sm text-muted">{testMsg}</p>}
-      </div>
-    </div>
-  );
-}
-
-/**
- * Partner commission terms. Changing a rate never rewrites history — every
- * commission row snapshots the rate it was accrued at — so this only affects
- * money earned from here on.
- */
-function AffiliateRates() {
-  const [r, setR] = useState({ rate: 20, enhancementMonths: 24, typicalMargin: 40, minPayoutInr: 500, attributionDays: 90 });
-  const [saved, setSaved] = useState("");
-
-  useEffect(() => {
-    fetch("/api/config").then((x) => x.json()).then((d) => {
-      if (d?.affiliate) {
-        setR({
-          rate: Math.round((d.affiliate.rate ?? 0.2) * 100),
-          enhancementMonths: d.affiliate.enhancementMonths ?? 24,
-          typicalMargin: Math.round((d.affiliate.typicalMargin ?? 0.4) * 100),
-          minPayoutInr: d.affiliate.minPayoutInr,
-          attributionDays: d.affiliate.attributionDays,
-        });
-      }
-    }).catch(() => {});
-  }, []);
-
-  const save = async () => {
-    setSaved("");
-    const d = await adminPost("/api/admin/settings", {
-      aff_rate: r.rate / 100,
-      aff_enh_months: r.enhancementMonths,
-      aff_typical_margin: r.typicalMargin / 100,
-      aff_min_payout: r.minPayoutInr,
-      aff_attribution_days: r.attributionDays,
-    });
-    setSaved(d.ok ? "Saved ✅ — live on the site and the earnings calculator" : "Failed");
-  };
-
-  const F = (label: string, key: keyof typeof r, suffix: string) => (
-    <label className="block">
-      <span className="mb-1 block text-sm font-semibold text-fg">{label}</span>
-      <div className="flex items-center gap-2">
-        <input className={`${inputClass} w-28`} type="number" value={r[key]}
-          onChange={(e) => setR({ ...r, [key]: Number(e.target.value) })} />
-        <span className="text-sm text-muted">{suffix}</span>
-      </div>
-    </label>
-  );
-
-  return (
-    <div className="glass space-y-5 rounded-2xl p-6">
-      <div>
-        <h2 className="font-display text-lg font-bold text-fg">Partner commission</h2>
-        <p className="mt-1 text-sm text-muted">
-          A partner earns a share of your <b>profit</b> on each project they introduced — price minus
-          your cost to deliver — booked when you record a payment in Projects. Enhancements that
-          customer orders within the window earn the same; maintenance never does. The typical margin
-          is only what the public calculator assumes; real commission uses the real cost you enter.
-          Existing commission rows keep the rate they were created at.
-        </p>
-      </div>
-      <div className="grid gap-4 sm:grid-cols-2">
-        {F("Share of profit", "rate", "%")}
-        {F("Enhancement window", "enhancementMonths", "months")}
-        {F("Typical margin (calculator only)", "typicalMargin", "%")}
-        {F("Minimum payout", "minPayoutInr", "₹")}
-        {F("Attribution window", "attributionDays", "days")}
-      </div>
-      <div>
-        <Button onClick={save}><ShieldCheck size={16} /> Save commission terms</Button>
-        {saved && <span className="ml-3 text-sm text-muted">{saved}</span>}
       </div>
     </div>
   );

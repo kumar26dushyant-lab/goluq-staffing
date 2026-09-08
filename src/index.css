@@ -452,3 +452,34 @@
   0%, 100% { height: 6px; }
   50% { height: 20px; }
 }
+
+/* ── Cockpit (admin) surfaces ─────────────────────────────────────────────
+   The marketing site is glass, glow and motion. The cockpit is a tool used
+   fifty times a day on a phone: solid surfaces, quiet borders, no blur, no
+   neon. Scoped under .cockpit so the same components render calmly there
+   without touching the public site. */
+.cockpit {
+  background: rgb(var(--c-base));
+}
+.cockpit .glass,
+.cockpit .glass-bright {
+  background: rgb(var(--c-panel));
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  border: 1px solid rgb(var(--c-hairline) / 0.10);
+  box-shadow: 0 1px 2px rgb(var(--c-hairline) / 0.06);
+}
+.cockpit .glass-bright {
+  border-color: rgb(var(--c-teal-glow) / 0.35);
+}
+.cockpit .glass-interactive::after { display: none; }
+.cockpit .glass-interactive:hover { transform: none; box-shadow: 0 1px 2px rgb(var(--c-hairline) / 0.08); }
+.cockpit .glow-teal, .cockpit .shadow-glass, .cockpit .shadow-neon { box-shadow: none; }
+.cockpit .border-gradient::before { display: none; }
+.cockpit input, .cockpit select, .cockpit textarea {
+  background: rgb(var(--c-base));
+  font-size: 0.95rem;
+  padding-top: 0.7rem;
+  padding-bottom: 0.7rem;
+}
+.cockpit .font-display { letter-spacing: -0.01em; }
