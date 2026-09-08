@@ -446,3 +446,14 @@ the fact stops believing every other term.
   (real photo passed as an input image; face preserved).
 - Photos now on disk: `Business plan/New/Gemini_Generated_Image_*.png`
   (headshot, office, laptop). Not in git.
+
+### Booking bridge (2026-09-09) — server side live
+- `bookings` table, `/api/bookings/inbound` (shared secret shown in cockpit →
+  Settings → Calendar bridge), Telegram alert on booking and cancellation, lead
+  follow-ups stop when that phone books, Today board "Upcoming calls" reads it.
+  Verified with a test booking + cancellation on the live server.
+- Owner action: install `docs/booking-bridge/Code.gs` at script.google.com with
+  the secret (5 minutes; steps in the file header).
+- Pending templates `appointment_confirmed` and `appointment_reminder`
+  (drafts in whatsapp-templates.md); once approved → confirmation on booking and
+  an hourly reminders cron. Until then bookings reach Telegram only.
