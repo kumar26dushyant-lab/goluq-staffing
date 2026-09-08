@@ -433,3 +433,16 @@ the fact stops believing every other term.
   builds, 2 products). Founder card pending the three new photos as files.
 - Rule learned: a headless Edge launch needs its own --user-data-dir per run
   or it attaches to the open browser and takes no screenshot.
+
+### Catalogue cards, third pass — icon-led (2026-09-09)
+- The text-heavy composed cards were rejected ("show, don't tell"). Replaced
+  with Fortius-style infographic cards generated whole by Nano Banana Pro
+  (`gemini-3-pro-image-preview`, falls back to `gemini-2.5-flash-image`) from a
+  structured prompt per product: headline, 5 icon tiles, How-it-works strip,
+  Use-cases row; bottom band left empty and the exact contact footer added in
+  HTML (`catalog/infographic.py` on the VM, `catalog/compose.mjs` locally).
+  Every card inspected; five regenerated for overflow, a face, or a duplicate
+  label. 17 cards live at `goluq.com/catalog/<id>.jpg` incl. `founder.jpg`
+  (real photo passed as an input image; face preserved).
+- Photos now on disk: `Business plan/New/Gemini_Generated_Image_*.png`
+  (headshot, office, laptop). Not in git.
