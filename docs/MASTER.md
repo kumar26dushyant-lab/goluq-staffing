@@ -397,3 +397,27 @@ the fact stops believing every other term.
   Telegram are used there — publish the same content on both.
 - Next: booking bridge (Apps Script → Telegram alert, WhatsApp confirmation and
   24 h / 1 h reminders), then `/book` in the visitor's local time.
+
+### Cockpit, second pass (2026-09-09)
+- Under `.cockpit` every surface is solid and still (no glass/blur/glow) — the
+  admin is a tool, not the marketing site. Every screen opens with its name and
+  one line on what it is for. Enquiries are cards with WhatsApp / Call / Email
+  and status chips. Partners is rebuilt around the profit share: decisions
+  first (approve, pay to UPI), then each partner and ledger, then terms. Email
+  is one pane on a phone. Settings is sectioned (Contact & alerts / Telegram /
+  WhatsApp Business API). Pricing grouped into products, comms, builds.
+  Visitors shows enquiries by source and visitors by country.
+- Bug fixed: the Conversations badge counted a month-old "wants a person"
+  session forever. Waiting count and list order now ignore sessions idle for
+  more than 7 days (same rule as the Today board).
+- Homepage guide bubble no longer renders on /admin.
+
+### WhatsApp Store catalog (2026-09-09)
+- First draft of seven 1080×1080 catalog cards on a design canvas (Claude
+  Design preview): WhatsApp Office, WhatsApp Store, Toll-free 1800, WhatsApp
+  Business API, Voice & SMS, Custom software, Founder. GoLuQ brand (Space
+  Grotesk/Inter, light tokens, Go/LuQ gradients), own layout — the Fortius
+  samples were guidance for the *kind* of card, not copied. No prices on
+  images (the catalog carries the live price). Export PNG per card → Meta
+  Commerce Manager catalog attached to the WABA; product messages via API
+  later. Founder photo: Business plan/New/20241031_191618.jpg (not in git).
