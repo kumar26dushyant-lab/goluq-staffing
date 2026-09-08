@@ -138,3 +138,24 @@ Meta gives a reason but rarely a useful one. The two that actually matter:
   MARKETING rather than rewording it into something dishonest.
 - **Too generic** — add the specific detail that makes it a real notification
   about a real thing, which is also what makes it worth sending.
+
+## Booking templates (drafts, 2026-09-09) — for the calendar bridge
+
+Both UTILITY category, language English (add Hindi copies once approved).
+
+### appointment_confirmed
+Body:
+Hello {{1}}, your call with GoLuQ is booked for {{2}} (IST). We will call you on this number, or join here: {{3}}. Reply here if you need to change the time.
+
+Sample: {{1}} = Rahul · {{2}} = Tue 16 Sep, 4:00 pm · {{3}} = https://meet.google.com/abc-defg-hij
+
+### appointment_reminder
+Body:
+Hello {{1}}, a reminder that your call with GoLuQ is {{2}} (IST). Join here: {{3}}. If the time no longer suits you, reply here and we will move it.
+
+Sample: {{1}} = Rahul · {{2}} = tomorrow at 4:00 pm · {{3}} = https://meet.google.com/abc-defg-hij
+
+Once approved: wire `appointment_confirmed` into /api/bookings/inbound (sent on
+first booking when a phone is present) and an hourly cron
+`/api/cron/reminders` that sends `appointment_reminder` at 24 h and 1 h using the
+`reminded_24h` / `reminded_1h` flags on `bookings`.
