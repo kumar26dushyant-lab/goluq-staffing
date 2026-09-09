@@ -472,3 +472,17 @@ the fact stops believing every other term.
   assigning the system user MANAGE on the catalog). Owner does it once in
   WhatsApp Manager → Catalog → Connect catalog → GoLuQ. After that the guide can
   send product cards (interactive product / product_list messages) — next build.
+
+### Product cards on WhatsApp (2026-09-10)
+- Catalog connected to the WABA by the owner (portfolio-level "Manage
+  everything" on the catalog was the missing permission, not the token's).
+- The guide now ends every WhatsApp reply with a hidden `[[card:id]]` tag; the
+  named product is sent as an interactive product card after the text, once
+  per thread (`chat_sessions.cards_sent`). "Price list" / "catalogue" (EN/HI)
+  sends the whole catalogue as a product_list in three sections. A cart sent
+  from the catalogue (`type: order`) is stored as "Cart: id ×qty", alerts the
+  owner on Telegram, and the guide confirms without inventing totals.
+- Verified on the live server with signed synthetic webhooks from the owner's
+  number: product list sent; enquiry reply + card path exercised.
+- Helpers: `waSendProduct`, `waSendProductList` in lib/whatsapp.ts;
+  `conciergeReplyWithCard` in lib/concierge.ts.
