@@ -26,6 +26,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     owner_whatsapp: (await getSetting(env.DB, "owner_whatsapp")) ?? "",
     owner_email: (await getSetting(env.DB, "owner_email")) ?? "",
     public_whatsapp: (await getSetting(env.DB, "public_whatsapp")) ?? "",
+    public_telegram: (await getSetting(env.DB, "public_telegram")) ?? "",
     followups_enabled: (await getSetting(env.DB, "followups_enabled")) ?? "1",
     bot_instructions: (await getSetting(env.DB, "bot_instructions")) ?? "",
     chat_enabled: (await getSetting(env.DB, "chat_enabled")) ?? "1",
@@ -50,7 +51,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
 export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   if (!(await checkAdmin(request, env))) return unauthorized();
   try {
-    const b = await request.json<{ owner_whatsapp?: string; public_whatsapp?: string; followups_enabled?: boolean | string; bot_instructions?: string; chat_enabled?: boolean | string; announcement?: string; aff_rate?: number; aff_enh_months?: number; aff_typical_margin?: number; aff_min_payout?: number; aff_attribution_days?: number; owner_email?: string; booking_url?: string; wa_phone_number_id?: string; wa_waba_id?: string; wa_verify_token?: string; wa_access_token?: string; wa_app_secret?: string; tg_bot_token?: string }>();
+    const b = await request.json<{ owner_whatsapp?: string; public_whatsapp?: string; followups_enabled?: boolean | string; bot_instructions?: string; chat_enabled?: boolean | string; announcement?: string; aff_rate?: number; aff_enh_months?: number; aff_typical_margin?: number; aff_min_payout?: number; aff_attribution_days?: number; owner_email?: string; booking_url?: string; public_telegram?: string; wa_phone_number_id?: string; wa_waba_id?: string; wa_verify_token?: string; wa_access_token?: string; wa_app_secret?: string; tg_bot_token?: string }>();
     if (typeof b.owner_whatsapp === "string") {
       await setSetting(env.DB, "owner_whatsapp", b.owner_whatsapp.replace(/\D/g, ""));
     }
@@ -59,6 +60,11 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
     }
     if (typeof b.public_whatsapp === "string") {
       await setSetting(env.DB, "public_whatsapp", b.public_whatsapp.replace(/\D/g, ""));
+    }
+    if (typeof b.public_telegram === "string") {
+      // Accept "@name", "name" or a t.me link; store the bare username.
+      const u = b.public_telegram.trim().replace(/^https?:\/\/(t\.me|telegram\.me)\//i, "").replace(/^@/, "").replace(/[^A-Za-z0-9_]/g, "").slice(0, 32);
+      await setSetting(env.DB, "public_telegram", u);
     }
     if (b.followups_enabled !== undefined) {
       const on = b.followups_enabled === true || b.followups_enabled === "1";

@@ -74,7 +74,8 @@ export default function App() {
     <BrowserRouter>
       <Pageviews />
       <Routes>
-        <Route path="/" element={<StaffingApp />} />
+        <Route path="/" element={<Suspense fallback={null}><StoryHome /></Suspense>} />
+        <Route path="/demo" element={<StaffingApp />} />
         {/* Custom-build practice — a separate funnel from "/" on purpose. */}
         <Route
           path="/build"
@@ -132,7 +133,7 @@ export default function App() {
         <Route path="/partner/reset" element={<PartnerReset />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/admin/setup" element={<AdminSetup />} />
-        <Route path="*" element={<StaffingApp />} />
+        <Route path="*" element={<Suspense fallback={null}><StoryHome /></Suspense>} />
       </Routes>
       <AssistantChat />
       {/* Sits above the chat launcher: the bot answers instantly, this reaches

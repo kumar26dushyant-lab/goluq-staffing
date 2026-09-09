@@ -27,6 +27,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     request.headers.get("cf-ipcountry") ||
     ""
   ).toUpperCase().slice(0, 2);
+  const telegram = (await getSetting(env.DB, "public_telegram")) || "";
   const [whatsapp, chatEnabled, announcement, bookingUrl] = await Promise.all([
     getSetting(env.DB, "public_whatsapp"),
     getSetting(env.DB, "chat_enabled"),
@@ -82,6 +83,8 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
   return Response.json({
     ok: true,
     whatsapp: whatsapp || "",
+    // Public Telegram channel or username, for markets that live on Telegram.
+    telegram,
     bookingUrl: bookingUrl || "",
     country,
     market: resolved,

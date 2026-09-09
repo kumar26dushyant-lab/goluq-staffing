@@ -2082,7 +2082,8 @@
     "founder": {
       "kicker": "The human behind it",
       "line": "You talk to the person who builds it. Training in plain language. You own the result.",
-      "cta": "Message on WhatsApp"
+      "cta": "Message on WhatsApp",
+      "ctaTelegram": "Message on Telegram"
     },
     "stories": {
       "kicker": "Customer stories",

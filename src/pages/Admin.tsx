@@ -788,6 +788,7 @@ function Content() {
 function SettingsPanel() {
   const [owner, setOwner] = useState("");
   const [publicWa, setPublicWa] = useState("");
+  const [publicTg, setPublicTg] = useState("");
   const [ownerEmail, setOwnerEmail] = useState("");
   const [bookingUrl, setBookingUrl] = useState("");
   const [bookingSecret, setBookingSecret] = useState("");
@@ -803,6 +804,7 @@ function SettingsPanel() {
     adminGet("/api/admin/settings").then((d) => {
       setOwner(d.owner_whatsapp || "");
       setPublicWa(d.public_whatsapp || "");
+      setPublicTg(d.public_telegram || "");
       setOwnerEmail(d.owner_email || "");
       setBookingUrl(d.booking_url || "");
       setBookingSecret(d.booking_secret || "");
@@ -814,7 +816,7 @@ function SettingsPanel() {
   const save = async () => {
     if (!loaded) return;
     setSaved("");
-    const d = await adminPost("/api/admin/settings", { owner_whatsapp: owner, owner_email: ownerEmail, public_whatsapp: publicWa, booking_url: bookingUrl, followups_enabled: followups });
+    const d = await adminPost("/api/admin/settings", { owner_whatsapp: owner, owner_email: ownerEmail, public_whatsapp: publicWa, public_telegram: publicTg, booking_url: bookingUrl, followups_enabled: followups });
     setSaved(d.ok ? "Saved ✅" : "Failed");
   };
   const TABS = [["general", "Contact & alerts"], ["telegram", "Telegram"], ["wa", "WhatsApp Business API"]] as const;
@@ -848,6 +850,15 @@ function SettingsPanel() {
           <span className="mb-1.5 block text-base font-semibold text-fg">Public contact WhatsApp (shown on site)</span>
           <span className="mb-2 block text-sm text-muted">Optional. If set, visitors can reach you on WhatsApp from the booking form. Leave blank to hide it.</span>
           <input className={inputClass} value={publicWa} onChange={(e) => setPublicWa(e.target.value)} placeholder="Leave blank to hide" />
+        </label>
+        <label className="block">
+          <span className="mb-1.5 block text-base font-semibold text-fg">Public Telegram channel or username</span>
+          <span className="mb-2 block text-sm text-muted">
+            Shown as a "Message on Telegram" button beside WhatsApp — first in Russia, Iran and the CIS,
+            where Telegram is the daily app. Paste the channel link or username. Leave blank to hide.
+            (Not the cockpit bot — that one stays private.)
+          </span>
+          <input className={inputClass} value={publicTg} onChange={(e) => setPublicTg(e.target.value)} placeholder="@goluq or https://t.me/goluq" />
         </label>
         <label className="block">
           <span className="mb-1.5 block text-base font-semibold text-fg">Booking link (product pages)</span>

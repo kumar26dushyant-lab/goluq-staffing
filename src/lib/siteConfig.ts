@@ -53,6 +53,8 @@ export interface AffiliateRates {
 
 export interface SiteConfig {
   whatsapp: string;
+  /** Public Telegram username (no @), or "" until the owner sets one. */
+  telegram: string;
   /** Calendar link for a 30-minute call, or "" until the owner sets one. */
   bookingUrl: string;
   chatEnabled: boolean;
@@ -127,6 +129,7 @@ export async function fetchSiteConfig(): Promise<SiteConfig> {
       applyContentOverrides(d?.content);
       cache = {
         whatsapp: String(d?.whatsapp || ""),
+        telegram: String(d?.telegram || ""),
         bookingUrl: /^https:\/\//i.test(String(d?.bookingUrl || "")) ? String(d.bookingUrl) : "",
         chatEnabled: d?.chatEnabled !== false,
         announcement: String(d?.announcement || ""),
@@ -138,7 +141,7 @@ export async function fetchSiteConfig(): Promise<SiteConfig> {
       };
     } catch {
       cache = {
-        whatsapp: "", bookingUrl: "", chatEnabled: true, announcement: "",
+        whatsapp: "", telegram: "", bookingUrl: "", chatEnabled: true, announcement: "",
         pricing: fromLocal(), country: "", market: INR_MARKET,
         extras: { voiceLite: VOICE_LITE_INR },
       };

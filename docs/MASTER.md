@@ -537,3 +537,12 @@ the fact stops believing every other term.
   (lib/region.ts) — same pictures, different words and currency. Cloudflare
   caches images 4 h at the edge: scene URLs carry `?v=N`, bump on regeneration.
   Validation URLs: /preview?r=in, ?r=gulf, ?r=cis, ?r=intl.
+
+### Story homepage LIVE (2026-09-10)
+- `/` now renders the story (StoryHome); the old five-step demo lives at
+  `/demo`; `/preview?r=…` stays for region validation (noindex only there).
+- Telegram contact: cockpit → Settings → "Public Telegram channel or username"
+  (`public_telegram`, stored as bare username, exposed as `telegram` in
+  /api/config). The founder block shows "Message on Telegram" beside WhatsApp,
+  Telegram first for the CIS region. Empty until the owner creates the public
+  channel; the cockpit bot stays private.
