@@ -529,3 +529,11 @@ the fact stops believing every other term.
   (done), CTA channel (WhatsApp / WhatsApp+call / Telegram), and caption
   variants (`story.*` per region: IN, GULF, INTL). Scene art regionalised only
   if a market actually shows up in Visitors → Countries.
+- 2026-09-10 (night): founder's brief applied — owners regenerated as late-20s
+  to early-40s (garment trader now a young woman); captions sharpened to loss
+  aversion ("tomorrow they join the institute that did"); words larger; voice
+  pill always visible; "Send to a friend" on every chapter (native share,
+  WhatsApp fallback) for spread; region wording via `?r=in|gulf|cis|intl`
+  (lib/region.ts) — same pictures, different words and currency. Cloudflare
+  caches images 4 h at the edge: scene URLs carry `?v=N`, bump on regeneration.
+  Validation URLs: /preview?r=in, ?r=gulf, ?r=cis, ?r=intl.

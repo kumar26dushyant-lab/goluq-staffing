@@ -53,7 +53,7 @@ function VoicePill() {
       type="button"
       onClick={toggleMute}
       aria-pressed={!muted}
-      className="fixed bottom-4 left-4 z-30 inline-flex items-center gap-2 rounded-full border border-white/25 bg-black/70 px-4 py-2.5 text-sm font-semibold text-white shadow-lg backdrop-blur lg:bottom-6 lg:left-6"
+      className="fixed left-4 top-[72px] z-30 inline-flex items-center gap-2 rounded-full border border-white/25 bg-black/70 px-4 py-2.5 text-sm font-semibold text-white shadow-lg backdrop-blur lg:left-6 lg:top-20"
     >
       {muted ? <VolumeX size={17} /> : <Volume2 size={17} className="text-brand-luq" />}
       {muted ? t("story.voiceOff") : t("story.voiceOn")}
@@ -197,7 +197,7 @@ function Chapter({ id, index, region, onEnter }: { id: ChapterId; index: number;
       <div className="relative min-h-[100svh] lg:hidden">
         <Scene id={id} after={after} eager={index === 0} reduced={reduced} className="absolute inset-0" />
         <div className="absolute inset-x-0 bottom-0 h-[72%] bg-gradient-to-t from-black/95 via-black/70 to-transparent" aria-hidden="true" />
-        <div className="absolute inset-x-0 bottom-0 z-10 px-5 pb-24 sm:px-8">{words(true)}</div>
+        <div className="absolute inset-x-0 bottom-0 z-10 px-5 pb-20 pr-16 sm:px-8">{words(true)}</div>
         {index === 0 && (
           <motion.div aria-hidden="true" animate={reduced ? undefined : { y: [0, 6, 0] }} transition={{ repeat: Infinity, duration: 1.6 }} className="absolute bottom-6 left-1/2 z-10 -translate-x-1/2 text-white/70">
             <ChevronDown size={22} />
