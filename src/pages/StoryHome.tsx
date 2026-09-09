@@ -41,7 +41,7 @@ export function StoryHome() {
       <TopBar showBack={false} onBack={() => {}} />
 
       {/* One breath before the story: the promise, then straight in. */}
-      <section className="mx-auto flex min-h-[38svh] max-w-6xl flex-col justify-end px-5 pb-8 pt-6 sm:px-8 lg:min-h-[44svh]">
+      <section className="mx-auto flex min-h-[30svh] max-w-6xl flex-col justify-end px-5 pb-8 pt-6 sm:px-8 lg:min-h-[40svh]">
         <motion.p
           initial={reduced ? false : { opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
