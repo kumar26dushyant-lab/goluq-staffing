@@ -546,3 +546,9 @@ the fact stops believing every other term.
   /api/config). The founder block shows "Message on Telegram" beside WhatsApp,
   Telegram first for the CIS region. Empty until the owner creates the public
   channel; the cockpit bot stays private.
+- 2026-09-10 (late): polish pass from the founder's screenshots — no empty
+  band above the hero; hero now carries a purpose line + "Book a 30-minute
+  call" + WhatsApp; chapter labels moved out of the letter-spaced mono face
+  (unreadable in Devanagari) into the body face on a pill over the art; voice
+  pill in its own row on phones, bottom-left on desktop; long captions size
+  down. Verified at 390 px and 1440 px with `shot2.cjs` (desktop mode added).
