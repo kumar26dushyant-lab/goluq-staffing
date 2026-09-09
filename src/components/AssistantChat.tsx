@@ -170,6 +170,21 @@ export function AssistantChat() {
     setOpen(true);
   };
 
+  // A story chapter's "This is my problem" button: open the guide with that
+  // problem already said, so the first reply is about them, not a greeting.
+  useEffect(() => {
+    const onAsk = (e: Event) => {
+      const text = String((e as CustomEvent).detail?.text || "").trim();
+      if (!text) return;
+      dismissTeaser();
+      setOpen(true);
+      window.setTimeout(() => { void send(text); }, 150);
+    };
+    window.addEventListener("goluq:ask", onAsk);
+    return () => window.removeEventListener("goluq:ask", onAsk);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lang]);
+
   // After every hook has run — bailing earlier would change the hook order
   // between routes, which React treats as a fatal error.
   if (hidden) return null;

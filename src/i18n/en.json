@@ -1971,5 +1971,61 @@
     "managed": "Managed",
     "days": "Live in 21 days · you own it at handover",
     "cta": "See how it works"
+  },
+  "story": {
+    "kicker": "Five businesses. Five ordinary problems.",
+    "title": "See what changes.",
+    "hint": "Scroll",
+    "before": "Before",
+    "after": "With GoLuQ",
+    "cta": "This is my problem",
+    "tap": "Tap to see what changes",
+    "chapters": {
+      "coaching": {
+        "who": "Coaching institute",
+        "before": "9 pm. A parent calls. Nobody answers.",
+        "after": "The 1800 number answers, books the visit, and calls back.",
+        "product": "Toll-free number + Digital Receptionist",
+        "ask": "I run a coaching institute. Calls go unanswered after hours and we lose admissions. What would you set up?"
+      },
+      "distributor": {
+        "who": "FMCG distributor",
+        "before": "Forty shops, forty reminders, one man's phone.",
+        "after": "Reminders go out on their own. Payments come in.",
+        "product": "WhatsApp automations",
+        "ask": "I am a distributor. Payment reminders and order follow-ups eat my day. What would you set up?"
+      },
+      "ca": {
+        "who": "CA firm",
+        "before": "The billing man is on leave. So is everything he knew.",
+        "after": "Every client, every file, every rate — in one WhatsApp Office.",
+        "product": "The WhatsApp Office",
+        "ask": "I run a CA firm. When one staff member is away, client files and rates go missing. How does the WhatsApp Office work?"
+      },
+      "garment": {
+        "who": "Garment wholesaler",
+        "before": "New designs every other day, sent one chat at a time.",
+        "after": "One upload. Every buyer sees it. Orders in the chat.",
+        "product": "The WhatsApp Store",
+        "ask": "I am a garment wholesaler with buyers in several countries. I send new designs one chat at a time. How does the WhatsApp Store work?"
+      },
+      "claims": {
+        "who": "Claims firm, four offices",
+        "before": "Four offices. Nobody knows the status.",
+        "after": "One system. The owner sees everything.",
+        "product": "Multi-branch platform",
+        "ask": "I run a business with several branches and nobody knows the status of anything. What would you build?"
+      }
+    },
+    "founder": {
+      "kicker": "The human behind it",
+      "line": "You talk to the person who builds it. Training in plain language. You own the result.",
+      "cta": "Message on WhatsApp"
+    },
+    "stories": {
+      "kicker": "Customer stories",
+      "title": "In their own words",
+      "soon": "Video stories from customers arrive here as they are recorded."
+    }
   }
 }
