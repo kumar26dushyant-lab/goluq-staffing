@@ -48,11 +48,11 @@ export function StoryHome() {
       <TopBar showBack={false} onBack={() => {}} />
 
       {/* One breath before the story: the promise, then straight in. */}
-      <section className="mx-auto flex min-h-[30svh] max-w-6xl flex-col justify-end px-5 pb-8 pt-6 sm:px-8 lg:min-h-[40svh]">
+      <section className="mx-auto max-w-6xl px-5 pb-8 pt-8 sm:px-8 lg:pb-12 lg:pt-14">
         <motion.p
           initial={reduced ? false : { opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          className="font-mono text-xs uppercase tracking-[0.28em] text-brand-luq"
+          className="text-base font-semibold text-brand-luq sm:text-lg"
         >
           {t(`story.regions.${region}.kicker`, { defaultValue: t("story.kicker") })}
         </motion.p>

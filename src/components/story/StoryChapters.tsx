@@ -53,7 +53,7 @@ function VoicePill() {
       type="button"
       onClick={toggleMute}
       aria-pressed={!muted}
-      className="fixed left-4 top-[72px] z-30 inline-flex items-center gap-2 rounded-full border border-white/25 bg-black/70 px-4 py-2.5 text-sm font-semibold text-white shadow-lg backdrop-blur lg:left-6 lg:top-20"
+      className="fixed left-4 top-[72px] z-30 inline-flex items-center gap-2 rounded-full border border-white/25 bg-black/70 px-4 py-2.5 text-sm font-semibold text-white shadow-lg backdrop-blur lg:bottom-6 lg:left-6 lg:top-auto"
     >
       {muted ? <VolumeX size={17} /> : <Volume2 size={17} className="text-brand-luq" />}
       {muted ? t("story.voiceOff") : t("story.voiceOn")}
@@ -129,8 +129,8 @@ function Chapter({ id, index, region, onEnter }: { id: ChapterId; index: number;
 
   const words = (dark: boolean) => (
     <div className={dark ? "text-white" : "text-fg"}>
-      <p className="font-mono text-xs uppercase tracking-[0.28em] text-brand-luq sm:text-sm">
-        {String(index + 1).padStart(2, "0")} · {line("who")}
+      <p className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-bold sm:text-base ${dark ? "bg-black/45 text-brand-luq backdrop-blur" : "bg-brand-luq/10 text-brand-luq"}`}>
+        <span className="font-mono">{String(index + 1).padStart(2, "0")}</span> · {line("who")}
       </p>
       <div className="mt-3 min-h-[11rem] sm:min-h-[12rem] lg:min-h-[14rem]">
         <AnimatePresence mode="wait" initial={false}>
@@ -140,10 +140,10 @@ function Chapter({ id, index, region, onEnter }: { id: ChapterId; index: number;
             animate={{ opacity: 1, y: 0 }}
             exit={reduced ? undefined : { opacity: 0, y: -8 }}
             transition={{ duration: 0.35 }}
-            className={`text-balance font-display text-[2.35rem] font-bold leading-[1.06] sm:text-5xl lg:text-[3.4rem] ${after ? "" : dark ? "text-white/85" : "text-muted"}`}
+            className={`text-balance font-display font-bold leading-[1.08] ${(after ? afterLine : before).length > 75 ? "text-[1.9rem] sm:text-[2.6rem] lg:text-[3rem]" : "text-[2.3rem] sm:text-5xl lg:text-[3.4rem]"} ${after ? "" : dark ? "text-white/85" : "text-muted"}`}
           >
-            <span className={`mb-2 block font-mono text-xs tracking-[0.24em] ${after ? "text-brand-luq" : dark ? "text-white/55" : "text-faint"}`}>
-              {(after ? t("story.after") : t("story.before")).toUpperCase()}
+            <span className={`mb-2 block text-sm font-bold uppercase tracking-wide ${after ? "text-brand-luq" : dark ? "text-white/60" : "text-faint"}`}>
+              {after ? t("story.after") : t("story.before")}
             </span>
             {after ? afterLine : before}
           </motion.p>
