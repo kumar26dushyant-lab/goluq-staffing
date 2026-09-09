@@ -70,7 +70,7 @@ function parseInbound(body: any): Inbound[] {
             retailerId: String(p?.product_retailer_id || ""),
             qty: Number(p?.quantity || 1),
           }));
-          text = "Cart: " + order.map((o) => `${o.retailerId} ×${o.qty}`).join(", ") + (m.order.text ? ` — ${m.order.text}` : "");
+          text = "Cart: " + (order || []).map((o) => `${o.retailerId} ×${o.qty}`).join(", ") + (m.order.text ? ` — ${m.order.text}` : "");
         }
         out.push({ id: m.id, from: String(m.from), text: String(text), name: nameOf(m.from), ...(order ? { order } : {}) });
       }
