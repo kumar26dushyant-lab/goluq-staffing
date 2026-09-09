@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { MessageCircle, Send, Video } from "lucide-react";
+import { CalendarClock, MessageCircle, Send, Video } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { TopBar } from "../components/TopBar";
 import { StoryChapters } from "../components/story/StoryChapters";
@@ -48,7 +48,8 @@ export function StoryHome() {
       <TopBar showBack={false} onBack={() => {}} />
 
       {/* One breath before the story: the promise, then straight in. */}
-      <section className="mx-auto max-w-6xl px-5 pb-8 pt-8 sm:px-8 lg:pb-12 lg:pt-14">
+      {/* The voice pill sits in its own row on a phone; the hero starts below it. */}
+      <section className="mx-auto max-w-6xl px-5 pb-8 pt-20 sm:px-8 lg:pb-12 lg:pt-14">
         <motion.p
           initial={reduced ? false : { opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
@@ -64,6 +65,33 @@ export function StoryHome() {
         >
           <span className="text-gradient-accent">{t("story.title")}</span>
         </motion.h1>
+        <motion.p
+          initial={reduced ? false : { opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.18 }}
+          className="mt-4 max-w-2xl text-lg leading-relaxed text-muted sm:text-xl"
+        >
+          {t("story.sub")}
+        </motion.p>
+        <motion.div
+          initial={reduced ? false : { opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.26 }}
+          className="mt-6 flex flex-wrap gap-3"
+        >
+          {cfg?.bookingUrl && (
+            <a href={cfg.bookingUrl} target="_blank" rel="noreferrer"
+              className="inline-flex items-center gap-2 rounded-full bg-fg px-5 py-3 text-base font-bold text-[rgb(var(--c-base))] shadow-lg">
+              <CalendarClock size={18} /> {t("story.book")}
+            </a>
+          )}
+          {wa && (
+            <a href={`https://wa.me/${wa}`} target="_blank" rel="noreferrer"
+              className="inline-flex items-center gap-2 rounded-full bg-success/15 px-5 py-3 text-base font-bold text-success ring-1 ring-success/30">
+              <MessageCircle size={18} /> {t("story.founder.cta")}
+            </a>
+          )}
+        </motion.div>
       </section>
 
       <StoryChapters />
