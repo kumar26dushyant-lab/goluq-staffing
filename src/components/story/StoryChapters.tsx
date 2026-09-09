@@ -22,6 +22,8 @@ export const CHAPTERS = ["coaching", "distributor", "ca", "garment", "claims", "
 export type ChapterId = (typeof CHAPTERS)[number];
 
 const BEAT_MS = 2200;
+/** Bump when scenes are regenerated: the edge caches images by URL. */
+const STORY_V = "3";
 
 export function StoryChapters() {
   const [active, setActive] = useState(0);
@@ -62,9 +64,9 @@ function VoicePill() {
 function Scene({ id, after, eager, reduced, className = "" }: { id: ChapterId; after: boolean; eager: boolean; reduced: boolean | null; className?: string }) {
   return (
     <div className={`overflow-hidden ${className}`}>
-      <img src={`/story/${id}_before.webp`} alt="" className="absolute inset-0 h-full w-full object-cover" loading={eager ? "eager" : "lazy"} decoding="async" />
+      <img src={`/story/${id}_before.webp?v=${STORY_V}`} alt="" className="absolute inset-0 h-full w-full object-cover" loading={eager ? "eager" : "lazy"} decoding="async" />
       <motion.img
-        src={`/story/${id}_after.webp`}
+        src={`/story/${id}_after.webp?v=${STORY_V}`}
         alt=""
         className="absolute inset-0 h-full w-full object-cover"
         initial={false}
