@@ -518,3 +518,14 @@ the fact stops believing every other term.
   collapsed to zero height on phones until fixed.
 - Owner reviews /preview; on approval it replaces `/` and the old flow moves
   under `/build`.
+- 2026-09-10 (later): captions rewritten to the founder's brief — money and
+  status ("the admission is yours, not the institute's next door", "money comes
+  in while you sleep") and a sixth closing chapter, "Any owner. Any trade.":
+  from closing the day alone to running it like a CEO, "for less than one
+  salary a month", with the managed-plan price live in the visitor's currency.
+  Opening: "Businesses like yours already run this way. Why not yours?"
+- Regional plan (not built yet): same chapters everywhere; per-region
+  differences live in three places already keyed by country — prices/currency
+  (done), CTA channel (WhatsApp / WhatsApp+call / Telegram), and caption
+  variants (`story.*` per region: IN, GULF, INTL). Scene art regionalised only
+  if a market actually shows up in Visitors → Countries.
