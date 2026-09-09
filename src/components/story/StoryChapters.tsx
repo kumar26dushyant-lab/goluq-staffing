@@ -152,8 +152,8 @@ function Chapter({ id, index, onEnter }: { id: ChapterId; index: number; onEnter
       {/* Phone: the scene is the screen. */}
       <div className="relative min-h-[100svh] lg:hidden">
         <Scene id={id} after={after} eager={index === 0} reduced={reduced} className="absolute inset-0" />
-        <div className="absolute inset-x-0 bottom-0 h-[62%] bg-gradient-to-t from-black/90 via-black/60 to-transparent" aria-hidden="true" />
-        <div className="absolute inset-x-0 bottom-0 z-10 px-5 pb-24 sm:px-8">{words(true)}</div>
+        <div className="absolute inset-x-0 bottom-0 h-[66%] bg-gradient-to-t from-black/95 via-black/65 to-transparent" aria-hidden="true" />
+        <div className="absolute inset-x-0 bottom-0 z-10 px-5 pb-28 pr-24 sm:px-8">{words(true)}</div>
         {index === 0 && (
           <motion.div aria-hidden="true" animate={reduced ? undefined : { y: [0, 6, 0] }} transition={{ repeat: Infinity, duration: 1.6 }} className="absolute bottom-6 left-1/2 z-10 -translate-x-1/2 text-white/70">
             <ChevronDown size={22} />

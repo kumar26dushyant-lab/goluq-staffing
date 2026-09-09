@@ -499,3 +499,22 @@ the fact stops believing every other term.
   `server/index.ts` (`/api/admin/products/generate`, writes to /media).
 - Not yet: video in the Meta catalog (Meta shows images only) — the video is
   kept for product replies and broadcasts; per-tenant admin login for clients.
+
+### Homepage story draft (2026-09-10) — live at /preview (noindex)
+- The homepage rebuilt as a story: five chapters (coaching institute, FMCG
+  distributor, CA firm, garment wholesaler, four-office claims firm), each one
+  screen: "before" scene dissolving into "with GoLuQ", one line each, product
+  name, one button "This is my problem" → opens the guide with that problem
+  already said (`goluq:ask` event handled in AssistantChat). Then the two
+  product cards (live prices), a reserved customer-stories section (video
+  placeholder until Ashwin's arrives), the founder with the new headshot,
+  footer. EN/HI captions under `story.*`.
+- Art: Nano Banana Pro, 4:5, "after" scenes generated with the "before" as a
+  reference image so each chapter is the same person (`scratchpad/story/
+  scenes.py`); exported to `public/story/*.webp`.
+- Verified with phone-size CDP screenshots (`scratchpad/shot2.cjs`, picks the
+  page target, skips the splash via sessionStorage). Lesson: Tailwind
+  `relative` beats `absolute` when both are on one element — a scene wrapper
+  collapsed to zero height on phones until fixed.
+- Owner reviews /preview; on approval it replaces `/` and the old flow moves
+  under `/build`.
