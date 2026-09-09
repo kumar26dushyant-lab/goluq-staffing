@@ -1,12 +1,13 @@
 /// <reference types="@cloudflare/workers-types" />
 
-import { conciergeReply, type ConciergeEnv, type ConciergeMsg } from "../../lib/concierge";
+import { conciergeReply, conciergeReplyWithCard, type ConciergeEnv, type ConciergeMsg } from "../../lib/concierge";
 import { classifyReply } from "../../lib/gemini";
 import { sendMail, mailEnabled, type MailEnv } from "../../lib/mailer";
-import { getOwnerEmail } from "../../lib/settings";
+import { getOwnerEmail, getSetting } from "../../lib/settings";
 import { tgAlertOwner, tgEscape, type TgButton, type TgEnv } from "../../lib/telegram";
 import {
-  waConfig, waReady, waSendText, waMarkRead, waVerifySignature, type WaEnv, type WaConfig,
+  waConfig, waReady, waSendText, waSendProduct, waSendProductList, waMarkRead, waVerifySignature,
+  type WaEnv, type WaConfig,
 } from "../../lib/whatsapp";
 
 interface Env extends ConciergeEnv, WaEnv, MailEnv, TgEnv {
@@ -39,6 +40,8 @@ interface Inbound {
   from: string;
   text: string;
   name: string;
+  /** Set when the customer sent a cart from the catalogue. */
+  order?: { retailerId: string; qty: number }[];
 }
 
 /** Pull the text messages out of a Meta webhook payload; ignore everything else. */
@@ -52,14 +55,24 @@ function parseInbound(body: any): Inbound[] {
       const nameOf = (wa: string) =>
         (v.contacts || []).find((c: any) => c?.wa_id === wa)?.profile?.name || "";
       for (const m of v.messages) {
-        const text =
+        let text =
           m?.text?.body ||
           m?.button?.text ||
           m?.interactive?.button_reply?.title ||
           m?.interactive?.list_reply?.title ||
           "";
         if (!m?.id || !m?.from) continue;
-        out.push({ id: m.id, from: String(m.from), text: String(text), name: nameOf(m.from) });
+        // A cart sent from the catalogue. Stored as readable text so the
+        // transcript, the guide and the owner all see the same thing.
+        let order: Inbound["order"];
+        if (m?.type === "order" && Array.isArray(m?.order?.product_items)) {
+          order = m.order.product_items.map((p: any) => ({
+            retailerId: String(p?.product_retailer_id || ""),
+            qty: Number(p?.quantity || 1),
+          }));
+          text = "Cart: " + order.map((o) => `${o.retailerId} ×${o.qty}`).join(", ") + (m.order.text ? ` — ${m.order.text}` : "");
+        }
+        out.push({ id: m.id, from: String(m.from), text: String(text), name: nameOf(m.from), ...(order ? { order } : {}) });
       }
     }
   }
@@ -267,6 +280,36 @@ async function handleMessage(env: Env, cfg: WaConfig, m: Inbound): Promise<void>
     await notifyOwner(env, m, "asked to speak to a person", { telegram: false });
   }
 
+  const why = wantsHuman ? "asked to speak to a person" : isNew ? "new WhatsApp conversation" : "";
+  const catalogId = (await getSetting(db, "wa_catalog_id")) || "";
+
+  // A cart is a buying signal, not a question: tell the owner at once and let
+  // the guide confirm rather than sell.
+  if (m.order?.length) {
+    await notifyOwner(env, m, "sent a cart from the catalogue");
+  }
+
+  // "Price list" / "catalogue" is the one request with a better answer than
+  // prose: the whole catalogue as tappable products.
+  if (catalogId && !m.order && CATALOGUE_ASK.test(m.text)) {
+    const sent = await waSendProductList(
+      cfg, m.from, catalogId,
+      lang === "hi" ? "GoLuQ की सेवाएँ" : "GoLuQ services",
+      lang === "hi"
+        ? "यहाँ हमारी पूरी सूची है। किसी पर टैप करके देखिए, या बताइए आपके बिज़नेस में क्या अटकता है — मैं सही चीज़ सुझाऊँगा।"
+        : "Here is everything we build and set up. Tap any item to see it, or tell me what is slowing your business down and I will point you to the right one.",
+      CATALOGUE_SECTIONS,
+      lang === "hi" ? "कीमतें भारत के लिए, ₹ में" : "Prices for India, in ₹"
+    );
+    if (sent.ok) {
+      await db.prepare(`INSERT INTO chat_messages (session_id, role, content, created_at) VALUES (?, 'guide', ?, datetime('now'))`)
+        .bind(sid, "[Sent the catalogue as a product list]").run();
+      await tgPush(env, m, sid, { why, reply: "(sent the catalogue as a product list)" });
+      return;
+    }
+    console.log("product list not sent:", sent.error);
+  }
+
   const history = await db
     .prepare("SELECT role, content FROM chat_messages WHERE session_id = ? ORDER BY id DESC LIMIT 10")
     .bind(sid)
@@ -276,20 +319,23 @@ async function handleMessage(env: Env, cfg: WaConfig, m: Inbound): Promise<void>
     .reverse()
     .map((r) => ({ role: r.role === "visitor" ? "user" : "assistant", content: r.content }));
 
-  const reply = await conciergeReply(env, {
+  const already = await cardsSent(db, sid);
+  const { reply, card } = await conciergeReplyWithCard(env, {
     messages: msgs,
     lang,
     country: countryFromPhone(m.from),
+    cardIds: catalogId ? CARD_IDS.filter((id) => !already.includes(id)) : [],
     context:
       "\nThe customer is messaging the GoLuQ business number on WhatsApp, so keep replies SHORT — two or three lines, the way people actually message. " +
       "They came to us, which means they already have something in mind: find out what business they run and what they need, then name a price. " +
       "You cannot show them a demo here, so close on either a quote or a call from a real person." +
+      (m.order?.length
+        ? " THEY JUST SENT A CART FROM OUR CATALOGUE (listed above as 'Cart: …'). Thank them, confirm what they picked in plain words, and say Dushyant will message them to agree scope and next steps — do not invent totals or delivery dates."
+        : "") +
       (wantsHuman
         ? " THEY HAVE ASKED TO SPEAK TO A PERSON. Say plainly that Dushyant has been told and will reply here himself shortly. Do not argue or try to handle it yourself — but do ask what they need, so he has it in front of him when he arrives."
         : ""),
   });
-
-  const why = wantsHuman ? "asked to speak to a person" : isNew ? "new WhatsApp conversation" : "";
 
   const sent = await waSendText(cfg, m.from, reply);
   if (!sent.ok) {
@@ -308,8 +354,55 @@ async function handleMessage(env: Env, cfg: WaConfig, m: Inbound): Promise<void>
     .bind(sid, reply.slice(0, 2000))
     .run();
 
+  // The product card follows the words, never replaces them.
+  if (card && catalogId) {
+    const shown = await waSendProduct(cfg, m.from, catalogId, card);
+    if (shown.ok) {
+      await rememberCard(db, sid, already, card);
+      await db.prepare(`INSERT INTO chat_messages (session_id, role, content, created_at) VALUES (?, 'guide', ?, datetime('now'))`)
+        .bind(sid, `[Showed product card: ${card}]`).run();
+    } else {
+      console.log("product card not sent:", shown.error);
+    }
+  }
+
   if (isNew && !wantsHuman) await notifyOwner(env, m, "new WhatsApp conversation", { telegram: false });
-  await tgPush(env, m, sid, { why, reply });
+  await tgPush(env, m, sid, { why, reply: card ? `${reply}\n[+ product card: ${card}]` : reply });
+}
+
+/** Ways people ask for the whole list, in the languages they write. */
+const CATALOGUE_ASK = /\b(price\s*list|catalog(ue)?|rate\s*list|all\s+services|services\s+list|what\s+all\s+do\s+you\s+(do|offer))\b|कैटलॉग|रेट\s*लिस्ट|प्राइस\s*लिस्ट|सारी\s*सेवाएँ/i;
+
+/** Catalogue ids the guide may show as cards — one per pricing row that sells on its own. */
+const CARD_IDS = [
+  "whatsappOffice", "whatsappStore",
+  "tollfree", "virtualNumber", "waApi", "voiceCampaign", "txnSms", "promoSms", "missedCall",
+  "automation", "whatsapp", "digitalEmployee", "website", "app", "offline", "platform",
+];
+
+const CATALOGUE_SECTIONS = [
+  { title: "Complete systems", ids: ["whatsappOffice", "whatsappStore"] },
+  { title: "Communication", ids: ["tollfree", "virtualNumber", "waApi", "voiceCampaign", "txnSms", "promoSms", "missedCall"] },
+  { title: "Software builds", ids: ["automation", "whatsapp", "digitalEmployee", "website", "app", "offline", "platform"] },
+];
+
+/** Cards already shown in this thread — a card repeated is a nag. */
+async function cardsSent(db: D1Database, sid: string): Promise<string[]> {
+  try {
+    const row = await db.prepare("SELECT cards_sent FROM chat_sessions WHERE id = ?").bind(sid).first<{ cards_sent: string | null }>();
+    const list = JSON.parse(row?.cards_sent || "[]");
+    return Array.isArray(list) ? list.map(String) : [];
+  } catch {
+    return [];
+  }
+}
+async function rememberCard(db: D1Database, sid: string, already: string[], card: string): Promise<void> {
+  try {
+    await db.prepare("UPDATE chat_sessions SET cards_sent = ? WHERE id = ?")
+      .bind(JSON.stringify([...already, card]), sid).run();
+  } catch (e) {
+    console.log("cards_sent not saved:", String(e).slice(0, 120));
+  }
 }
 
 /**

@@ -90,6 +90,8 @@ for (const sql of [
   `ALTER TABLE commissions ADD COLUMN project_id INTEGER`,
   `ALTER TABLE commissions ADD COLUMN basis_inr REAL`,
   `ALTER TABLE commissions ADD COLUMN note TEXT`,
+  // Product cards already shown in a WhatsApp thread, so none is repeated.
+  `ALTER TABLE chat_sessions ADD COLUMN cards_sent TEXT`,
 ]) {
   try {
     sqlite.exec(sql);

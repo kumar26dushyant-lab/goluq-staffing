@@ -120,6 +120,29 @@ export function conciergeFallback(lang: string, money: (n: number) => string = i
 }
 
 /**
+ * The guide's reply plus, when one is clearly relevant, the id of a catalogue
+ * product to show as a card. The model is asked to end its reply with a tag
+ * naming ONE product from `cardIds` or "none"; the tag is stripped before the
+ * text goes to the customer. A card is a strong gesture — it must follow a
+ * customer asking about that thing, not be pushed at every turn.
+ */
+export async function conciergeReplyWithCard(
+  env: ConciergeEnv,
+  opts: { messages: ConciergeMsg[]; lang: string; context: string; country?: string; cardIds: string[] }
+): Promise<{ reply: string; card: string | null }> {
+  const ids = opts.cardIds.filter(Boolean);
+  const instruction = ids.length
+    ? `\nAfter your reply, on a new final line, write exactly [[card:ID]] where ID is the ONE catalogue id the customer is clearly asking about, from this list: ${ids.join(", ")}. ` +
+      `If they are not asking about a specific service yet, or you already showed it, write [[card:none]]. This tag is removed before sending; never mention it.`
+    : "";
+  const raw = await conciergeReply(env, { ...opts, context: opts.context + instruction });
+  const m = raw.match(/\[\[card:([a-zA-Z]+)\]\]/);
+  const card = m && ids.includes(m[1]) ? m[1] : null;
+  const reply = raw.replace(/\s*\[\[card:[^\]]*\]\]\s*/g, "").trim();
+  return { reply: reply || raw, card };
+}
+
+/**
  * Ask the guide for its next line.
  *
  *  is the one-paragraph situational brief — which page the visitor is

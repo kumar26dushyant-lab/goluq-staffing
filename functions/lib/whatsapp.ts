@@ -121,6 +121,59 @@ export async function waSendTemplate(
   });
 }
 
+/**
+ * One product from the connected Meta catalog, as a tappable card under a line
+ * of text. Only deliverable inside the 24-hour window, like any free-form send.
+ */
+export async function waSendProduct(
+  c: WaConfig,
+  to: string,
+  catalogId: string,
+  retailerId: string,
+  body = ""
+): Promise<WaResult> {
+  if (!waReady(c)) return { ok: false, error: "whatsapp_not_configured" };
+  return graph(c, {
+    to: waNormalize(to),
+    type: "interactive",
+    interactive: {
+      type: "product",
+      ...(body ? { body: { text: String(body).slice(0, 1024) } } : {}),
+      action: { catalog_id: catalogId, product_retailer_id: retailerId },
+    },
+  });
+}
+
+/** Several products grouped in sections — the "price list" a customer asks for. */
+export async function waSendProductList(
+  c: WaConfig,
+  to: string,
+  catalogId: string,
+  header: string,
+  body: string,
+  sections: { title: string; ids: string[] }[],
+  footer = ""
+): Promise<WaResult> {
+  if (!waReady(c)) return { ok: false, error: "whatsapp_not_configured" };
+  return graph(c, {
+    to: waNormalize(to),
+    type: "interactive",
+    interactive: {
+      type: "product_list",
+      header: { type: "text", text: String(header).slice(0, 60) },
+      body: { text: String(body).slice(0, 1024) },
+      ...(footer ? { footer: { text: String(footer).slice(0, 60) } } : {}),
+      action: {
+        catalog_id: catalogId,
+        sections: sections.slice(0, 10).map((s) => ({
+          title: s.title.slice(0, 24),
+          product_items: s.ids.slice(0, 30).map((id) => ({ product_retailer_id: id })),
+        })),
+      },
+    },
+  });
+}
+
 /** Mark the customer's message read, so they see the blue ticks while we think. */
 export async function waMarkRead(c: WaConfig, messageId: string): Promise<void> {
   if (!waReady(c) || !messageId) return;
