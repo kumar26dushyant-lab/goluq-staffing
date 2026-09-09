@@ -14,6 +14,7 @@ import { Today } from "../components/admin/Today";
 import { Enquiries } from "../components/admin/Enquiries";
 import { Partners } from "../components/admin/Partners";
 import { EmailInbox } from "../components/admin/EmailInbox";
+import { Store } from "../components/admin/Store";
 import { BrandMark } from "../components/BrandMark";
 import { useTranslation } from "react-i18next";
 import { inputClass } from "../lib/ui";
@@ -25,7 +26,7 @@ import {
 
 type Section =
   | "today" | "leads" | "chat" | "visitors" | "pricing"
-  | "bot" | "content" | "inbox" | "affiliates" | "projects" | "campaigns" | "marketing" | "testimonials" | "settings";
+  | "bot" | "content" | "inbox" | "affiliates" | "projects" | "campaigns" | "marketing" | "testimonials" | "settings" | "store";
 
 export function Admin() {
   const [authed, setAuthed] = useState(false);
@@ -131,6 +132,7 @@ export function Admin() {
             {section === "projects" && <Projects />}
             {section === "campaigns" && <Campaigns />}
             {section === "marketing" && <Marketing />}
+            {section === "store" && <Store />}
             {section === "testimonials" && <TestimonialsPanel />}
             {section === "settings" && <SettingsPanel />}
           </main>
@@ -164,6 +166,7 @@ const SECTION_META: Record<Section, { title: string; desc: string }> = {
   leads: { title: "Enquiries", desc: "Everyone who left a number. WhatsApp, call, and mark where it stands." },
   inbox: { title: "Email", desc: "Mail to the business address, answered as the domain." },
   pricing: { title: "Pricing & offers", desc: "One list drives the site, the guide and WhatsApp. Live on save." },
+  store: { title: "Store", desc: "Products behind your WhatsApp catalog. Photograph, price, sync." },
   campaigns: { title: "Campaigns", desc: "Approved templates to people who gave you their number." },
   testimonials: { title: "Testimonials", desc: "Real customers, in their words. Nothing shows until you switch it live." },
   marketing: { title: "Marketing", desc: "Social cards from a prompt." },
@@ -192,6 +195,7 @@ const GROUPS: { id: string; label: string; icon: typeof Users; sections: { id: S
     { id: "inbox", label: "Email", icon: Mail },
   ] },
   { id: "sell", label: "Sell", icon: Megaphone, sections: [
+    { id: "store", label: "Store", icon: ImageIcon },
     { id: "pricing", label: "Pricing & offers", icon: IndianRupee },
     { id: "campaigns", label: "Campaigns", icon: Megaphone },
     { id: "testimonials", label: "Testimonials", icon: Video },

@@ -45,6 +45,41 @@ export async function geminiText(env: GeminiEnv, prompt: string, maxTokens = 400
 }
 
 /** Classify a customer's WhatsApp reply. Falls back to keywords without Gemini. */
+/**
+ * An image from Gemini's image models ("Nano Banana"). Optional input images
+ * let it work FROM a photo — a clean product shot from a phone picture, a
+ * catalogue card with the real product as the hero. Returns PNG bytes as
+ * base64, or null with the reason.
+ */
+export async function geminiImage(
+  env: GeminiEnv,
+  prompt: string,
+  inputs: { mime: string; base64: string }[] = []
+): Promise<{ base64: string; mime: string } | { error: string }> {
+  if (!geminiEnabled(env)) return { error: "Gemini is not configured." };
+  const parts: unknown[] = [{ text: prompt }, ...inputs.map((i) => ({ inlineData: { mimeType: i.mime, data: i.base64 } }))];
+  const body = JSON.stringify({
+    contents: [{ parts }],
+    generationConfig: { responseModalities: ["IMAGE"], imageConfig: { aspectRatio: "1:1" } },
+  });
+  for (const model of ["gemini-3-pro-image-preview", "gemini-2.5-flash-image"]) {
+    try {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+        method: "POST",
+        headers: { "x-goog-api-key": env.GEMINI_API_KEY as string, "Content-Type": "application/json" },
+        body,
+      });
+      const j: any = await res.json().catch(() => ({}));
+      if (!res.ok || j.error) continue;
+      const img = (j?.candidates?.[0]?.content?.parts || []).find((p: any) => p?.inlineData);
+      if (img) return { base64: String(img.inlineData.data), mime: String(img.inlineData.mimeType || "image/png") };
+    } catch {
+      /* try the next model */
+    }
+  }
+  return { error: "The image model did not return a picture. Try again or change the wording." };
+}
+
 export async function classifyReply(
   env: GeminiEnv,
   text: string

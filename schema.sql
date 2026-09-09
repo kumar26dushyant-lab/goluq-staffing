@@ -380,3 +380,31 @@ CREATE TABLE IF NOT EXISTS bookings (
   updated_at TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_bookings_start ON bookings(starts_at);
+
+-- ── Store products ──────────────────────────────────────────────────────────
+-- The catalogue behind the WhatsApp catalog: edited in the cockpit, pushed to
+-- Meta on demand. `tenant` exists so the same engine can run a client's store
+-- (the WhatsApp Store product) without a rewrite; for now it is 'goluq'.
+CREATE TABLE IF NOT EXISTS products (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  tenant TEXT NOT NULL DEFAULT 'goluq',
+  retailer_id TEXT NOT NULL,           -- stable id sent to Meta; pricing id for the service rows
+  name TEXT NOT NULL,
+  description TEXT,
+  price_inr INTEGER NOT NULL DEFAULT 0,
+  currency TEXT NOT NULL DEFAULT 'INR',
+  image_path TEXT,                     -- /media/… or /catalog/… (served by us)
+  extra_images TEXT,                   -- JSON array of paths
+  video_path TEXT,                     -- /media/….mp4, used in replies/broadcasts
+  url TEXT,
+  category TEXT,
+  availability TEXT NOT NULL DEFAULT 'in stock',
+  sort_order INTEGER DEFAULT 0,
+  live INTEGER NOT NULL DEFAULT 1,     -- 0 = hidden (removed from Meta on sync)
+  meta_id TEXT,                        -- Meta product id once created
+  synced_at TEXT,
+  sync_error TEXT,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_products_tenant_rid ON products(tenant, retailer_id);

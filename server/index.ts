@@ -34,6 +34,8 @@ import { onRequestPost as tgWebhook } from "../functions/api/tg/webhook";
 import { onRequestGet as tgCheckGet, onRequestPost as tgCheckPost } from "../functions/api/admin/tg-check";
 import { onRequestGet as adminToday } from "../functions/api/admin/today";
 import { onRequestPost as bookingsInbound } from "../functions/api/bookings/inbound";
+import { onRequestGet as adminProductsGet, onRequestPost as adminProductsPost } from "../functions/api/admin/products";
+import { geminiImage } from "../functions/lib/gemini";
 import { checkAdmin } from "../functions/lib/admin";
 import { writeFileSync, existsSync, statSync, createReadStream } from "node:fs";
 import { extname, basename } from "node:path";
@@ -255,6 +257,8 @@ app.post("/api/tg/webhook", (c) => callFn(tgWebhook as Handler, c.req.raw));
 app.get("/api/admin/tg-check", (c) => callFn(tgCheckGet as Handler, c.req.raw));
 app.get("/api/admin/today", (c) => callFn(adminToday as Handler, c.req.raw));
 app.post("/api/bookings/inbound", (c) => callFn(bookingsInbound as Handler, c.req.raw));
+app.get("/api/admin/products", (c) => callFn(adminProductsGet as Handler, c.req.raw));
+app.post("/api/admin/products", (c) => callFn(adminProductsPost as Handler, c.req.raw));
 app.post("/api/admin/tg-check", (c) => callFn(tgCheckPost as Handler, c.req.raw));
 
 // ── Uploads ──────────────────────────────────────────────────────────────────
@@ -282,6 +286,50 @@ app.post("/api/admin/upload", async (c) => {
   const name = randomBytes(12).toString("hex") + ext;
   writeFileSync(join(UPLOAD_DIR, name), Buffer.from(await file.arrayBuffer()));
   return c.json({ ok: true, path: "/media/" + name });
+});
+
+/**
+ * A product picture from the image model, saved under /media like an upload.
+ *   { mode: "clean" | "card" | "prompt", name, description, imagePath?, prompt? }
+ * "clean" and "card" work FROM the owner's photo (same product, kept exactly);
+ * "prompt" is free text. Never touches the product row — the owner chooses
+ * "Use this" or "Keep old" in the cockpit.
+ */
+app.post("/api/admin/products/generate", async (c) => {
+  if (!(await checkAdmin(c.req.raw, env as { DB: unknown; ADMIN_SECRET?: string }))) {
+    return c.json({ ok: false, error: "unauthorised" }, 401);
+  }
+  const b = await c.req.json().catch(() => ({})) as Record<string, string>;
+  const mode = String(b.mode || "prompt");
+  const name = String(b.name || "").slice(0, 120);
+  const desc = String(b.description || "").slice(0, 600);
+  const inputs: { mime: string; base64: string }[] = [];
+  const src = basename(String(b.imagePath || ""));
+  if ((mode === "clean" || mode === "card") && src) {
+    const file = join(UPLOAD_DIR, src);
+    const type = MEDIA_TYPES[extname(src).toLowerCase()];
+    if (existsSync(file) && type && type.startsWith("image/")) {
+      inputs.push({ mime: type, base64: readFileSync(file).toString("base64") });
+    } else if (String(b.imagePath || "").startsWith("/catalog/")) {
+      const f2 = join(DIST, "catalog", src);
+      if (existsSync(f2)) inputs.push({ mime: "image/jpeg", base64: readFileSync(f2).toString("base64") });
+    }
+  }
+  if ((mode === "clean" || mode === "card") && !inputs.length) {
+    return c.json({ ok: false, error: "Take or upload a photo first." }, 400);
+  }
+  const BRAND = "brand colours teal #0E9AAE, blue #2563EB, orange #EA580C, dark navy text #0E1629, very light off-white background";
+  const prompt =
+    mode === "clean"
+      ? `Studio product photograph of EXACTLY the item in the provided photo — same product, same colours, pattern, shape and details, nothing added or changed — presented cleanly: neat, wrinkle-free, centred on a plain very light background with soft daylight and a gentle shadow. Square 1:1, fills the frame, no text, no logos, no people, no watermark.`
+      : mode === "card"
+        ? `Square 1:1 catalogue card in the style of a premium product one-pager: ${BRAND}, white rounded tiles with soft shadows. Hero: the EXACT product from the provided photo (unchanged) on the right. Left: headline in large bold navy: ${name || "Product"}. ${desc ? `Sub-headline: ${desc.split(/[.\n]/)[0].slice(0, 90)}.` : ""} Below: three white icon tiles with large realistic 3D icons and two-word labels describing the item. Leave the bottom 90 pixels empty. Minimal text, perfectly aligned, no people, no watermark, no prices. All text spelled exactly as given.`
+        : `${String(b.prompt || "").slice(0, 600)}. Square 1:1 product image for a WhatsApp catalogue, clean and realistic, fills the frame, no text, no watermark.`;
+  const out = await geminiImage(env, prompt, inputs);
+  if ("error" in out) return c.json({ ok: false, error: out.error }, 502);
+  const fname = randomBytes(12).toString("hex") + (out.mime === "image/jpeg" ? ".jpg" : ".png");
+  writeFileSync(join(UPLOAD_DIR, fname), Buffer.from(out.base64, "base64"));
+  return c.json({ ok: true, path: "/media/" + fname });
 });
 
 const MEDIA_TYPES: Record<string, string> = {
