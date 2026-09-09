@@ -44,7 +44,7 @@ export function StoryChapters() {
 
 function Scene({ id, after, eager, reduced, className = "" }: { id: ChapterId; after: boolean; eager: boolean; reduced: boolean | null; className?: string }) {
   return (
-    <div className={`relative overflow-hidden ${className}`}>
+    <div className={`overflow-hidden ${className}`}>
       <img src={`/story/${id}_before.webp`} alt="" className="absolute inset-0 h-full w-full object-cover" loading={eager ? "eager" : "lazy"} decoding="async" />
       <motion.img
         src={`/story/${id}_after.webp`}
@@ -129,7 +129,7 @@ function Chapter({ id, index, onEnter }: { id: ChapterId; index: number; onEnter
               <button
                 type="button"
                 onClick={ask}
-                className={`inline-flex items-center gap-2 rounded-full px-5 py-3 text-base font-bold shadow-lg ${dark ? "bg-white text-ink" : "bg-fg text-base"}`}
+                className={`inline-flex items-center gap-2 rounded-full px-5 py-3 text-base font-bold shadow-lg ${dark ? "bg-white text-[#0B1020]" : "bg-fg text-[rgb(var(--c-base))]"}`}
               >
                 {t("story.cta")} <ArrowRight size={17} />
               </button>
@@ -163,7 +163,7 @@ function Chapter({ id, index, onEnter }: { id: ChapterId; index: number; onEnter
 
       {/* Desk: portrait scene beside the words. */}
       <div className="mx-auto hidden min-h-[100svh] w-full max-w-6xl grid-cols-2 items-center gap-12 px-8 lg:grid">
-        <Scene id={id} after={after} eager={index === 0} reduced={reduced} className="aspect-[4/5] max-h-[82vh] rounded-3xl shadow-glass" />
+        <Scene id={id} after={after} eager={index === 0} reduced={reduced} className="relative aspect-[4/5] max-h-[82vh] rounded-3xl shadow-glass" />
         <div>{words(false)}</div>
       </div>
     </section>
