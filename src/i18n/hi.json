@@ -1666,38 +1666,42 @@
     "after": "GoLuQ के साथ",
     "cta": "यही मेरी समस्या है",
     "tap": "टैप करके देखिए क्या बदलता है",
+    "share": "किसी बिज़नेस वाले दोस्त को भेजें",
+    "shareText": "यह देखा और आपका ख़याल आया — {{line}} {{url}}",
+    "voiceOn": "आवाज़ चालू",
+    "voiceOff": "आवाज़ बंद",
     "chapters": {
       "coaching": {
         "who": "कोचिंग इंस्टीट्यूट",
-        "before": "रात 9 बजे। एक अभिभावक का फ़ोन। कोई नहीं उठाता।",
-        "after": "1800 नंबर रात 9 बजे भी उठता है। एडमिशन आपका, बगल वाले इंस्टीट्यूट का नहीं।",
+        "before": "रात 9 बजे। एक अभिभावक का फ़ोन। कोई नहीं उठाता। कल वे उस इंस्टीट्यूट में जाते हैं जिसने उठाया।",
+        "after": "आपका नंबर रात 9 बजे उठता है, विज़िट बुक करता है, वापस कॉल करता है। एडमिशन आपका।",
         "product": "टोल-फ़्री नंबर + डिजिटल रिसेप्शनिस्ट",
         "ask": "मेरा कोचिंग इंस्टीट्यूट है। शाम के बाद फ़ोन नहीं उठते और एडमिशन छूट जाते हैं। आप क्या सेट करेंगे और खर्च क्या होगा?"
       },
       "distributor": {
         "who": "FMCG डिस्ट्रीब्यूटर",
-        "before": "चालीस दुकानें, चालीस रिमाइंडर, एक आदमी का फ़ोन।",
+        "before": "चालीस दुकानें। चालीस रिमाइंडर। एक फ़ोन। जिस दुकान को किसी ने नहीं टोका, वही कभी नहीं देती।",
         "after": "रिमाइंडर अपने आप जाते हैं। पैसा तब भी आता है जब आप सो रहे हों।",
         "product": "WhatsApp ऑटोमेशन",
         "ask": "मैं डिस्ट्रीब्यूटर हूँ। पेमेंट रिमाइंडर और ऑर्डर फ़ॉलो-अप में पूरा दिन जाता है। आप क्या सेट करेंगे और खर्च क्या होगा?"
       },
       "ca": {
         "who": "CA फ़र्म",
-        "before": "बिलिंग वाला छुट्टी पर है। और उसके साथ वो सब जो उसे पता था।",
+        "before": "बिलिंग वाला छुट्टी पर है। और उसके साथ वो सब जो उसे पता था। क्लाइंट दरवाज़े पर है।",
         "after": "हर क्लाइंट, फ़ाइल और रेट एक जगह। फ़र्म आप चलाते हैं — फ़र्म आपको नहीं।",
         "product": "The WhatsApp Office",
         "ask": "मेरी CA फ़र्म है। एक स्टाफ़ छुट्टी पर हो तो क्लाइंट की फ़ाइलें और रेट गुम हो जाते हैं। WhatsApp Office कैसे काम करता है और खर्च क्या है?"
       },
       "garment": {
         "who": "गारमेंट होलसेलर",
-        "before": "हर दूसरे दिन नए डिज़ाइन, एक-एक चैट में भेजे हुए।",
-        "after": "एक अपलोड। पाँच देशों के खरीदार देखते हैं। ऑर्डर तब आते हैं जब आप चाय पी रहे हों।",
+        "before": "हर दूसरे दिन नए डिज़ाइन, एक-एक चैट में। खरीदार ने किसी तेज़ वाले से ऑर्डर कर लिया।",
+        "after": "एक अपलोड। पाँच देशों के खरीदार देखते हैं। ऑर्डर तब आते हैं जब आप चाय पी रही हों।",
         "product": "The WhatsApp Store",
-        "ask": "मैं गारमेंट होलसेलर हूँ, कई देशों में खरीदार हैं। नए डिज़ाइन एक-एक चैट में भेजता हूँ। WhatsApp Store कैसे काम करता है और खर्च क्या है?"
+        "ask": "मैं गारमेंट होलसेलर हूँ, कई देशों में खरीदार हैं। नए डिज़ाइन एक-एक चैट में भेजती हूँ। WhatsApp Store कैसे काम करता है और खर्च क्या है?"
       },
       "claims": {
         "who": "क्लेम फ़र्म, चार ऑफ़िस",
-        "before": "चार ऑफ़िस। किसी को स्टेटस नहीं पता।",
+        "before": "चार ऑफ़िस। किसी को स्टेटस नहीं पता। मालिक को सबसे बाद में पता चलता है।",
         "after": "एक स्क्रीन पर चारों दिखते हैं। CEO की तरह चलाना ऐसा दिखता है।",
         "product": "मल्टी-ब्रांच प्लेटफ़ॉर्म",
         "ask": "मेरे बिज़नेस की कई ब्रांच हैं और किसी को किसी चीज़ का स्टेटस नहीं पता। आप क्या बनाएँगे और खर्च क्या होगा?"
@@ -1705,9 +1709,60 @@
       "ceo": {
         "who": "कोई भी मालिक। कोई भी धंधा।",
         "before": "सब घर चले गए। आप अभी भी दिन का हिसाब बंद कर रहे हैं।",
-        "after": "हिसाब सिस्टम बंद करता है। बिज़नेस आप CEO की तरह चलाते हैं — महीने की एक तनख़्वाह से भी कम में।",
+        "after": "हिसाब सिस्टम बंद करता है। आप इसे CEO की तरह चलाते हैं — महीने की एक तनख़्वाह से कम में।",
         "product": "मैनेज्ड {{price}} प्रति माह से",
         "ask": "मैं चाहता हूँ मेरा बिज़नेस कॉर्पोरेट की तरह सिस्टम से चले, बिना कॉर्पोरेट बजट के। कहाँ से शुरू करूँ और खर्च क्या होगा?"
+      }
+    },
+    "regions": {
+      "gulf": {
+        "kicker": "Businesses across the Gulf already run this way.",
+        "chapters": {
+          "coaching": {
+            "who": "Training institute",
+            "after": "Your business number answers at 9 pm, books the visit, calls back. The enrolment is yours.",
+            "product": "Business number + Digital Receptionist"
+          },
+          "garment": {
+            "who": "Garment trader, buyers in five countries",
+            "after": "One upload. Buyers in five countries see it. Orders arrive while you drink your karak."
+          },
+          "ceo": {
+            "after": "The system closes the day. You run it like a CEO, for less than one salary a month."
+          }
+        }
+      },
+      "cis": {
+        "kicker": "Businesses across the region already run this way.",
+        "chapters": {
+          "coaching": {
+            "who": "Training centre",
+            "after": "Your business number answers at 9 pm, books the visit, calls back. The enrolment is yours.",
+            "product": "Business number + Digital Receptionist"
+          },
+          "garment": {
+            "who": "Garment importer",
+            "after": "One upload, on WhatsApp and Telegram. Buyers in five countries see it. Orders arrive while you drink your tea.",
+            "product": "The WhatsApp + Telegram Store"
+          },
+          "distributor": {
+            "after": "Reminders go out on their own, on WhatsApp and Telegram. Money comes in while you sleep."
+          }
+        }
+      },
+      "intl": {
+        "kicker": "Businesses like yours already run this way.",
+        "chapters": {
+          "coaching": {
+            "who": "Training institute",
+            "after": "Your business number answers at 9 pm, books the visit, calls back. The enrolment is yours.",
+            "product": "Business number + Digital Receptionist"
+          },
+          "garment": {
+            "who": "Wholesaler, buyers in five countries",
+            "after": "One upload. Buyers in five countries see it. Orders arrive while you drink your coffee."
+          }
+        }
       }
     },
     "founder": {

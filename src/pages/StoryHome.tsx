@@ -8,6 +8,7 @@ import { ProductsBand } from "../components/ProductsBand";
 import { Testimonials } from "../components/Testimonials";
 import { SiteFooter } from "../components/SiteFooter";
 import { useSiteConfig } from "../lib/siteConfig";
+import { useRegion } from "../lib/region";
 
 /**
  * The homepage as a story — currently at /preview while the owner reviews it.
@@ -21,6 +22,7 @@ export function StoryHome() {
   const reduced = useReducedMotion();
   const cfg = useSiteConfig();
   const wa = cfg?.whatsapp || "";
+  const region = useRegion();
 
   // A draft must not be indexed, and chapters should snap like a reel.
   useEffect(() => {
@@ -47,7 +49,7 @@ export function StoryHome() {
           animate={{ opacity: 1, y: 0 }}
           className="font-mono text-xs uppercase tracking-[0.28em] text-brand-luq"
         >
-          {t("story.kicker")}
+          {t(`story.regions.${region}.kicker`, { defaultValue: t("story.kicker") })}
         </motion.p>
         <motion.h1
           initial={reduced ? false : { opacity: 0, y: 10 }}

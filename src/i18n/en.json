@@ -1980,38 +1980,42 @@
     "after": "With GoLuQ",
     "cta": "This is my problem",
     "tap": "Tap to see what changes",
+    "share": "Send to a friend who runs a business",
+    "shareText": "Saw this and thought of you — {{line}} {{url}}",
+    "voiceOn": "Voice on",
+    "voiceOff": "Voice off",
     "chapters": {
       "coaching": {
         "who": "Coaching institute",
-        "before": "9 pm. A parent calls. Nobody answers.",
-        "after": "The 1800 number answers at 9 pm. The admission is yours, not the institute's next door.",
+        "before": "9 pm. A parent calls. Nobody answers. Tomorrow they join the institute that did.",
+        "after": "Your number answers at 9 pm, books the visit, calls back. The admission is yours.",
         "product": "Toll-free number + Digital Receptionist",
         "ask": "I run a coaching institute. Calls go unanswered after hours and we lose admissions. What would you set up, and what does it cost?"
       },
       "distributor": {
         "who": "FMCG distributor",
-        "before": "Forty shops, forty reminders, one man's phone.",
+        "before": "Forty shops. Forty reminders. One phone. The shop nobody chased is the one that never pays.",
         "after": "Reminders go out on their own. Money comes in while you sleep.",
         "product": "WhatsApp automations",
         "ask": "I am a distributor. Payment reminders and order follow-ups eat my day. What would you set up, and what does it cost?"
       },
       "ca": {
         "who": "CA firm",
-        "before": "The billing man is on leave. So is everything he knew.",
+        "before": "The billing man is on leave. So is everything he knew. The client is at the door.",
         "after": "Every client, file and rate in one place. You run the firm; it no longer runs you.",
         "product": "The WhatsApp Office",
         "ask": "I run a CA firm. When one staff member is away, client files and rates go missing. How does the WhatsApp Office work and what does it cost?"
       },
       "garment": {
         "who": "Garment wholesaler",
-        "before": "New designs every other day, sent one chat at a time.",
+        "before": "New designs every other day, sent one chat at a time. The buyer already ordered from someone faster.",
         "after": "One upload. Buyers in five countries see it. Orders arrive while you drink your chai.",
         "product": "The WhatsApp Store",
         "ask": "I am a garment wholesaler with buyers in several countries. I send new designs one chat at a time. How does the WhatsApp Store work and what does it cost?"
       },
       "claims": {
         "who": "Claims firm, four offices",
-        "before": "Four offices. Nobody knows the status.",
+        "before": "Four offices. Nobody knows the status. The owner finds out last.",
         "after": "One screen shows all four. This is what running it like a CEO looks like.",
         "product": "Multi-branch platform",
         "ask": "I run a business with several branches and nobody knows the status of anything. What would you build, and what does it cost?"
@@ -2019,9 +2023,60 @@
       "ceo": {
         "who": "Any owner. Any trade.",
         "before": "Everyone else went home. You are still closing the day.",
-        "after": "The system closes the day. You run the business like a CEO, for less than one salary a month.",
+        "after": "The system closes the day. You run it like a CEO, for less than one salary a month.",
         "product": "Managed from {{price}} a month",
         "ask": "I want my business to run like a corporate one, systems and all, without a corporate budget. Where do I start and what does it cost?"
+      }
+    },
+    "regions": {
+      "gulf": {
+        "kicker": "Businesses across the Gulf already run this way.",
+        "chapters": {
+          "coaching": {
+            "who": "Training institute",
+            "after": "Your business number answers at 9 pm, books the visit, calls back. The enrolment is yours.",
+            "product": "Business number + Digital Receptionist"
+          },
+          "garment": {
+            "who": "Garment trader, buyers in five countries",
+            "after": "One upload. Buyers in five countries see it. Orders arrive while you drink your karak."
+          },
+          "ceo": {
+            "after": "The system closes the day. You run it like a CEO, for less than one salary a month."
+          }
+        }
+      },
+      "cis": {
+        "kicker": "Businesses across the region already run this way.",
+        "chapters": {
+          "coaching": {
+            "who": "Training centre",
+            "after": "Your business number answers at 9 pm, books the visit, calls back. The enrolment is yours.",
+            "product": "Business number + Digital Receptionist"
+          },
+          "garment": {
+            "who": "Garment importer",
+            "after": "One upload, on WhatsApp and Telegram. Buyers in five countries see it. Orders arrive while you drink your tea.",
+            "product": "The WhatsApp + Telegram Store"
+          },
+          "distributor": {
+            "after": "Reminders go out on their own, on WhatsApp and Telegram. Money comes in while you sleep."
+          }
+        }
+      },
+      "intl": {
+        "kicker": "Businesses like yours already run this way.",
+        "chapters": {
+          "coaching": {
+            "who": "Training institute",
+            "after": "Your business number answers at 9 pm, books the visit, calls back. The enrolment is yours.",
+            "product": "Business number + Digital Receptionist"
+          },
+          "garment": {
+            "who": "Wholesaler, buyers in five countries",
+            "after": "One upload. Buyers in five countries see it. Orders arrive while you drink your coffee."
+          }
+        }
       }
     },
     "founder": {
