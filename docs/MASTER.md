@@ -486,3 +486,16 @@ the fact stops believing every other term.
   number: product list sent; enquiry reply + card path exercised.
 - Helpers: `waSendProduct`, `waSendProductList` in lib/whatsapp.ts;
   `conciergeReplyWithCard` in lib/concierge.ts.
+
+### Store tab (2026-09-10) — the WhatsApp Store engine, first tenant = GoLuQ
+- Cockpit → Sell → Store: product grid; add/edit from a phone (camera capture
+  for photo, video upload), name, price, description, availability, show/hide.
+  Image model buttons: "Clean photo" (studio shot of the exact item from the
+  phone photo), "Catalogue card" (infographic with the real product as hero),
+  free prompt. Owner chooses "Use this" or "Keep old". "Sync to WhatsApp"
+  pushes create/update/remove to the Meta catalog; per-row sync errors shown.
+  Import seeded the 18 existing items. `products.tenant` reserved for client
+  stores. Endpoints: `/api/admin/products` (functions), image generation in
+  `server/index.ts` (`/api/admin/products/generate`, writes to /media).
+- Not yet: video in the Meta catalog (Meta shows images only) — the video is
+  kept for product replies and broadcasts; per-tenant admin login for clients.
