@@ -99,8 +99,8 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
       return Response.json({ ok: true });
     }
 
-    if (action === "import") return importFromMeta(env);
-    if (action === "sync") return syncToMeta(env);
+    if (action === "import") return await importFromMeta(env);
+    if (action === "sync") return await syncToMeta(env);
 
     return Response.json({ ok: false, error: "unknown action" }, { status: 400 });
   } catch (e) {
@@ -144,7 +144,7 @@ async function importFromMeta(env: Env): Promise<Response> {
                              live, meta_id, synced_at, created_at, updated_at)
        VALUES (?,?,?,?,?,?,'[]',?,?,?,1,?,datetime('now'),datetime('now'),datetime('now'))`
     ).bind(TENANT, rid, clip(p.name, 120), clip(p.description, 4000) || null, price, img || null, url || null,
-           priced?.category || null, String(p.availability || "in stock").replace("_", " ")).run();
+           priced?.category || null, String(p.availability || "in stock").replace("_", " "), String(p.id)).run();
     n++;
   }
   return Response.json({ ok: true, imported: n });
