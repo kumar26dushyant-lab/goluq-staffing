@@ -457,3 +457,18 @@ the fact stops believing every other term.
 - Pending templates `appointment_confirmed` and `appointment_reminder`
   (drafts in whatsapp-templates.md); once approved → confirmation on booking and
   an hourly reminders cron. Until then bookings reach Telegram only.
+
+### Meta catalog (2026-09-09)
+- Product catalog **GoLuQ**, id `4366824943570016`, owned by the business
+  (970474245742283), created and filled by API with all 18 catalogue rows —
+  names, honest descriptions, INR prices from the live pricing table, card
+  images at goluq.com/catalog, links to the product/services pages. Stored in
+  settings as `wa_catalog_id`. Commerce settings on the phone number: catalog
+  visible, cart enabled.
+- Re-sync after a price or copy change: `scp scripts/commerce-catalog.mjs` to
+  the VM and `node commerce-catalog.mjs` (idempotent; retailer_id = pricing id).
+- **Not possible by API**: connecting the catalog to the WABA
+  (`POST /{waba}/product_catalogs` → "Manage Catalog permission" even after
+  assigning the system user MANAGE on the catalog). Owner does it once in
+  WhatsApp Manager → Catalog → Connect catalog → GoLuQ. After that the guide can
+  send product cards (interactive product / product_list messages) — next build.
