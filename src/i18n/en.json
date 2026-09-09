@@ -1973,8 +1973,8 @@
     "cta": "See how it works"
   },
   "story": {
-    "kicker": "Five businesses. Five ordinary problems.",
-    "title": "See what changes.",
+    "kicker": "Businesses like yours already run this way.",
+    "title": "Why not yours?",
     "hint": "Scroll",
     "before": "Before",
     "after": "With GoLuQ",
@@ -1984,37 +1984,44 @@
       "coaching": {
         "who": "Coaching institute",
         "before": "9 pm. A parent calls. Nobody answers.",
-        "after": "The 1800 number answers, books the visit, and calls back.",
+        "after": "The 1800 number answers at 9 pm. The admission is yours, not the institute's next door.",
         "product": "Toll-free number + Digital Receptionist",
-        "ask": "I run a coaching institute. Calls go unanswered after hours and we lose admissions. What would you set up?"
+        "ask": "I run a coaching institute. Calls go unanswered after hours and we lose admissions. What would you set up, and what does it cost?"
       },
       "distributor": {
         "who": "FMCG distributor",
         "before": "Forty shops, forty reminders, one man's phone.",
-        "after": "Reminders go out on their own. Payments come in.",
+        "after": "Reminders go out on their own. Money comes in while you sleep.",
         "product": "WhatsApp automations",
-        "ask": "I am a distributor. Payment reminders and order follow-ups eat my day. What would you set up?"
+        "ask": "I am a distributor. Payment reminders and order follow-ups eat my day. What would you set up, and what does it cost?"
       },
       "ca": {
         "who": "CA firm",
         "before": "The billing man is on leave. So is everything he knew.",
-        "after": "Every client, every file, every rate — in one WhatsApp Office.",
+        "after": "Every client, file and rate in one place. You run the firm; it no longer runs you.",
         "product": "The WhatsApp Office",
-        "ask": "I run a CA firm. When one staff member is away, client files and rates go missing. How does the WhatsApp Office work?"
+        "ask": "I run a CA firm. When one staff member is away, client files and rates go missing. How does the WhatsApp Office work and what does it cost?"
       },
       "garment": {
         "who": "Garment wholesaler",
         "before": "New designs every other day, sent one chat at a time.",
-        "after": "One upload. Every buyer sees it. Orders in the chat.",
+        "after": "One upload. Buyers in five countries see it. Orders arrive while you drink your chai.",
         "product": "The WhatsApp Store",
-        "ask": "I am a garment wholesaler with buyers in several countries. I send new designs one chat at a time. How does the WhatsApp Store work?"
+        "ask": "I am a garment wholesaler with buyers in several countries. I send new designs one chat at a time. How does the WhatsApp Store work and what does it cost?"
       },
       "claims": {
         "who": "Claims firm, four offices",
         "before": "Four offices. Nobody knows the status.",
-        "after": "One system. The owner sees everything.",
+        "after": "One screen shows all four. This is what running it like a CEO looks like.",
         "product": "Multi-branch platform",
-        "ask": "I run a business with several branches and nobody knows the status of anything. What would you build?"
+        "ask": "I run a business with several branches and nobody knows the status of anything. What would you build, and what does it cost?"
+      },
+      "ceo": {
+        "who": "Any owner. Any trade.",
+        "before": "Everyone else went home. You are still closing the day.",
+        "after": "The system closes the day. You run the business like a CEO, for less than one salary a month.",
+        "product": "Managed from {{price}} a month",
+        "ask": "I want my business to run like a corporate one, systems and all, without a corporate budget. Where do I start and what does it cost?"
       }
     },
     "founder": {

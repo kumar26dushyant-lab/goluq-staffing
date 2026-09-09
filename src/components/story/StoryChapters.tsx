@@ -3,6 +3,7 @@ import { AnimatePresence, motion, useInView, useReducedMotion } from "framer-mot
 import { ArrowRight, ChevronDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useVoice } from "../../lib/voice";
+import { useMoney, usePricing } from "../../lib/siteConfig";
 
 /**
  * The homepage as a story: five chapters, one screen each.
@@ -21,7 +22,7 @@ import { useVoice } from "../../lib/voice";
  * page background is light in light mode. On a desk the scene is a portrait
  * card beside the words.
  */
-export const CHAPTERS = ["coaching", "distributor", "ca", "garment", "claims"] as const;
+export const CHAPTERS = ["coaching", "distributor", "ca", "garment", "claims", "ceo"] as const;
 export type ChapterId = (typeof CHAPTERS)[number];
 
 const BEAT_MS = 2200;
@@ -72,6 +73,12 @@ function Chapter({ id, index, onEnter }: { id: ChapterId; index: number; onEnter
 
   const before = t(`story.chapters.${id}.before`);
   const afterLine = t(`story.chapters.${id}.after`);
+  // The closing chapter names a real, live price — the managed plan — in the
+  // visitor's currency, so "less than one salary" is a checkable claim.
+  const pricing = usePricing();
+  const money = useMoney();
+  const managed = pricing.find((p) => p.id === "officeManaged");
+  const productLabel = t(`story.chapters.${id}.product`, { price: managed ? money(managed.offer ?? managed.from) : "" });
 
   useEffect(() => {
     if (!inView) {
@@ -124,7 +131,7 @@ function Chapter({ id, index, onEnter }: { id: ChapterId; index: number; onEnter
               onClick={(e) => e.stopPropagation()}
             >
               <span className="rounded-full border border-brand-luq/50 bg-brand-luq/15 px-3 py-1.5 text-sm font-semibold text-brand-luq">
-                {t(`story.chapters.${id}.product`)}
+                {productLabel}
               </span>
               <button
                 type="button"
