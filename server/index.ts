@@ -22,6 +22,7 @@ import { onRequestPost as adminLead } from "../functions/api/admin/lead";
 import { onRequestGet as adminAffiliates } from "../functions/api/admin/affiliates";
 import { onRequestGet as adminSettingsGet, onRequestPost as adminSettingsPost } from "../functions/api/admin/settings";
 import { onRequest as cronFollowups } from "../functions/api/cron/followups";
+import { onRequest as cronBriefs } from "../functions/api/cron/briefs";
 import { onRequestPost as waWebhook } from "../functions/api/wa/webhook";
 import { onRequestGet as waMetaVerify, onRequestPost as waMetaInbound } from "../functions/api/wa/meta";
 import { onRequestGet as waCheckGet, onRequestPost as waCheckPost } from "../functions/api/admin/wa-check";
@@ -94,6 +95,8 @@ for (const sql of [
   `ALTER TABLE commissions ADD COLUMN note TEXT`,
   // Product cards already shown in a WhatsApp thread, so none is repeated.
   `ALTER TABLE chat_sessions ADD COLUMN cards_sent TEXT`,
+  // Pre-call brief sent once per booking.
+  `ALTER TABLE bookings ADD COLUMN briefed_at TEXT`,
 ]) {
   try {
     sqlite.exec(sql);
@@ -393,6 +396,7 @@ app.post("/api/admin/pricing", (c) => callFn(adminPricingPost as Handler, c.req.
 app.get("/api/admin/settings", (c) => callFn(adminSettingsGet as Handler, c.req.raw));
 app.post("/api/admin/settings", (c) => callFn(adminSettingsPost as Handler, c.req.raw));
 app.all("/api/cron/followups", (c) => callFn(cronFollowups as Handler, c.req.raw));
+app.all("/api/cron/briefs", (c) => callFn(cronBriefs as Handler, c.req.raw));
 app.post("/api/wa/webhook", (c) => callFn(waWebhook as Handler, c.req.raw));
 // Official WhatsApp Business Platform. GET is Meta verifying the callback URL,
 // POST is a real customer message. Both must live at the SAME path — that single

@@ -23,3 +23,6 @@ _pkgcheck.mjs
 # Optimised, web-ready images belong in public/ instead.
 "Business plan"/
 Business plan/
+
+# Marketing masters (large binaries; hosted copies live under public/)
+marketing/

@@ -100,7 +100,8 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
     }
 
     if (action === "import") return await importFromMeta(env);
-    if (action === "sync") return await syncToMeta(env);
+    // force: push every live product again (used after images change on disk).
+    if (action === "sync") return await syncToMeta(env, b.force === true);
 
     return Response.json({ ok: false, error: "unknown action" }, { status: 400 });
   } catch (e) {
@@ -151,7 +152,7 @@ async function importFromMeta(env: Env): Promise<Response> {
 }
 
 /** Push every local change to Meta: create, update, or remove. */
-async function syncToMeta(env: Env): Promise<Response> {
+async function syncToMeta(env: Env, force = false): Promise<Response> {
   const cfg = await waConfig(env.DB, env);
   const catalog = (await getSetting(env.DB, "wa_catalog_id")) || "";
   if (!catalog || !cfg.accessToken) return Response.json({ ok: false, error: "No catalog connected yet." });
@@ -168,9 +169,13 @@ async function syncToMeta(env: Env): Promise<Response> {
         }
         continue;
       }
-      if (p.synced_at && p.synced_at >= p.updated_at && p.meta_id) continue;
+      if (!force && p.synced_at && p.synced_at >= p.updated_at && p.meta_id) continue;
       if (!p.image_path) throw new Error("needs a photo before it can go to WhatsApp");
       const extra = (() => { try { return JSON.parse(p.extra_images || "[]"); } catch { return []; } })();
+      // Meta caches a product image by its URL. A changed picture at the same
+      // path never shows up, so the URL carries a version stamp.
+      const stamp = Date.now().toString(36);
+      const versioned = (path: string | null) => (abs(path) ? `${abs(path)}${abs(path).includes("?") ? "&" : "?"}v=${stamp}` : "");
       const data: Record<string, unknown> = {
         name: p.name,
         description: p.description || p.name,
@@ -179,8 +184,8 @@ async function syncToMeta(env: Env): Promise<Response> {
         availability: p.availability === "out of stock" ? "out of stock" : "in stock",
         condition: "new",
         brand: "GoLuQ.com Digital Consultancy",
-        image_url: abs(p.image_path),
-        ...(extra.length ? { additional_image_urls: extra.map((x: string) => abs(x)) } : {}),
+        image_url: versioned(p.image_path),
+        ...(extra.length ? { additional_image_urls: extra.map((x: string) => versioned(x)) } : {}),
         url: abs(p.url) || `${ORIGIN}/services`,
       };
       if (p.meta_id) {

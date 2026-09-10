@@ -77,7 +77,8 @@ for (const [id, name, description, path] of ITEMS) {
     name, description,
     price: inr * 100, currency: "INR",
     availability: "in stock", condition: "new", brand: "GoLuQ.com Digital Consultancy",
-    image_url: `https://goluq.com/catalog/${id === "officeManaged" ? "whatsappOffice" : id === "storeManaged" ? "whatsappStore" : id}.jpg`,
+    // Versioned: Meta caches the picture by URL and would keep an old card.
+    image_url: `https://goluq.com/catalog/${id === "officeManaged" ? "whatsappOffice" : id === "storeManaged" ? "whatsappStore" : id}.jpg?v=${Date.now().toString(36)}`,
     url: `https://goluq.com${path}`,
   };
   try {
