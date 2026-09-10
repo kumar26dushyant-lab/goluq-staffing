@@ -48,8 +48,7 @@ export function StoryHome() {
       <TopBar showBack={false} onBack={() => {}} />
 
       {/* One breath before the story: the promise, then straight in. */}
-      {/* The voice pill sits in its own row on a phone; the hero starts below it. */}
-      <section className="mx-auto max-w-6xl px-5 pb-8 pt-20 sm:px-8 lg:pb-12 lg:pt-14">
+      <section className="mx-auto max-w-6xl px-5 pb-8 pt-8 sm:px-8 lg:pb-12 lg:pt-14">
         <motion.p
           initial={reduced ? false : { opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}

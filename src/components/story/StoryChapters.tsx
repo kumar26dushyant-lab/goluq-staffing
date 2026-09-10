@@ -53,7 +53,7 @@ function VoicePill() {
       type="button"
       onClick={toggleMute}
       aria-pressed={!muted}
-      className="fixed left-4 top-[72px] z-30 inline-flex items-center gap-2 rounded-full border border-white/25 bg-black/70 px-4 py-2.5 text-sm font-semibold text-white shadow-lg backdrop-blur lg:bottom-6 lg:left-6 lg:top-auto"
+      className="fixed bottom-4 left-4 z-30 inline-flex items-center gap-2 rounded-full border border-white/25 bg-black/70 px-4 py-2.5 text-sm font-semibold text-white shadow-lg backdrop-blur lg:bottom-6 lg:left-6"
     >
       {muted ? <VolumeX size={17} /> : <Volume2 size={17} className="text-brand-luq" />}
       {muted ? t("story.voiceOff") : t("story.voiceOn")}
@@ -205,7 +205,7 @@ function Chapter({ id, index, region, onEnter }: { id: ChapterId; index: number;
             </motion.div>
           )}
         </div>
-        <div className="flex flex-1 flex-col justify-start bg-[#0B1020] px-5 pb-24 pr-20 pt-4 sm:px-8">{words(true)}</div>
+        <div className="flex flex-1 flex-col justify-center bg-[#0B1020] px-5 pb-20 pr-20 pt-4 sm:px-8">{words(true)}</div>
       </div>
 
       {/* Desk: portrait scene beside the words. */}
