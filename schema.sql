@@ -408,3 +408,23 @@ CREATE TABLE IF NOT EXISTS products (
   updated_at TEXT NOT NULL
 );
 CREATE UNIQUE INDEX IF NOT EXISTS idx_products_tenant_rid ON products(tenant, retailer_id);
+
+-- ── Social posts ────────────────────────────────────────────────────────────
+-- Posts composed in the cockpit and published to the Facebook Page (and
+-- Instagram once linked) through Meta's Graph API. Drafts wait; published
+-- rows keep the platform post id and the error text when something failed.
+CREATE TABLE IF NOT EXISTS posts (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  caption TEXT NOT NULL,
+  image_url TEXT,                      -- absolute https URL of the picture
+  link_url TEXT,                       -- optional link in the caption
+  channels TEXT NOT NULL DEFAULT 'facebook',  -- comma list: facebook,instagram
+  status TEXT NOT NULL DEFAULT 'draft',        -- draft | published | failed
+  fb_post_id TEXT,
+  ig_post_id TEXT,
+  error TEXT,
+  scheduled_at TEXT,
+  published_at TEXT,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
