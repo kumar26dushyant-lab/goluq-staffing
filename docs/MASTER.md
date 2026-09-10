@@ -624,16 +624,68 @@ not only a builder.
 - Facebook Shop: same Meta catalog; owner enables it in Commerce Manager →
   Shops (screens only).
 
+### Hindi catalogue (2026-09-12)
+- All 28 cards (16 products, 10 scenarios, founder, thank-you) in Hindi at
+  goluq.com/catalog/hi/<id>.jpg; PNG masters in marketing/catalog-cards/hi/.
+  Composed in HTML (Noto Sans Devanagari) over generated icons and hero
+  scenes, because the image model kept dropping matras from Devanagari; the
+  words are now set by us, letter for letter. Engine: hicard.mjs (session
+  scratchpad; icons and heroes on the VM under /tmp/cat/icons, /tmp/cat/heroes).
+- Hindi reels already existed (reel-<chapter>-hi.mp4); each "Watch:" card in
+  the Meta catalog now carries the Hindi link under the English one.
+- Publish's picture picker lists every card twice: English and "· हिंदी".
+- Not added as separate Meta catalog items — the catalog would double to 56
+  and the WhatsApp guide already answers in Hindi with the English cards.
+  Revisit if India-circle customers ask for the cards themselves in Hindi.
+
+### Payments — founder call and cart checkout (2026-09-12)
+Flow, built and verified with signed synthetic webhooks (no Razorpay keys yet):
+- **Founder call in the WhatsApp cart** → guide replies with a "Pick a slot"
+  button to the Google appointment page (his live free hours; Meet created by
+  Google). The thread is marked `call_cart_at`.
+- **Booking arrives via the calendar bridge** → if that phone/email put the
+  call in a cart within 30 days (or Settings → Payments → "every booking"),
+  a Razorpay Payment Link for the live Store price of `founder` goes out on
+  WhatsApp (tappable button) and email: "pay now or after the meeting", valid
+  until 30 minutes after the call's end.
+- **30 min after the call, still unpaid** → cron `briefs?job=payments`
+  (every 15 min) expires that link, marks the booking done, issues a fresh
+  7-day link once. After that it is the owner's push.
+- **Owner push**: cockpit → Sell → Payments: one tap at any call (supersedes
+  the open link), or a free-form link (phone/email, amount, what for).
+- **Any other cart** → total from the Store prices (never from the cart
+  payload), link issued at once with "pay now to start, or talk first" and
+  the slot button. Watch/thank-you rows are not for sale.
+- **Paid** → Razorpay webhook (HMAC, `razorpay_webhook_secret`) marks the
+  row, cancels sibling links, thanks the customer on WhatsApp, alerts
+  Telegram. /thanks is the return page.
+- Code: functions/lib/razorpay.ts (API + signature), functions/lib/payments.ts
+  (issue/markPaid/callIntent), functions/api/razorpay/webhook.ts,
+  functions/api/admin/payments.ts, src/components/admin/Payments.tsx;
+  `payments` table; WhatsApp `cta_url` helper in lib/whatsapp.ts.
+- Outside the 24-hour window WhatsApp needs the `payment_link` template
+  (docs/whatsapp-templates.md); until approved the renewal reaches email and
+  falls back to plain text on WhatsApp (which Meta may reject).
+- Keys are write-only in Settings → Payments (key id shown, secret and
+  webhook secret never read back). Razorpay account: owner's personal savings
+  account as stated; a current account is not required for Payment Links.
+
 ## 9. TO-DO (current)
 ### Owner
-- [ ] Business Settings: assign the Facebook Page to the system user; regenerate
-      the token with the four posting scopes; paste it in Settings → WhatsApp
-      Business API; press Connect in Publish.
+- [ ] Razorpay: Settings → API keys → paste key id + secret in cockpit →
+      Settings → Payments. Then Razorpay → Webhooks → add
+      https://goluq.com/api/razorpay/webhook (payment_link.paid, .expired,
+      .cancelled) with a secret; paste the same secret in the cockpit.
+- [ ] Submit the `payment_link` template (docs/whatsapp-templates.md) with the
+      two booking templates; put its name in Settings → Payments once approved.
+- [ ] developers.facebook.com → app → Use cases → add "Pages"; regenerate the
+      token with pages_manage_posts, pages_read_engagement, instagram_basic,
+      instagram_content_publish; paste in Settings → WhatsApp Business API;
+      press Connect in Publish.
 - [ ] Create the Instagram professional account, link it to the Page.
 - [ ] Create the LinkedIn company page.
-- [ ] Commerce Manager → Shops: turn on the Facebook Shop on the GoLuQ catalog.
-- [ ] Install the calendar bridge (docs/booking-bridge/Code.gs).
-- [ ] Submit the two booking templates (docs/whatsapp-templates.md).
+- [ ] Install the calendar bridge (docs/booking-bridge/Code.gs) — the payment
+      flow depends on it.
 - [ ] Ashwin testimonial video + written consent.
 - [ ] Public Telegram channel name → Settings.
 ### Build (mine, in order)

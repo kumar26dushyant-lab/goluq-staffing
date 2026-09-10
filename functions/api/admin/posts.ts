@@ -23,6 +23,14 @@ const clip = (v: unknown, n: number) => String(v ?? "").trim().slice(0, n);
  *   POST { action: "publish", id } → publish now
  *   POST { action: "delete", id }
  */
+/** Cards that exist in Hindi under public/catalog/hi (composed by marketing/catalog-cards/hi). */
+const HINDI_CARDS = new Set([
+  "whatsappOffice", "whatsappStore", "tollfree", "virtualNumber", "waApi", "voiceCampaign", "txnSms", "promoSms", "missedCall",
+  "automation", "whatsapp", "digitalEmployee", "website", "app", "offline", "platform",
+  "for_coaching", "for_clinic", "for_ca", "for_garment", "for_distributor", "for_realestate", "for_restaurant", "for_salon", "for_school", "for_logistics",
+  "founder", "thankyou",
+]);
+
 export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
   if (!(await checkAdmin(request, env))) return unauthorized();
   const posts = await env.DB.prepare(`SELECT * FROM posts ORDER BY id DESC LIMIT 100`).all();
@@ -36,7 +44,11 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
       igId: (await getSetting(env.DB, "ig_user_id")) || "",
       note: (await getSetting(env.DB, "fb_connect_note")) || "",
     },
-    assets: (products.results ?? []).map((p: any) => ({ label: p.name, url: `https://goluq.com${p.image_path}` })),
+    assets: (products.results ?? []).flatMap((p: any) => [
+      { label: p.name, url: `https://goluq.com${p.image_path}` },
+      // The Hindi edition of the same card, for India-facing posts.
+      ...(HINDI_CARDS.has(p.retailer_id) ? [{ label: `${p.name} · हिंदी`, url: `https://goluq.com/catalog/hi/${p.retailer_id}.jpg` }] : []),
+    ]),
   });
 };
 
