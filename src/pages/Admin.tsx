@@ -16,6 +16,7 @@ import { Partners } from "../components/admin/Partners";
 import { EmailInbox } from "../components/admin/EmailInbox";
 import { Store } from "../components/admin/Store";
 import { Publish } from "../components/admin/Publish";
+import { Payments } from "../components/admin/Payments";
 import { BrandMark } from "../components/BrandMark";
 import { useTranslation } from "react-i18next";
 import { inputClass } from "../lib/ui";
@@ -27,7 +28,7 @@ import {
 
 type Section =
   | "today" | "leads" | "chat" | "visitors" | "pricing"
-  | "bot" | "content" | "inbox" | "affiliates" | "projects" | "campaigns" | "marketing" | "testimonials" | "settings" | "store" | "publish";
+  | "bot" | "content" | "inbox" | "affiliates" | "projects" | "campaigns" | "marketing" | "testimonials" | "settings" | "store" | "publish" | "payments";
 
 export function Admin() {
   const [authed, setAuthed] = useState(false);
@@ -135,6 +136,7 @@ export function Admin() {
             {section === "marketing" && <Marketing />}
             {section === "store" && <Store />}
             {section === "publish" && <Publish />}
+            {section === "payments" && <Payments />}
             {section === "testimonials" && <TestimonialsPanel />}
             {section === "settings" && <SettingsPanel />}
           </main>
@@ -170,13 +172,14 @@ const SECTION_META: Record<Section, { title: string; desc: string }> = {
   pricing: { title: "Pricing & offers", desc: "One list drives the site, the guide and WhatsApp. Live on save." },
   store: { title: "Store", desc: "Products behind your WhatsApp catalog. Photograph, price, sync." },
   publish: { title: "Publish", desc: "Facebook and Instagram posts, from here." },
+  payments: { title: "Payments", desc: "Razorpay links sent, paid or open. Push one at any call." },
   campaigns: { title: "Campaigns", desc: "Approved templates to people who gave you their number." },
   testimonials: { title: "Testimonials", desc: "Real customers, in their words. Nothing shows until you switch it live." },
   marketing: { title: "Marketing", desc: "Social cards from a prompt." },
   visitors: { title: "Visitors", desc: "Where people come from and which channel turns into enquiries." },
   projects: { title: "Projects", desc: "Each customer's build, its stage, and the money on it." },
   affiliates: { title: "Partners", desc: "Who brings customers, what they are owed, and the terms." },
-  settings: { title: "Settings", desc: "Alerts, booking link, WhatsApp Business API and Telegram." },
+  settings: { title: "Settings", desc: "Alerts, booking link, payments, WhatsApp Business API and Telegram." },
   bot: { title: "Guide", desc: "The assistant that answers on the site and on WhatsApp." },
   content: { title: "Content", desc: "Site copy you can change without a deploy." },
 };
@@ -200,6 +203,7 @@ const GROUPS: { id: string; label: string; icon: typeof Users; sections: { id: S
   { id: "sell", label: "Sell", icon: Megaphone, sections: [
     { id: "store", label: "Store", icon: ImageIcon },
     { id: "publish", label: "Publish", icon: Megaphone },
+    { id: "payments", label: "Payments", icon: IndianRupee },
     { id: "pricing", label: "Pricing & offers", icon: IndianRupee },
     { id: "campaigns", label: "Campaigns", icon: Megaphone },
     { id: "testimonials", label: "Testimonials", icon: Video },
@@ -798,7 +802,7 @@ function SettingsPanel() {
   const [bookingSecret, setBookingSecret] = useState("");
   const [followups, setFollowups] = useState(true);
   const [saved, setSaved] = useState("");
-  const [tab, setTab] = useState<"general" | "telegram" | "wa">("general");
+  const [tab, setTab] = useState<"general" | "telegram" | "wa" | "payments">("general");
   // Saving before the current values have loaded would post empty strings and
   // wipe them — which is exactly how the public WhatsApp number got blanked and
   // silently disappeared from the site. Save stays disabled until loaded.
@@ -823,7 +827,7 @@ function SettingsPanel() {
     const d = await adminPost("/api/admin/settings", { owner_whatsapp: owner, owner_email: ownerEmail, public_whatsapp: publicWa, public_telegram: publicTg, booking_url: bookingUrl, followups_enabled: followups });
     setSaved(d.ok ? "Saved ✅" : "Failed");
   };
-  const TABS = [["general", "Contact & alerts"], ["telegram", "Telegram"], ["wa", "WhatsApp Business API"]] as const;
+  const TABS = [["general", "Contact & alerts"], ["payments", "Payments"], ["telegram", "Telegram"], ["wa", "WhatsApp Business API"]] as const;
   return (
     <div className="max-w-2xl space-y-5">
       <div className="flex gap-1.5 overflow-x-auto pb-1">
@@ -900,6 +904,71 @@ function SettingsPanel() {
 
       {tab === "wa" && <WhatsAppBusiness />}
       {tab === "telegram" && <TelegramCockpit />}
+      {tab === "payments" && <PaymentsSetup />}
+    </div>
+  );
+}
+
+/**
+ * Razorpay. The key id is shown; the key secret and the webhook secret are
+ * write-only, like every other secret in here. The founder call is priced in
+ * the Store; the only choice here is who gets its link.
+ */
+function PaymentsSetup() {
+  const [keyId, setKeyId] = useState("");
+  const [secret, setSecret] = useState("");
+  const [whSecret, setWhSecret] = useState("");
+  const [secretSet, setSecretSet] = useState(false);
+  const [whSet, setWhSet] = useState(false);
+  const [all, setAll] = useState(false);
+  const [tpl, setTpl] = useState("");
+  const [loaded, setLoaded] = useState(false);
+  const [saved, setSaved] = useState("");
+  useEffect(() => {
+    adminGet("/api/admin/settings").then((d) => {
+      setKeyId(d.razorpay_key_id || ""); setSecretSet(!!d.razorpay_key_secret_set); setWhSet(!!d.razorpay_webhook_secret_set);
+      setAll(d.call_paid_all === "1"); setTpl(d.wa_tpl_payment_link || ""); setLoaded(true);
+    });
+  }, []);
+  const save = async () => {
+    if (!loaded) return;
+    setSaved("");
+    const r = await adminPost("/api/admin/settings", { razorpay_key_id: keyId, razorpay_key_secret: secret || undefined, razorpay_webhook_secret: whSecret || undefined, call_paid_all: all, wa_tpl_payment_link: tpl });
+    setSaved(r.ok ? "Saved ✅" : "Failed");
+    if (r.ok) { if (secret) setSecretSet(true); if (whSecret) setWhSet(true); setSecret(""); setWhSecret(""); }
+  };
+  return (
+    <div className="glass space-y-5 rounded-2xl p-5">
+      <p className="text-sm text-muted">
+        Razorpay dashboard → Account &amp; Settings → API keys. Paste the key id and the key secret once; the secret is never shown again.
+        Then Webhooks → add <span className="font-mono text-brand-luq">https://goluq.com/api/razorpay/webhook</span> for
+        payment_link.paid, payment_link.expired and payment_link.cancelled, with a secret of your choosing — paste that same secret below.
+      </p>
+      <label className="block">
+        <span className="mb-1.5 block text-base font-semibold text-fg">Key id</span>
+        <input className={inputClass} value={keyId} onChange={(e) => setKeyId(e.target.value)} placeholder="rzp_live_…" />
+      </label>
+      <label className="block">
+        <span className="mb-1.5 block text-base font-semibold text-fg">Key secret {secretSet && <span className="ml-2 text-xs font-normal text-brand-luq">set</span>}</span>
+        <input className={inputClass} type="password" value={secret} onChange={(e) => setSecret(e.target.value)} placeholder={secretSet ? "Leave blank to keep the current one" : "Paste once"} autoComplete="off" />
+      </label>
+      <label className="block">
+        <span className="mb-1.5 block text-base font-semibold text-fg">Webhook secret {whSet && <span className="ml-2 text-xs font-normal text-brand-luq">set</span>}</span>
+        <input className={inputClass} type="password" value={whSecret} onChange={(e) => setWhSecret(e.target.value)} placeholder={whSet ? "Leave blank to keep the current one" : "The secret you typed in the Razorpay webhook form"} autoComplete="off" />
+      </label>
+      <label className="flex items-start gap-3">
+        <input type="checkbox" checked={all} onChange={(e) => setAll(e.target.checked)} className="mt-0.5 h-5 w-5" />
+        <span>
+          <span className="block text-base font-semibold text-fg">Send the call link for every booking</span>
+          <span className="block text-sm text-muted">Off: only people who put the founder call in their WhatsApp cart get the link when they book. On: every booking from the calendar page does. Either way the link is valid until half an hour after the call, then renewed once.</span>
+        </span>
+      </label>
+      <label className="block">
+        <span className="mb-1.5 block text-base font-semibold text-fg">Approved WhatsApp template for payment links (optional)</span>
+        <span className="mb-2 block text-sm text-muted">Template name, once Meta approves payment_link (docs/whatsapp-templates.md). Used only when a free-form message cannot be delivered — more than 24 hours after the customer last wrote.</span>
+        <input className={inputClass} value={tpl} onChange={(e) => setTpl(e.target.value)} placeholder="payment_link" />
+      </label>
+      <div><Button onClick={save} disabled={!loaded}><ShieldCheck size={16} /> Save payments</Button>{saved && <span className="ml-3 text-sm text-muted">{saved}</span>}</div>
     </div>
   );
 }

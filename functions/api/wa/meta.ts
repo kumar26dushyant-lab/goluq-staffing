@@ -6,9 +6,10 @@ import { sendMail, mailEnabled, type MailEnv } from "../../lib/mailer";
 import { getOwnerEmail, getSetting } from "../../lib/settings";
 import { tgAlertOwner, tgEscape, type TgButton, type TgEnv } from "../../lib/telegram";
 import {
-  waConfig, waReady, waSendText, waSendProduct, waSendProductList, waMarkRead, waVerifySignature,
+  waConfig, waReady, waSendText, waSendProduct, waSendProductList, waSendCtaUrl, waMarkRead, waVerifySignature,
   type WaEnv, type WaConfig,
 } from "../../lib/whatsapp";
+import { issuePaymentLink, callPriceInr } from "../../lib/payments";
 
 interface Env extends ConciergeEnv, WaEnv, MailEnv, TgEnv {
   DB: D1Database;
@@ -283,10 +284,16 @@ async function handleMessage(env: Env, cfg: WaConfig, m: Inbound): Promise<void>
   const why = wantsHuman ? "asked to speak to a person" : isNew ? "new WhatsApp conversation" : "";
   const catalogId = (await getSetting(db, "wa_catalog_id")) || "";
 
-  // A cart is a buying signal, not a question: tell the owner at once and let
-  // the guide confirm rather than sell.
+  // A cart is a buying signal, not a question: tell the owner at once, and
+  // answer with the next concrete step — a slot to pick for the founder call,
+  // a payment link for anything else.
   if (m.order?.length) {
     await notifyOwner(env, m, "sent a cart from the catalogue");
+    const handled = await handleCart(env, cfg, m, sid, lang);
+    if (handled) {
+      await tgPush(env, m, sid, { why, reply: handled });
+      return;
+    }
   }
 
   // "Price list" / "catalogue" is the one request with a better answer than
@@ -368,6 +375,76 @@ async function handleMessage(env: Env, cfg: WaConfig, m: Inbound): Promise<void>
 
   if (isNew && !wantsHuman) await notifyOwner(env, m, "new WhatsApp conversation", { telegram: false });
   await tgPush(env, m, sid, { why, reply: card ? `${reply}\n[+ product card: ${card}]` : reply });
+}
+
+/** Catalogue rows that are not things to pay for: the sign-off card and the videos. */
+const NOT_FOR_SALE = (id: string) => id === "thankyou" || id.startsWith("watch_");
+const CALL_ID = "founder";
+
+/**
+ * What happens after a cart, in the customer's own words:
+ *
+ *  · founder call in the cart → "pick a slot" button to the owner's calendar
+ *    page (it shows his real free hours and makes the Meet itself). The slot
+ *    booked comes back through the calendar bridge, which is where the ₹ link
+ *    is issued — pay now or after the call.
+ *  · anything else → the Store total for what they picked, as a Razorpay link,
+ *    with the call offered as the alternative.
+ *
+ * Returns the text that went out (for the owner's Telegram copy), or "" when
+ * nothing applied and the guide should answer as usual.
+ */
+async function handleCart(env: Env, cfg: WaConfig, m: Inbound, sid: string, lang: string): Promise<string> {
+  const db = env.DB;
+  const hi = lang === "hi";
+  const ids = (m.order || []).map((o) => o.retailerId);
+  const wantsCall = ids.includes(CALL_ID) || (ids.length > 0 && ids.every(NOT_FOR_SALE));
+  const bookingUrl = (await getSetting(db, "booking_url")) || "";
+  const say = async (text: string) => {
+    await db.prepare(`INSERT INTO chat_messages (session_id, role, content, created_at) VALUES (?, 'guide', ?, datetime('now'))`).bind(sid, text.slice(0, 2000)).run();
+  };
+
+  if (wantsCall) {
+    await db.prepare("UPDATE chat_sessions SET call_cart_at = datetime('now') WHERE id = ?").bind(sid).run();
+    const price = await callPriceInr(db);
+    const amount = "₹" + price.toLocaleString("en-IN");
+    if (!bookingUrl) return "";
+    const text = hi
+      ? `धन्यवाद! दुष्यंत के साथ 30 मिनट की Google Meet के लिए नीचे से अपना समय चुनिए — कैलेंडर में उनके खाली स्लॉट दिखेंगे। फ़ॉर्म में यही WhatsApp नंबर लिखिएगा।\n\nस्लॉट बुक होते ही ${amount} का पेमेंट लिंक यहीं और ईमेल पर आ जाएगा — अभी दें या मीटिंग के बाद, दोनों ठीक हैं।`
+      : `Thank you! Pick a time for your 30-minute Google Meet with Dushyant below — the calendar shows his free slots. Please use this same WhatsApp number on the form.\n\nAs soon as the slot is booked, the ${amount} payment link comes here and on email — pay now or after the meeting, either is fine.`;
+    const r = await waSendCtaUrl(cfg, m.from, text, hi ? "समय चुनें" : "Pick a slot", bookingUrl);
+    if (!r.ok) {
+      const t = await waSendText(cfg, m.from, `${text}\n${bookingUrl}`);
+      if (!t.ok) return "";
+    }
+    await say(`${text}\n[+ button: ${bookingUrl}]`);
+    return text + "\n[+ Pick a slot button]";
+  }
+
+  // Everything else: price it from the Store, never from the cart payload.
+  const items: { name: string; total: number }[] = [];
+  for (const o of m.order || []) {
+    if (NOT_FOR_SALE(o.retailerId)) continue;
+    const p = await db.prepare("SELECT name, price_inr FROM products WHERE retailer_id = ? AND tenant = 'goluq'").bind(o.retailerId).first<{ name: string; price_inr: number }>();
+    if (!p || !(p.price_inr > 0)) continue;
+    items.push({ name: p.name, total: p.price_inr * Math.max(1, o.qty) });
+  }
+  const total = items.reduce((s, i) => s + i.total, 0);
+  if (!total) return "";
+  const desc = items.map((i) => i.name).join(", ");
+  const amount = "₹" + total.toLocaleString("en-IN");
+  const intro = hi
+    ? `धन्यवाद! आपने चुना: ${desc}। कुल ${amount}। पेमेंट लिंक यह रहा — अभी शुरू करने के लिए भुगतान कर दीजिए, या पहले दुष्यंत से बात करनी हो तो यहीं लिख दीजिए${bookingUrl ? " (या कैलेंडर से समय चुन लीजिए)" : ""}।`
+    : `Thank you! You picked: ${desc}. Total ${amount}. Here is the payment link — pay now to get started, or reply here first if you would rather talk to Dushyant${bookingUrl ? " (or pick a slot on his calendar)" : ""}.`;
+  const r = await issuePaymentLink(env, {
+    kind: "cart", phone: m.from, name: m.name || null, amountInr: total, description: desc, lang, intro, by: "WhatsApp cart",
+  });
+  if (!r.ok) {
+    console.log("cart link not issued:", r.error);
+    return "";
+  }
+  if (bookingUrl) await waSendCtaUrl(cfg, m.from, hi ? "पहले बात करना चाहें तो:" : "If you would rather talk first:", hi ? "समय चुनें" : "Pick a slot", bookingUrl);
+  return `${intro}\n[+ payment link ${amount}]`;
 }
 
 /** Ways people ask for the whole list, in the languages they write. */

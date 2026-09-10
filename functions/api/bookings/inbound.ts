@@ -1,11 +1,10 @@
 /// <reference types="@cloudflare/workers-types" />
 
 import { getSetting } from "../../lib/settings";
-import { tgAlertOwner, tgEscape, type TgEnv } from "../../lib/telegram";
+import { tgAlertOwner, tgEscape } from "../../lib/telegram";
+import { issuePaymentLink, callIntentFor, callPriceInr, type PayEnv } from "../../lib/payments";
 
-interface Env extends TgEnv {
-  DB: D1Database;
-}
+type Env = PayEnv;
 
 /**
  * A booking (or cancellation) from the owner's Google Calendar, posted by the
@@ -96,7 +95,34 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
     });
   }
 
-  return Response.json({ ok: true, id: prior?.id ?? null, status });
+  // The founder call is a paid product. A new booking from someone who put it
+  // in their WhatsApp cart (or every booking, if the owner says so) gets the
+  // link now, valid until half an hour after the call — pay before or after.
+  let payment: string | null = null;
+  if (isNew && status === "booked") {
+    const row = await env.DB.prepare("SELECT id FROM bookings WHERE event_id = ?").bind(eventId).first<{ id: number }>();
+    const everyone = (await getSetting(env.DB, "call_paid_all")) === "1";
+    const intent = await callIntentFor(env.DB, phone, email);
+    if (row && (intent || everyone)) {
+      const price = await callPriceInr(env.DB);
+      const toPhone = phone && phone.replace(/\D/g, "").length >= 10 ? phone.replace(/\D/g, "").replace(/^0+/, "") : intent?.phone || null;
+      const endMs = Date.parse((endsAt || startsAt).replace(" ", "T") + "Z") + (endsAt ? 0 : 30 * 60e3);
+      const expiresAt = new Date(endMs + 30 * 60e3).toISOString().slice(0, 19).replace("T", " ");
+      const hi = intent?.lang === "hi";
+      const whenIst = new Date(startsAt.replace(" ", "T") + "Z").toLocaleString("en-IN", { timeZone: "Asia/Kolkata", weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit" });
+      const r = await issuePaymentLink(env, {
+        kind: "call", bookingId: row.id, phone: toPhone && toPhone.length === 10 ? "91" + toPhone : toPhone, email, name,
+        amountInr: price, description: hi ? "दुष्यंत के साथ 30 मिनट की कॉल" : "your 30-minute call with Dushyant",
+        expiresAt, lang: intent?.lang ?? null, by: "new booking",
+        intro: hi
+          ? `आपकी कॉल ${whenIst} IST पर तय हो गई है${meet ? ` — Meet लिंक: ${meet}` : ""}।\n\n₹${price.toLocaleString("en-IN")} का पेमेंट लिंक यह रहा — अभी दें या मीटिंग के बाद; यह मीटिंग के आधे घंटे बाद तक चलेगा।`
+          : `Your call with Dushyant is booked for ${whenIst} IST${meet ? ` — Meet link: ${meet}` : ""}.\n\nHere is the ₹${price.toLocaleString("en-IN")} payment link — pay now or after the meeting; it stays valid until half an hour after the call.`,
+      });
+      payment = r.ok ? r.url : r.error;
+    }
+  }
+
+  return Response.json({ ok: true, id: prior?.id ?? null, status, payment });
 };
 
 /** ISO or "YYYY-MM-DD HH:MM" → SQLite UTC text; "" when unparseable. */

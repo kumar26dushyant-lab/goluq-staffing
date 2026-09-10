@@ -45,13 +45,19 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     tg_bot_token_set: Boolean(await getSetting(env.DB, "tg_bot_token")),
     tg_owner_chat_id: (await getSetting(env.DB, "tg_owner_chat_id")) ?? "",
     tg_bot_username: (await getSetting(env.DB, "tg_bot_username")) ?? "",
+    // Razorpay. Key id is public by nature; the secret and webhook secret are write-only.
+    razorpay_key_id: (await getSetting(env.DB, "razorpay_key_id")) ?? "",
+    razorpay_key_secret_set: Boolean(await getSetting(env.DB, "razorpay_key_secret")),
+    razorpay_webhook_secret_set: Boolean(await getSetting(env.DB, "razorpay_webhook_secret")),
+    call_paid_all: (await getSetting(env.DB, "call_paid_all")) ?? "0",
+    wa_tpl_payment_link: (await getSetting(env.DB, "wa_tpl_payment_link")) ?? "",
   });
 };
 
 export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   if (!(await checkAdmin(request, env))) return unauthorized();
   try {
-    const b = await request.json<{ owner_whatsapp?: string; public_whatsapp?: string; followups_enabled?: boolean | string; bot_instructions?: string; chat_enabled?: boolean | string; announcement?: string; aff_rate?: number; aff_enh_months?: number; aff_typical_margin?: number; aff_min_payout?: number; aff_attribution_days?: number; owner_email?: string; booking_url?: string; public_telegram?: string; wa_phone_number_id?: string; wa_waba_id?: string; wa_verify_token?: string; wa_access_token?: string; wa_app_secret?: string; tg_bot_token?: string }>();
+    const b = await request.json<{ owner_whatsapp?: string; public_whatsapp?: string; followups_enabled?: boolean | string; bot_instructions?: string; chat_enabled?: boolean | string; announcement?: string; aff_rate?: number; aff_enh_months?: number; aff_typical_margin?: number; aff_min_payout?: number; aff_attribution_days?: number; owner_email?: string; booking_url?: string; public_telegram?: string; wa_phone_number_id?: string; wa_waba_id?: string; wa_verify_token?: string; wa_access_token?: string; wa_app_secret?: string; tg_bot_token?: string; razorpay_key_id?: string; razorpay_key_secret?: string; razorpay_webhook_secret?: string; call_paid_all?: boolean | string; wa_tpl_payment_link?: string }>();
     if (typeof b.owner_whatsapp === "string") {
       await setSetting(env.DB, "owner_whatsapp", b.owner_whatsapp.replace(/\D/g, ""));
     }
@@ -114,6 +120,18 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
       // Connect re-reads it, but keep the pairing — it is the owner's chat either way.
       await setSetting(env.DB, "tg_bot_token", b.tg_bot_token.trim());
       await setSetting(env.DB, "tg_bot_username", "");
+    }
+    if (typeof b.razorpay_key_id === "string") {
+      await setSetting(env.DB, "razorpay_key_id", b.razorpay_key_id.trim().slice(0, 60));
+    }
+    if (b.razorpay_key_secret) await setSetting(env.DB, "razorpay_key_secret", b.razorpay_key_secret.trim());
+    if (b.razorpay_webhook_secret) await setSetting(env.DB, "razorpay_webhook_secret", b.razorpay_webhook_secret.trim());
+    if (b.call_paid_all !== undefined) {
+      const on = b.call_paid_all === true || b.call_paid_all === "1";
+      await setSetting(env.DB, "call_paid_all", on ? "1" : "0");
+    }
+    if (typeof b.wa_tpl_payment_link === "string") {
+      await setSetting(env.DB, "wa_tpl_payment_link", b.wa_tpl_payment_link.trim().replace(/[^a-z0-9_]/g, "").slice(0, 100));
     }
     if (b.chat_enabled !== undefined) {
       const on = b.chat_enabled === true || b.chat_enabled === "1";

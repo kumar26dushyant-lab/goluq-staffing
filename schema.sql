@@ -428,3 +428,26 @@ CREATE TABLE IF NOT EXISTS posts (
   created_at TEXT NOT NULL,
   updated_at TEXT NOT NULL
 );
+
+-- ── Payments ────────────────────────────────────────────────────────────────
+-- Razorpay payment links we issued: for the founder call (tied to a booking)
+-- and for carts sent from the WhatsApp catalogue. Paid status arrives by
+-- Razorpay webhook. One row per link; a re-issued link is a new row.
+CREATE TABLE IF NOT EXISTS payments (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  kind TEXT NOT NULL,                  -- call | cart
+  booking_id INTEGER,
+  phone TEXT,
+  email TEXT,
+  name TEXT,
+  amount_inr INTEGER NOT NULL,
+  description TEXT,
+  rp_link_id TEXT,
+  url TEXT,
+  status TEXT NOT NULL DEFAULT 'issued',   -- issued | paid | expired | cancelled
+  expires_at TEXT,
+  created_at TEXT NOT NULL,
+  paid_at TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_payments_booking ON payments(booking_id);
+CREATE INDEX IF NOT EXISTS idx_payments_link ON payments(rp_link_id);

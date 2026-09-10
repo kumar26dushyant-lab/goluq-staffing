@@ -122,6 +122,23 @@ export async function waSendTemplate(
 }
 
 /**
+ * Text with one tappable link button under it — a payment link, a booking page.
+ * Only deliverable inside the 24-hour window, like any free-form send.
+ */
+export async function waSendCtaUrl(c: WaConfig, to: string, body: string, buttonText: string, url: string): Promise<WaResult> {
+  if (!waReady(c)) return { ok: false, error: "whatsapp_not_configured" };
+  return graph(c, {
+    to: waNormalize(to),
+    type: "interactive",
+    interactive: {
+      type: "cta_url",
+      body: { text: String(body).slice(0, 1024) },
+      action: { name: "cta_url", parameters: { display_text: String(buttonText).slice(0, 20), url } },
+    },
+  });
+}
+
+/**
  * One product from the connected Meta catalog, as a tappable card under a line
  * of text. Only deliverable inside the 24-hour window, like any free-form send.
  */

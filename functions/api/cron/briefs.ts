@@ -2,10 +2,10 @@
 
 import { checkAdmin, unauthorized } from "../../lib/admin";
 import { geminiEnabled, geminiText, type GeminiEnv } from "../../lib/gemini";
-import { tgAlertOwner, tgEscape, type TgEnv } from "../../lib/telegram";
+import { tgAlertOwner, tgEscape } from "../../lib/telegram";
+import { issuePaymentLink, type PayEnv } from "../../lib/payments";
 
-interface Env extends TgEnv, GeminiEnv {
-  DB: D1Database;
+interface Env extends PayEnv, GeminiEnv {
   ADMIN_SECRET?: string;
 }
 
@@ -28,6 +28,7 @@ export const onRequest: PagesFunction<Env> = async ({ request, env }) => {
   const job = new URL(request.url).searchParams.get("job") || "calls";
   try {
     if (job === "weekly") return Response.json(await weekly(env));
+    if (job === "payments") return Response.json(await payments(env));
     return Response.json(await calls(env));
   } catch (e) {
     return Response.json({ ok: false, error: String(e).slice(0, 300) }, { status: 500 });
@@ -86,6 +87,46 @@ async function calls(env: Env) {
     }
   }
   return { ok: true, briefed: sent };
+}
+
+/**
+ * ?job=payments (every 15 minutes): the founder-call link is valid until half
+ * an hour after the call. When that passes unpaid, the call is marked done and
+ * a fresh 7-day link goes out — once. Anything after that is the owner's call,
+ * from the cockpit.
+ */
+async function payments(env: Env) {
+  const rows = await env.DB.prepare(
+    `SELECT b.id, b.name, b.email, b.phone, b.ends_at, b.starts_at, p.id AS pay_id, p.phone AS pay_phone, p.amount_inr, p.description
+       FROM bookings b JOIN payments p ON p.booking_id = b.id AND p.kind = 'call' AND p.status = 'issued'
+      WHERE b.status = 'booked'
+        AND COALESCE(b.ends_at, datetime(b.starts_at, '+30 minutes')) <= datetime('now','-30 minutes')
+        AND NOT EXISTS (SELECT 1 FROM payments q WHERE q.booking_id = b.id AND q.status = 'paid')
+      ORDER BY b.id`
+  ).all<{ id: number; name: string; email: string | null; phone: string | null; ends_at: string | null; starts_at: string; pay_id: number; pay_phone: string | null; amount_inr: number; description: string }>();
+  let renewed = 0;
+  for (const b of rows.results ?? []) {
+    await env.DB.prepare("UPDATE payments SET status = 'expired' WHERE id = ?").bind(b.pay_id).run();
+    await env.DB.prepare("UPDATE bookings SET status = 'done', updated_at = datetime('now') WHERE id = ?").bind(b.id).run();
+    const phone = b.pay_phone || b.phone;
+    const s = phone ? await env.DB.prepare("SELECT lang FROM chat_sessions WHERE id = ?").bind(`wa:${phone.replace(/\D/g, "")}`).first<{ lang: string | null }>() : null;
+    const hi = s?.lang === "hi";
+    const r = await issuePaymentLink(env, {
+      kind: "call", bookingId: b.id, phone, email: b.email, name: b.name, amountInr: b.amount_inr, description: b.description, lang: s?.lang ?? null, by: "after the call",
+      intro: hi
+        ? `उम्मीद है दुष्यंत के साथ बातचीत काम की रही। ${b.description} के लिए ₹${b.amount_inr.toLocaleString("en-IN")} का नया पेमेंट लिंक यह रहा — 7 दिन तक चलेगा।`
+        : `Hope the conversation with Dushyant was useful. Here is a fresh ₹${b.amount_inr.toLocaleString("en-IN")} payment link for ${b.description} — valid for 7 days.`,
+    });
+    if (r.ok) renewed++;
+    else console.log("renew link failed:", r.error);
+  }
+  // Calls that ended without any link (free ones) are simply done.
+  await env.DB.prepare(
+    `UPDATE bookings SET status = 'done', updated_at = datetime('now')
+      WHERE status = 'booked' AND COALESCE(ends_at, datetime(starts_at, '+30 minutes')) <= datetime('now','-30 minutes')
+        AND NOT EXISTS (SELECT 1 FROM payments p WHERE p.booking_id = bookings.id AND p.status = 'issued')`
+  ).run();
+  return { ok: true, renewed };
 }
 
 async function weekly(env: Env) {

@@ -37,6 +37,8 @@ import { onRequestGet as tgCheckGet, onRequestPost as tgCheckPost } from "../fun
 import { onRequestGet as adminToday } from "../functions/api/admin/today";
 import { onRequestPost as bookingsInbound } from "../functions/api/bookings/inbound";
 import { onRequestGet as adminProductsGet, onRequestPost as adminProductsPost } from "../functions/api/admin/products";
+import { onRequestGet as adminPaymentsGet, onRequestPost as adminPaymentsPost } from "../functions/api/admin/payments";
+import { onRequestPost as razorpayWebhook } from "../functions/api/razorpay/webhook";
 import { geminiImage } from "../functions/lib/gemini";
 import { checkAdmin } from "../functions/lib/admin";
 import { writeFileSync, existsSync, statSync, createReadStream } from "node:fs";
@@ -98,6 +100,7 @@ for (const sql of [
   `ALTER TABLE chat_sessions ADD COLUMN cards_sent TEXT`,
   // Pre-call brief sent once per booking.
   `ALTER TABLE bookings ADD COLUMN briefed_at TEXT`,
+  `ALTER TABLE chat_sessions ADD COLUMN call_cart_at TEXT`,
 ]) {
   try {
     sqlite.exec(sql);
@@ -262,6 +265,9 @@ app.get("/api/admin/tg-check", (c) => callFn(tgCheckGet as Handler, c.req.raw));
 app.get("/api/admin/today", (c) => callFn(adminToday as Handler, c.req.raw));
 app.post("/api/bookings/inbound", (c) => callFn(bookingsInbound as Handler, c.req.raw));
 app.get("/api/admin/products", (c) => callFn(adminProductsGet as Handler, c.req.raw));
+app.get("/api/admin/payments", (c) => callFn(adminPaymentsGet as Handler, c.req.raw));
+app.post("/api/admin/payments", (c) => callFn(adminPaymentsPost as Handler, c.req.raw));
+app.post("/api/razorpay/webhook", (c) => callFn(razorpayWebhook as Handler, c.req.raw));
 app.post("/api/admin/products", (c) => callFn(adminProductsPost as Handler, c.req.raw));
 app.post("/api/admin/tg-check", (c) => callFn(tgCheckPost as Handler, c.req.raw));
 

@@ -159,3 +159,25 @@ Once approved: wire `appointment_confirmed` into /api/bookings/inbound (sent on
 first booking when a phone is present) and an hourly cron
 `/api/cron/reminders` that sends `appointment_reminder` at 24 h and 1 h using the
 `reminded_24h` / `reminded_1h` flags on `bookings`.
+
+### payment_link
+Category: UTILITY · Languages: en, hi
+Used only when a payment link must reach someone more than 24 hours after
+their last message (the after-call renewal, or a link pushed from the cockpit
+days later). Inside the window the link goes as a tappable button instead.
+
+EN body:
+```
+Hi {{1}}, here is your GoLuQ payment link for {{2}}:
+{{3}}
+Pay whenever suits you — UPI, card or netbanking. Reply here with any question.
+```
+Sample: {{1}} Rahul · {{2}} your 30-minute call with Dushyant · {{3}} https://rzp.io/l/abc123
+
+HI body:
+```
+नमस्ते {{1}}, {{2}} के लिए आपका GoLuQ पेमेंट लिंक यह रहा:
+{{3}}
+जब सुविधा हो तब भुगतान करें — UPI, कार्ड या नेटबैंकिंग। कोई सवाल हो तो यहीं लिखिए।
+```
+Once approved: put the template name in cockpit → Settings → Payments.
