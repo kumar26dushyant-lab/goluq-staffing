@@ -578,3 +578,24 @@ the fact stops believing every other term.
   test worked but a 4:5 reference letterboxes in 9:16 and the animated
   characters wobble — usable for B-roll with a 9:16 reference and no text,
   not for the hero shot. Still-based reels look better and cost nothing.
+
+### Assets, catalog cache, briefs (2026-09-11, later)
+- All marketing masters live in `C:\Goluq.com\marketing\` (gitignored, 35 MB):
+  catalog-cards/ (17 PNG), ads/ (4 PNG with the founder), reels/
+  (coaching-en.mp4, veo-test), brand/ (profile pictures), story-scenes/
+  (12 scenes + storyboard). Hosted copies: goluq.com/catalog/*.jpg,
+  /brand/profile-*.png, /story/*.webp. Generation scripts stay in the session
+  scratchpad (catalog/infographic.py, ads.py, compose.mjs; reel/build.mjs,
+  tts.py, veo.py; story/scenes.py) — copy into scripts/ if they are needed
+  beyond this session.
+- Meta caches product images by URL: sync now stamps `?v=` and the Store's
+  Sync accepts `force`. Force-synced all 18 → the WhatsApp store shows the
+  GoLuQ.com cards.
+- Cron on the VM: `15 * * * *` pre-call briefs (bookings 30–90 min ahead:
+  form answer, prior chat, suggested opener), `30 2 * * 1` (08:00 IST Monday)
+  weekly funnel report to Telegram. First weekly report sent 2026-09-11:
+  327 visitors, 1 enquiry, 0 bookings.
+- Facebook Page exists (id 61594072290908). For posting from the cockpit the
+  system-user token needs pages_manage_posts, pages_read_engagement,
+  instagram_basic, instagram_content_publish, and the Page + IG account
+  assigned to the system user in Business Settings.
