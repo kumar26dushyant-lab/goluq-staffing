@@ -674,3 +674,7 @@ not only a builder.
   has no Pages use case, so pages_manage_posts / instagram_* cannot be granted
   — owner adds the "Pages" (Content) use case at developers.facebook.com → app
   → Use cases, then regenerates the token with those scopes.
+- 2026-09-11: Facebook Shops is not available to India-based businesses
+  (Commerce Manager: "Shops isn't available in your country"). Dropped from
+  the to-do; the WhatsApp catalog is the storefront. Re-check only if Meta
+  expands availability; no setup change needed then.
