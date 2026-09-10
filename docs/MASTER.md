@@ -599,3 +599,49 @@ the fact stops believing every other term.
   system-user token needs pages_manage_posts, pages_read_engagement,
   instagram_basic, instagram_content_publish, and the Page + IG account
   assigned to the system user in Business Settings.
+
+## 8. Direction (2026-09-12) — India first, then international high-ticket
+Founder's call: build the vibe in the India circle first (WhatsApp, catalog,
+reels, Facebook/Instagram, partners), THEN the international high-ticket push
+(docs/GTM-INTERNATIONAL.md stays the plan for that phase). The next strategy
+session covers: automated marketing, client-acquisition design, when to pivot,
+which geographies show heavy demand — GoLuQ.com as an aggressive business
+solution consultancy (scale, reach, demand creation, psychological marketing),
+not only a builder.
+
+### Catalogue coverage (2026-09-12)
+- WhatsApp catalog now 28 items: 18 products/services + 10 scenario cards
+  ("GoLuQ for …": coaching, clinics, CA & law, garments, distributors, real
+  estate, restaurants, salons & gyms, schools, logistics). Cards at
+  goluq.com/catalog/for_*.jpg; masters in marketing/catalog-cards/.
+- Twelve chapter reels (6 chapters × EN/HI, 14–20 s, voice-over) hosted at
+  goluq.com/media/reel-<chapter>-<en|hi>.mp4; masters in marketing/reels/.
+- Publish tab live (cockpit → Sell → Publish): Facebook photo/link posts and
+  Instagram via Graph API. Blocked only on the owner assigning the Page to the
+  system user and regenerating the token with pages_manage_posts,
+  pages_read_engagement, instagram_basic, instagram_content_publish; the
+  Connect button names the missing step.
+- Facebook Shop: same Meta catalog; owner enables it in Commerce Manager →
+  Shops (screens only).
+
+## 9. TO-DO (current)
+### Owner
+- [ ] Business Settings: assign the Facebook Page to the system user; regenerate
+      the token with the four posting scopes; paste it in Settings → WhatsApp
+      Business API; press Connect in Publish.
+- [ ] Create the Instagram professional account, link it to the Page.
+- [ ] Create the LinkedIn company page.
+- [ ] Commerce Manager → Shops: turn on the Facebook Shop on the GoLuQ catalog.
+- [ ] Install the calendar bridge (docs/booking-bridge/Code.gs).
+- [ ] Submit the two booking templates (docs/whatsapp-templates.md).
+- [ ] Ashwin testimonial video + written consent.
+- [ ] Public Telegram channel name → Settings.
+### Build (mine, in order)
+- [ ] Post the first month of content through Publish once connected: one
+      scenario card + one reel a day, EN/HI alternating, tracked links.
+- [ ] Strategy session deliverable (section 8): demand map by geography from
+      Visitors data + market signals, pivot rules, acquisition playbooks.
+- [ ] Multi-tenant Store login for the first client store.
+- [ ] Reminders cron once templates are approved.
+- [ ] International pricing page, Nidaan case study, vertical pages — when the
+      international phase starts.
