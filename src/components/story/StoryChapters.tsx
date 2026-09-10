@@ -53,7 +53,7 @@ function VoicePill() {
       type="button"
       onClick={toggleMute}
       aria-pressed={!muted}
-      className="fixed right-4 top-[68px] z-30 inline-flex items-center gap-2 rounded-full border border-white/25 bg-black/70 px-4 py-2.5 text-sm font-semibold text-white shadow-lg backdrop-blur lg:bottom-6 lg:left-6 lg:right-auto lg:top-auto"
+      className="fixed left-4 top-[68px] z-30 inline-flex items-center gap-2 rounded-full border border-white/25 bg-black/70 px-4 py-2.5 text-sm font-semibold text-white shadow-lg backdrop-blur lg:bottom-6 lg:left-6 lg:top-auto"
     >
       {muted ? <VolumeX size={17} /> : <Volume2 size={17} className="text-brand-luq" />}
       {muted ? t("story.voiceOff") : t("story.voiceOn")}
