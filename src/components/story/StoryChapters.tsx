@@ -193,16 +193,19 @@ function Chapter({ id, index, region, onEnter }: { id: ChapterId; index: number;
       className="relative snap-start overflow-hidden bg-black lg:bg-transparent"
       onClick={() => setAfter((a) => !a)}
     >
-      {/* Phone: the scene is the screen. */}
-      <div className="relative min-h-[100svh] lg:hidden">
-        <Scene id={id} after={after} eager={index === 0} reduced={reduced} className="absolute inset-0" />
-        <div className="absolute inset-x-0 bottom-0 h-[72%] bg-gradient-to-t from-black/95 via-black/70 to-transparent" aria-hidden="true" />
-        <div className="absolute inset-x-0 bottom-0 z-10 px-5 pb-20 pr-16 sm:px-8">{words(true)}</div>
-        {index === 0 && (
-          <motion.div aria-hidden="true" animate={reduced ? undefined : { y: [0, 6, 0] }} transition={{ repeat: Infinity, duration: 1.6 }} className="absolute bottom-6 left-1/2 z-10 -translate-x-1/2 text-white/70">
-            <ChevronDown size={22} />
-          </motion.div>
-        )}
+      {/* Phone: picture on top, words below it — never on top of the art. */}
+      <div className="flex min-h-[100svh] flex-col lg:hidden">
+        <div className="relative h-[52svh] shrink-0">
+          <Scene id={id} after={after} eager={index === 0} reduced={reduced} className="absolute inset-0" />
+          {/* A soft fade into the caption panel, so the join reads as one card. */}
+          <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#0B1020] to-transparent" aria-hidden="true" />
+          {index === 0 && (
+            <motion.div aria-hidden="true" animate={reduced ? undefined : { y: [0, 6, 0] }} transition={{ repeat: Infinity, duration: 1.6 }} className="absolute bottom-3 left-1/2 z-10 -translate-x-1/2 text-white/70">
+              <ChevronDown size={22} />
+            </motion.div>
+          )}
+        </div>
+        <div className="flex flex-1 flex-col justify-start bg-[#0B1020] px-5 pb-24 pr-20 pt-4 sm:px-8">{words(true)}</div>
       </div>
 
       {/* Desk: portrait scene beside the words. */}

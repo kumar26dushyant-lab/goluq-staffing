@@ -63,7 +63,16 @@ export function isSpeechSupported(): boolean {
   return typeof window !== "undefined" && "speechSynthesis" in window;
 }
 
+/**
+ * Every narration belongs to a generation. Cancelling an utterance makes the
+ * browser fire its onend/onerror, which used to start the NEXT line of the
+ * sequence — so "voice off" cut one line and the story kept talking. A stop
+ * bumps the generation; a sequence that is not current goes silent for good.
+ */
+let generation = 0;
+
 export function stopSpeaking() {
+  generation += 1;
   if (isSpeechSupported()) window.speechSynthesis.cancel();
 }
 
@@ -104,10 +113,13 @@ export async function speakSequence(
   }
   await loadVoices();
   window.speechSynthesis.cancel();
+  const mine = ++generation;
 
   let i = 0;
   let started = false;
   const next = () => {
+    // Stopped, or superseded by a newer narration: do not speak another word.
+    if (mine !== generation) return;
     if (i >= lines.length) {
       handlers.onEnd?.();
       return;

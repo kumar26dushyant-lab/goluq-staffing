@@ -76,7 +76,7 @@ for (const [id, name, description, path] of ITEMS) {
   const data = {
     name, description,
     price: inr * 100, currency: "INR",
-    availability: "in stock", condition: "new", brand: "GoLuQ",
+    availability: "in stock", condition: "new", brand: "GoLuQ.com Digital Consultancy",
     image_url: `https://goluq.com/catalog/${id === "officeManaged" ? "whatsappOffice" : id === "storeManaged" ? "whatsappStore" : id}.jpg`,
     url: `https://goluq.com${path}`,
   };

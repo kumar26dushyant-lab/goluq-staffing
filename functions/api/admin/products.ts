@@ -178,7 +178,7 @@ async function syncToMeta(env: Env): Promise<Response> {
         currency: "INR",
         availability: p.availability === "out of stock" ? "out of stock" : "in stock",
         condition: "new",
-        brand: "GoLuQ",
+        brand: "GoLuQ.com Digital Consultancy",
         image_url: abs(p.image_path),
         ...(extra.length ? { additional_image_urls: extra.map((x: string) => abs(x)) } : {}),
         url: abs(p.url) || `${ORIGIN}/services`,
