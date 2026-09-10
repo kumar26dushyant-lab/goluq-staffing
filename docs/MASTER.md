@@ -552,3 +552,10 @@ the fact stops believing every other term.
   (unreadable in Devanagari) into the body face on a pill over the art; voice
   pill in its own row on phones, bottom-left on desktop; long captions size
   down. Verified at 390 px and 1440 px with `shot2.cjs` (desktop mode added).
+
+### International go-to-market (2026-09-11)
+- Strategy, researched rate comparison, packages, channel ranking, pipeline
+  maths, the founder's weekly tasks and my build list: `docs/GTM-INTERNATIONAL.md`.
+- Same day: voice-off now stops narration immediately (generation token in
+  lib/speak.ts); phone chapters are picture-above / words-below; catalogue
+  cards and the Meta brand field read "GoLuQ.com Digital Consultancy".
