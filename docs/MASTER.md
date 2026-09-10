@@ -670,6 +670,24 @@ Flow, built and verified with signed synthetic webhooks (no Razorpay keys yet):
   webhook secret never read back). Razorpay account: owner's personal savings
   account as stated; a current account is not required for Payment Links.
 
+### Homepage reels + a server crash fixed (2026-09-12, later)
+- Each story chapter now plays its own reel (goluq.com/media/reel-<chapter>-<en|hi>.mp4)
+  instead of the two stills: autoplays muted when the chapter is on screen,
+  pauses and rewinds when it leaves, "Tap for sound" pill on the film turns
+  the recorded voice-over on (off by default; a phone will not start audio on
+  its own). Browser speech synthesis is gone from the homepage — it stalled
+  and read the wrong card. Language switch swaps the reel.
+- INCIDENT: the first deploy took the site down for every visitor. /media
+  wrapped a Node read stream in a Response; when a browser abandoned a video
+  mid-download undici threw "ReadableStream is already closed" as an uncaught
+  exception and the process exited (systemd restarted it, 3–30 s of 502 each
+  time). Fixed by serving /media from buffered slices (≤ 8 MB per request,
+  Range/206/416 honoured) and logging uncaught errors instead of dying.
+  Verified: aborted parallel downloads, NRestarts=0.
+- docs/OWNER-TASKS.md: the owner's to-do written step by step for a browser
+  agent (Razorpay, calendar bridge, templates, Pages use case, Instagram,
+  LinkedIn, Telegram channel, testimonial).
+
 ## 9. TO-DO (current)
 ### Owner
 - [ ] Razorpay: Settings → API keys → paste key id + secret in cockpit →
