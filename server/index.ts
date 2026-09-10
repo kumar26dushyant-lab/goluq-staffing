@@ -41,7 +41,7 @@ import { onRequestGet as adminPaymentsGet, onRequestPost as adminPaymentsPost } 
 import { onRequestPost as razorpayWebhook } from "../functions/api/razorpay/webhook";
 import { geminiImage } from "../functions/lib/gemini";
 import { checkAdmin } from "../functions/lib/admin";
-import { writeFileSync, existsSync, statSync, createReadStream } from "node:fs";
+import { writeFileSync, existsSync, statSync, openSync, readSync, closeSync } from "node:fs";
 import { extname, basename } from "node:path";
 import { randomBytes } from "node:crypto";
 import { onRequestGet as custAuthGet, onRequestPost as custAuthPost } from "../functions/api/customer/auth";
@@ -354,28 +354,34 @@ app.get("/media/:name", (c) => {
   if (!type || !existsSync(file)) return c.notFound();
   const size = statSync(file).size;
   // Range support so a phone can seek inside a video instead of reloading it.
+  //
+  // Served from a Buffer, not a Node stream. Wrapping createReadStream() in a
+  // Response crashed the whole process ("ReadableStream is already closed" in
+  // undici) whenever a browser abandoned a video mid-download — which the
+  // homepage reels made happen for every visitor. A buffered slice has no
+  // stream to close; the cap keeps a single request under 8 MB and a browser
+  // simply asks for the next slice.
+  const CHUNK = 8 * 1024 * 1024;
   const range = c.req.header("range");
-  if (range) {
-    const m = /bytes=(\d*)-(\d*)/.exec(range);
-    const start = m && m[1] ? Number(m[1]) : 0;
-    const end = m && m[2] ? Math.min(Number(m[2]), size - 1) : size - 1;
-    const stream = createReadStream(file, { start, end });
-    return new Response(stream as unknown as ReadableStream, {
-      status: 206,
-      headers: {
-        "content-type": type,
-        "content-range": `bytes ${start}-${end}/${size}`,
-        "accept-ranges": "bytes",
-        "content-length": String(end - start + 1),
-        "cache-control": "public, max-age=31536000, immutable",
-      },
-    });
+  const m = range ? /bytes=(\d*)-(\d*)/.exec(range) : null;
+  const wantStart = m && m[1] ? Number(m[1]) : 0;
+  const wantEnd = m && m[2] ? Math.min(Number(m[2]), size - 1) : size - 1;
+  if (m && (wantStart >= size || wantStart > wantEnd)) {
+    return new Response(null, { status: 416, headers: { "content-range": `bytes */${size}` } });
   }
-  return new Response(createReadStream(file) as unknown as ReadableStream, {
+  const partial = Boolean(m) || size > CHUNK;
+  const start = wantStart;
+  const end = Math.min(wantEnd, start + CHUNK - 1);
+  const buf = Buffer.alloc(end - start + 1);
+  const fd = openSync(file, "r");
+  try { readSync(fd, buf, 0, buf.length, start); } finally { closeSync(fd); }
+  return new Response(buf, {
+    status: partial ? 206 : 200,
     headers: {
       "content-type": type,
-      "content-length": String(size),
+      ...(partial ? { "content-range": `bytes ${start}-${end}/${size}` } : {}),
       "accept-ranges": "bytes",
+      "content-length": String(buf.length),
       "cache-control": "public, max-age=31536000, immutable",
     },
   });
@@ -457,6 +463,13 @@ setInterval(runFollowups, 24 * 60 * 60 * 1000); // once a day
 
 const port = Number(process.env.PORT || 8090);
 const hostname = process.env.HOST || "127.0.0.1";
+// One aborted download must never take the business site down. Anything that
+// escapes a handler is logged with its stack and the process carries on;
+// systemd would restart it anyway, but a restart is a few seconds of 502 for
+// every visitor.
+process.on("uncaughtException", (e) => console.error("uncaught:", e));
+process.on("unhandledRejection", (e) => console.error("unhandled:", e));
+
 serve({ fetch: app.fetch, port, hostname });
 // eslint-disable-next-line no-console
 console.log(`GoLuQ server listening on http://${hostname}:${port}`);
