@@ -667,3 +667,10 @@ not only a builder.
   six "Watch:" reel cards (link to the hosted reels), thank-you (last), with
   sort_order; a `reorder` action recreates Meta items in reverse so the founder
   shows first. Runs once the token is back.
+- 2026-09-12 (later): token restored on system user goluq-api (never expires;
+  scopes: whatsapp_business_management, whatsapp_business_messaging,
+  catalog_management, business_management, pages_read_engagement). WhatsApp,
+  catalog and Page verified. Facebook POSTING still blocked: the GoLuQ.com app
+  has no Pages use case, so pages_manage_posts / instagram_* cannot be granted
+  — owner adds the "Pages" (Content) use case at developers.facebook.com → app
+  → Use cases, then regenerates the token with those scopes.
