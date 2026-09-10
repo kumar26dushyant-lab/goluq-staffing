@@ -53,7 +53,7 @@ function VoicePill() {
       type="button"
       onClick={toggleMute}
       aria-pressed={!muted}
-      className="fixed bottom-4 left-4 z-30 inline-flex items-center gap-2 rounded-full border border-white/25 bg-black/70 px-4 py-2.5 text-sm font-semibold text-white shadow-lg backdrop-blur lg:bottom-6 lg:left-6"
+      className="fixed right-4 top-[68px] z-30 inline-flex items-center gap-2 rounded-full border border-white/25 bg-black/70 px-4 py-2.5 text-sm font-semibold text-white shadow-lg backdrop-blur lg:bottom-6 lg:left-6 lg:right-auto lg:top-auto"
     >
       {muted ? <VolumeX size={17} /> : <Volume2 size={17} className="text-brand-luq" />}
       {muted ? t("story.voiceOff") : t("story.voiceOn")}
@@ -132,7 +132,7 @@ function Chapter({ id, index, region, onEnter }: { id: ChapterId; index: number;
       <p className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-bold sm:text-base ${dark ? "bg-black/45 text-brand-luq backdrop-blur" : "bg-brand-luq/10 text-brand-luq"}`}>
         <span className="font-mono">{String(index + 1).padStart(2, "0")}</span> · {line("who")}
       </p>
-      <div className="mt-3 min-h-[11rem] sm:min-h-[12rem] lg:min-h-[14rem]">
+      <div className="mt-2 min-h-0 sm:min-h-[12rem] lg:min-h-[14rem]">
         <AnimatePresence mode="wait" initial={false}>
           <motion.p
             key={after ? "after" : "before"}
@@ -140,7 +140,7 @@ function Chapter({ id, index, region, onEnter }: { id: ChapterId; index: number;
             animate={{ opacity: 1, y: 0 }}
             exit={reduced ? undefined : { opacity: 0, y: -8 }}
             transition={{ duration: 0.35 }}
-            className={`text-balance font-display font-bold leading-[1.08] ${(after ? afterLine : before).length > 75 ? "text-[1.9rem] sm:text-[2.6rem] lg:text-[3rem]" : "text-[2.3rem] sm:text-5xl lg:text-[3.4rem]"} ${after ? "" : dark ? "text-white/85" : "text-muted"}`}
+            className={`text-balance font-display font-bold leading-[1.1] ${(after ? afterLine : before).length > 75 ? "text-[1.45rem] sm:text-[2.6rem] lg:text-[3rem]" : "text-[1.7rem] sm:text-5xl lg:text-[3.4rem]"} ${after ? "" : dark ? "text-white/85" : "text-muted"}`}
           >
             <span className={`mb-2 block text-sm font-bold uppercase tracking-wide ${after ? "text-brand-luq" : dark ? "text-white/60" : "text-faint"}`}>
               {after ? t("story.after") : t("story.before")}
@@ -149,7 +149,7 @@ function Chapter({ id, index, region, onEnter }: { id: ChapterId; index: number;
           </motion.p>
         </AnimatePresence>
       </div>
-      <div className="mt-5 min-h-[3.5rem]">
+      <div className="mt-3 min-h-[3rem] sm:mt-5">
         <AnimatePresence>
           {after ? (
             <motion.div
@@ -157,23 +157,23 @@ function Chapter({ id, index, region, onEnter }: { id: ChapterId; index: number;
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
               transition={{ delay: 0.25 }}
-              className="flex flex-wrap items-center gap-3"
+              className="flex flex-wrap items-center gap-2 sm:gap-3"
               onClick={(e) => e.stopPropagation()}
             >
-              <span className="rounded-full border border-brand-luq/50 bg-brand-luq/15 px-3.5 py-2 text-base font-semibold text-brand-luq">
+              <span className="rounded-full border border-brand-luq/50 bg-brand-luq/15 px-3 py-1.5 text-sm font-semibold text-brand-luq sm:px-3.5 sm:py-2 sm:text-base">
                 {product}
               </span>
               <button
                 type="button"
                 onClick={ask}
-                className={`inline-flex items-center gap-2 rounded-full px-6 py-3.5 text-lg font-bold shadow-lg ${dark ? "bg-white text-[#0B1020]" : "bg-fg text-[rgb(var(--c-base))]"}`}
+                className={`inline-flex items-center gap-2 rounded-full px-5 py-3 text-base font-bold shadow-lg sm:px-6 sm:py-3.5 sm:text-lg ${dark ? "bg-white text-[#0B1020]" : "bg-fg text-[rgb(var(--c-base))]"}`}
               >
                 {t("story.cta")} <ArrowRight size={19} />
               </button>
               <button
                 type="button"
                 onClick={share}
-                className={`inline-flex items-center gap-2 rounded-full border px-4 py-3 text-base font-semibold ${dark ? "border-white/30 text-white/90" : "border-hairline/30 text-muted"}`}
+                className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-2.5 text-sm font-semibold sm:px-4 sm:py-3 sm:text-base ${dark ? "border-white/30 text-white/90" : "border-hairline/30 text-muted"}`}
               >
                 <Share2 size={17} /> {t("story.share")}
               </button>
@@ -195,7 +195,7 @@ function Chapter({ id, index, region, onEnter }: { id: ChapterId; index: number;
     >
       {/* Phone: picture on top, words below it — never on top of the art. */}
       <div className="flex min-h-[100svh] flex-col lg:hidden">
-        <div className="relative h-[52svh] shrink-0">
+        <div className="relative h-[46svh] shrink-0">
           <Scene id={id} after={after} eager={index === 0} reduced={reduced} className="absolute inset-0" />
           {/* A soft fade into the caption panel, so the join reads as one card. */}
           <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#0B1020] to-transparent" aria-hidden="true" />
@@ -205,7 +205,7 @@ function Chapter({ id, index, region, onEnter }: { id: ChapterId; index: number;
             </motion.div>
           )}
         </div>
-        <div className="flex flex-1 flex-col justify-center bg-[#0B1020] px-5 pb-20 pr-20 pt-4 sm:px-8">{words(true)}</div>
+        <div className="flex flex-1 flex-col justify-center bg-[#0B1020] px-5 pb-6 pr-20 pt-3 sm:px-8">{words(true)}</div>
       </div>
 
       {/* Desk: portrait scene beside the words. */}
