@@ -99,6 +99,22 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
       return Response.json({ ok: true });
     }
 
+    // Meta shows the WhatsApp catalog newest-first. To control the order the
+    // customer sees, remove everything from Meta and recreate it in reverse
+    // sort order, so the lowest sort_order (the founder card) is created last
+    // and shows first. Local rows are untouched.
+    if (action === "reorder") {
+      const cfg = await waConfig(env.DB, env);
+      const catalog = (await getSetting(env.DB, "wa_catalog_id")) || "";
+      if (!catalog || !cfg.accessToken) return Response.json({ ok: false, error: "No catalog connected yet." });
+      const rows = await env.DB.prepare("SELECT id, meta_id FROM products WHERE tenant = ? AND meta_id IS NOT NULL").bind(TENANT).all<any>();
+      for (const p of rows.results ?? []) {
+        try { await graph(cfg.accessToken, p.meta_id, "DELETE"); } catch { /* already gone */ }
+        await env.DB.prepare("UPDATE products SET meta_id = NULL, synced_at = NULL WHERE id = ?").bind(p.id).run();
+      }
+      await env.DB.prepare("UPDATE products SET updated_at = datetime('now') WHERE tenant = ?").bind(TENANT).run();
+      return await syncToMeta(env, true, "DESC");
+    }
     if (action === "import") return await importFromMeta(env);
     // force: push every live product again (used after images change on disk).
     if (action === "sync") return await syncToMeta(env, b.force === true);
@@ -152,11 +168,11 @@ async function importFromMeta(env: Env): Promise<Response> {
 }
 
 /** Push every local change to Meta: create, update, or remove. */
-async function syncToMeta(env: Env, force = false): Promise<Response> {
+async function syncToMeta(env: Env, force = false, order: "ASC" | "DESC" = "ASC"): Promise<Response> {
   const cfg = await waConfig(env.DB, env);
   const catalog = (await getSetting(env.DB, "wa_catalog_id")) || "";
   if (!catalog || !cfg.accessToken) return Response.json({ ok: false, error: "No catalog connected yet." });
-  const rows = await env.DB.prepare("SELECT * FROM products WHERE tenant = ?").bind(TENANT).all<any>();
+  const rows = await env.DB.prepare(`SELECT * FROM products WHERE tenant = ? ORDER BY sort_order ${order}, id ${order}`).bind(TENANT).all<any>();
   let created = 0, updated = 0, removed = 0, failed = 0;
   for (const p of rows.results ?? []) {
     const abs = (path: string | null) => (path ? (path.startsWith("http") ? path : ORIGIN + path) : "");
