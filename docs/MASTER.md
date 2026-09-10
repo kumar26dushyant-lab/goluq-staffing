@@ -645,3 +645,25 @@ not only a builder.
 - [ ] Reminders cron once templates are approved.
 - [ ] International pricing page, Nidaan case study, vertical pages — when the
       international phase starts.
+
+### INCIDENT 2026-09-12 — WhatsApp token dead
+- The stored Meta token belonged to system user "sarathi wa". While assigning
+  the Facebook Page to "goluq-api", that user's assets were "cleaned up" and
+  the token stopped resolving (GET /me → {}; WABA, phone number and catalog all
+  "does not exist or missing permissions"). Effect: the guide cannot send
+  replies, catalog sync fails, product cards/lists cannot be sent. Inbound
+  webhooks still arrive; Telegram alerts of inbound still work.
+- Fix (owner): in Business Settings → System users → goluq-api → Add assets:
+  WhatsApp account "GoLuQ - Digital Consultancy" (full control), Catalog
+  "GoLuQ" (Manage), Page GoLuQ.com (already assigned); Generate token with
+  whatsapp_business_management, whatsapp_business_messaging,
+  catalog_management, business_management, pages_manage_posts,
+  pages_read_engagement, instagram_basic, instagram_content_publish; paste in
+  cockpit → Settings → WhatsApp Business API → Save; press Check connection,
+  then Publish → Connect, then Store → Sync.
+- Prepared while waiting: prices halved for WhatsApp products (Office/Store
+  ₹50,000 + ₹5,000/mo, $1,450 + $245; WhatsApp API ₹3,999; WhatsApp
+  automations ₹5,000; scenario cards ₹50,000). Store rows for founder (first),
+  six "Watch:" reel cards (link to the hosted reels), thank-you (last), with
+  sort_order; a `reorder` action recreates Meta items in reverse so the founder
+  shows first. Runs once the token is back.
