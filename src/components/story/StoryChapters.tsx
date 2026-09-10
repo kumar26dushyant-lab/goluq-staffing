@@ -10,20 +10,26 @@ import { useRegion, type Region } from "../../lib/region";
  * The homepage as a story: six chapters, one screen each.
  *
  * Every chapter is a business owner in an ordinary bad moment, dissolving into
- * the same owner once the thing GoLuQ builds is in place. One line for each
- * state, the product's name, one button. No paragraphs — a visitor on a phone
- * consumes it the way they consume a reel: look, feel it, swipe, send it on.
+ * the same owner once the thing GoLuQ builds is in place. The picture is the
+ * chapter's reel — the same 15–20 s film we post on Instagram, with its own
+ * voice-over — playing on its own as it scrolls into view and stopping as it
+ * leaves. One line for each state, the product's name, one button.
  *
- * Region changes the wording, never the pictures (see lib/region.ts). The
- * voice pill stays on screen because a story told aloud lands harder, and a
- * control nobody can find is a control nobody uses.
+ * Sound: reels start muted (browsers allow nothing else) and the pill turns
+ * the voice-over on for whichever chapter is on screen. The browser's own
+ * speech synthesis is gone from this page — it stalled and spoke over the
+ * wrong card; the reel's recorded voice cannot.
+ *
+ * Region changes the wording, never the pictures (see lib/region.ts).
  */
 export const CHAPTERS = ["coaching", "distributor", "ca", "garment", "claims", "ceo"] as const;
 export type ChapterId = (typeof CHAPTERS)[number];
 
 const BEAT_MS = 2200;
-/** Bump when scenes are regenerated: the edge caches images by URL. */
+/** Bump when posters are regenerated: the edge caches images by URL. */
 const STORY_V = "3";
+/** Fired from the sound pill inside the click, so iOS lets the video unmute. */
+const SOUND_EVENT = "goluq:sound";
 
 export function StoryChapters() {
   const [active, setActive] = useState(0);
@@ -38,42 +44,90 @@ export function StoryChapters() {
           <span key={id} className={`h-2 w-2 rounded-full transition-all ${i === active ? "scale-125 bg-brand-luq" : "bg-fg/25"}`} />
         ))}
       </div>
-      <VoicePill />
+      <SoundPill />
     </div>
   );
 }
 
 /** Always visible while the story is on screen. */
-function VoicePill() {
+function SoundPill() {
   const { t } = useTranslation();
-  const { supported, muted, toggleMute } = useVoice();
-  if (!supported) return null;
+  const { muted, toggleMute } = useVoice();
+  const onClick = () => {
+    // Tell the visible reel first, synchronously, while we are still inside
+    // the user's tap — that is the only moment a phone lets audio start.
+    window.dispatchEvent(new CustomEvent(SOUND_EVENT, { detail: { on: muted } }));
+    toggleMute();
+  };
   return (
     <button
       type="button"
-      onClick={toggleMute}
+      onClick={onClick}
       aria-pressed={!muted}
       className="fixed left-4 top-[68px] z-30 inline-flex items-center gap-2 rounded-full border border-white/25 bg-black/70 px-4 py-2.5 text-sm font-semibold text-white shadow-lg backdrop-blur lg:bottom-6 lg:left-6 lg:top-auto"
     >
       {muted ? <VolumeX size={17} /> : <Volume2 size={17} className="text-brand-luq" />}
-      {muted ? t("story.voiceOff") : t("story.voiceOn")}
+      {muted ? t("story.soundOff") : t("story.soundOn")}
     </button>
   );
 }
 
-function Scene({ id, after, eager, reduced, className = "" }: { id: ChapterId; after: boolean; eager: boolean; reduced: boolean | null; className?: string }) {
+/**
+ * The chapter's reel. Plays when the chapter is on screen, pauses when it is
+ * not; muted unless the visitor asked for sound. If an unmuted play is refused
+ * (autoplay policy), it falls back to muted rather than showing a frozen frame.
+ */
+function Reel({ id, inView, eager, className = "" }: { id: ChapterId; inView: boolean; eager: boolean; className?: string }) {
+  const { i18n } = useTranslation();
+  const { muted } = useVoice();
+  const ref = useRef<HTMLVideoElement>(null);
+  const lang = i18n.language.startsWith("hi") ? "hi" : "en";
+  const src = `/media/reel-${id}-${lang}.mp4`;
+
+  const play = (withSound: boolean) => {
+    const v = ref.current;
+    if (!v) return;
+    v.muted = !withSound;
+    const p = v.play();
+    if (p && typeof p.catch === "function") {
+      p.catch(() => {
+        if (!v.muted) { v.muted = true; v.play().catch(() => {}); }
+      });
+    }
+  };
+
+  useEffect(() => {
+    const v = ref.current;
+    if (!v) return;
+    if (inView) play(!muted);
+    else { v.pause(); v.currentTime = 0; }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inView, muted, src]);
+
+  useEffect(() => {
+    const onSound = (e: Event) => {
+      if (!inView) return;
+      const on = Boolean((e as CustomEvent).detail?.on);
+      play(on);
+    };
+    window.addEventListener(SOUND_EVENT, onSound);
+    return () => window.removeEventListener(SOUND_EVENT, onSound);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inView]);
+
   return (
-    <div className={`overflow-hidden ${className}`}>
-      <img src={`/story/${id}_before.webp?v=${STORY_V}`} alt="" className="absolute inset-0 h-full w-full object-cover" loading={eager ? "eager" : "lazy"} decoding="async" />
-      <motion.img
-        src={`/story/${id}_after.webp?v=${STORY_V}`}
-        alt=""
+    <div className={`overflow-hidden bg-black ${className}`}>
+      <video
+        key={src}
+        ref={ref}
+        src={src}
+        poster={`/story/${id}_before.webp?v=${STORY_V}`}
         className="absolute inset-0 h-full w-full object-cover"
-        initial={false}
-        animate={{ opacity: after ? 1 : 0 }}
-        transition={{ duration: reduced ? 0 : 0.9, ease: "easeInOut" }}
-        loading={eager ? "eager" : "lazy"}
-        decoding="async"
+        muted
+        loop
+        playsInline
+        preload={eager ? "auto" : "metadata"}
+        aria-hidden="true"
       />
     </div>
   );
@@ -82,7 +136,6 @@ function Scene({ id, after, eager, reduced, className = "" }: { id: ChapterId; a
 function Chapter({ id, index, region, onEnter }: { id: ChapterId; index: number; region: Region; onEnter: () => void }) {
   const { t, i18n } = useTranslation();
   const reduced = useReducedMotion();
-  const { say, muted, supported } = useVoice();
   const ref = useRef<HTMLElement>(null);
   const inView = useInView(ref, { amount: 0.5 });
   const [after, setAfter] = useState(false);
@@ -109,7 +162,6 @@ function Chapter({ id, index, region, onEnter }: { id: ChapterId; index: number;
     onEnter();
     setAfter(false);
     timer.current = window.setTimeout(() => { setAfter(true); setPlayed(true); }, reduced ? 600 : BEAT_MS);
-    if (supported && !muted) say([before, afterLine]);
     return () => { if (timer.current) window.clearTimeout(timer.current); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inView, i18n.language, region]);
@@ -193,10 +245,10 @@ function Chapter({ id, index, region, onEnter }: { id: ChapterId; index: number;
       className="relative snap-start overflow-hidden bg-black lg:bg-transparent"
       onClick={() => setAfter((a) => !a)}
     >
-      {/* Phone: picture on top, words below it — never on top of the art. */}
+      {/* Phone: the reel on top, words below it — never on top of the film. */}
       <div className="flex min-h-[100svh] flex-col lg:hidden">
-        <div className="relative h-[46svh] shrink-0">
-          <Scene id={id} after={after} eager={index === 0} reduced={reduced} className="absolute inset-0" />
+        <div className="relative h-[52svh] shrink-0">
+          <Reel id={id} inView={inView} eager={index === 0} className="absolute inset-0" />
           {/* A soft fade into the caption panel, so the join reads as one card. */}
           <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#0B1020] to-transparent" aria-hidden="true" />
           {index === 0 && (
@@ -208,9 +260,9 @@ function Chapter({ id, index, region, onEnter }: { id: ChapterId; index: number;
         <div className="flex flex-1 flex-col justify-center bg-[#0B1020] px-5 pb-6 pr-20 pt-3 sm:px-8">{words(true)}</div>
       </div>
 
-      {/* Desk: portrait scene beside the words. */}
-      <div className="mx-auto hidden min-h-[100svh] w-full max-w-6xl grid-cols-2 items-center gap-12 px-8 lg:grid">
-        <Scene id={id} after={after} eager={index === 0} reduced={reduced} className="relative aspect-[4/5] max-h-[82vh] rounded-3xl shadow-glass" />
+      {/* Desk: the reel, phone-shaped, beside the words. */}
+      <div className="mx-auto hidden min-h-[100svh] w-full max-w-6xl grid-cols-[minmax(0,420px)_1fr] items-center gap-12 px-8 lg:grid">
+        <Reel id={id} inView={inView} eager={index === 0} className="relative aspect-[9/16] max-h-[82vh] w-full rounded-3xl shadow-glass" />
         <div>{words(false)}</div>
       </div>
     </section>

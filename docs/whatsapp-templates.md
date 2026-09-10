@@ -168,16 +168,12 @@ days later). Inside the window the link goes as a tappable button instead.
 
 EN body:
 ```
-Hi {{1}}, here is your GoLuQ payment link for {{2}}:
-{{3}}
-Pay whenever suits you — UPI, card or netbanking. Reply here with any question.
+Hi {{1}}, here is your GoLuQ payment link for {{2}}: {{3}} — pay whenever suits you, by UPI, card or netbanking. Reply here with any question.
 ```
 Sample: {{1}} Rahul · {{2}} your 30-minute call with Dushyant · {{3}} https://rzp.io/l/abc123
 
 HI body:
 ```
-नमस्ते {{1}}, {{2}} के लिए आपका GoLuQ पेमेंट लिंक यह रहा:
-{{3}}
-जब सुविधा हो तब भुगतान करें — UPI, कार्ड या नेटबैंकिंग। कोई सवाल हो तो यहीं लिखिए।
+नमस्ते {{1}}, {{2}} के लिए आपका GoLuQ पेमेंट लिंक यह रहा: {{3}} — जब सुविधा हो तब भुगतान करें, UPI, कार्ड या नेटबैंकिंग से। कोई सवाल हो तो यहीं लिखिए।
 ```
 Once approved: put the template name in cockpit → Settings → Payments.
