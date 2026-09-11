@@ -177,3 +177,12 @@ HI body:
 नमस्ते {{1}}, {{2}} के लिए आपका GoLuQ पेमेंट लिंक यह रहा: {{3}} — जब सुविधा हो तब भुगतान करें, UPI, कार्ड या नेटबैंकिंग से। कोई सवाल हो तो यहीं लिखिए।
 ```
 Once approved: put the template name in cockpit → Settings → Payments.
+
+### login_otp — AUTHENTICATION category · en + hi
+Meta writes the body of an authentication template itself; you only choose
+the options. In WhatsApp Manager → Create template → Category
+**Authentication** → name `login_otp` → language English → Code delivery:
+**Copy code** → tick "Add security recommendation" → expiry: 10 minutes →
+Submit. Repeat with language Hindi. Approval is usually within minutes.
+Then cockpit → Settings → Client sign-in → "WhatsApp OTP template name" =
+`login_otp`. The /start page shows "or by WhatsApp" the moment it is set.

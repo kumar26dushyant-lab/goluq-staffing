@@ -708,14 +708,60 @@ Flow, built and verified with signed synthetic webhooks (no Razorpay keys yet):
   per account; regenerating would break Sarathi-AI) + a second webhook; Dodo
   Payments for international; Google OAuth client for the client sign-in.
 
+### Self-service intake — goluq.com/start (2026-09-12, later)
+Decision (owner): the multi-tenant store engine is on hold; clients are
+onboarded through a generic intake and mapped as they arrive. Built:
+- **/start**: sign in with an email code (live), a WhatsApp code (once the
+  `login_otp` authentication template is approved) or Google (once the OAuth
+  client is pasted in Settings → Client sign-in). No passwords, no SMS, works
+  in any country. Same customer identity as the portal.
+- Tiles: business type (14) → departments that hurt (12) → "tell us" by
+  hold-to-talk (browser recording, transcribed server-side by Gemini, Hindi
+  stays Devanagari) or typing → up to four follow-up questions from the guide
+  → a written plan (BRD: title, summary, goals, users, day-to-day scenarios,
+  integrations, timeline, open questions) the client edits and confirms →
+  contact details → sent.
+- On submit: `briefs` row, a lead row (status engaged, source = utm or
+  referrer), Telegram alert with the summary and WhatsApp/cockpit buttons,
+  owner email with the full plan, client email with the plan and the booking
+  link; the done screen offers the calendar and WhatsApp.
+- Cockpit → Inbox → **Briefs**: each plan, status (new/contacted/quoted/
+  won/lost), the raw words and follow-ups, a note field.
+- Homepage hero leads with "Tell us what slows you down" → /start.
+- No price anywhere on /start: the copy says a fixed quote comes on the call,
+  "priced for a small business, not an enterprise".
+- Code: functions/api/auth/otp.ts, auth/google.ts, api/intake.ts,
+  api/admin/briefs.ts, lib/gemini.ts (geminiJson, geminiTranscribe),
+  lib/whatsapp.ts (waSendAuthTemplate), src/pages/Start.tsx,
+  src/components/admin/Briefs.tsx; tables login_codes, briefs; customers
+  gained google_sub, lang.
+
+### Decisions recorded (2026-09-12, later)
+- Department cards ("all-in-one", operations, CRM, billing, inventory, HR,
+  training, vendors, support, field, owner dashboard): no fixed price; they
+  are custom builds quoted after the BRD. Catalog needs a price, so each card
+  will carry the scope-call price with "fixed quote after the call" in the
+  description. Cards to be composed next (EN + HI, same engine).
+- Payments: Razorpay for India. Razorpay international needs the feature
+  enabled on a business account with documents, settles in INR at ~3%+GST and
+  refuses some categories; on a personal savings account it is unlikely to be
+  enabled. Dodo Payments (merchant of record) for customers abroad — owner to
+  share the API key and webhook secret (docs/OWNER-TASKS.md 1b).
+- Partner programme: creatives never state the commission rate (it is set in
+  the cockpit, currently 20%). The pitch is "become a GoLuQ.com partner —
+  open your GoLuQ partner office, earn a lump sum on every order and
+  recurring revenue on what stays live", pointing to goluq.com/partner.
+
 ## 9. TO-DO (current)
 ### Owner
 - [ ] Razorpay: Settings → API keys → paste key id + secret in cockpit →
       Settings → Payments. Then Razorpay → Webhooks → add
       https://goluq.com/api/razorpay/webhook (payment_link.paid, .expired,
       .cancelled) with a secret; paste the same secret in the cockpit.
-- [ ] Submit the `payment_link` template (docs/whatsapp-templates.md) with the
-      two booking templates; put its name in Settings → Payments once approved.
+- [ ] Submit `payment_link`, `login_otp` (authentication) and the two booking
+      templates (docs/OWNER-TASKS.md §3); put the names in Settings once approved.
+- [ ] Google OAuth client → Settings → Client sign-in (docs/OWNER-TASKS.md §1c).
+- [ ] Dodo Payments API key + webhook secret (docs/OWNER-TASKS.md §1b).
 - [ ] developers.facebook.com → app → Use cases → add "Pages"; regenerate the
       token with pages_manage_posts, pages_read_engagement, instagram_basic,
       instagram_content_publish; paste in Settings → WhatsApp Business API;
@@ -727,6 +773,15 @@ Flow, built and verified with signed synthetic webhooks (no Razorpay keys yet):
 - [ ] Ashwin testimonial video + written consent.
 - [ ] Public Telegram channel name → Settings.
 ### Build (mine, in order)
+- [ ] Department cards (11) EN + HI, composed with the card engine, priced at
+      the scope call, "fixed quote after the call"; add to Store and catalog.
+- [ ] Partner (affiliate) campaign: cards + 15 s reels EN/HI — "start your
+      GoLuQ.com partner office", lump sum + recurring, no rate shown, CTA to
+      goluq.com/partner. Refresh /partner copy to match the pitch.
+- [ ] Dodo Payments adapter for non-INR markets once the key arrives; the
+      cart and cockpit choose Razorpay or Dodo by the customer's market.
+- [ ] Pre-launch walk-through checklist: ad → /start → plan → call → payment
+      → WhatsApp, EN/HI, three phones; fix everything found before spend.
 - [ ] Post the first month of content through Publish once connected: one
       scenario card + one reel a day, EN/HI alternating, tracked links.
 - [ ] Strategy session deliverable (section 8): demand map by geography from

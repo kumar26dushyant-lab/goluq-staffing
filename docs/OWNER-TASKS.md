@@ -7,7 +7,15 @@ cockpit fields named below. The cockpit is https://goluq.com/admin.
 
 ---
 
-## 1. Razorpay — reuse the Sarathi-AI keys, add one webhook (10 minutes)
+## 1. Razorpay — keys and one webhook (10 minutes)
+
+If GoLuQ gets its OWN Razorpay account (or sub-merchant), generate the key
+pair there: Account & Settings → API Keys → Generate Live Key, and skip the
+Sarathi-AI note below. If GoLuQ shares Sarathi-AI's account, follow the note:
+a Razorpay account has one live key pair, and regenerating it breaks whatever
+else uses it.
+
+### 1-shared. Reuse the Sarathi-AI keys
 
 Why: without this, the founder-call and cart payment links cannot be created.
 GoLuQ uses the same Razorpay account as Sarathi-AI.com. A Razorpay account has
@@ -147,6 +155,13 @@ Samples: {{1}} Rahul · {{2}} your 30-minute call with Dushyant · {{3}} https:/
 नमस्ते {{1}}, {{2}} के लिए आपका GoLuQ पेमेंट लिंक यह रहा: {{3}} — जब सुविधा हो तब भुगतान करें, UPI, कार्ड या नेटबैंकिंग से। कोई सवाल हो तो यहीं लिखिए।
 ```
 Samples: {{1}} राहुल · {{2}} दुष्यंत के साथ 30 मिनट की कॉल · {{3}} https://rzp.io/l/abc123
+
+### 3d. `login_otp` — Authentication category (English, then Hindi)
+Create template → Category **Authentication** → name `login_otp` → language
+English → Code delivery **Copy code** → tick "Add security recommendation" →
+code expires in 10 minutes → Submit. Repeat for Hindi. (Meta writes the body.)
+Once approved: cockpit → Settings → **Client sign-in** → "WhatsApp OTP template
+name" = `login_otp` → Save. /start then offers sign-in by WhatsApp code.
 
 After approval (usually a few hours): open cockpit → Settings → Payments and
 type `payment_link` into "Approved WhatsApp template for payment links" →
