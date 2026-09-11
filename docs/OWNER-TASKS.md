@@ -229,19 +229,16 @@ lacks the Pages permissions.
 
 ---
 
-## 6. LinkedIn company page (10 minutes)
+## 6. LinkedIn company page — complete it (15 minutes)
 
-1. https://www.linkedin.com/company/setup/new/ → Company → name
-   "GoLuQ.com Digital Consultancy", public URL `goluq`, website
-   https://goluq.com, industry "IT Services and IT Consulting", size 1–10,
-   type "Sole proprietorship", tagline "Software, WhatsApp, voice and
-   toll-free lines that let a business run without the owner on the phone."
-2. Logo: goluq.com/brand/profile-640.png. Cover: any card from
-   goluq.com/catalog/ (e.g. whatsappOffice.jpg) cropped to 1128×191.
-3. Post nothing yet; posting from the cockpit is a later build. Send Claude
-   the page URL.
-
----
+The page exists: https://www.linkedin.com/company/145008974/admin/. Open
+docs/LINKEDIN.md and paste each field exactly as written there: Page info
+(tagline, logo, cover), Details (overview, website, industry, size, type,
+phone, specialties), Buttons (Contact us → https://goluq.com/start),
+Locations, Workplace, Languages (Hindi description). Two values are yours:
+**Year founded** and the **registered address** — the document does not
+guess them. Then post the first three items of the 30-day plan and start the
+daily outreach routine in §12 of that document.
 
 ## 7. Public Telegram channel (5 minutes)
 

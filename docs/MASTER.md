@@ -833,8 +833,34 @@ What they do well, and what we take:
 - Instagram needs the professional account linked to the Page first;
   the cron posts to Facebook alone until then and marks the IG error.
 
+### Badge, solutions page, catalog language, LinkedIn (2026-09-12, later)
+- **Badge** "Official WhatsApp Business Platform · Meta / WhatsApp · Facebook ·
+  Instagram" (never "Meta Business Partner") on 17 Meta-platform cards in
+  both languages: Office, Store, API, WhatsApp automations, Digital Employee,
+  the ten scenario cards, CRM and support desk. Engine cards carry it under
+  the subheadline; the model-made English cards carry it as a top-right
+  sticker (badge-overlay.mjs). Masters: marketing/catalog-cards/badged/.
+  Reel end-frames with the badge: still to do.
+- **/solutions**: by role, business type, industry, in EN/HI; every tile
+  lands on /start with the business pre-picked. In the top nav.
+- **Catalog language**: Meta allows one catalog per WhatsApp number and one
+  language per catalog, so there is no Hindi catalog and no per-customer
+  catalog. What is done instead: every product's second picture is its Hindi
+  card (swipe on the product), every description ends with a bilingual line
+  saying we build, train and report in Hindi, English or any language, and
+  the "Hindi and English" tile on the website card now says "Any language"
+  (EN re-rendered with the engine, HI edited). The guide already answers in
+  the customer's language and sends the card that fits.
+- **LinkedIn**: docs/LINKEDIN.md — every page field paste-ready, the
+  narrative ("Let the system do the work. You do the growing."), a 30-day
+  posting plan, the outreach routine and the honest maths for 2–3 clients a
+  month at USD 3–5k (400 requests → ~8 scope calls → 2–3 wins, from month
+  two if the daily routine holds).
+
 ## 9. TO-DO (current)
 ### Owner
+- [ ] LinkedIn page: fill every field from docs/LINKEDIN.md (year founded and
+      registered address are yours to enter); start the daily outreach routine.
 - [ ] Razorpay: Settings → API keys → paste key id + secret in cockpit →
       Settings → Payments. Then Razorpay → Webhooks → add
       https://goluq.com/api/razorpay/webhook (payment_link.paid, .expired,
@@ -854,9 +880,8 @@ What they do well, and what we take:
 - [ ] Ashwin testimonial video + written consent.
 - [ ] Public Telegram channel name → Settings.
 ### Build (mine, in order)
-- [ ] /solutions page + nav: by role, business type, industry → scenario card + /start.
-- [ ] "Official WhatsApp Business Platform · Meta" badge on Meta-related
-      cards (EN/HI) and reel end-frames; price-anchor variants (abroad vs India).
+- [ ] Reel end-frames with the platform badge (12 reels); price-anchor card
+      variants (abroad vs India price).
 - [ ] Partner (affiliate) campaign: cards + 15 s reels EN/HI — "start your
       GoLuQ.com partner office", lump sum + recurring, no rate shown, CTA to
       goluq.com/partner. Refresh /partner copy to match the pitch.

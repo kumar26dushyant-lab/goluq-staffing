@@ -16,6 +16,7 @@ import { WhatsAppCta } from "./components/WhatsAppCta";
 // the initial bundle so "/" stays inside the BUILD_SPEC ~200KB gzip budget.
 const Thanks = lazy(() => import("./pages/Thanks"));
 const Start = lazy(() => import("./pages/Start"));
+const Solutions = lazy(() => import("./pages/Solutions"));
 const StoryHome = lazy(() => import("./pages/StoryHome").then((m) => ({ default: m.StoryHome })));
 const Services = lazy(() =>
   import("./pages/Services").then((m) => ({ default: m.Services }))
@@ -131,6 +132,7 @@ export default function App() {
         <Route path="/preview" element={<Suspense fallback={null}><StoryHome /></Suspense>} />
         <Route path="/thanks" element={<Suspense fallback={null}><Thanks /></Suspense>} />
         <Route path="/start" element={<Suspense fallback={null}><Start /></Suspense>} />
+        <Route path="/solutions" element={<Suspense fallback={null}><Solutions /></Suspense>} />
         <Route path="/about" element={<About />} />
         <Route path="/partner" element={<PartnerLanding />} />
         <Route path="/partner/dashboard" element={<PartnerDashboard />} />

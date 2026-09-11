@@ -129,6 +129,9 @@ export default function Start() {
     const m = /[#&]token=([A-Za-z0-9_-]{32,})/.exec(window.location.hash);
     if (m) { localStorage.setItem(TOKEN_KEY, m[1]); window.history.replaceState(null, "", window.location.pathname + window.location.search); }
     captureUtm();
+    // From /solutions: the business is already chosen.
+    const pre = new URLSearchParams(window.location.search).get("business") || "";
+    if (pre && BUSINESS.some((b) => b[0] === pre)) setBusiness(pre);
     try { const d = JSON.parse(sessionStorage.getItem(DRAFT_KEY) || "null"); if (d) { setBusiness(d.business || ""); setDepts(d.depts || []); setText(d.text || ""); } } catch { /* fresh start */ }
     api("/api/intake").then((d) => { if (d.ok) { setContact((c) => ({ ...c, name: d.customer.name === "Customer" ? "" : d.customer.name, email: d.customer.email || "", phone: d.customer.phone.startsWith("email:") ? "" : d.customer.phone })); setStep("business"); } });
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -202,13 +202,17 @@ async function syncToMeta(env: Env, force = false, order: "ASC" | "DESC" = "ASC"
       if (!force && p.synced_at && p.synced_at >= p.updated_at && p.meta_id) continue;
       if (!p.image_path) throw new Error("needs a photo before it can go to WhatsApp");
       const extra = (() => { try { return JSON.parse(p.extra_images || "[]"); } catch { return []; } })();
+      // One catalog per WhatsApp number and one language per catalog is Meta's
+      // rule. So the Hindi edition of a card is the product's second picture
+      // (swipe on the card), and the words say the build comes in any language.
+      if (HINDI_CARDS.has(p.retailer_id) && !extra.includes(`/catalog/hi/${p.retailer_id}.jpg`)) extra.unshift(`/catalog/hi/${p.retailer_id}.jpg`);
       // Meta caches a product image by its URL. A changed picture at the same
       // path never shows up, so the URL carries a version stamp.
       const stamp = Date.now().toString(36);
       const versioned = (path: string | null) => (abs(path) ? `${abs(path)}${abs(path).includes("?") ? "&" : "?"}v=${stamp}` : "");
       const data: Record<string, unknown> = {
         name: p.name,
-        description: p.description || p.name,
+        description: withLanguageLine(p.description || p.name),
         price: Math.round(p.price_inr) * 100,
         currency: "INR",
         availability: p.availability === "out of stock" ? "out of stock" : "in stock",
@@ -267,4 +271,17 @@ async function ensureSets(env: Env): Promise<{ ok: boolean; created: number; upd
     }
   }
   return { ok: true, created, updated };
+}
+
+/** Cards that exist in Hindi under public/catalog/hi. */
+const HINDI_CARDS = new Set([
+  "whatsappOffice", "whatsappStore", "tollfree", "virtualNumber", "waApi", "voiceCampaign", "txnSms", "promoSms", "missedCall",
+  "automation", "whatsapp", "digitalEmployee", "website", "app", "offline", "platform",
+  "for_coaching", "for_clinic", "for_ca", "for_garment", "for_distributor", "for_realestate", "for_restaurant", "for_salon", "for_school", "for_logistics",
+  "founder", "thankyou",
+  "dept_allinone", "dept_operations", "dept_crm", "dept_billing", "dept_inventory", "dept_hr", "dept_training", "dept_vendors", "dept_support", "dept_field", "dept_dashboard",
+]);
+const LANG_LINE = "Built, trained and reported in Hindi, English or any language your customers use. हिंदी में बात करें — हम हिंदी, अंग्रेज़ी या आपकी किसी भी भाषा में बनाते और ट्रेन करते हैं।";
+function withLanguageLine(d: string): string {
+  return d.includes("any language") ? d : `${d}\n\n${LANG_LINE}`.slice(0, 9999);
 }
