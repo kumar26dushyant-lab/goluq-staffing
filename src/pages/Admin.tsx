@@ -17,6 +17,7 @@ import { EmailInbox } from "../components/admin/EmailInbox";
 import { Store } from "../components/admin/Store";
 import { Publish } from "../components/admin/Publish";
 import { Payments } from "../components/admin/Payments";
+import { Briefs } from "../components/admin/Briefs";
 import { BrandMark } from "../components/BrandMark";
 import { useTranslation } from "react-i18next";
 import { inputClass } from "../lib/ui";
@@ -28,7 +29,7 @@ import {
 
 type Section =
   | "today" | "leads" | "chat" | "visitors" | "pricing"
-  | "bot" | "content" | "inbox" | "affiliates" | "projects" | "campaigns" | "marketing" | "testimonials" | "settings" | "store" | "publish" | "payments";
+  | "bot" | "content" | "inbox" | "affiliates" | "projects" | "campaigns" | "marketing" | "testimonials" | "settings" | "store" | "publish" | "payments" | "briefs";
 
 export function Admin() {
   const [authed, setAuthed] = useState(false);
@@ -137,6 +138,7 @@ export function Admin() {
             {section === "store" && <Store />}
             {section === "publish" && <Publish />}
             {section === "payments" && <Payments />}
+            {section === "briefs" && <Briefs />}
             {section === "testimonials" && <TestimonialsPanel />}
             {section === "settings" && <SettingsPanel />}
           </main>
@@ -167,6 +169,7 @@ export function Admin() {
 const SECTION_META: Record<Section, { title: string; desc: string }> = {
   today: { title: "Today", desc: "Who is waiting, what came in, what is due." },
   chat: { title: "Conversations", desc: "WhatsApp and website chats, together. Reply here or from Telegram." },
+  briefs: { title: "Briefs", desc: "Plans written with prospects on goluq.com/start. Read, call, quote." },
   leads: { title: "Enquiries", desc: "Everyone who left a number. WhatsApp, call, and mark where it stands." },
   inbox: { title: "Email", desc: "Mail to the business address, answered as the domain." },
   pricing: { title: "Pricing & offers", desc: "One list drives the site, the guide and WhatsApp. Live on save." },
@@ -197,6 +200,7 @@ const GROUPS: { id: string; label: string; icon: typeof Users; sections: { id: S
   { id: "today", label: "", icon: LayoutDashboard, sections: [{ id: "today", label: "Today", icon: LayoutDashboard }] },
   { id: "inbox", label: "Inbox", icon: MessageSquare, sections: [
     { id: "chat", label: "Conversations", icon: MessageSquare },
+    { id: "briefs", label: "Briefs", icon: FileText },
     { id: "leads", label: "Enquiries", icon: Users },
     { id: "inbox", label: "Email", icon: Mail },
   ] },
@@ -802,7 +806,7 @@ function SettingsPanel() {
   const [bookingSecret, setBookingSecret] = useState("");
   const [followups, setFollowups] = useState(true);
   const [saved, setSaved] = useState("");
-  const [tab, setTab] = useState<"general" | "telegram" | "wa" | "payments">("general");
+  const [tab, setTab] = useState<"general" | "telegram" | "wa" | "payments" | "signin">("general");
   // Saving before the current values have loaded would post empty strings and
   // wipe them — which is exactly how the public WhatsApp number got blanked and
   // silently disappeared from the site. Save stays disabled until loaded.
@@ -827,7 +831,7 @@ function SettingsPanel() {
     const d = await adminPost("/api/admin/settings", { owner_whatsapp: owner, owner_email: ownerEmail, public_whatsapp: publicWa, public_telegram: publicTg, booking_url: bookingUrl, followups_enabled: followups });
     setSaved(d.ok ? "Saved ✅" : "Failed");
   };
-  const TABS = [["general", "Contact & alerts"], ["payments", "Payments"], ["telegram", "Telegram"], ["wa", "WhatsApp Business API"]] as const;
+  const TABS = [["general", "Contact & alerts"], ["payments", "Payments"], ["signin", "Client sign-in"], ["telegram", "Telegram"], ["wa", "WhatsApp Business API"]] as const;
   return (
     <div className="max-w-2xl space-y-5">
       <div className="flex gap-1.5 overflow-x-auto pb-1">
@@ -905,6 +909,55 @@ function SettingsPanel() {
       {tab === "wa" && <WhatsAppBusiness />}
       {tab === "telegram" && <TelegramCockpit />}
       {tab === "payments" && <PaymentsSetup />}
+      {tab === "signin" && <SignInSetup />}
+    </div>
+  );
+}
+
+/**
+ * How clients sign in on /start and /portal: email codes work as soon as mail
+ * does; Google needs its OAuth client; WhatsApp codes need the approved
+ * login_otp template. Secrets are write-only.
+ */
+function SignInSetup() {
+  const [clientId, setClientId] = useState("");
+  const [secret, setSecret] = useState("");
+  const [secretSet, setSecretSet] = useState(false);
+  const [tpl, setTpl] = useState("");
+  const [loaded, setLoaded] = useState(false);
+  const [saved, setSaved] = useState("");
+  useEffect(() => {
+    adminGet("/api/admin/settings").then((d) => {
+      setClientId(d.google_client_id || ""); setSecretSet(!!d.google_client_secret_set); setTpl(d.wa_tpl_login_otp || ""); setLoaded(true);
+    });
+  }, []);
+  const save = async () => {
+    if (!loaded) return;
+    setSaved("");
+    const r = await adminPost("/api/admin/settings", { google_client_id: clientId, google_client_secret: secret || undefined, wa_tpl_login_otp: tpl });
+    setSaved(r.ok ? "Saved ✅" : "Failed");
+    if (r.ok && secret) { setSecretSet(true); setSecret(""); }
+  };
+  return (
+    <div className="glass space-y-5 rounded-2xl p-5">
+      <p className="text-sm text-muted">
+        Email codes are on whenever mail sending works. Google sign-in needs an OAuth client (Google Cloud → Credentials → Web application, redirect
+        URI <span className="font-mono text-brand-luq">https://goluq.com/api/auth/google/callback</span>). WhatsApp codes need the
+        <span className="font-mono text-brand-luq"> login_otp</span> authentication template approved in WhatsApp Manager.
+      </p>
+      <label className="block">
+        <span className="mb-1.5 block text-base font-semibold text-fg">Google client id</span>
+        <input className={inputClass} value={clientId} onChange={(e) => setClientId(e.target.value)} placeholder="….apps.googleusercontent.com" />
+      </label>
+      <label className="block">
+        <span className="mb-1.5 block text-base font-semibold text-fg">Google client secret {secretSet && <span className="ml-2 text-xs font-normal text-brand-luq">set</span>}</span>
+        <input className={inputClass} type="password" value={secret} onChange={(e) => setSecret(e.target.value)} placeholder={secretSet ? "Leave blank to keep the current one" : "Paste once"} autoComplete="off" />
+      </label>
+      <label className="block">
+        <span className="mb-1.5 block text-base font-semibold text-fg">WhatsApp OTP template name</span>
+        <input className={inputClass} value={tpl} onChange={(e) => setTpl(e.target.value)} placeholder="login_otp" />
+      </label>
+      <div><Button onClick={save} disabled={!loaded}><ShieldCheck size={16} /> Save sign-in</Button>{saved && <span className="ml-3 text-sm text-muted">{saved}</span>}</div>
     </div>
   );
 }

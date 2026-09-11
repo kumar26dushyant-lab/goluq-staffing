@@ -110,3 +110,53 @@ export async function classifyReply(
   if (out.includes("question")) return "question";
   return "other";
 }
+
+/** A JSON answer. The model is asked for JSON only; fences are stripped if it adds them. */
+export async function geminiJson<T = unknown>(env: GeminiEnv, prompt: string, maxTokens = 800): Promise<T | null> {
+  if (!env.GEMINI_API_KEY) return null;
+  const model = env.GEMINI_MODEL || "gemini-2.5-flash";
+  try {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+      method: "POST",
+      headers: { "x-goog-api-key": env.GEMINI_API_KEY, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.4, maxOutputTokens: maxTokens, responseMimeType: "application/json", thinkingConfig: { thinkingBudget: 0 } },
+      }),
+    });
+    if (!res.ok) return null;
+    const data = await res.json<any>();
+    const raw = String(data?.candidates?.[0]?.content?.parts?.[0]?.text || "").trim().replace(/^```(?:json)?\s*|\s*```$/g, "");
+    return JSON.parse(raw) as T;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Speech to text from a browser recording (webm/ogg/mp4 audio as base64).
+ * Returns the transcript in the language spoken — Hindi comes back in
+ * Devanagari, not romanised — or "" when nothing usable was heard.
+ */
+export async function geminiTranscribe(env: GeminiEnv, mime: string, base64: string, langHint = "en"): Promise<string> {
+  if (!env.GEMINI_API_KEY) return "";
+  const model = env.GEMINI_MODEL || "gemini-2.5-flash";
+  try {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+      method: "POST",
+      headers: { "x-goog-api-key": env.GEMINI_API_KEY, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ parts: [
+          { text: `Transcribe this recording word for word. Keep the speaker's language: Hindi in Devanagari script (never romanised), English as English, mixed as mixed. Output only the transcript, no notes. If nothing intelligible is spoken, output an empty string. Likely language: ${langHint === "hi" ? "Hindi" : "English or Hindi"}.` },
+          { inlineData: { mimeType: mime, data: base64 } },
+        ] }],
+        generationConfig: { temperature: 0.1, maxOutputTokens: 1500, thinkingConfig: { thinkingBudget: 0 } },
+      }),
+    });
+    if (!res.ok) return "";
+    const data = await res.json<any>();
+    return String(data?.candidates?.[0]?.content?.parts?.[0]?.text || "").trim();
+  } catch {
+    return "";
+  }
+}

@@ -451,3 +451,37 @@ CREATE TABLE IF NOT EXISTS payments (
 );
 CREATE INDEX IF NOT EXISTS idx_payments_booking ON payments(booking_id);
 CREATE INDEX IF NOT EXISTS idx_payments_link ON payments(rp_link_id);
+
+-- ── Sign-in codes and intake briefs ─────────────────────────────────────────
+-- One-time codes for email / WhatsApp sign-in and the state of a Google
+-- sign-in. The code is stored hashed; rows are short-lived.
+CREATE TABLE IF NOT EXISTS login_codes (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  channel TEXT NOT NULL,               -- email | whatsapp | google
+  target TEXT NOT NULL,                -- email, phone digits, or the oauth state
+  code_hash TEXT NOT NULL,
+  name TEXT,                           -- name typed at sign-in (google: "lang next")
+  attempts INTEGER DEFAULT 0,
+  created_at TEXT NOT NULL,
+  expires_at TEXT NOT NULL,
+  used_at TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_login_codes_target ON login_codes(target, channel);
+
+-- What a prospect told us on /start, and the plan drafted from it.
+CREATE TABLE IF NOT EXISTS briefs (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  customer_id INTEGER NOT NULL,
+  lang TEXT,
+  business_type TEXT,
+  departments TEXT,                    -- JSON array
+  raw_text TEXT,                       -- their words (typed + transcribed)
+  history TEXT,                        -- JSON [{q,a}] follow-up questions
+  brd TEXT,                            -- JSON plan as confirmed by the client
+  name TEXT, phone TEXT, email TEXT, company TEXT,
+  source TEXT,                         -- utm / ref at landing
+  status TEXT NOT NULL DEFAULT 'new',  -- new | contacted | quoted | won | lost
+  note TEXT,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);

@@ -7,6 +7,8 @@ import { resolveMarket, convert, convertRow } from "../lib/markets";
 
 interface Env {
   DB: D1Database;
+  MAIL_API_KEY?: string;
+  MAIL_FROM?: string;
 }
 
 /**
@@ -92,6 +94,13 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     extras: { voiceLite: convert(EXTRA_PRICES.voiceLite, market, multiplier) },
     affiliate: rates,
     chatEnabled: chatEnabled !== "0",
+    // Which sign-in doors are open on /start. Email needs the mailer; WhatsApp
+    // needs the approved login_otp template; Google needs its OAuth client.
+    auth: {
+      email: Boolean(env.MAIL_API_KEY && env.MAIL_FROM),
+      whatsapp: Boolean((await getSetting(env.DB, "wa_tpl_login_otp")) && (await getSetting(env.DB, "wa_access_token"))),
+      google: Boolean((await getSetting(env.DB, "google_client_id")) && (await getSetting(env.DB, "google_client_secret"))),
+    },
     announcement: announcement || "",
     pricing,
     content,

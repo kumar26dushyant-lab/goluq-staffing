@@ -1,7 +1,8 @@
 import { useEffect } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { CalendarClock, MessageCircle, Send, Video } from "lucide-react";
+import { CalendarClock, MessageCircle, PenLine, Send, Video } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 import { TopBar } from "../components/TopBar";
 import { StoryChapters } from "../components/story/StoryChapters";
 import { ProductsBand } from "../components/ProductsBand";
@@ -78,9 +79,13 @@ export function StoryHome() {
           transition={{ delay: 0.26 }}
           className="mt-6 flex flex-wrap gap-3"
         >
+          <Link to="/start"
+            className="inline-flex items-center gap-2 rounded-full bg-fg px-5 py-3 text-base font-bold text-[rgb(var(--c-base))] shadow-lg">
+            <PenLine size={18} /> {t("story.start")}
+          </Link>
           {cfg?.bookingUrl && (
             <a href={cfg.bookingUrl} target="_blank" rel="noreferrer"
-              className="inline-flex items-center gap-2 rounded-full bg-fg px-5 py-3 text-base font-bold text-[rgb(var(--c-base))] shadow-lg">
+              className="inline-flex items-center gap-2 rounded-full border border-hairline/30 px-5 py-3 text-base font-bold text-fg">
               <CalendarClock size={18} /> {t("story.book")}
             </a>
           )}

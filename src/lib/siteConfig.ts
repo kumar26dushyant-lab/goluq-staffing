@@ -57,6 +57,8 @@ export interface SiteConfig {
   telegram: string;
   /** Calendar link for a 30-minute call, or "" until the owner sets one. */
   bookingUrl: string;
+  /** Which sign-in doors are open on /start. */
+  auth?: { email: boolean; whatsapp: boolean; google: boolean };
   chatEnabled: boolean;
   announcement: string;
   pricing: LivePrice[];
@@ -132,6 +134,7 @@ export async function fetchSiteConfig(): Promise<SiteConfig> {
         telegram: String(d?.telegram || ""),
         bookingUrl: /^https:\/\//i.test(String(d?.bookingUrl || "")) ? String(d.bookingUrl) : "",
         chatEnabled: d?.chatEnabled !== false,
+        auth: d?.auth ? { email: !!d.auth.email, whatsapp: !!d.auth.whatsapp, google: !!d.auth.google } : undefined,
         announcement: String(d?.announcement || ""),
         pricing,
         affiliate: d?.affiliate,

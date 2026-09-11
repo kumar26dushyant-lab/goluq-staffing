@@ -122,6 +122,26 @@ export async function waSendTemplate(
 }
 
 /**
+ * An AUTHENTICATION-category template (one-time passcode). Meta fixes its
+ * shape: the code goes in the body and again on the copy-code button.
+ */
+export async function waSendAuthTemplate(c: WaConfig, to: string, name: string, lang: string, code: string): Promise<WaResult> {
+  if (!waReady(c)) return { ok: false, error: "whatsapp_not_configured" };
+  return graph(c, {
+    to: waNormalize(to),
+    type: "template",
+    template: {
+      name,
+      language: { code: lang === "hi" ? "hi" : "en" },
+      components: [
+        { type: "body", parameters: [{ type: "text", text: code }] },
+        { type: "button", sub_type: "url", index: "0", parameters: [{ type: "text", text: code }] },
+      ],
+    },
+  });
+}
+
+/**
  * Text with one tappable link button under it — a payment link, a booking page.
  * Only deliverable inside the 24-hour window, like any free-form send.
  */

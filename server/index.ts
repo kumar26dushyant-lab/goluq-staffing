@@ -39,6 +39,10 @@ import { onRequestPost as bookingsInbound } from "../functions/api/bookings/inbo
 import { onRequestGet as adminProductsGet, onRequestPost as adminProductsPost } from "../functions/api/admin/products";
 import { onRequestGet as adminPaymentsGet, onRequestPost as adminPaymentsPost } from "../functions/api/admin/payments";
 import { onRequestPost as razorpayWebhook } from "../functions/api/razorpay/webhook";
+import { onRequestPost as authOtp } from "../functions/api/auth/otp";
+import { onRequestGet as authGoogle } from "../functions/api/auth/google";
+import { onRequestGet as intakeGet, onRequestPost as intakePost } from "../functions/api/intake";
+import { onRequestGet as adminBriefsGet, onRequestPost as adminBriefsPost } from "../functions/api/admin/briefs";
 import { geminiImage } from "../functions/lib/gemini";
 import { checkAdmin } from "../functions/lib/admin";
 import { writeFileSync, existsSync, statSync, openSync, readSync, closeSync } from "node:fs";
@@ -101,6 +105,9 @@ for (const sql of [
   // Pre-call brief sent once per booking.
   `ALTER TABLE bookings ADD COLUMN briefed_at TEXT`,
   `ALTER TABLE chat_sessions ADD COLUMN call_cart_at TEXT`,
+  // Sign-in with Google, and the language a customer signed in with.
+  `ALTER TABLE customers ADD COLUMN google_sub TEXT`,
+  `ALTER TABLE customers ADD COLUMN lang TEXT`,
 ]) {
   try {
     sqlite.exec(sql);
@@ -268,6 +275,13 @@ app.get("/api/admin/products", (c) => callFn(adminProductsGet as Handler, c.req.
 app.get("/api/admin/payments", (c) => callFn(adminPaymentsGet as Handler, c.req.raw));
 app.post("/api/admin/payments", (c) => callFn(adminPaymentsPost as Handler, c.req.raw));
 app.post("/api/razorpay/webhook", (c) => callFn(razorpayWebhook as Handler, c.req.raw));
+app.post("/api/auth/otp", (c) => callFn(authOtp as Handler, c.req.raw));
+app.get("/api/auth/google", (c) => callFn(authGoogle as Handler, c.req.raw));
+app.get("/api/auth/google/callback", (c) => callFn(authGoogle as Handler, c.req.raw));
+app.get("/api/intake", (c) => callFn(intakeGet as Handler, c.req.raw));
+app.post("/api/intake", (c) => callFn(intakePost as Handler, c.req.raw));
+app.get("/api/admin/briefs", (c) => callFn(adminBriefsGet as Handler, c.req.raw));
+app.post("/api/admin/briefs", (c) => callFn(adminBriefsPost as Handler, c.req.raw));
 app.post("/api/admin/products", (c) => callFn(adminProductsPost as Handler, c.req.raw));
 app.post("/api/admin/tg-check", (c) => callFn(tgCheckPost as Handler, c.req.raw));
 

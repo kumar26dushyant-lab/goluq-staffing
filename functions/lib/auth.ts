@@ -163,3 +163,9 @@ export async function sessionValid(db: D1Database, token: string): Promise<boole
 export async function destroySession(db: D1Database, token: string): Promise<void> {
   await db.prepare(`DELETE FROM admin_sessions WHERE token = ?`).bind(token).run();
 }
+
+/** Hex SHA-256 of a string — for one-time codes, which are short-lived and never stored in clear. */
+export async function sha256Hex(text: string): Promise<string> {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
