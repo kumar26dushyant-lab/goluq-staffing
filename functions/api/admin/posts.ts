@@ -29,6 +29,7 @@ const HINDI_CARDS = new Set([
   "automation", "whatsapp", "digitalEmployee", "website", "app", "offline", "platform",
   "for_coaching", "for_clinic", "for_ca", "for_garment", "for_distributor", "for_realestate", "for_restaurant", "for_salon", "for_school", "for_logistics",
   "founder", "thankyou",
+  "dept_allinone", "dept_operations", "dept_crm", "dept_billing", "dept_inventory", "dept_hr", "dept_training", "dept_vendors", "dept_support", "dept_field", "dept_dashboard",
 ]);
 
 export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {

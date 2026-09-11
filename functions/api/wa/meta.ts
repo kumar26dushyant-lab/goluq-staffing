@@ -455,12 +455,14 @@ const CARD_IDS = [
   "whatsappOffice", "whatsappStore",
   "tollfree", "virtualNumber", "waApi", "voiceCampaign", "txnSms", "promoSms", "missedCall",
   "automation", "whatsapp", "digitalEmployee", "website", "app", "offline", "platform",
+  "dept_allinone", "dept_operations", "dept_crm", "dept_billing", "dept_inventory", "dept_hr", "dept_training", "dept_vendors", "dept_support", "dept_field", "dept_dashboard",
 ];
 
 const CATALOGUE_SECTIONS = [
   { title: "Complete systems", ids: ["whatsappOffice", "whatsappStore"] },
   { title: "Communication", ids: ["tollfree", "virtualNumber", "waApi", "voiceCampaign", "txnSms", "promoSms", "missedCall"] },
   { title: "Software builds", ids: ["automation", "whatsapp", "digitalEmployee", "website", "app", "offline", "platform"] },
+  { title: "By department", ids: ["dept_allinone", "dept_operations", "dept_crm", "dept_billing", "dept_inventory", "dept_hr", "dept_training", "dept_vendors", "dept_support", "dept_field", "dept_dashboard"] },
 ];
 
 /** Cards already shown in this thread — a card repeated is a nag. */
