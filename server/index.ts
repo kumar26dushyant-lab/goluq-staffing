@@ -112,6 +112,7 @@ for (const sql of [
   `ALTER TABLE payments ADD COLUMN provider TEXT DEFAULT 'razorpay'`,
   `ALTER TABLE payments ADD COLUMN currency TEXT DEFAULT 'INR'`,
   `ALTER TABLE payments ADD COLUMN amount REAL`,
+  `ALTER TABLE posts ADD COLUMN video_url TEXT`,
 ]) {
   try {
     sqlite.exec(sql);

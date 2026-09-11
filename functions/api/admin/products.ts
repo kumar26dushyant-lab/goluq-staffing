@@ -117,9 +117,21 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
       await env.DB.prepare("UPDATE products SET updated_at = datetime('now') WHERE tenant = ?").bind(TENANT).run();
       return await syncToMeta(env, true, b.order === "desc" ? "DESC" : "ASC");
     }
+    // Collections. The order WhatsApp shows a flat catalog in is Meta's and the
+    // app's, not ours (see MASTER §catalog). Product sets are the one thing
+    // that gives the customer a structure regardless: they appear as
+    // collections at the top of the catalog. Idempotent: existing sets with
+    // the same name are updated, so this can run after every sync.
+    if (action === "sets") return Response.json(await ensureSets(env));
     if (action === "import") return await importFromMeta(env);
     // force: push every live product again (used after images change on disk).
-    if (action === "sync") return await syncToMeta(env, b.force === true);
+    if (action === "sync") {
+      const r = await syncToMeta(env, b.force === true);
+      // Collections ride along with every sync, so the catalog always has its sections.
+      const sets = await ensureSets(env).catch((e) => ({ ok: false, created: 0, updated: 0, error: String(e).slice(0, 120) }));
+      const j: any = await r.json().catch(() => ({}));
+      return Response.json({ ...j, sets });
+    }
 
     return Response.json({ ok: false, error: "unknown action" }, { status: 400 });
   } catch (e) {
@@ -221,4 +233,38 @@ async function syncToMeta(env: Env, force = false, order: "ASC" | "DESC" = "ASC"
     }
   }
   return Response.json({ ok: true, created, updated, removed, failed });
+}
+
+/** Collection name → retailer ids, in the order the customer should read them. */
+const SETS: { name: string; ids: string[] }[] = [
+  { name: "Start here", ids: ["founder", "whatsappOffice", "whatsappStore", "thankyou"] },
+  { name: "Complete systems", ids: ["whatsappOffice", "officeManaged", "whatsappStore", "storeManaged"] },
+  { name: "For your business", ids: ["for_coaching", "for_clinic", "for_ca", "for_garment", "for_distributor", "for_realestate", "for_restaurant", "for_salon", "for_school", "for_logistics"] },
+  { name: "By department", ids: ["dept_allinone", "dept_operations", "dept_crm", "dept_billing", "dept_inventory", "dept_hr", "dept_training", "dept_vendors", "dept_support", "dept_field", "dept_dashboard"] },
+  { name: "Numbers, calls and SMS", ids: ["tollfree", "virtualNumber", "waApi", "voiceCampaign", "txnSms", "promoSms", "missedCall"] },
+  { name: "Software builds", ids: ["automation", "whatsapp", "digitalEmployee", "website", "app", "offline", "platform"] },
+];
+
+async function ensureSets(env: Env): Promise<{ ok: boolean; created: number; updated: number; error?: string }> {
+  const cfg = await waConfig(env.DB, env);
+  const catalog = (await getSetting(env.DB, "wa_catalog_id")) || "";
+  if (!catalog || !cfg.accessToken) return { ok: false, created: 0, updated: 0, error: "No catalog connected yet." };
+  let existing: { id: string; name: string }[] = [];
+  try {
+    existing = ((await graph(cfg.accessToken, `${catalog}/product_sets?fields=id,name&limit=100`)).data || []) as { id: string; name: string }[];
+  } catch (e) {
+    return { ok: false, created: 0, updated: 0, error: String(e).slice(0, 200) };
+  }
+  let created = 0, updated = 0;
+  for (const set of SETS) {
+    const filter = { retailer_id: { is_any: set.ids } };
+    const found = existing.find((x) => x.name === set.name);
+    try {
+      if (found) { await graph(cfg.accessToken, found.id, "POST", { name: set.name, filter: JSON.stringify(filter) }); updated++; }
+      else { await graph(cfg.accessToken, `${catalog}/product_sets`, "POST", { name: set.name, filter: JSON.stringify(filter) }); created++; }
+    } catch (e) {
+      return { ok: false, created, updated, error: `${set.name}: ${String(e).slice(0, 160)}` };
+    }
+  }
+  return { ok: true, created, updated };
 }

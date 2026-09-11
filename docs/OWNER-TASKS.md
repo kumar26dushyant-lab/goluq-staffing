@@ -7,58 +7,72 @@ cockpit fields named below. The cockpit is https://goluq.com/admin.
 
 ---
 
-## 1. Razorpay — do NOT regenerate; paste the existing pair, add one webhook (10 minutes)
+## 1. Razorpay — paste the existing key pair, add one webhook (10 minutes)
 
-State on 2026-09-12: goluq.com is listed under the existing Razorpay account
-beside sarathi-ai.com and nidaanpartner.com, status "Under review (24–48 h)".
-Razorpay's own note on that screen: API keys are universal across all
-approved websites. So the key `rzp_live_SPruIDUQVZPQir` (generated 11 Mar
-2026) already serves GoLuQ once the review clears. Regenerating it would
-break Sarathi-AI and NidaanPartner the same minute.
+State on 2026-09-12: goluq.com is APPROVED under the existing Razorpay
+account (with sarathi-ai.com and nidaanpartner.com). API keys are universal
+across the account's approved sites, so the key `rzp_live_SPruIDUQVZPQir`
+(generated 11 Mar 2026) already serves GoLuQ. Never press "Regenerate Key":
+it would break Sarathi-AI and NidaanPartner the same minute.
 
-1. Find the secret for that key where Sarathi-AI keeps it (its `.env` /
-   hosting environment variables, names like `RAZORPAY_KEY_SECRET`). Do not
-   press "Regenerate Key". If the secret truly cannot be found anywhere,
-   stop and tell Claude — regenerating is a coordinated change on three sites.
-2. https://goluq.com/admin → **Setup → Settings** → tab **Payments**: Key id
-   = `rzp_live_SPruIDUQVZPQir`, Key secret = the value from step 1 → **Save
-   payments**. The secret field goes blank and shows "set".
-3. Razorpay → Account & Settings → **Webhooks** tab (next to "Websites & API
-   keys") → **Add New Webhook**:
-   - URL `https://goluq.com/api/razorpay/webhook`
-   - Secret: any long random phrase (20+ chars); keep it on screen
-   - Alert email kumar26.dushyant@gmail.com
-   - Events: payment_link.paid, payment_link.expired, payment_link.cancelled
-   - Create.
-4. Cockpit → Settings → Payments → "Webhook secret" = that phrase → Save.
-5. Wait for the goluq.com review to show Approved (24–48 h). Until then a
-   link may be created but Razorpay can refuse the payment on an unapproved
-   site; do not send links to real customers before it is Approved.
-6. Verify afterwards: cockpit → Sell → Payments → "Send a link for anything
-   else" → your own number, ₹1, "test" → pay it → the row turns "paid" and a
-   Telegram alert arrives.
+Step by step:
+1. Open the place where Sarathi-AI keeps its Razorpay secret — its hosting
+   dashboard → environment variables, or its `.env` file — and copy the value
+   of the variable named like `RAZORPAY_KEY_SECRET` (a 24-character string).
+   The key id is `rzp_live_SPruIDUQVZPQir`. If the secret is not stored
+   anywhere, STOP and tell Claude (a regeneration must be coordinated on all
+   three sites the same hour).
+2. Open https://goluq.com/admin → left menu **Setup → Settings** → tab
+   **Payments**. Field "Key id": paste `rzp_live_SPruIDUQVZPQir`. Field "Key
+   secret": paste the secret. Press **Save payments**. The secret field goes
+   blank and shows "set".
+3. Open https://dashboard.razorpay.com → **Account & Settings** → **Business
+   website details** → tab **Webhooks** → **Add New Webhook**.
+   - Webhook URL: `https://goluq.com/api/razorpay/webhook`
+   - Secret: type a random phrase of 20+ characters (e.g. from a password
+     generator). Keep it visible.
+   - Alert email: kumar26.dushyant@gmail.com
+   - Active events: tick `payment_link.paid`, `payment_link.expired`,
+     `payment_link.cancelled`. Leave everything else unticked.
+   - Press **Create Webhook**.
+4. Back in the cockpit Payments tab: field "Webhook secret" = the same
+   phrase → **Save payments**.
+5. Verify: cockpit → **Sell → Payments**. The yellow "Razorpay is not
+   connected" notice must be gone. In "Send a link for anything else" enter
+   your own WhatsApp number (10 digits), amount 1, description "test" →
+   **Send payment link**. A WhatsApp message with a "Pay now" button arrives;
+   pay ₹1 by UPI. Within a minute the row under "Links issued" shows "paid"
+   and a Telegram alert "Payment received" arrives.
 
-## 1b. Dodo Payments — finish the connection (5 minutes)
+## 1b. Dodo Payments — webhook secret and brand id (5 minutes)
 
-Done already: GoLuQ.com Digital Consultancy is a secondary brand under the
-EagleEye business; the API key is stored in the cockpit (write-only). Left:
+Done: GoLuQ.com Digital Consultancy exists as a secondary brand under the
+EagleEye business; the API key is in the cockpit. The checkout currently
+shows "EagleEye" because the product was created before the brand id was
+set; step 2 fixes that (the product is recreated under the GoLuQ brand
+automatically on the next payment).
 
-1. Dodo dashboard → **Developer → Webhooks** → Add endpoint
-   `https://goluq.com/api/dodo/webhook` → events **payment.succeeded** and
-   **payment.failed** → create → copy the **signing secret** (starts
-   `whsec_`).
-2. Dodo → Settings → Business → Brands → the "…" beside
-   **GoLuQ.com Digital Consultancy** → copy the brand id (`brand_…`).
-3. https://goluq.com/admin → Settings → Payments → paste "Dodo webhook
-   signing secret" and "Dodo brand id" → Save payments. The Dodo product
-   ("GoLuQ.com services", pay-what-you-want, USD) is created automatically on
-   first use and its id appears in the read-only field.
-4. Because the API key was pasted into a chat once, rotate it when convenient:
-   Developer → API keys → create a new key → paste in the cockpit → delete
-   the old one. Nothing else changes.
-5. Verify: Sell → Payments → send a link to your own email with country "US"
-   (the form uses the number's country; use an email only) for ₹88 — it comes
-   out as a $1 Dodo link. Pay it with a card; the row turns "paid".
+1. https://app.dodopayments.com → left menu **Developer** → **Webhooks** →
+   **Add Endpoint**. URL: `https://goluq.com/api/dodo/webhook`. Events:
+   tick `payment.succeeded` and `payment.failed`. Create. On the endpoint
+   page press **Reveal** / copy beside **Signing Secret** (starts `whsec_`).
+2. Dodo → **Settings** → tab **Business** → right panel "Brands Under
+   EagleEye" → row **GoLuQ.com Digital Consultancy** → press the "…" →
+   **Edit** (or "Copy ID") → copy the Brand ID (starts `brand_`). While there,
+   set the brand's logo (goluq.com/brand/profile-640.png), statement
+   descriptor "GOLUQ.COM" and URL https://goluq.com if empty.
+3. https://goluq.com/admin → **Setup → Settings** → tab **Payments** → scroll
+   to "Customers outside India · Dodo Payments": paste the signing secret in
+   "Dodo webhook signing secret", the brand id in "Dodo brand id" →
+   **Save payments**.
+4. Rotate the API key (it was pasted into a chat once): Dodo → Developer →
+   **API keys** → create a new live key named "goluq.com" → paste it in the
+   cockpit "Dodo API key" → Save → delete the old key in Dodo.
+5. Verify: cockpit → Sell → Payments → "Send a link for anything else" →
+   email kumar26.dushyant@gmail.com (leave the phone empty), amount 88,
+   description "test" → Send. The email carries a checkout link; open it —
+   the header must now read **GoLuQ.com Digital Consultancy**, not EagleEye.
+   Pay $1 with a card or ignore it.
 
 ## 1c. Google sign-in for the client login (10 minutes)
 

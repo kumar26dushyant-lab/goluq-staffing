@@ -12,20 +12,22 @@ import { adminGet, adminPost } from "../../lib/adminApi";
  * is assigned to it, the screen says exactly what to click in Business
  * Settings rather than failing quietly.
  */
-interface Post { id: number; caption: string; image_url: string | null; link_url: string | null; channels: string; status: string; fb_post_id: string | null; ig_post_id: string | null; error: string | null; created_at: string; published_at: string | null }
+interface Post { id: number; caption: string; image_url: string | null; video_url: string | null; scheduled_at: string | null; link_url: string | null; channels: string; status: string; fb_post_id: string | null; ig_post_id: string | null; error: string | null; created_at: string; published_at: string | null }
 interface Conn { pageId: string; pageName: string; igId: string; note: string }
 
 export function Publish() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [conn, setConn] = useState<Conn>({ pageId: "", pageName: "", igId: "", note: "" });
   const [assets, setAssets] = useState<{ label: string; url: string }[]>([]);
-  const [f, setF] = useState({ id: 0, caption: "", imageUrl: "", linkUrl: "https://goluq.com", channels: "facebook" });
+  const [videos, setVideos] = useState<{ label: string; url: string }[]>([]);
+  const EMPTY = { id: 0, caption: "", imageUrl: "", videoUrl: "", linkUrl: "https://goluq.com/start", channels: "facebook,instagram", scheduledAt: "" };
+  const [f, setF] = useState(EMPTY);
   const [busy, setBusy] = useState("");
   const [msg, setMsg] = useState("");
 
   const load = useCallback(async () => {
     const d = await adminGet("/api/admin/posts");
-    setPosts(d.posts || []); setConn(d.connection || conn); setAssets(d.assets || []);
+    setPosts(d.posts || []); setConn(d.connection || conn); setAssets(d.assets || []); setVideos(d.videos || []);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useEffect(() => { load(); }, [load]);
@@ -45,7 +47,7 @@ export function Publish() {
       setMsg(p.ok ? "Published." : p.error || "Publish failed.");
     } else setMsg("Saved as draft.");
     setBusy("");
-    setF({ id: 0, caption: "", imageUrl: "", linkUrl: "https://goluq.com", channels: "facebook" });
+    setF(EMPTY);
     load();
   };
   const publish = async (id: number) => {
@@ -87,6 +89,13 @@ export function Publish() {
               <input className={inputClass} value={f.imageUrl} onChange={(e) => setF({ ...f, imageUrl: e.target.value })} placeholder="…or paste a picture URL (https)" />
             </div>
             <div className="grid gap-2 sm:grid-cols-2">
+              <select className={inputClass} value={f.videoUrl} onChange={(e) => setF({ ...f, videoUrl: e.target.value })}>
+                <option value="">Reel: none (picture post)…</option>
+                {videos.map((a) => <option key={a.url} value={a.url}>{a.label}</option>)}
+              </select>
+              <input className={inputClass} type="datetime-local" value={f.scheduledAt} onChange={(e) => setF({ ...f, scheduledAt: e.target.value })} title="Schedule (leave empty to publish now or keep as draft)" />
+            </div>
+            <div className="grid gap-2 sm:grid-cols-2">
               <input className={inputClass} value={f.linkUrl} onChange={(e) => setF({ ...f, linkUrl: e.target.value })} placeholder="Link (https)" />
               <select className={inputClass} value={f.channels} onChange={(e) => setF({ ...f, channels: e.target.value })}>
                 <option value="facebook">Facebook</option>
@@ -101,7 +110,7 @@ export function Publish() {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Button onClick={() => save(true)} disabled={!!busy || !f.caption.trim() || !connected}><Send size={16} /> Publish now</Button>
-          <Button variant="secondary" onClick={() => save(false)} disabled={!!busy || !f.caption.trim()}><Plus size={16} /> Save draft</Button>
+          <Button variant="secondary" onClick={() => save(false)} disabled={!!busy || !f.caption.trim()}><Plus size={16} /> {f.scheduledAt ? "Schedule" : "Save draft"}</Button>
           {busy && <span className="text-sm text-muted">{busy}</span>}
           {msg && <span className="text-sm text-fg">{msg}</span>}
         </div>
@@ -113,11 +122,12 @@ export function Publish() {
         <div className="divide-y divide-hairline/8">
           {posts.map((p) => (
             <div key={p.id} className="flex gap-3 px-4 py-3">
-              <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-base">{p.image_url && <img src={p.image_url} alt="" className="h-full w-full object-cover" />}</div>
+              <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-base">{p.image_url ? <img src={p.image_url} alt="" className="h-full w-full object-cover" /> : p.video_url ? <video src={p.video_url} muted className="h-full w-full object-cover" /> : null}</div>
               <div className="min-w-0 flex-1">
                 <p className="line-clamp-2 text-sm text-fg">{p.caption}</p>
                 <p className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted">
-                  {p.status === "published" ? <span className="inline-flex items-center gap-1 text-success"><CheckCircle2 size={12} /> published</span> : p.status === "failed" ? <span className="inline-flex items-center gap-1 text-danger"><AlertTriangle size={12} /> failed</span> : <span>draft</span>}
+                  {p.status === "published" ? <span className="inline-flex items-center gap-1 text-success"><CheckCircle2 size={12} /> published</span> : p.status === "failed" ? <span className="inline-flex items-center gap-1 text-danger"><AlertTriangle size={12} /> failed</span> : p.status === "scheduled" ? <span className="text-brand-luq">scheduled {String(p.scheduled_at || "").slice(0, 16)}</span> : <span>draft</span>}
+                  {p.video_url && <span>reel</span>}
                   {p.channels.includes("facebook") && <Facebook size={12} />}
                   {p.channels.includes("instagram") && <Instagram size={12} />}
                   {p.link_url && <span className="inline-flex items-center gap-1"><Link2 size={12} /> link</span>}

@@ -36,9 +36,14 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
   if (!(await checkAdmin(request, env))) return unauthorized();
   const posts = await env.DB.prepare(`SELECT * FROM posts ORDER BY id DESC LIMIT 100`).all();
   const products = await env.DB.prepare(`SELECT retailer_id, name, image_path FROM products WHERE tenant='goluq' AND live=1 AND image_path IS NOT NULL ORDER BY sort_order, id`).all();
+  const REELS = ["coaching", "distributor", "ca", "garment", "claims", "ceo"];
   return Response.json({
     ok: true,
     posts: posts.results ?? [],
+    videos: REELS.flatMap((r) => [
+      { label: `Reel · ${r} · English`, url: `https://goluq.com/media/reel-${r}-en.mp4` },
+      { label: `Reel · ${r} · हिंदी`, url: `https://goluq.com/media/reel-${r}-hi.mp4` },
+    ]),
     connection: {
       pageId: (await getSetting(env.DB, "fb_page_id")) || "",
       pageName: (await getSetting(env.DB, "fb_page_name")) || "",
@@ -69,16 +74,21 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
       const caption = clip(b.caption, 2200);
       if (!caption) return Response.json({ ok: false, error: "Write a caption." }, { status: 400 });
       const imageUrl = /^https:\/\//i.test(clip(b.imageUrl, 500)) ? clip(b.imageUrl, 500) : null;
+      const videoUrl = /^https:\/\/.+\.mp4$/i.test(clip(b.videoUrl, 500)) ? clip(b.videoUrl, 500) : null;
       const linkUrl = /^https:\/\//i.test(clip(b.linkUrl, 500)) ? clip(b.linkUrl, 500) : null;
       const channels = clip(b.channels, 40) || "facebook";
+      // A future time makes it a scheduled post; the cron publishes it.
+      const when = Date.parse(clip(b.scheduledAt, 40));
+      const scheduledAt = Number.isFinite(when) ? new Date(when).toISOString().slice(0, 19).replace("T", " ") : null;
+      const status = scheduledAt ? "scheduled" : "draft";
       const id = Number(b.id) || 0;
       if (id) {
-        await env.DB.prepare(`UPDATE posts SET caption=?, image_url=?, link_url=?, channels=?, updated_at=datetime('now') WHERE id=?`)
-          .bind(caption, imageUrl, linkUrl, channels, id).run();
+        await env.DB.prepare(`UPDATE posts SET caption=?, image_url=?, video_url=?, link_url=?, channels=?, scheduled_at=?, status=CASE WHEN status='published' THEN status ELSE ? END, updated_at=datetime('now') WHERE id=?`)
+          .bind(caption, imageUrl, videoUrl, linkUrl, channels, scheduledAt, status, id).run();
         return Response.json({ ok: true, id });
       }
-      const r = await env.DB.prepare(`INSERT INTO posts (caption, image_url, link_url, channels, created_at, updated_at) VALUES (?,?,?,?,datetime('now'),datetime('now'))`)
-        .bind(caption, imageUrl, linkUrl, channels).run();
+      const r = await env.DB.prepare(`INSERT INTO posts (caption, image_url, video_url, link_url, channels, status, scheduled_at, created_at, updated_at) VALUES (?,?,?,?,?,?,?,datetime('now'),datetime('now'))`)
+        .bind(caption, imageUrl, videoUrl, linkUrl, channels, status, scheduledAt).run();
       return Response.json({ ok: true, id: Number((r as any)?.meta?.last_row_id || 0) });
     }
 
@@ -133,7 +143,7 @@ async function connect(env: Env) {
   return { ok: true, pageId: page.id, pageName: page.name, igId: page.instagram_business_account?.id || "" };
 }
 
-async function publish(env: Env, id: number) {
+export async function publish(env: Env, id: number) {
   const post = await env.DB.prepare(`SELECT * FROM posts WHERE id = ?`).bind(id).first<any>();
   if (!post) return { ok: false, error: "Post not found." };
   const pageId = (await getSetting(env.DB, "fb_page_id")) || "";
@@ -148,9 +158,11 @@ async function publish(env: Env, id: number) {
 
   if (channels.includes("facebook") && !fbId) {
     try {
-      const r = post.image_url
-        ? await graph(pageToken, `${pageId}/photos`, "POST", { url: post.image_url, message: caption })
-        : await graph(pageToken, `${pageId}/feed`, "POST", { message: caption, ...(post.link_url ? { link: post.link_url } : {}) });
+      const r = post.video_url
+        ? await graph(pageToken, `${pageId}/videos`, "POST", { file_url: post.video_url, description: caption })
+        : post.image_url
+          ? await graph(pageToken, `${pageId}/photos`, "POST", { url: post.image_url, message: caption })
+          : await graph(pageToken, `${pageId}/feed`, "POST", { message: caption, ...(post.link_url ? { link: post.link_url } : {}) });
       fbId = String(r.post_id || r.id || "");
     } catch (e) {
       errors.push(`Facebook: ${String(e).slice(0, 200)}`);
@@ -158,10 +170,22 @@ async function publish(env: Env, id: number) {
   }
   if (channels.includes("instagram") && !igPostId) {
     if (!igId) errors.push("Instagram: no Instagram account is linked to the Page yet.");
-    else if (!post.image_url) errors.push("Instagram: a picture is required.");
+    else if (!post.image_url && !post.video_url) errors.push("Instagram: a picture or a reel is required.");
     else {
       try {
-        const c = await graph(pageToken, `${igId}/media`, "POST", { image_url: post.image_url, caption });
+        // Instagram links are not clickable in captions; the profile link is the door.
+        const c = post.video_url
+          ? await graph(pageToken, `${igId}/media`, "POST", { media_type: "REELS", video_url: post.video_url, caption, share_to_feed: true })
+          : await graph(pageToken, `${igId}/media`, "POST", { image_url: post.image_url, caption });
+        // A reel container needs processing time before it can be published.
+        if (post.video_url) {
+          for (let i = 0; i < 12; i++) {
+            const st = await graph(pageToken, `${c.id}?fields=status_code`);
+            if (st.status_code === "FINISHED") break;
+            if (st.status_code === "ERROR") throw new Error("Instagram could not process the video");
+            await new Promise((r) => setTimeout(r, 5000));
+          }
+        }
         const p = await graph(pageToken, `${igId}/media_publish`, "POST", { creation_id: c.id });
         igPostId = String(p.id || "");
       } catch (e) {

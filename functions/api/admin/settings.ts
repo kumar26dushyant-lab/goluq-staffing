@@ -148,7 +148,15 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
     if (typeof b.wa_tpl_login_otp === "string") await setSetting(env.DB, "wa_tpl_login_otp", b.wa_tpl_login_otp.trim().replace(/[^a-z0-9_]/g, "").slice(0, 100));
     if (b.dodo_api_key) await setSetting(env.DB, "dodo_api_key", b.dodo_api_key.trim());
     if (b.dodo_webhook_secret) await setSetting(env.DB, "dodo_webhook_secret", b.dodo_webhook_secret.trim());
-    if (typeof b.dodo_brand_id === "string") await setSetting(env.DB, "dodo_brand_id", b.dodo_brand_id.trim().slice(0, 80));
+    if (typeof b.dodo_brand_id === "string") {
+      const next = b.dodo_brand_id.trim().slice(0, 80);
+      const prev = (await getSetting(env.DB, "dodo_brand_id")) || "";
+      await setSetting(env.DB, "dodo_brand_id", next);
+      // The checkout shows the brand the PRODUCT belongs to. A product made
+      // before the brand was set shows the primary brand (EagleEye), so it is
+      // recreated under the new brand on the next payment.
+      if (next !== prev) await setSetting(env.DB, "dodo_product_id", "");
+    }
     if (typeof b.dodo_product_id === "string") await setSetting(env.DB, "dodo_product_id", b.dodo_product_id.trim().slice(0, 80));
     if (b.dodo_test_mode !== undefined) await setSetting(env.DB, "dodo_test_mode", b.dodo_test_mode === true || b.dodo_test_mode === "1" ? "1" : "0");
     if (b.chat_enabled !== undefined) {

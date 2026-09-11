@@ -4,6 +4,8 @@ import { checkAdmin, unauthorized } from "../../lib/admin";
 import { geminiEnabled, geminiText, type GeminiEnv } from "../../lib/gemini";
 import { tgAlertOwner, tgEscape } from "../../lib/telegram";
 import { issuePaymentLink, countryFromPhone, type PayEnv } from "../../lib/payments";
+import { publish as publishPost } from "../admin/posts";
+import { getSetting } from "../../lib/settings";
 
 interface Env extends PayEnv, GeminiEnv {
   ADMIN_SECRET?: string;
@@ -29,6 +31,7 @@ export const onRequest: PagesFunction<Env> = async ({ request, env }) => {
   try {
     if (job === "weekly") return Response.json(await weekly(env));
     if (job === "payments") return Response.json(await payments(env));
+    if (job === "posts") return Response.json(await duePosts(env));
     return Response.json(await calls(env));
   } catch (e) {
     return Response.json({ ok: false, error: String(e).slice(0, 300) }, { status: 500 });
@@ -166,4 +169,26 @@ async function weekly(env: Env) {
   ].filter((l) => l !== "");
   const r = await tgAlertOwner(env.DB, env, text.join("\n"));
   return { ok: r.ok, sessions, leads, bookings };
+}
+
+/**
+ * ?job=posts (every 15 minutes): publish scheduled posts whose time has come.
+ * Skips quietly while the Page is not connected — the queue simply waits —
+ * and tells the owner once per post whether it went out.
+ */
+async function duePosts(env: Env) {
+  const pageToken = (await getSetting(env.DB, "fb_page_token")) || "";
+  if (!pageToken) return { ok: true, published: 0, waiting: "page not connected" };
+  const rows = await env.DB.prepare(
+    `SELECT id, caption FROM posts WHERE status = 'scheduled' AND scheduled_at <= datetime('now') ORDER BY scheduled_at LIMIT 3`
+  ).all<{ id: number; caption: string }>();
+  let published = 0;
+  for (const p of rows.results ?? []) {
+    const r = await publishPost(env as any, p.id);
+    if (r.ok) published++;
+    await tgAlertOwner(env.DB, env, r.ok
+      ? `📣 <b>Posted</b> · ${tgEscape(p.caption.slice(0, 120))}`
+      : `⚠️ <b>Post failed</b> · ${tgEscape(p.caption.slice(0, 80))}\n${tgEscape(String(r.error || "").slice(0, 200))}`).catch(() => {});
+  }
+  return { ok: true, published };
 }

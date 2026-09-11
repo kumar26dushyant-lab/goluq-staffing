@@ -806,6 +806,33 @@ What they do well, and what we take:
   and the price list has a "By department" section. Publish lists both
   languages. Masters: marketing/catalog-cards/dept/.
 
+### WhatsApp catalog order — what we control and what we do not (2026-09-12)
+- Owner's phone shows the catalog in an order that is neither ours nor
+  Meta's creation order (the app groups and caches; new items land where the
+  app decides). The WhatsApp Windows app does not show catalogs for Cloud
+  API numbers at all. Neither is fixable from the API.
+- What is ours: **collections** (product sets). The catalog now has six —
+  Start here, Complete systems, For your business, By department, Numbers
+  calls and SMS, Software builds — created/updated by cockpit Store → Sync
+  (`action: sets`). WhatsApp shows collections at the top of the catalog, so
+  a customer reads it by section whatever the flat order is.
+- Sync timing: a product is visible within minutes of sync, but Meta reviews
+  every item (usually under an hour, sometimes a day) and images are cached
+  by URL (we stamp URLs, so a changed picture shows). The phone app caches
+  the catalog; force-close and reopen WhatsApp to see the latest.
+
+### Marketing engine (2026-09-12)
+- Publish now takes reels (Facebook video posts, Instagram Reels with
+  processing wait) and a schedule. A cron (`briefs?job=posts`, every 15 min)
+  publishes due posts once the Page is connected and reports each on
+  Telegram. Until the Pages use case + token are done, the queue waits.
+- A 30-day queue is loaded: one post a day at 10:30 IST from 14 Sep,
+  alternating reel and card, English and Hindi, every caption problem →
+  what changes → goluq.com/start with utm_campaign=sep26. No numbers that are
+  not ours. Facebook + Instagram; LinkedIn and YouTube are the owner's.
+- Instagram needs the professional account linked to the Page first;
+  the cron posts to Facebook alone until then and marks the IG error.
+
 ## 9. TO-DO (current)
 ### Owner
 - [ ] Razorpay: Settings → API keys → paste key id + secret in cockpit →
@@ -837,8 +864,6 @@ What they do well, and what we take:
       cart and cockpit choose Razorpay or Dodo by the customer's market.
 - [ ] Pre-launch walk-through checklist: ad → /start → plan → call → payment
       → WhatsApp, EN/HI, three phones; fix everything found before spend.
-- [ ] Post the first month of content through Publish once connected: one
-      scenario card + one reel a day, EN/HI alternating, tracked links.
 - [ ] Strategy session deliverable (section 8): demand map by geography from
       Visitors data + market signals, pivot rules, acquisition playbooks.
 - [ ] Multi-tenant Store login for the first client store.
