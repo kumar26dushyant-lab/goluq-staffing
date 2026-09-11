@@ -792,6 +792,20 @@ What they do well, and what we take:
 - **Foldable-phone joke** — topical creative; we do the same kind of hook
   with Indian moments (Diwali stock, exam-season admissions, GST deadline).
 
+### Department cards (2026-09-12, later)
+- Eleven custom-build cards, EN at goluq.com/catalog/dept_*.jpg and HI under
+  /catalog/hi/: all-in-one, daily operations, CRM and sales pipeline,
+  billing/accounts/GST, inventory and purchase, HR/attendance/payroll,
+  employee training, vendor management, customer support desk, field staff
+  and delivery, owner's dashboard. Composed with the HTML card engine (now
+  bilingual: `node hicard.mjs en|hi …`), heroes generated per card.
+- In the Store and the WhatsApp catalog (41 items, recreated in order:
+  founder first, departments after the software builds, thank-you last),
+  priced at the live scope-call price with "fixed quote after the call" in
+  the description; the card's link goes to /start. The guide can show them
+  and the price list has a "By department" section. Publish lists both
+  languages. Masters: marketing/catalog-cards/dept/.
+
 ## 9. TO-DO (current)
 ### Owner
 - [ ] Razorpay: Settings → API keys → paste key id + secret in cockpit →
@@ -816,8 +830,6 @@ What they do well, and what we take:
 - [ ] /solutions page + nav: by role, business type, industry → scenario card + /start.
 - [ ] "Official WhatsApp Business Platform · Meta" badge on Meta-related
       cards (EN/HI) and reel end-frames; price-anchor variants (abroad vs India).
-- [ ] Department cards (11) EN + HI, composed with the card engine, priced at
-      the scope call, "fixed quote after the call"; add to Store and catalog.
 - [ ] Partner (affiliate) campaign: cards + 15 s reels EN/HI — "start your
       GoLuQ.com partner office", lump sum + recurring, no rate shown, CTA to
       goluq.com/partner. Refresh /partner copy to match the pitch.
