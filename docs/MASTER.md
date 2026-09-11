@@ -752,6 +752,46 @@ onboarded through a generic intake and mapped as they arrive. Built:
   open your GoLuQ partner office, earn a lump sum on every order and
   recurring revenue on what stays live", pointing to goluq.com/partner.
 
+### Dodo Payments live for customers abroad (2026-09-12, later)
+- issuePaymentLink() now picks the rail by the customer's country (dialling
+  code on WhatsApp, form country in the cockpit): India → Razorpay in ₹;
+  anywhere else → Dodo Payments in USD (same conversion the site shows),
+  Dodo's adaptive currency displays the local amount. One pay-what-you-want
+  product carries every charge; created on first use under the GoLuQ brand.
+- /api/dodo/webhook (Standard-Webhooks signature) marks paid/failed; the
+  ledger shows provider and currency. Owner: webhook secret + brand id
+  (docs/OWNER-TASKS.md 1b), and rotate the key that was pasted in chat.
+- Razorpay: goluq.com added to the existing account (with sarathi-ai.com
+  and nidaanpartner.com), under review 24–48 h; keys are universal per
+  account, so the existing pair is reused — never regenerated.
+
+### Competitor read — ZapUp (screens in Business plan/New folder, 2026-09-12)
+What they do well, and what we take:
+- **Solutions by role / business type / industry** in one menu. We take it:
+  a /solutions page and top-nav entry with the same three columns, each tile
+  landing on the matching scenario card + /start with the business pre-picked.
+- **Price anchoring** ("not $2,499 — it's just ₹2,499"). We have a truthful
+  version: our own international price beside the India price (WhatsApp
+  Office: $1,450 abroad, ₹50,000 in India). Never a made-up strike-through.
+- **"Meta Business Partner · Trusted by Meta" badge**. We are NOT in Meta's
+  partner programme and must not claim it. What is true and can be shown:
+  "Runs on the official WhatsApp Business Platform by Meta (the company
+  behind WhatsApp, Facebook and Instagram)". Badge design: shield + the
+  words "Official WhatsApp Business Platform · Meta" with "WhatsApp ·
+  Facebook · Instagram" under it, because tier-2/3 buyers know those names,
+  not Meta. Goes on every Meta-related card (Office, Store, API, WhatsApp
+  automations, all scenario cards) EN + HI, and as an end-frame/corner
+  overlay on the reels. Not on toll-free/SMS/voice cards — those are not
+  Meta products. Apply for Meta's Tech Provider / Business Partner status
+  later; only then does the official badge appear.
+- **"3-day free trial, no credit card"** — a SaaS line; ours is "₹999 scope
+  call, credited to your build", already on the founder card.
+- **Live social proof widgets** ("148 DMs handled while you slept"). Ours
+  must come from real customer systems (the monthly ROI report); nothing
+  invented. Ashwin's numbers once he agrees.
+- **Foldable-phone joke** — topical creative; we do the same kind of hook
+  with Indian moments (Diwali stock, exam-season admissions, GST deadline).
+
 ## 9. TO-DO (current)
 ### Owner
 - [ ] Razorpay: Settings → API keys → paste key id + secret in cockpit →
@@ -773,6 +813,9 @@ onboarded through a generic intake and mapped as they arrive. Built:
 - [ ] Ashwin testimonial video + written consent.
 - [ ] Public Telegram channel name → Settings.
 ### Build (mine, in order)
+- [ ] /solutions page + nav: by role, business type, industry → scenario card + /start.
+- [ ] "Official WhatsApp Business Platform · Meta" badge on Meta-related
+      cards (EN/HI) and reel end-frames; price-anchor variants (abroad vs India).
 - [ ] Department cards (11) EN + HI, composed with the card engine, priced at
       the scope call, "fixed quote after the call"; add to Store and catalog.
 - [ ] Partner (affiliate) campaign: cards + 15 s reels EN/HI — "start your

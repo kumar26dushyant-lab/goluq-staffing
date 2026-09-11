@@ -7,63 +7,58 @@ cockpit fields named below. The cockpit is https://goluq.com/admin.
 
 ---
 
-## 1. Razorpay — keys and one webhook (10 minutes)
+## 1. Razorpay — do NOT regenerate; paste the existing pair, add one webhook (10 minutes)
 
-If GoLuQ gets its OWN Razorpay account (or sub-merchant), generate the key
-pair there: Account & Settings → API Keys → Generate Live Key, and skip the
-Sarathi-AI note below. If GoLuQ shares Sarathi-AI's account, follow the note:
-a Razorpay account has one live key pair, and regenerating it breaks whatever
-else uses it.
+State on 2026-09-12: goluq.com is listed under the existing Razorpay account
+beside sarathi-ai.com and nidaanpartner.com, status "Under review (24–48 h)".
+Razorpay's own note on that screen: API keys are universal across all
+approved websites. So the key `rzp_live_SPruIDUQVZPQir` (generated 11 Mar
+2026) already serves GoLuQ once the review clears. Regenerating it would
+break Sarathi-AI and NidaanPartner the same minute.
 
-### 1-shared. Reuse the Sarathi-AI keys
+1. Find the secret for that key where Sarathi-AI keeps it (its `.env` /
+   hosting environment variables, names like `RAZORPAY_KEY_SECRET`). Do not
+   press "Regenerate Key". If the secret truly cannot be found anywhere,
+   stop and tell Claude — regenerating is a coordinated change on three sites.
+2. https://goluq.com/admin → **Setup → Settings** → tab **Payments**: Key id
+   = `rzp_live_SPruIDUQVZPQir`, Key secret = the value from step 1 → **Save
+   payments**. The secret field goes blank and shows "set".
+3. Razorpay → Account & Settings → **Webhooks** tab (next to "Websites & API
+   keys") → **Add New Webhook**:
+   - URL `https://goluq.com/api/razorpay/webhook`
+   - Secret: any long random phrase (20+ chars); keep it on screen
+   - Alert email kumar26.dushyant@gmail.com
+   - Events: payment_link.paid, payment_link.expired, payment_link.cancelled
+   - Create.
+4. Cockpit → Settings → Payments → "Webhook secret" = that phrase → Save.
+5. Wait for the goluq.com review to show Approved (24–48 h). Until then a
+   link may be created but Razorpay can refuse the payment on an unapproved
+   site; do not send links to real customers before it is Approved.
+6. Verify afterwards: cockpit → Sell → Payments → "Send a link for anything
+   else" → your own number, ₹1, "test" → pay it → the row turns "paid" and a
+   Telegram alert arrives.
 
-Why: without this, the founder-call and cart payment links cannot be created.
-GoLuQ uses the same Razorpay account as Sarathi-AI.com. A Razorpay account has
-ONE live key pair; regenerating it would break Sarathi-AI, so do not press
-"Regenerate". Copy the pair that Sarathi-AI already uses.
+## 1b. Dodo Payments — finish the connection (5 minutes)
 
-1. Open the Sarathi-AI.com server configuration (its `.env` or hosting
-   dashboard → environment variables) and copy the two values named like
-   `RAZORPAY_KEY_ID` (starts `rzp_live_`) and `RAZORPAY_KEY_SECRET`.
-   If they cannot be found there: https://dashboard.razorpay.com → Account &
-   Settings → API Keys shows the Key Id; the secret is only shown at
-   generation time, so in that case generate a NEW pair and update Sarathi-AI
-   with the same new pair on the same day.
-2. Open https://goluq.com/admin → **Setup → Settings** → tab **Payments**.
-   Paste Key Id into "Key id", Key Secret into "Key secret". Press
-   **Save payments**. The secret field goes blank after save and shows "set".
-3. In Razorpay: **Account & Settings** → **Webhooks** → **Add New Webhook**
-   (Sarathi-AI's existing webhook stays; a second one is allowed).
-   - Webhook URL: `https://goluq.com/api/razorpay/webhook`
-   - Secret: type any long random phrase (20+ characters). Keep it on screen.
-   - Alert email: kumar26.dushyant@gmail.com
-   - Active events: tick **payment_link.paid**, **payment_link.expired**,
-     **payment_link.cancelled**. Nothing else is needed.
-   - Create Webhook.
-4. In the cockpit Payments tab paste that same phrase into "Webhook secret" →
-   **Save payments**.
-5. Leave "Send the call link for every booking" OFF unless you want every
-   calendar booking (even a free discovery call) to receive the ₹999 link.
-6. Verify: cockpit → **Sell → Payments** should no longer show the yellow
-   "Razorpay is not connected" notice. Optional dry run: in "Send a link for
-   anything else" enter your own WhatsApp number, amount 1, description
-   "test", Send. A link arrives on WhatsApp; pay ₹1 or ignore it; the ledger
-   row appears under "Links issued".
+Done already: GoLuQ.com Digital Consultancy is a secondary brand under the
+EagleEye business; the API key is stored in the cockpit (write-only). Left:
 
-## 1b. Dodo Payments — for customers outside India (10 minutes)
-
-Why: Razorpay serves India in rupees. International customers pay through Dodo
-Payments (merchant of record: cards, PayPal, local methods, tax handled), the
-account already used for one of our apps.
-
-1. https://app.dodopayments.com → Developer → **API keys** → create a key
-   named "goluq.com" (live mode). Copy it.
-2. Developer → **Webhooks** → add endpoint `https://goluq.com/api/dodo/webhook`,
-   events: payment.succeeded, payment.failed. Copy the signing secret.
-3. Paste both into cockpit → Settings → Payments → "Dodo API key" and "Dodo
-   webhook secret" (fields appear once the international build is deployed;
-   until then keep them in your password manager, not in chat).
-4. Tell Claude which currencies to offer: USD only, or USD + AED + GBP.
+1. Dodo dashboard → **Developer → Webhooks** → Add endpoint
+   `https://goluq.com/api/dodo/webhook` → events **payment.succeeded** and
+   **payment.failed** → create → copy the **signing secret** (starts
+   `whsec_`).
+2. Dodo → Settings → Business → Brands → the "…" beside
+   **GoLuQ.com Digital Consultancy** → copy the brand id (`brand_…`).
+3. https://goluq.com/admin → Settings → Payments → paste "Dodo webhook
+   signing secret" and "Dodo brand id" → Save payments. The Dodo product
+   ("GoLuQ.com services", pay-what-you-want, USD) is created automatically on
+   first use and its id appears in the read-only field.
+4. Because the API key was pasted into a chat once, rotate it when convenient:
+   Developer → API keys → create a new key → paste in the cockpit → delete
+   the old one. Nothing else changes.
+5. Verify: Sell → Payments → send a link to your own email with country "US"
+   (the form uses the number's country; use an email only) for ₹88 — it comes
+   out as a $1 Dodo link. Pay it with a card; the row turns "paid".
 
 ## 1c. Google sign-in for the client login (10 minutes)
 
