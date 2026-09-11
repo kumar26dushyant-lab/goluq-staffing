@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useInView, useReducedMotion } from "framer-motion";
-import { ArrowRight, ChevronDown, Share2, Volume2, VolumeX } from "lucide-react";
+import { ArrowRight, ChevronDown, Share2, Volume2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useMoney, usePricing } from "../../lib/siteConfig";
 import { useRegion, type Region } from "../../lib/region";
@@ -14,10 +14,10 @@ import { useRegion, type Region } from "../../lib/region";
  * voice-over — playing on its own as it scrolls into view and stopping as it
  * leaves. One line for each state, the product's name, one button.
  *
- * Sound: reels start muted (browsers allow nothing else) and the pill turns
- * the voice-over on for whichever chapter is on screen. The browser's own
- * speech synthesis is gone from this page — it stalled and spoke over the
- * wrong card; the reel's recorded voice cannot.
+ * The homepage plays a silent preview; "Watch with sound" opens the full reel.
+ * Autoplaying sound on a page was tried and failed twice — the browser's
+ * speech synthesis stalled and spoke over the wrong card, and video audio
+ * doubled up when two chapters were half on screen. Sound is now a choice.
  *
  * Region changes the wording, never the pictures (see lib/region.ts).
  */
@@ -27,31 +27,14 @@ export type ChapterId = (typeof CHAPTERS)[number];
 const BEAT_MS = 2200;
 /** Bump when posters are regenerated: the edge caches images by URL. */
 const STORY_V = "3";
-/** Fired from the sound pill inside the click, so iOS lets the video unmute. */
-const SOUND_EVENT = "goluq:sound";
-
-const SOUND_KEY = "goluq_story_sound";
 
 export function StoryChapters() {
   const [active, setActive] = useState(0);
-  // Off until the visitor asks: a phone will not start audio on its own, and
-  // a pill that says "sound on" over a silent film is a lie.
-  const [sound, setSound] = useState<boolean>(() => {
-    try { return sessionStorage.getItem(SOUND_KEY) === "1"; } catch { return false; }
-  });
-  const toggleSound = () => {
-    const on = !sound;
-    // Tell the visible reel first, synchronously, while we are still inside
-    // the user's tap — that is the only moment a phone lets audio start.
-    window.dispatchEvent(new CustomEvent(SOUND_EVENT, { detail: { on } }));
-    setSound(on);
-    try { sessionStorage.setItem(SOUND_KEY, on ? "1" : "0"); } catch { /* private mode */ }
-  };
   const region = useRegion();
   return (
     <div className="relative">
       {CHAPTERS.map((id, i) => (
-        <Chapter key={id} id={id} index={i} region={region} sound={sound} onToggleSound={toggleSound} onEnter={() => setActive(i)} />
+        <Chapter key={id} id={id} index={i} region={region} onEnter={() => setActive(i)} />
       ))}
       <div className="pointer-events-none fixed right-3 top-1/2 z-20 hidden -translate-y-1/2 flex-col gap-2 sm:flex" aria-hidden="true">
         {CHAPTERS.map((id, i) => (
@@ -63,54 +46,39 @@ export function StoryChapters() {
 }
 
 /**
- * The chapter's reel. Plays when the chapter is on screen, pauses when it is
- * not; muted unless the visitor asked for sound. If an unmuted play is refused
- * (autoplay policy), it falls back to muted rather than showing a frozen frame.
- * The sound pill sits on the film itself, where a reel's mute button lives,
- * so it never covers the words.
+ * The chapter's film: a silent, low-bitrate preview of the reel (≈0.5 MB,
+ * 480 px wide) that starts on its own when the chapter is on screen and stops
+ * when it leaves. It only fetches once the chapter is within a screen of the
+ * viewport, so opening the page costs one preview, not six. Audio never plays
+ * here — the full reel with its voice-over is one tap away, and that is where
+ * the bandwidth goes only for the people who ask for it.
  */
-function Reel({ id, inView, eager, sound, onToggleSound, className = "" }: { id: ChapterId; inView: boolean; eager: boolean; sound: boolean; onToggleSound: () => void; className?: string }) {
+function Reel({ id, inView, near, eager, className = "" }: { id: ChapterId; inView: boolean; near: boolean; eager: boolean; className?: string }) {
   const { t, i18n } = useTranslation();
   const ref = useRef<HTMLVideoElement>(null);
   const lang = i18n.language.startsWith("hi") ? "hi" : "en";
-  const src = `/media/reel-${id}-${lang}.mp4`;
+  const preview = `/media/preview-${id}-${lang}.mp4`;
+  const full = `/media/reel-${id}-${lang}.mp4`;
+  const load = eager || near;
 
-  const play = (withSound: boolean) => {
+  useEffect(() => {
     const v = ref.current;
-    if (!v) return;
-    v.muted = !withSound;
-    const p = v.play();
-    if (p && typeof p.catch === "function") {
-      p.catch(() => {
-        if (!v.muted) { v.muted = true; v.play().catch(() => {}); }
-      });
+    if (!v || !load) return;
+    if (inView) {
+      v.muted = true;
+      const p = v.play();
+      if (p && typeof p.catch === "function") p.catch(() => {});
+    } else {
+      v.pause();
     }
-  };
-
-  useEffect(() => {
-    const v = ref.current;
-    if (!v) return;
-    if (inView) play(sound);
-    else { v.pause(); v.currentTime = 0; }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inView, sound, src]);
-
-  useEffect(() => {
-    const onSound = (e: Event) => {
-      if (!inView) return;
-      play(Boolean((e as CustomEvent).detail?.on));
-    };
-    window.addEventListener(SOUND_EVENT, onSound);
-    return () => window.removeEventListener(SOUND_EVENT, onSound);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inView]);
+  }, [inView, load, preview]);
 
   return (
     <div className={`overflow-hidden bg-black ${className}`}>
       <video
-        key={src}
+        key={preview}
         ref={ref}
-        src={src}
+        src={load ? preview : undefined}
         poster={`/story/${id}_before.webp?v=${STORY_V}`}
         className="absolute inset-0 h-full w-full object-cover"
         muted
@@ -119,24 +87,26 @@ function Reel({ id, inView, eager, sound, onToggleSound, className = "" }: { id:
         preload={eager ? "auto" : "metadata"}
         aria-hidden="true"
       />
-      <button
-        type="button"
-        onClick={(e) => { e.stopPropagation(); onToggleSound(); }}
-        aria-pressed={sound}
+      <a
+        href={full}
+        target="_blank"
+        rel="noreferrer"
+        onClick={(e) => e.stopPropagation()}
         className="absolute right-3 top-3 z-10 inline-flex items-center gap-2 rounded-full border border-white/25 bg-black/60 px-3.5 py-2 text-sm font-semibold text-white shadow-lg backdrop-blur"
       >
-        {sound ? <Volume2 size={16} className="text-brand-luq" /> : <VolumeX size={16} />}
-        {sound ? t("story.soundOn") : t("story.soundOff")}
-      </button>
+        <Volume2 size={16} /> {t("story.watchWithSound")}
+      </a>
     </div>
   );
 }
 
-function Chapter({ id, index, region, sound, onToggleSound, onEnter }: { id: ChapterId; index: number; region: Region; sound: boolean; onToggleSound: () => void; onEnter: () => void }) {
+function Chapter({ id, index, region, onEnter }: { id: ChapterId; index: number; region: Region; onEnter: () => void }) {
   const { t, i18n } = useTranslation();
   const reduced = useReducedMotion();
   const ref = useRef<HTMLElement>(null);
   const inView = useInView(ref, { amount: 0.5 });
+  // Within one screen of the viewport: time to fetch the preview.
+  const near = useInView(ref, { margin: "100% 0px 100% 0px" });
   const [after, setAfter] = useState(false);
   const [played, setPlayed] = useState(false);
   const timer = useRef<number | null>(null);
@@ -247,7 +217,7 @@ function Chapter({ id, index, region, sound, onToggleSound, onEnter }: { id: Cha
       {/* Phone: the reel on top, words below it — never on top of the film. */}
       <div className="flex min-h-[100svh] flex-col lg:hidden">
         <div className="relative h-[52svh] shrink-0">
-          <Reel id={id} inView={inView} eager={index === 0} sound={sound} onToggleSound={onToggleSound} className="absolute inset-0" />
+          <Reel id={id} inView={inView} eager={index === 0} near={near} className="absolute inset-0" />
           {/* A soft fade into the caption panel, so the join reads as one card. */}
           <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#0B1020] to-transparent" aria-hidden="true" />
           {index === 0 && (
@@ -261,7 +231,7 @@ function Chapter({ id, index, region, sound, onToggleSound, onEnter }: { id: Cha
 
       {/* Desk: the reel, phone-shaped, beside the words. */}
       <div className="mx-auto hidden min-h-[100svh] w-full max-w-6xl grid-cols-[minmax(0,420px)_1fr] items-center gap-12 px-8 lg:grid">
-        <Reel id={id} inView={inView} eager={index === 0} sound={sound} onToggleSound={onToggleSound} className="relative aspect-[9/16] max-h-[82vh] w-full rounded-3xl shadow-glass" />
+        <Reel id={id} inView={inView} eager={index === 0} near={near} className="relative aspect-[9/16] max-h-[82vh] w-full rounded-3xl shadow-glass" />
         <div>{words(false)}</div>
       </div>
     </section>

@@ -99,10 +99,12 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
       return Response.json({ ok: true });
     }
 
-    // Meta shows the WhatsApp catalog newest-first. To control the order the
-    // customer sees, remove everything from Meta and recreate it in reverse
-    // sort order, so the lowest sort_order (the founder card) is created last
-    // and shows first. Local rows are untouched.
+    // Meta keeps a catalog in creation order and the WhatsApp store shows it
+    // oldest-first (Commerce Manager shows the same list newest-first, which
+    // is what misled the first pass). To control what the customer sees,
+    // remove everything from Meta and recreate it in sort order, so the
+    // founder card is created first and shows first. Local rows are untouched.
+    // `order: "desc"` is kept for the day Meta flips it again.
     if (action === "reorder") {
       const cfg = await waConfig(env.DB, env);
       const catalog = (await getSetting(env.DB, "wa_catalog_id")) || "";
@@ -113,7 +115,7 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
         await env.DB.prepare("UPDATE products SET meta_id = NULL, synced_at = NULL WHERE id = ?").bind(p.id).run();
       }
       await env.DB.prepare("UPDATE products SET updated_at = datetime('now') WHERE tenant = ?").bind(TENANT).run();
-      return await syncToMeta(env, true, "DESC");
+      return await syncToMeta(env, true, b.order === "desc" ? "DESC" : "ASC");
     }
     if (action === "import") return await importFromMeta(env);
     // force: push every live product again (used after images change on disk).

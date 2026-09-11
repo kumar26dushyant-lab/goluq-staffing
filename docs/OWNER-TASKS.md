@@ -7,38 +7,68 @@ cockpit fields named below. The cockpit is https://goluq.com/admin.
 
 ---
 
-## 1. Razorpay — keys and webhook (15 minutes)
+## 1. Razorpay — reuse the Sarathi-AI keys, add one webhook (10 minutes)
 
 Why: without this, the founder-call and cart payment links cannot be created.
+GoLuQ uses the same Razorpay account as Sarathi-AI.com. A Razorpay account has
+ONE live key pair; regenerating it would break Sarathi-AI, so do not press
+"Regenerate". Copy the pair that Sarathi-AI already uses.
 
-1. Sign in at https://dashboard.razorpay.com with the GoLuQ Razorpay account
-   (Dushyant Sharma, personal savings account). If the account still shows
-   "Activate your account" or KYC pending, finish that first — Payment Links
-   need an activated account. Test mode keys also work for a dry run.
-2. Left menu → **Account & Settings** → **API Keys** → **Generate Live Key**
-   (or "Regenerate"). Copy both values shown: **Key Id** (starts `rzp_live_`)
-   and **Key Secret** (shown once).
-3. Open https://goluq.com/admin → **Setup → Settings** → tab **Payments**.
+1. Open the Sarathi-AI.com server configuration (its `.env` or hosting
+   dashboard → environment variables) and copy the two values named like
+   `RAZORPAY_KEY_ID` (starts `rzp_live_`) and `RAZORPAY_KEY_SECRET`.
+   If they cannot be found there: https://dashboard.razorpay.com → Account &
+   Settings → API Keys shows the Key Id; the secret is only shown at
+   generation time, so in that case generate a NEW pair and update Sarathi-AI
+   with the same new pair on the same day.
+2. Open https://goluq.com/admin → **Setup → Settings** → tab **Payments**.
    Paste Key Id into "Key id", Key Secret into "Key secret". Press
    **Save payments**. The secret field goes blank after save and shows "set".
-4. Back in Razorpay: **Account & Settings** → **Webhooks** → **Add New Webhook**.
+3. In Razorpay: **Account & Settings** → **Webhooks** → **Add New Webhook**
+   (Sarathi-AI's existing webhook stays; a second one is allowed).
    - Webhook URL: `https://goluq.com/api/razorpay/webhook`
    - Secret: type any long random phrase (20+ characters). Keep it on screen.
    - Alert email: kumar26.dushyant@gmail.com
    - Active events: tick **payment_link.paid**, **payment_link.expired**,
      **payment_link.cancelled**. Nothing else is needed.
    - Create Webhook.
-5. In the cockpit Payments tab paste that same phrase into "Webhook secret" →
+4. In the cockpit Payments tab paste that same phrase into "Webhook secret" →
    **Save payments**.
-6. Leave "Send the call link for every booking" OFF unless you want every
+5. Leave "Send the call link for every booking" OFF unless you want every
    calendar booking (even a free discovery call) to receive the ₹999 link.
-7. Verify: cockpit → **Sell → Payments** should no longer show the yellow
+6. Verify: cockpit → **Sell → Payments** should no longer show the yellow
    "Razorpay is not connected" notice. Optional dry run: in "Send a link for
    anything else" enter your own WhatsApp number, amount 1, description
    "test", Send. A link arrives on WhatsApp; pay ₹1 or ignore it; the ledger
    row appears under "Links issued".
 
----
+## 1b. Dodo Payments — for customers outside India (10 minutes)
+
+Why: Razorpay serves India in rupees. International customers pay through Dodo
+Payments (merchant of record: cards, PayPal, local methods, tax handled), the
+account already used for one of our apps.
+
+1. https://app.dodopayments.com → Developer → **API keys** → create a key
+   named "goluq.com" (live mode). Copy it.
+2. Developer → **Webhooks** → add endpoint `https://goluq.com/api/dodo/webhook`,
+   events: payment.succeeded, payment.failed. Copy the signing secret.
+3. Paste both into cockpit → Settings → Payments → "Dodo API key" and "Dodo
+   webhook secret" (fields appear once the international build is deployed;
+   until then keep them in your password manager, not in chat).
+4. Tell Claude which currencies to offer: USD only, or USD + AED + GBP.
+
+## 1c. Google sign-in for the client login (10 minutes)
+
+1. https://console.cloud.google.com → project "GoLuQ" (create if absent) →
+   APIs & Services → OAuth consent screen → External → app name "GoLuQ.com",
+   support email kumar26.dushyant@gmail.com, authorised domain goluq.com →
+   Save. Publish the app (not testing mode).
+2. Credentials → Create credentials → OAuth client ID → Web application →
+   name "goluq.com web" → Authorised JavaScript origins `https://goluq.com`
+   → Authorised redirect URIs `https://goluq.com/api/auth/google/callback` →
+   Create. Copy Client ID and Client secret.
+3. Paste into cockpit → Settings → Sign-in (fields appear with the login
+   build). Until then, password manager.
 
 ## 2. Calendar bridge — Google Apps Script (10 minutes)
 
