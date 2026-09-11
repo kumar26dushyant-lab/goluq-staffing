@@ -39,6 +39,7 @@ import { onRequestPost as bookingsInbound } from "../functions/api/bookings/inbo
 import { onRequestGet as adminProductsGet, onRequestPost as adminProductsPost } from "../functions/api/admin/products";
 import { onRequestGet as adminPaymentsGet, onRequestPost as adminPaymentsPost } from "../functions/api/admin/payments";
 import { onRequestPost as razorpayWebhook } from "../functions/api/razorpay/webhook";
+import { onRequestPost as dodoWebhook } from "../functions/api/dodo/webhook";
 import { onRequestPost as authOtp } from "../functions/api/auth/otp";
 import { onRequestGet as authGoogle } from "../functions/api/auth/google";
 import { onRequestGet as intakeGet, onRequestPost as intakePost } from "../functions/api/intake";
@@ -108,6 +109,9 @@ for (const sql of [
   // Sign-in with Google, and the language a customer signed in with.
   `ALTER TABLE customers ADD COLUMN google_sub TEXT`,
   `ALTER TABLE customers ADD COLUMN lang TEXT`,
+  `ALTER TABLE payments ADD COLUMN provider TEXT DEFAULT 'razorpay'`,
+  `ALTER TABLE payments ADD COLUMN currency TEXT DEFAULT 'INR'`,
+  `ALTER TABLE payments ADD COLUMN amount REAL`,
 ]) {
   try {
     sqlite.exec(sql);
@@ -275,6 +279,7 @@ app.get("/api/admin/products", (c) => callFn(adminProductsGet as Handler, c.req.
 app.get("/api/admin/payments", (c) => callFn(adminPaymentsGet as Handler, c.req.raw));
 app.post("/api/admin/payments", (c) => callFn(adminPaymentsPost as Handler, c.req.raw));
 app.post("/api/razorpay/webhook", (c) => callFn(razorpayWebhook as Handler, c.req.raw));
+app.post("/api/dodo/webhook", (c) => callFn(dodoWebhook as Handler, c.req.raw));
 app.post("/api/auth/otp", (c) => callFn(authOtp as Handler, c.req.raw));
 app.get("/api/auth/google", (c) => callFn(authGoogle as Handler, c.req.raw));
 app.get("/api/auth/google/callback", (c) => callFn(authGoogle as Handler, c.req.raw));

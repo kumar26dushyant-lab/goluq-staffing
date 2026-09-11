@@ -9,9 +9,9 @@ import { adminGet, adminPost } from "../../lib/adminApi";
  * paid; plus the recent calls, so a link can be pushed at a booking with one
  * tap (a fresh one replaces whatever is still open for that call).
  */
-interface Payment { id: number; kind: string; booking_id: number | null; phone: string | null; email: string | null; name: string | null; amount_inr: number; description: string; url: string; status: string; expires_at: string | null; created_at: string; paid_at: string | null; booking_name: string | null; starts_at: string | null }
+interface Payment { id: number; kind: string; booking_id: number | null; phone: string | null; email: string | null; name: string | null; amount_inr: number; provider: string | null; currency: string | null; amount: number | null; description: string; url: string; status: string; expires_at: string | null; created_at: string; paid_at: string | null; booking_name: string | null; starts_at: string | null }
 interface Call { id: number; name: string; email: string | null; phone: string | null; starts_at: string; ends_at: string | null; status: string; pay_status: string | null }
-interface Data { ready: boolean; call_price_inr: number; payments: Payment[]; calls: Call[]; totals: { paid: number; open: number; paid30: number } }
+interface Data { ready: boolean; dodo: boolean; call_price_inr: number; payments: Payment[]; calls: Call[]; totals: { paid: number; open: number; paid30: number } }
 
 const inr = (n: number) => "₹" + Math.round(n).toLocaleString("en-IN");
 const when = (s: string | null) => {
@@ -55,7 +55,7 @@ export function Payments() {
       {!d.ready && (
         <div className="flex items-start gap-3 rounded-2xl border border-warn/40 bg-warn/10 p-4 text-sm">
           <AlertTriangle size={18} className="mt-0.5 shrink-0 text-warn" />
-          <p className="text-fg">Razorpay is not connected yet. Add the key id and key secret under Settings → Payments. Until then carts and bookings get no link.</p>
+          <p className="text-fg">Razorpay is not connected yet. Add the key id and key secret under Settings → Payments. Until then carts and bookings in India get no link{d.dodo ? "; customers abroad still get a Dodo link" : ""}.</p>
         </div>
       )}
 
@@ -104,7 +104,7 @@ export function Payments() {
         {d.payments.map((p) => (
           <div key={p.id} className="flex items-center justify-between gap-3 px-4 py-3">
             <div className="min-w-0">
-              <p className="truncate font-semibold text-fg">{inr(p.amount_inr)} · {p.description}</p>
+              <p className="truncate font-semibold text-fg">{p.currency && p.currency !== "INR" ? `${p.currency} ${Number(p.amount || 0).toLocaleString("en-US")}` : inr(p.amount_inr)} · {p.description}{p.provider === "dodo" ? <span className="ml-2 text-xs font-normal text-faint">Dodo</span> : null}</p>
               <p className="truncate text-sm text-muted">{p.name || p.booking_name || ""}{p.phone ? ` · ${p.phone}` : ""}{p.email ? ` · ${p.email}` : ""} · {when(p.created_at)}{p.paid_at ? ` · paid ${when(p.paid_at)}` : p.expires_at ? ` · till ${when(p.expires_at)}` : ""}</p>
             </div>
             <div className="flex shrink-0 items-center gap-2">

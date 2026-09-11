@@ -447,7 +447,10 @@ CREATE TABLE IF NOT EXISTS payments (
   status TEXT NOT NULL DEFAULT 'issued',   -- issued | paid | expired | cancelled
   expires_at TEXT,
   created_at TEXT NOT NULL,
-  paid_at TEXT
+  paid_at TEXT,
+  provider TEXT DEFAULT 'razorpay',     -- razorpay | dodo
+  currency TEXT DEFAULT 'INR',
+  amount REAL                          -- charged amount in `currency` (amount_inr stays the rupee basis)
 );
 CREATE INDEX IF NOT EXISTS idx_payments_booking ON payments(booking_id);
 CREATE INDEX IF NOT EXISTS idx_payments_link ON payments(rp_link_id);

@@ -1,6 +1,8 @@
 /// <reference types="@cloudflare/workers-types" />
 
 import { createPaymentLink, rzpConfig, rzpReady } from "./razorpay";
+import { createDodoPayment, dodoConfig, dodoReady } from "./dodo";
+import { convert, formatMoney, resolveMarket } from "./markets";
 import { sendMail, mailEnabled, type MailEnv } from "./mailer";
 import { getSetting } from "./settings";
 import { tgAlertOwner, tgEscape, type TgEnv } from "./telegram";
@@ -26,6 +28,8 @@ export interface IssueArgs {
   intro?: string;
   /** Who asked: 'cart' | 'booking' | 'cron' | 'admin' — for the owner alert. */
   by?: string;
+  /** Two-letter country of the customer, from the phone's dialling code or the edge. Decides Razorpay (India) or Dodo (elsewhere). */
+  country?: string;
 }
 
 export type IssueResult =
@@ -44,8 +48,6 @@ const IST = (s: string) =>
  */
 export async function issuePaymentLink(env: PayEnv, a: IssueArgs): Promise<IssueResult> {
   const db = env.DB;
-  const rzp = await rzpConfig(db);
-  if (!rzpReady(rzp)) return { ok: false, error: "Razorpay keys are not set." };
   if (!(a.amountInr > 0)) return { ok: false, error: "Amount must be above zero." };
   if (!a.phone && !a.email) return { ok: false, error: "Need a phone or an email to send it to." };
 
@@ -53,30 +55,63 @@ export async function issuePaymentLink(env: PayEnv, a: IssueArgs): Promise<Issue
   const expiresAt = a.expiresAt || new Date(Date.now() + 7 * 86400e3).toISOString().slice(0, 19).replace("T", " ");
   const expireBy = Math.max(Math.floor(Date.parse(expiresAt.replace(" ", "T") + "Z") / 1000), Math.floor(Date.now() / 1000) + 20 * 60);
 
-  const link = await createPaymentLink(rzp, {
-    amountInr: a.amountInr,
-    description: a.description,
-    referenceId: ref,
-    customer: { name: a.name || undefined, contact: a.phone || undefined, email: a.email || undefined },
-    expireBy,
-    notes: { kind: a.kind, booking_id: String(a.bookingId || ""), phone: a.phone || "" },
-  });
+  // India pays Razorpay in rupees. Everyone else pays Dodo in dollars — the
+  // same conversion the site shows them — unless Dodo is not set up yet, in
+  // which case the rupee link is still better than no link.
+  const country = (a.country || "").toUpperCase();
+  const { market, multiplier } = await resolveMarket(db, country);
+  const dodo = await dodoConfig(db);
+  const abroad = country !== "" && country !== "IN" && market.currency !== "INR";
+  let provider: "razorpay" | "dodo" = "razorpay";
+  let currency = "INR";
+  let charged = Math.round(a.amountInr);
+  let link: { ok: true; id: string; url: string } | { ok: false; error: string };
+  if (abroad && dodoReady(dodo)) {
+    provider = "dodo";
+    currency = "USD";
+    const { market: usd, multiplier: m2 } = await resolveMarket(db, "US");
+    charged = convert(a.amountInr, usd, m2);
+    // Dodo needs an email for the receipt. A WhatsApp-only customer gets a
+    // goluq.com alias so the receipt lands with us and can be forwarded.
+    const email = a.email || `pay-${(a.phone || "").replace(/\D/g, "")}@goluq.com`;
+    link = await createDodoPayment(db, dodo, {
+      amountUsd: charged,
+      description: a.description,
+      customer: { email, name: a.name || undefined, phone: a.phone || undefined },
+      country,
+      metadata: { kind: a.kind, booking_id: String(a.bookingId || ""), phone: a.phone || "", ref },
+    });
+  } else {
+    const rzp = await rzpConfig(db);
+    if (!rzpReady(rzp)) return { ok: false, error: "Razorpay keys are not set." };
+    link = await createPaymentLink(rzp, {
+      amountInr: a.amountInr,
+      description: a.description,
+      referenceId: ref,
+      customer: { name: a.name || undefined, contact: a.phone || undefined, email: a.email || undefined },
+      expireBy,
+      notes: { kind: a.kind, booking_id: String(a.bookingId || ""), phone: a.phone || "" },
+    });
+  }
   if (!link.ok) return { ok: false, error: link.error };
+  void multiplier;
 
   const ins = await db.prepare(
-    `INSERT INTO payments (kind, booking_id, phone, email, name, amount_inr, description, rp_link_id, url, status, expires_at, created_at)
-     VALUES (?,?,?,?,?,?,?,?,?,'issued',?,datetime('now'))`
-  ).bind(a.kind, a.bookingId || null, a.phone || null, a.email || null, a.name || null, Math.round(a.amountInr), a.description, link.id, link.url, expiresAt).run();
+    `INSERT INTO payments (kind, booking_id, phone, email, name, amount_inr, description, rp_link_id, url, status, expires_at, created_at, provider, currency, amount)
+     VALUES (?,?,?,?,?,?,?,?,?,'issued',?,datetime('now'),?,?,?)`
+  ).bind(a.kind, a.bookingId || null, a.phone || null, a.email || null, a.name || null, Math.round(a.amountInr), a.description, link.id, link.url, expiresAt, provider, currency, charged).run();
   const id = Number((ins as any)?.meta?.last_row_id || 0);
 
   const hi = a.lang === "hi";
-  const amount = fmtInr(a.amountInr);
+  const amount = currency === "INR" ? fmtInr(a.amountInr) : formatMoney(charged, { ...market, currency: "USD", locale: "en-US" });
   const intro = a.intro || (hi
     ? `${a.description} के लिए ${amount} का पेमेंट लिंक यह रहा।`
     : `Here is the ${amount} payment link for ${a.description}.`);
-  const tail = hi
-    ? "UPI, कार्ड या नेटबैंकिंग — जो सुविधाजनक हो। कोई सवाल हो तो यहीं लिख दीजिए।"
-    : "UPI, card or netbanking, whichever suits you. Any question, just reply here.";
+  const tail = provider === "dodo"
+    ? (hi ? "कार्ड या PayPal — अपनी करेंसी में। कोई सवाल हो तो यहीं लिख दीजिए।" : "Card or PayPal, in your own currency. Any question, just reply here.")
+    : hi
+      ? "UPI, कार्ड या नेटबैंकिंग — जो सुविधाजनक हो। कोई सवाल हो तो यहीं लिख दीजिए।"
+      : "UPI, card or netbanking, whichever suits you. Any question, just reply here.";
 
   // WhatsApp: a tappable button inside the 24-hour window; the approved
   // template (once there is one) outside it; plain text as the last resort.
@@ -159,10 +194,10 @@ export async function callIntentFor(db: D1Database, phone: string | null, email:
 }
 
 /** Mark the paid row and tell the owner. Called from the Razorpay webhook. */
-export async function markPaid(env: PayEnv, rpLinkId: string, paymentId: string, amountPaise: number): Promise<boolean> {
+export async function markPaid(env: PayEnv, rpLinkId: string, paymentId: string, amountMinor: number, currency = "INR"): Promise<boolean> {
   const db = env.DB;
-  const row = await db.prepare("SELECT id, kind, booking_id, phone, email, name, amount_inr, description, status FROM payments WHERE rp_link_id = ?")
-    .bind(rpLinkId).first<{ id: number; kind: string; booking_id: number | null; phone: string | null; email: string | null; name: string | null; amount_inr: number; description: string; status: string }>();
+  const row = await db.prepare("SELECT id, kind, booking_id, phone, email, name, amount_inr, description, status, currency, amount FROM payments WHERE rp_link_id = ?")
+    .bind(rpLinkId).first<{ id: number; kind: string; booking_id: number | null; phone: string | null; email: string | null; name: string | null; amount_inr: number; description: string; status: string; currency: string | null; amount: number | null }>();
   if (!row) return false;
   if (row.status === "paid") return true;
   await db.prepare("UPDATE payments SET status = 'paid', paid_at = datetime('now') WHERE id = ?").bind(row.id).run();
@@ -177,15 +212,33 @@ export async function markPaid(env: PayEnv, rpLinkId: string, paymentId: string,
     if (waReady(cfg)) {
       const s = await db.prepare("SELECT lang FROM chat_sessions WHERE id = ?").bind(`wa:${row.phone}`).first<{ lang: string | null }>();
       const hi = s?.lang === "hi";
+      const shown = row.currency && row.currency !== "INR" ? `${row.currency} ${Number(row.amount || 0).toLocaleString("en-US")}` : fmtInr(row.amount_inr);
       await waSendText(cfg, row.phone, hi
-        ? `भुगतान मिल गया — धन्यवाद! ${row.description} के लिए ${fmtInr(row.amount_inr)}। दुष्यंत जल्द ही यहीं आपसे बात करेंगे।`
-        : `Payment received — thank you! ${fmtInr(row.amount_inr)} for ${row.description}. Dushyant will take it from here and message you on this number.`).catch(() => {});
+        ? `भुगतान मिल गया — धन्यवाद! ${row.description} के लिए ${shown}। दुष्यंत जल्द ही यहीं आपसे बात करेंगे।`
+        : `Payment received — thank you! ${shown} for ${row.description}. Dushyant will take it from here and message you on this number.`).catch(() => {});
     }
   }
   await tgAlertOwner(db, env, [
     `✅ <b>Payment received</b> · ${tgEscape(row.name || row.phone || row.email || "")}`,
-    `${tgEscape(fmtInr(amountPaise / 100))} · ${tgEscape(row.description)}`,
-    `Razorpay ${tgEscape(paymentId)}`,
+    `${tgEscape(currency === "INR" ? fmtInr(amountMinor / 100) : `${currency} ${(amountMinor / 100).toLocaleString("en-US")}`)} · ${tgEscape(row.description)}`,
+    `${currency === "INR" ? "Razorpay" : "Dodo"} ${tgEscape(paymentId)}`,
   ].join("\n"), { buttons: [[...(row.phone ? [{ text: "Open WhatsApp", url: `https://wa.me/${row.phone.replace(/\D/g, "")}` }] : [])]] }).catch(() => {});
   return true;
+}
+
+/**
+ * Country from a phone's dialling code — the only clue a WhatsApp number
+ * gives. Only codes we price for; anything else is "" and the caller treats
+ * it as unknown (which means India, the base market).
+ */
+export function countryFromPhone(phone: string): string {
+  const p = String(phone || "").replace(/\D/g, "");
+  const CODES: [string, string][] = [
+    ["91", "IN"], ["971", "AE"], ["966", "SA"], ["974", "QA"], ["965", "KW"],
+    ["968", "OM"], ["973", "BH"], ["44", "GB"], ["61", "AU"], ["65", "SG"],
+    ["880", "BD"], ["92", "PK"], ["94", "LK"], ["977", "NP"], ["49", "DE"], ["33", "FR"], ["39", "IT"], ["34", "ES"], ["31", "NL"],
+  ];
+  for (const [code, cc] of CODES.sort((x, y) => y[0].length - x[0].length)) if (p.startsWith(code)) return cc;
+  if (p.startsWith("1")) return "US";
+  return "";
 }

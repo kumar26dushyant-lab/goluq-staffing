@@ -2,7 +2,7 @@
 
 import { getSetting } from "../../lib/settings";
 import { tgAlertOwner, tgEscape } from "../../lib/telegram";
-import { issuePaymentLink, callIntentFor, callPriceInr, type PayEnv } from "../../lib/payments";
+import { issuePaymentLink, callIntentFor, callPriceInr, countryFromPhone, type PayEnv } from "../../lib/payments";
 
 type Env = PayEnv;
 
@@ -113,7 +113,7 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
       const r = await issuePaymentLink(env, {
         kind: "call", bookingId: row.id, phone: toPhone && toPhone.length === 10 ? "91" + toPhone : toPhone, email, name,
         amountInr: price, description: hi ? "दुष्यंत के साथ 30 मिनट की कॉल" : "your 30-minute call with Dushyant",
-        expiresAt, lang: intent?.lang ?? null, by: "new booking",
+        expiresAt, lang: intent?.lang ?? null, by: "new booking", country: countryFromPhone(toPhone || ""),
         intro: hi
           ? `आपकी कॉल ${whenIst} IST पर तय हो गई है${meet ? ` — Meet लिंक: ${meet}` : ""}।\n\n₹${price.toLocaleString("en-IN")} का पेमेंट लिंक यह रहा — अभी दें या मीटिंग के बाद; यह मीटिंग के आधे घंटे बाद तक चलेगा।`
           : `Your call with Dushyant is booked for ${whenIst} IST${meet ? ` — Meet link: ${meet}` : ""}.\n\nHere is the ₹${price.toLocaleString("en-IN")} payment link — pay now or after the meeting; it stays valid until half an hour after the call.`,

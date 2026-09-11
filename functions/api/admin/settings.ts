@@ -55,13 +55,19 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     google_client_id: (await getSetting(env.DB, "google_client_id")) ?? "",
     google_client_secret_set: Boolean(await getSetting(env.DB, "google_client_secret")),
     wa_tpl_login_otp: (await getSetting(env.DB, "wa_tpl_login_otp")) ?? "",
+    // Dodo Payments (customers outside India). Key and webhook secret write-only.
+    dodo_api_key_set: Boolean(await getSetting(env.DB, "dodo_api_key")),
+    dodo_webhook_secret_set: Boolean(await getSetting(env.DB, "dodo_webhook_secret")),
+    dodo_brand_id: (await getSetting(env.DB, "dodo_brand_id")) ?? "",
+    dodo_product_id: (await getSetting(env.DB, "dodo_product_id")) ?? "",
+    dodo_test_mode: (await getSetting(env.DB, "dodo_test_mode")) ?? "0",
   });
 };
 
 export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   if (!(await checkAdmin(request, env))) return unauthorized();
   try {
-    const b = await request.json<{ owner_whatsapp?: string; public_whatsapp?: string; followups_enabled?: boolean | string; bot_instructions?: string; chat_enabled?: boolean | string; announcement?: string; aff_rate?: number; aff_enh_months?: number; aff_typical_margin?: number; aff_min_payout?: number; aff_attribution_days?: number; owner_email?: string; booking_url?: string; public_telegram?: string; wa_phone_number_id?: string; wa_waba_id?: string; wa_verify_token?: string; wa_access_token?: string; wa_app_secret?: string; tg_bot_token?: string; razorpay_key_id?: string; razorpay_key_secret?: string; razorpay_webhook_secret?: string; call_paid_all?: boolean | string; wa_tpl_payment_link?: string; google_client_id?: string; google_client_secret?: string; wa_tpl_login_otp?: string }>();
+    const b = await request.json<{ owner_whatsapp?: string; public_whatsapp?: string; followups_enabled?: boolean | string; bot_instructions?: string; chat_enabled?: boolean | string; announcement?: string; aff_rate?: number; aff_enh_months?: number; aff_typical_margin?: number; aff_min_payout?: number; aff_attribution_days?: number; owner_email?: string; booking_url?: string; public_telegram?: string; wa_phone_number_id?: string; wa_waba_id?: string; wa_verify_token?: string; wa_access_token?: string; wa_app_secret?: string; tg_bot_token?: string; razorpay_key_id?: string; razorpay_key_secret?: string; razorpay_webhook_secret?: string; call_paid_all?: boolean | string; wa_tpl_payment_link?: string; google_client_id?: string; google_client_secret?: string; wa_tpl_login_otp?: string; dodo_api_key?: string; dodo_webhook_secret?: string; dodo_brand_id?: string; dodo_product_id?: string; dodo_test_mode?: boolean | string }>();
     if (typeof b.owner_whatsapp === "string") {
       await setSetting(env.DB, "owner_whatsapp", b.owner_whatsapp.replace(/\D/g, ""));
     }
@@ -140,6 +146,11 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
     if (typeof b.google_client_id === "string") await setSetting(env.DB, "google_client_id", b.google_client_id.trim().slice(0, 200));
     if (b.google_client_secret) await setSetting(env.DB, "google_client_secret", b.google_client_secret.trim());
     if (typeof b.wa_tpl_login_otp === "string") await setSetting(env.DB, "wa_tpl_login_otp", b.wa_tpl_login_otp.trim().replace(/[^a-z0-9_]/g, "").slice(0, 100));
+    if (b.dodo_api_key) await setSetting(env.DB, "dodo_api_key", b.dodo_api_key.trim());
+    if (b.dodo_webhook_secret) await setSetting(env.DB, "dodo_webhook_secret", b.dodo_webhook_secret.trim());
+    if (typeof b.dodo_brand_id === "string") await setSetting(env.DB, "dodo_brand_id", b.dodo_brand_id.trim().slice(0, 80));
+    if (typeof b.dodo_product_id === "string") await setSetting(env.DB, "dodo_product_id", b.dodo_product_id.trim().slice(0, 80));
+    if (b.dodo_test_mode !== undefined) await setSetting(env.DB, "dodo_test_mode", b.dodo_test_mode === true || b.dodo_test_mode === "1" ? "1" : "0");
     if (b.chat_enabled !== undefined) {
       const on = b.chat_enabled === true || b.chat_enabled === "1";
       await setSetting(env.DB, "chat_enabled", on ? "1" : "0");

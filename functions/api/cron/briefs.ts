@@ -3,7 +3,7 @@
 import { checkAdmin, unauthorized } from "../../lib/admin";
 import { geminiEnabled, geminiText, type GeminiEnv } from "../../lib/gemini";
 import { tgAlertOwner, tgEscape } from "../../lib/telegram";
-import { issuePaymentLink, type PayEnv } from "../../lib/payments";
+import { issuePaymentLink, countryFromPhone, type PayEnv } from "../../lib/payments";
 
 interface Env extends PayEnv, GeminiEnv {
   ADMIN_SECRET?: string;
@@ -112,7 +112,7 @@ async function payments(env: Env) {
     const s = phone ? await env.DB.prepare("SELECT lang FROM chat_sessions WHERE id = ?").bind(`wa:${phone.replace(/\D/g, "")}`).first<{ lang: string | null }>() : null;
     const hi = s?.lang === "hi";
     const r = await issuePaymentLink(env, {
-      kind: "call", bookingId: b.id, phone, email: b.email, name: b.name, amountInr: b.amount_inr, description: b.description, lang: s?.lang ?? null, by: "after the call",
+      kind: "call", bookingId: b.id, phone, email: b.email, name: b.name, amountInr: b.amount_inr, description: b.description, lang: s?.lang ?? null, by: "after the call", country: countryFromPhone(phone || ""),
       intro: hi
         ? `उम्मीद है दुष्यंत के साथ बातचीत काम की रही। ${b.description} के लिए ₹${b.amount_inr.toLocaleString("en-IN")} का नया पेमेंट लिंक यह रहा — 7 दिन तक चलेगा।`
         : `Hope the conversation with Dushyant was useful. Here is a fresh ₹${b.amount_inr.toLocaleString("en-IN")} payment link for ${b.description} — valid for 7 days.`,

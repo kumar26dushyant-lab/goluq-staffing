@@ -1,8 +1,9 @@
 /// <reference types="@cloudflare/workers-types" />
 
 import { checkAdmin, unauthorized } from "../../lib/admin";
-import { issuePaymentLink, callPriceInr, type PayEnv } from "../../lib/payments";
+import { issuePaymentLink, callPriceInr, countryFromPhone, type PayEnv } from "../../lib/payments";
 import { rzpConfig, rzpReady } from "../../lib/razorpay";
+import { getSetting } from "../../lib/settings";
 
 interface Env extends PayEnv {
   ADMIN_SECRET: string;
@@ -36,6 +37,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
   return Response.json({
     ok: true,
     ready: rzpReady(await rzpConfig(env.DB)),
+    dodo: Boolean((await getSetting(env.DB, "dodo_api_key"))),
     call_price_inr: await callPriceInr(env.DB),
     payments: rows.results ?? [],
     calls: calls.results ?? [],
@@ -45,7 +47,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
 
 export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   if (!(await checkAdmin(request, env))) return unauthorized();
-  const b = await request.json<{ action?: string; booking_id?: number; phone?: string; email?: string; name?: string; amount_inr?: number; description?: string }>().catch(() => ({} as any));
+  const b = await request.json<{ action?: string; booking_id?: number; phone?: string; email?: string; name?: string; amount_inr?: number; description?: string; country?: string }>().catch(() => ({} as any));
   if (b.action !== "issue") return Response.json({ ok: false, error: "unknown action" }, { status: 400 });
 
   let phone = String(b.phone || "").replace(/\D/g, "");
@@ -77,6 +79,6 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   }
   if (!description) return Response.json({ ok: false, error: "say what it is for" }, { status: 400 });
 
-  const r = await issuePaymentLink(env, { kind: bookingId ? "call" : "cart", bookingId, phone: phone || null, email: email || null, name: name || null, amountInr: amount, description, lang, by: "pushed from the cockpit" });
+  const r = await issuePaymentLink(env, { kind: bookingId ? "call" : "cart", bookingId, phone: phone || null, email: email || null, name: name || null, amountInr: amount, description, lang, by: "pushed from the cockpit", country: String(b.country || "").toUpperCase().slice(0, 2) || countryFromPhone(phone) });
   return Response.json(r, { status: r.ok ? 200 : 400 });
 };

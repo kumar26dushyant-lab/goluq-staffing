@@ -975,20 +975,29 @@ function PaymentsSetup() {
   const [whSet, setWhSet] = useState(false);
   const [all, setAll] = useState(false);
   const [tpl, setTpl] = useState("");
+  const [dodoKey, setDodoKey] = useState("");
+  const [dodoKeySet, setDodoKeySet] = useState(false);
+  const [dodoWh, setDodoWh] = useState("");
+  const [dodoWhSet, setDodoWhSet] = useState(false);
+  const [dodoBrand, setDodoBrand] = useState("");
+  const [dodoProduct, setDodoProduct] = useState("");
+  const [dodoTest, setDodoTest] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [saved, setSaved] = useState("");
   useEffect(() => {
     adminGet("/api/admin/settings").then((d) => {
       setKeyId(d.razorpay_key_id || ""); setSecretSet(!!d.razorpay_key_secret_set); setWhSet(!!d.razorpay_webhook_secret_set);
-      setAll(d.call_paid_all === "1"); setTpl(d.wa_tpl_payment_link || ""); setLoaded(true);
+      setAll(d.call_paid_all === "1"); setTpl(d.wa_tpl_payment_link || "");
+      setDodoKeySet(!!d.dodo_api_key_set); setDodoWhSet(!!d.dodo_webhook_secret_set); setDodoBrand(d.dodo_brand_id || ""); setDodoProduct(d.dodo_product_id || ""); setDodoTest(d.dodo_test_mode === "1");
+      setLoaded(true);
     });
   }, []);
   const save = async () => {
     if (!loaded) return;
     setSaved("");
-    const r = await adminPost("/api/admin/settings", { razorpay_key_id: keyId, razorpay_key_secret: secret || undefined, razorpay_webhook_secret: whSecret || undefined, call_paid_all: all, wa_tpl_payment_link: tpl });
+    const r = await adminPost("/api/admin/settings", { razorpay_key_id: keyId, razorpay_key_secret: secret || undefined, razorpay_webhook_secret: whSecret || undefined, call_paid_all: all, wa_tpl_payment_link: tpl, dodo_api_key: dodoKey || undefined, dodo_webhook_secret: dodoWh || undefined, dodo_brand_id: dodoBrand, dodo_test_mode: dodoTest });
     setSaved(r.ok ? "Saved ✅" : "Failed");
-    if (r.ok) { if (secret) setSecretSet(true); if (whSecret) setWhSet(true); setSecret(""); setWhSecret(""); }
+    if (r.ok) { if (secret) setSecretSet(true); if (whSecret) setWhSet(true); if (dodoKey) setDodoKeySet(true); if (dodoWh) setDodoWhSet(true); setSecret(""); setWhSecret(""); setDodoKey(""); setDodoWh(""); }
   };
   return (
     <div className="glass space-y-5 rounded-2xl p-5">
@@ -1020,6 +1029,36 @@ function PaymentsSetup() {
         <span className="mb-1.5 block text-base font-semibold text-fg">Approved WhatsApp template for payment links (optional)</span>
         <span className="mb-2 block text-sm text-muted">Template name, once Meta approves payment_link (docs/whatsapp-templates.md). Used only when a free-form message cannot be delivered — more than 24 hours after the customer last wrote.</span>
         <input className={inputClass} value={tpl} onChange={(e) => setTpl(e.target.value)} placeholder="payment_link" />
+      </label>
+      <div className="border-t border-hairline/10 pt-5">
+        <p className="text-base font-semibold text-fg">Customers outside India · Dodo Payments</p>
+        <p className="mt-1 text-sm text-muted">
+          Cards, PayPal and local methods worldwide, in the customer's own currency, tax handled. Dashboard → Developer → API keys (paste below), and
+          Webhooks → endpoint <span className="font-mono text-brand-luq">https://goluq.com/api/dodo/webhook</span> for payment.succeeded and payment.failed (paste its signing secret).
+          Brand id: Settings → Business → the "…" beside GoLuQ.com Digital Consultancy. The product is created for you on first use.
+        </p>
+      </div>
+      <label className="block">
+        <span className="mb-1.5 block text-base font-semibold text-fg">Dodo API key {dodoKeySet && <span className="ml-2 text-xs font-normal text-brand-luq">set</span>}</span>
+        <input className={inputClass} type="password" value={dodoKey} onChange={(e) => setDodoKey(e.target.value)} placeholder={dodoKeySet ? "Leave blank to keep the current one" : "Paste once"} autoComplete="off" />
+      </label>
+      <label className="block">
+        <span className="mb-1.5 block text-base font-semibold text-fg">Dodo webhook signing secret {dodoWhSet && <span className="ml-2 text-xs font-normal text-brand-luq">set</span>}</span>
+        <input className={inputClass} type="password" value={dodoWh} onChange={(e) => setDodoWh(e.target.value)} placeholder={dodoWhSet ? "Leave blank to keep the current one" : "whsec_…"} autoComplete="off" />
+      </label>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <label className="block">
+          <span className="mb-1.5 block text-base font-semibold text-fg">Dodo brand id</span>
+          <input className={inputClass} value={dodoBrand} onChange={(e) => setDodoBrand(e.target.value)} placeholder="brand_…" />
+        </label>
+        <label className="block">
+          <span className="mb-1.5 block text-base font-semibold text-fg">Dodo product id</span>
+          <input className={inputClass} value={dodoProduct} readOnly placeholder="created automatically" />
+        </label>
+      </div>
+      <label className="flex items-center gap-3">
+        <input type="checkbox" checked={dodoTest} onChange={(e) => setDodoTest(e.target.checked)} className="h-5 w-5" />
+        <span className="text-base font-semibold text-fg">Dodo test mode <span className="text-sm font-normal text-muted">(use with a test-mode key only)</span></span>
       </label>
       <div><Button onClick={save} disabled={!loaded}><ShieldCheck size={16} /> Save payments</Button>{saved && <span className="ml-3 text-sm text-muted">{saved}</span>}</div>
     </div>

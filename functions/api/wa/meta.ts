@@ -437,7 +437,7 @@ async function handleCart(env: Env, cfg: WaConfig, m: Inbound, sid: string, lang
     ? `धन्यवाद! आपने चुना: ${desc}। कुल ${amount}। पेमेंट लिंक यह रहा — अभी शुरू करने के लिए भुगतान कर दीजिए, या पहले दुष्यंत से बात करनी हो तो यहीं लिख दीजिए${bookingUrl ? " (या कैलेंडर से समय चुन लीजिए)" : ""}।`
     : `Thank you! You picked: ${desc}. Total ${amount}. Here is the payment link — pay now to get started, or reply here first if you would rather talk to Dushyant${bookingUrl ? " (or pick a slot on his calendar)" : ""}.`;
   const r = await issuePaymentLink(env, {
-    kind: "cart", phone: m.from, name: m.name || null, amountInr: total, description: desc, lang, intro, by: "WhatsApp cart",
+    kind: "cart", phone: m.from, name: m.name || null, amountInr: total, description: desc, lang, intro, by: "WhatsApp cart", country: countryFromPhone(m.from),
   });
   if (!r.ok) {
     console.log("cart link not issued:", r.error);
