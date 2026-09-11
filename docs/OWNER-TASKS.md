@@ -1,7 +1,19 @@
-# Owner tasks — step by step (2026-09-12)
+# Owner tasks — step by step (updated 2026-09-12, evening)
 
 Written for Dushyant, or for a browser agent acting as Dushyant. Each task is
 independent; do them in this order because the first three unblock money.
+
+Status board (tick as done):
+- [ ] 1  Razorpay secret + webhook (site approved; never regenerate)
+- [ ] 1b Dodo webhook secret + brand id + key rotation
+- [ ] 1c Google sign-in OAuth client
+- [ ] 2  Calendar bridge script
+- [ ] 3  WhatsApp templates: appointment_confirmed, appointment_reminder, payment_link (EN+HI), login_otp (EN+HI)
+- [ ] 4  Meta app Pages use case + new token → Publish → Connect (this starts the 30-day post queue)
+- [ ] 5  Instagram professional account linked to the Page
+- [x] 6  LinkedIn page — done 2026-09-12 (post the first three items of docs/LINKEDIN.md §11; run §12 daily)
+- [ ] 7  Public Telegram channel → Settings
+- [ ] 8  Ashwin testimonial
 Never paste any secret into a chat, a document or a commit — only into the
 cockpit fields named below. The cockpit is https://goluq.com/admin.
 
@@ -124,7 +136,7 @@ and trigger the payment link only through this script.
 
 ---
 
-## 3. WhatsApp message templates — submit three (10 minutes)
+## 3. WhatsApp message templates — submit four (15 minutes)
 
 Why: WhatsApp only delivers messages outside 24 hours through approved
 templates. These cover booking confirmations, reminders and payment links.
@@ -229,7 +241,7 @@ lacks the Pages permissions.
 
 ---
 
-## 6. LinkedIn company page — complete it (15 minutes)
+## 6. LinkedIn company page — DONE 2026-09-12 (posting and outreach remain)
 
 The page exists: https://www.linkedin.com/company/145008974/admin/. Open
 docs/LINKEDIN.md and paste each field exactly as written there: Page info
