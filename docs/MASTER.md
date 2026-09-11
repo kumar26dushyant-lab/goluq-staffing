@@ -688,6 +688,26 @@ Flow, built and verified with signed synthetic webhooks (no Razorpay keys yet):
   agent (Razorpay, calendar bridge, templates, Pages use case, Instagram,
   LinkedIn, Telegram channel, testimonial).
 
+### Homepage made light, catalog order fixed, video cards retired (2026-09-12, later)
+- Homepage chapters now play a SILENT 480-px preview (≈300 KB each,
+  goluq.com/media/preview-<chapter>-<en|hi>.mp4) fetched only when the chapter
+  is within one screen; "Watch with sound" opens the full reel in a new tab.
+  Owner tested the autoplay-with-audio version in incognito: slow, voice
+  missing or doubled between two half-visible chapters. Decision: no audio on
+  the page, ever; the full reels are for Instagram/Facebook/LinkedIn/YouTube
+  and for the tap. (GIFs were considered and rejected: a 15 s GIF is 5–10 MB,
+  ten times the mp4 preview.)
+- WhatsApp store shows a catalog oldest-first (Commerce Manager shows the same
+  list newest-first, which fooled the first reorder). Reorder now recreates
+  items in sort order; verified via Graph: founder created first, thank-you
+  last. 30 items live.
+- The six "Watch:" video cards are retired (live=0, removed from Meta): the
+  WhatsApp catalog cannot hold video, and a play-button picture that does not
+  play is a broken promise. Reels are linked from posts instead.
+- Owner tasks updated: Razorpay = reuse Sarathi-AI's key pair (one live pair
+  per account; regenerating would break Sarathi-AI) + a second webhook; Dodo
+  Payments for international; Google OAuth client for the client sign-in.
+
 ## 9. TO-DO (current)
 ### Owner
 - [ ] Razorpay: Settings → API keys → paste key id + secret in cockpit →
