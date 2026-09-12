@@ -102,7 +102,7 @@ export async function classifyReply(
   const prompt =
     `Classify this WhatsApp reply from a lead into exactly one word: ` +
     `stop, interested, question, or other.\n` +
-    `"stop" = wants no more messages / not interested.\n` +
+    `"stop" = wants no more messages from us at all / not interested. NOT stop: cancelling, moving or asking about a call, meeting, order or payment — that is "question".\n` +
     `Reply: "${text}"\nOne word:`;
   const out = (await geminiText(env, prompt, 5)).toLowerCase();
   if (out.includes("stop")) return "stop";
