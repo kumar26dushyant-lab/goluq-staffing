@@ -224,17 +224,48 @@ async function handleMessage(env: Env, cfg: WaConfig, m: Inbound): Promise<void>
   // A reply to a campaign is the whole point of having sent one.
   await markReplied(db, m.from);
 
+  // A call already in the diary changes what every other reply should say:
+  // no fresh calendar, and a change request goes to the owner, not the guide.
+  // This runs BEFORE the opt-out classifier: "cancel my call" is a change
+  // request, not a request to be left alone — the classifier once read it as
+  // STOP and closed the thread.
+  const booking = await upcomingBooking(db, m.from, null);
+  if (booking && (BOOKING_CHANGE.test(m.text) || BOOKING_ASK.test(m.text))) {
+    const change = BOOKING_CHANGE.test(m.text);
+    const text = change
+      ? (lang === "hi"
+        ? `आपकी कॉल ${booking.whenIst} IST पर तय है। दुष्यंत को बता दिया है — वे इसे बदलकर/रद्द करके यहीं पुष्टि करेंगे। नया समय कौन-सा ठीक रहेगा?`
+        : `Your call is booked for ${booking.whenIst} IST. Dushyant has been told — he will move or cancel it and confirm here. Which new time suits you?`)
+      : (lang === "hi"
+        ? `आपकी कॉल पहले से ${booking.whenIst} IST पर तय है${booking.meetUrl ? ` — Meet लिंक: ${booking.meetUrl}` : ""}। बदलना हो तो यहीं लिख दीजिए।`
+        : `Your call is already booked for ${booking.whenIst} IST${booking.meetUrl ? ` — Meet link: ${booking.meetUrl}` : ""}. If you need to change it, just say so here.`);
+    const sent = await waSendText(cfg, m.from, text);
+    if (sent.ok) {
+      await db.prepare(`INSERT INTO chat_messages (session_id, role, content, created_at) VALUES (?, 'guide', ?, datetime('now'))`).bind(sid, text).run();
+      if (change) {
+        await db.prepare("UPDATE chat_sessions SET needs_human = 1 WHERE id = ?").bind(sid).run();
+        await tgAlertOwner(env.DB, env, [
+          `🔁 <b>Call change requested</b> · ${tgEscape(m.name || m.from)}`,
+          `Booked: ${tgEscape(booking.whenIst)} IST`,
+          `They wrote: <i>${tgEscape(m.text.slice(0, 300))}</i>`,
+          "Move or cancel it in Google Calendar; the bridge updates the cockpit and the customer gets the confirmation here.",
+        ].join("\n"), { buttons: [[{ text: "Open WhatsApp", url: `https://wa.me/${m.from}` }, { text: "Google Calendar", url: "https://calendar.google.com/calendar/r" }]] }).catch(() => {});
+      }
+      await tgPush(env, m, sid, { why: change ? "asked to change a booked call" : "", reply: text });
+      return;
+    }
+  }
+
+
   // Someone asking to be left alone is asking once. Honour it, confirm it, and
   // never let the guide speak to them again.
   if ((await classifyReply(env, m.text)) === "stop") {
     await db.prepare("UPDATE chat_sessions SET closed = 1 WHERE id = ?").bind(sid).run();
-    await waSendText(
-      cfg,
-      m.from,
-      lang === "hi"
-        ? "ठीक है, अब आपको हमारी ओर से कोई संदेश नहीं आएगा। ज़रूरत हो तो कभी भी लिख दीजिए।"
-        : "Done — you won't hear from us again. Message any time if you need us."
-    );
+    const bye = lang === "hi"
+      ? "ठीक है, अब आपको हमारी ओर से कोई संदेश नहीं आएगा। ज़रूरत हो तो कभी भी लिख दीजिए।"
+      : "Done — you won't hear from us again. Message any time if you need us.";
+    await waSendText(cfg, m.from, bye);
+    await db.prepare(`INSERT INTO chat_messages (session_id, role, content, created_at) VALUES (?, 'guide', ?, datetime('now'))`).bind(sid, `${bye} [thread closed: opt-out]`).run();
     await tgPush(env, m, sid, { why: "asked to stop — conversation closed", buttons: false });
     return;
   }
@@ -274,35 +305,6 @@ async function handleMessage(env: Env, cfg: WaConfig, m: Inbound): Promise<void>
   // so the cockpit shows it as waiting, tell the owner, and let the guide say a
   // person is coming rather than going silent — silence is what makes someone
   // give up and message a competitor.
-  // A call already in the diary changes what every other reply should say:
-  // no fresh calendar, and a change request goes to the owner, not the guide.
-  const booking = await upcomingBooking(db, m.from, null);
-  if (booking && (BOOKING_CHANGE.test(m.text) || BOOKING_ASK.test(m.text))) {
-    const change = BOOKING_CHANGE.test(m.text);
-    const text = change
-      ? (lang === "hi"
-        ? `आपकी कॉल ${booking.whenIst} IST पर तय है। दुष्यंत को बता दिया है — वे इसे बदलकर/रद्द करके यहीं पुष्टि करेंगे। नया समय कौन-सा ठीक रहेगा?`
-        : `Your call is booked for ${booking.whenIst} IST. Dushyant has been told — he will move or cancel it and confirm here. Which new time suits you?`)
-      : (lang === "hi"
-        ? `आपकी कॉल पहले से ${booking.whenIst} IST पर तय है${booking.meetUrl ? ` — Meet लिंक: ${booking.meetUrl}` : ""}। बदलना हो तो यहीं लिख दीजिए।`
-        : `Your call is already booked for ${booking.whenIst} IST${booking.meetUrl ? ` — Meet link: ${booking.meetUrl}` : ""}. If you need to change it, just say so here.`);
-    const sent = await waSendText(cfg, m.from, text);
-    if (sent.ok) {
-      await db.prepare(`INSERT INTO chat_messages (session_id, role, content, created_at) VALUES (?, 'guide', ?, datetime('now'))`).bind(sid, text).run();
-      if (change) {
-        await db.prepare("UPDATE chat_sessions SET needs_human = 1 WHERE id = ?").bind(sid).run();
-        await tgAlertOwner(env.DB, env, [
-          `🔁 <b>Call change requested</b> · ${tgEscape(m.name || m.from)}`,
-          `Booked: ${tgEscape(booking.whenIst)} IST`,
-          `They wrote: <i>${tgEscape(m.text.slice(0, 300))}</i>`,
-          "Move or cancel it in Google Calendar; the bridge updates the cockpit and the customer gets the confirmation here.",
-        ].join("\n"), { buttons: [[{ text: "Open WhatsApp", url: `https://wa.me/${m.from}` }, { text: "Google Calendar", url: "https://calendar.google.com/calendar/r" }]] }).catch(() => {});
-      }
-      await tgPush(env, m, sid, { why: change ? "asked to change a booked call" : "", reply: text });
-      return;
-    }
-  }
-
   const wantsHuman = WANTS_HUMAN.test(m.text);
   if (wantsHuman) {
     await db.prepare("UPDATE chat_sessions SET needs_human = 1 WHERE id = ?").bind(sid).run();
