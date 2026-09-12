@@ -120,6 +120,7 @@ export default function Start() {
   const [err, setErr] = useState("");
   const [contact, setContact] = useState({ name: "", phone: "", email: "", company: "" });
   const [bookingUrl, setBookingUrl] = useState("");
+  const [booked, setBooked] = useState<{ whenIst: string; meetUrl: string | null } | null>(null);
 
   const label = (id: string, list: readonly (readonly [string, string, string])[]) => { const r = list.find((x) => x[0] === id); return r ? (lang === "hi" ? r[2] : r[1]) : id; };
   const ctx = () => ({ lang, businessType: label(business, BUSINESS), departments: depts.map((d) => label(d, DEPTS)), text });
@@ -164,7 +165,7 @@ export default function Start() {
     const source = [utm.utmSource, utm.utmMedium, utm.utmCampaign].filter(Boolean).join("/") || document.referrer.replace(/^https?:\/\//, "").split("/")[0] || "";
     const d = await api("/api/intake", { action: "submit", ctx: ctx(), history, brd, contact, source: source.slice(0, 200) + (sessionId() ? "" : "") });
     setBusy("");
-    if (d.ok) { setBookingUrl(d.bookingUrl || cfg?.bookingUrl || ""); setStep("done"); try { sessionStorage.removeItem(DRAFT_KEY); } catch { /* fine */ } }
+    if (d.ok) { setBookingUrl(d.bookingUrl || cfg?.bookingUrl || ""); setBooked(d.booking || null); setStep("done"); try { sessionStorage.removeItem(DRAFT_KEY); } catch { /* fine */ } }
     else setErr(d.error === "need_name_phone" ? (lang === "hi" ? "नाम और WhatsApp नंबर ज़रूरी है।" : "Name and WhatsApp number are needed.") : t.draftFail);
   };
 
@@ -243,8 +244,15 @@ export default function Start() {
 
         {step === "done" && (
           <Section title={t.doneTitle} sub={t.doneSub}>
+            {booked && (
+              <p className="mb-4 rounded-2xl border border-brand-luq/40 bg-brand-luq/10 px-4 py-3 text-base text-fg">
+                {lang === "hi" ? `आपकी कॉल पहले से ${booked.whenIst} IST पर तय है।` : `Your call is already booked for ${booked.whenIst} IST.`}
+                {booked.meetUrl && <> <a href={booked.meetUrl} className="font-semibold text-brand-luq underline">Google Meet</a></>}
+                {" "}{lang === "hi" ? "समय बदलना हो तो WhatsApp पर लिखिए।" : "To change it, message us on WhatsApp."}
+              </p>
+            )}
             <div className="flex flex-wrap gap-3">
-              {bookingUrl && <a href={bookingUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full bg-fg px-5 py-3 text-base font-bold text-[rgb(var(--c-base))] shadow-lg"><CalendarClock size={18} /> {t.book}</a>}
+              {bookingUrl && !booked && <a href={bookingUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full bg-fg px-5 py-3 text-base font-bold text-[rgb(var(--c-base))] shadow-lg"><CalendarClock size={18} /> {t.book}</a>}
               {cfg?.whatsapp && <a href={`https://wa.me/${cfg.whatsapp}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full bg-success/15 px-5 py-3 text-base font-bold text-success ring-1 ring-success/30"><MessageCircle size={18} /> {t.wa}</a>}
               <Link to="/" className="inline-flex items-center gap-2 rounded-full px-4 py-3 text-sm font-semibold text-muted">{t.home}</Link>
             </div>

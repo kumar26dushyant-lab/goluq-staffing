@@ -1,6 +1,8 @@
 /// <reference types="@cloudflare/workers-types" />
 
 import { checkAdmin, unauthorized } from "../../lib/admin";
+import { waHealth, insideSendingHours } from "../../lib/waHealth";
+import { tgAlertOwner } from "../../lib/telegram";
 import { waConfig, waReady, type WaEnv } from "../../lib/whatsapp";
 import { WA_TEMPLATES, sendTemplate } from "../../lib/waTemplates";
 
@@ -46,6 +48,10 @@ function audienceSql(f: Filters): { sql: string; binds: unknown[] } {
     "length(l.phone) >= 10",
     `NOT EXISTS (SELECT 1 FROM chat_sessions s
                   WHERE s.id = 'wa:91' || l.phone AND s.closed = 1)`,
+    // Frequency cap: nobody hears from a campaign twice in seven days. Two
+    // marketing messages in a week is where blocks start.
+    `NOT EXISTS (SELECT 1 FROM campaign_targets ct
+                  WHERE ct.phone LIKE '%' || substr(l.phone, -10) AND ct.sent_at >= datetime('now','-7 days'))`,
   ];
   const binds: unknown[] = [];
   if (f.status) {
@@ -197,6 +203,19 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
       if (!camp) return Response.json({ ok: false, error: "not_found" }, { status: 404 });
       if (camp.status === "cancelled") {
         return Response.json({ ok: false, error: "This campaign was cancelled." });
+      }
+
+      // The number is the asset. Marketing goes out 9–21 IST only, and never
+      // while Meta rates the number below GREEN — a campaign on a YELLOW
+      // number is how it turns RED, and RED means no templates at all.
+      if (!insideSendingHours()) {
+        return Response.json({ ok: false, error: "Campaigns send between 9:00 and 21:00 IST. Try again in the morning." });
+      }
+      const health = await waHealth(cfg);
+      if (health.quality === "RED" || health.quality === "YELLOW") {
+        await env.DB.prepare(`UPDATE campaigns SET status = 'paused' WHERE id = ?`).bind(id).run();
+        await tgAlertOwner(env.DB, env, `⛔ <b>Campaign paused</b> — WhatsApp number quality is <b>${health.quality}</b>. Sending marketing now would risk the number. Wait for GREEN (Meta re-rates within days when there are no new blocks).`).catch(() => {});
+        return Response.json({ ok: false, error: `Paused: the number's quality rating is ${health.quality}. Wait for GREEN.` });
       }
 
       const batch = await env.DB.prepare(

@@ -857,6 +857,23 @@ What they do well, and what we take:
   month at USD 3–5k (400 requests → ~8 scope calls → 2–3 wins, from month
   two if the daily routine holds).
 
+### Protecting the WhatsApp number, and booking awareness (2026-09-12, later)
+- The number is the asset. Enforced now: opt-out honoured everywhere (STOP
+  text or button closes the thread; leads opted_out; campaigns exclude both);
+  one marketing message per number per 7 days; campaigns only 9–21 IST;
+  campaigns refuse to send and pause themselves when Meta rates the number
+  YELLOW or RED; the hourly cron alerts on any rating change; the weekly
+  brief shows rating and tier. Template rule: every marketing template ends
+  with an opt-out line and a "Stop messages" quick reply.
+- Google's appointment page is stateless — it shows a fresh calendar to
+  everyone; only Google's own confirmation email carries the reschedule and
+  cancel links. So the memory is ours: the WhatsApp guide, the founder-cart
+  flow and the intake's done screen all check `bookings` first and show the
+  existing call (time, Meet link) instead of the calendar. "Cancel / change my
+  call" on WhatsApp is recognised, answered with the booked time, flagged for
+  the owner on Telegram, and the owner moves it in Google Calendar; the
+  bridge re-posts and the customer is told on WhatsApp.
+
 ## 9. TO-DO (current)
 ### Owner
 - [ ] LinkedIn page: fill every field from docs/LINKEDIN.md (year founded and

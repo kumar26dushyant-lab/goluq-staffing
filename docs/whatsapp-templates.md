@@ -118,6 +118,19 @@ automatically.
 
 ---
 
+## Number-protection rules (apply to every template)
+
+- Every MARKETING template ends with an opt-out sentence ("reply STOP…") AND
+  carries a quick-reply button "Stop messages". Meta rewards it and a block
+  costs more than a lost reader. The button reply arrives as text "Stop
+  messages" and the guide's STOP handling closes the thread.
+- UTILITY templates (confirmations, reminders, payment links) need no opt-out
+  but must be about something the person asked for.
+- Frequency: one marketing message per number per 7 days (enforced in the
+  campaign audience), 9:00–21:00 IST only (enforced at send), never while the
+  number's quality rating is below GREEN (enforced at send; the cockpit and
+  Telegram show the rating).
+
 ## After approval
 
 Tell me, and I will wire them up:

@@ -5,7 +5,9 @@ import { geminiEnabled, geminiText, type GeminiEnv } from "../../lib/gemini";
 import { tgAlertOwner, tgEscape } from "../../lib/telegram";
 import { issuePaymentLink, countryFromPhone, type PayEnv } from "../../lib/payments";
 import { publish as publishPost } from "../admin/posts";
-import { getSetting } from "../../lib/settings";
+import { getSetting, setSetting } from "../../lib/settings";
+import { waConfig } from "../../lib/whatsapp";
+import { waHealth } from "../../lib/waHealth";
 
 interface Env extends PayEnv, GeminiEnv {
   ADMIN_SECRET?: string;
@@ -48,6 +50,18 @@ async function calls(env: Env) {
         AND starts_at BETWEEN datetime('now','+30 minutes') AND datetime('now','+90 minutes')
       ORDER BY starts_at`
   ).all<{ id: number; name: string; email: string | null; phone: string | null; starts_at: string; meet_url: string | null; note: string | null }>();
+  // Hourly watch on the number's quality: a drop is the one thing that must
+  // never be discovered a week later. Alert on every change, once.
+  try {
+    const h = await waHealth(await waConfig(env.DB, env));
+    const last = (await getSetting(env.DB, "wa_quality_last")) || "";
+    if (h.quality !== "UNKNOWN" && h.quality !== last) {
+      await setSetting(env.DB, "wa_quality_last", h.quality);
+      if (last) {
+        await tgAlertOwner(env.DB, env, `${h.quality === "GREEN" ? "🟢" : h.quality === "YELLOW" ? "🟡" : "🔴"} <b>WhatsApp number quality: ${h.quality}</b> (was ${tgEscape(last)})${h.tier ? ` · tier ${tgEscape(h.tier)}` : ""}\n${h.quality === "GREEN" ? "Campaigns can run." : "Campaigns are blocked until GREEN. No new templates, no broadcasts; reply only to people who write in."}`);
+      }
+    }
+  } catch { /* the briefing must not fail on a health check */ }
   let sent = 0;
   for (const b of rows.results ?? []) {
     // What this person already told the guide, if they came through chat.
@@ -149,6 +163,7 @@ async function weekly(env: Env) {
   const paid = (await env.DB.prepare(`SELECT COALESCE(SUM(amount_inr),0) AS s FROM commissions WHERE created_at >= ${wk}`).first<number>("s")) ?? 0;
   const pending = await n(`SELECT COUNT(*) AS c FROM leads WHERE COALESCE(status,'new') IN ('new','engaged') AND created_at >= datetime('now','-30 days')`);
 
+  const health = await waHealth(await waConfig(env.DB, env));
   const row = (xs: { k: string; c: number }[]) => xs.map((x) => `${tgEscape(x.k)} ${x.c}`).join(" · ") || "—";
   const delta = prevSessions ? ` (${sessions >= prevSessions ? "+" : ""}${Math.round(((sessions - prevSessions) / prevSessions) * 100)}% vs last week)` : "";
   const text = [
@@ -162,6 +177,7 @@ async function weekly(env: Env) {
     `📅 Calls booked <b>${bookings}</b> · Customers won <b>${converted}</b>`,
     paid ? `🤝 Partner commission booked ₹${Math.round(paid).toLocaleString("en-IN")}` : "",
     `⏳ Open opportunities (30 days): <b>${pending}</b>`,
+    `📶 WhatsApp number: <b>${health.quality}</b>${health.tier ? ` · tier ${tgEscape(health.tier)}` : ""}`,
     "",
     leads === 0 && sessions > 0
       ? "<i>Visitors without enquiries: the story is being seen but not acted on. Check which pages they leave from on the Visitors tab.</i>"

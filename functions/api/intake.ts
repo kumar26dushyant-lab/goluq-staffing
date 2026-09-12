@@ -5,6 +5,7 @@ import { sendMail, mailEnabled, type MailEnv } from "../lib/mailer";
 import { getOwnerEmail, getSetting } from "../lib/settings";
 import { customerFromRequest, notLoggedIn } from "../lib/portal";
 import { tgAlertOwner, tgEscape, type TgEnv } from "../lib/telegram";
+import { upcomingBooking } from "../lib/bookings";
 
 interface Env extends GeminiEnv, MailEnv, TgEnv {
   DB: D1Database;
@@ -121,7 +122,8 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
         }).catch(() => {});
       }
     }
-    return Response.json({ ok: true, id, bookingUrl });
+    const booking = await upcomingBooking(env.DB, phone, email || null);
+    return Response.json({ ok: true, id, bookingUrl, booking });
   }
 
   return Response.json({ ok: false, error: "unknown_action" }, { status: 400 });
@@ -131,7 +133,8 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
   const me = await customerFromRequest(env.DB, request);
   if (!me) return notLoggedIn();
   const rows = await env.DB.prepare("SELECT id, business_type, brd, status, created_at FROM briefs WHERE customer_id = ? ORDER BY id DESC LIMIT 20").bind(me.id).all<any>();
-  return Response.json({ ok: true, customer: me, briefs: (rows.results ?? []).map((r) => ({ ...r, brd: parse(r.brd) })) });
+  const booking = await upcomingBooking(env.DB, me.phone.startsWith("email:") ? null : me.phone, me.email);
+  return Response.json({ ok: true, customer: me, booking, briefs: (rows.results ?? []).map((r) => ({ ...r, brd: parse(r.brd) })) });
 };
 
 // ── shapes ─────────────────────────────────────────────────────────────────

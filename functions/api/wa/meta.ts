@@ -10,6 +10,7 @@ import {
   type WaEnv, type WaConfig,
 } from "../../lib/whatsapp";
 import { issuePaymentLink, callPriceInr } from "../../lib/payments";
+import { upcomingBooking, BOOKING_CHANGE, BOOKING_ASK } from "../../lib/bookings";
 
 interface Env extends ConciergeEnv, WaEnv, MailEnv, TgEnv {
   DB: D1Database;
@@ -273,6 +274,35 @@ async function handleMessage(env: Env, cfg: WaConfig, m: Inbound): Promise<void>
   // so the cockpit shows it as waiting, tell the owner, and let the guide say a
   // person is coming rather than going silent — silence is what makes someone
   // give up and message a competitor.
+  // A call already in the diary changes what every other reply should say:
+  // no fresh calendar, and a change request goes to the owner, not the guide.
+  const booking = await upcomingBooking(db, m.from, null);
+  if (booking && (BOOKING_CHANGE.test(m.text) || BOOKING_ASK.test(m.text))) {
+    const change = BOOKING_CHANGE.test(m.text);
+    const text = change
+      ? (lang === "hi"
+        ? `आपकी कॉल ${booking.whenIst} IST पर तय है। दुष्यंत को बता दिया है — वे इसे बदलकर/रद्द करके यहीं पुष्टि करेंगे। नया समय कौन-सा ठीक रहेगा?`
+        : `Your call is booked for ${booking.whenIst} IST. Dushyant has been told — he will move or cancel it and confirm here. Which new time suits you?`)
+      : (lang === "hi"
+        ? `आपकी कॉल पहले से ${booking.whenIst} IST पर तय है${booking.meetUrl ? ` — Meet लिंक: ${booking.meetUrl}` : ""}। बदलना हो तो यहीं लिख दीजिए।`
+        : `Your call is already booked for ${booking.whenIst} IST${booking.meetUrl ? ` — Meet link: ${booking.meetUrl}` : ""}. If you need to change it, just say so here.`);
+    const sent = await waSendText(cfg, m.from, text);
+    if (sent.ok) {
+      await db.prepare(`INSERT INTO chat_messages (session_id, role, content, created_at) VALUES (?, 'guide', ?, datetime('now'))`).bind(sid, text).run();
+      if (change) {
+        await db.prepare("UPDATE chat_sessions SET needs_human = 1 WHERE id = ?").bind(sid).run();
+        await tgAlertOwner(env.DB, env, [
+          `🔁 <b>Call change requested</b> · ${tgEscape(m.name || m.from)}`,
+          `Booked: ${tgEscape(booking.whenIst)} IST`,
+          `They wrote: <i>${tgEscape(m.text.slice(0, 300))}</i>`,
+          "Move or cancel it in Google Calendar; the bridge updates the cockpit and the customer gets the confirmation here.",
+        ].join("\n"), { buttons: [[{ text: "Open WhatsApp", url: `https://wa.me/${m.from}` }, { text: "Google Calendar", url: "https://calendar.google.com/calendar/r" }]] }).catch(() => {});
+      }
+      await tgPush(env, m, sid, { why: change ? "asked to change a booked call" : "", reply: text });
+      return;
+    }
+  }
+
   const wantsHuman = WANTS_HUMAN.test(m.text);
   if (wantsHuman) {
     await db.prepare("UPDATE chat_sessions SET needs_human = 1 WHERE id = ?").bind(sid).run();
@@ -338,6 +368,9 @@ async function handleMessage(env: Env, cfg: WaConfig, m: Inbound): Promise<void>
       "You cannot show them a demo here, so close on either a quote or a call from a real person." +
       (m.order?.length
         ? " THEY JUST SENT A CART FROM OUR CATALOGUE (listed above as 'Cart: …'). Thank them, confirm what they picked in plain words, and say Dushyant will message them to agree scope and next steps — do not invent totals or delivery dates."
+        : "") +
+      (booking
+        ? ` THIS CUSTOMER ALREADY HAS A CALL BOOKED WITH DUSHYANT FOR ${booking.whenIst} IST. Do not offer the calendar or ask them to book; refer to that call. If they want to change it, say Dushyant will move it and confirm here.`
         : "") +
       (wantsHuman
         ? " THEY HAVE ASKED TO SPEAK TO A PERSON. Say plainly that Dushyant has been told and will reply here himself shortly. Do not argue or try to handle it yourself — but do ask what they need, so he has it in front of him when he arrives."
@@ -406,6 +439,14 @@ async function handleCart(env: Env, cfg: WaConfig, m: Inbound, sid: string, lang
 
   if (wantsCall) {
     await db.prepare("UPDATE chat_sessions SET call_cart_at = datetime('now') WHERE id = ?").bind(sid).run();
+    const existing = await upcomingBooking(db, m.from, null);
+    if (existing) {
+      const text = hi
+        ? `आपकी कॉल पहले से ${existing.whenIst} IST पर तय है${existing.meetUrl ? ` — Meet लिंक: ${existing.meetUrl}` : ""}। दोबारा बुक करने की ज़रूरत नहीं; समय बदलना हो तो यहीं लिखिए।`
+        : `Your call is already booked for ${existing.whenIst} IST${existing.meetUrl ? ` — Meet link: ${existing.meetUrl}` : ""}. No need to book again; if you want a different time, say so here.`;
+      const r = await waSendText(cfg, m.from, text);
+      if (r.ok) { await say(text); return text; }
+    }
     const price = await callPriceInr(db);
     const amount = "₹" + price.toLocaleString("en-IN");
     if (!bookingUrl) return "";
