@@ -9,6 +9,7 @@ import { submitLead } from "../lib/lead";
 import { useVoice } from "../lib/voice";
 import { WaveformOrb } from "./WaveformOrb";
 import { WhatsAppCta } from "./WhatsAppCta";
+import { useSiteConfig } from "../lib/siteConfig";
 
 /** How long a visitor sits before the guide walks over and says hello. */
 const TEASER_DELAY_MS = 20_000;
@@ -38,6 +39,11 @@ export function AssistantChat() {
   const page = pageFromPath(pathname);
   // The portal is for customers who have already bought. A sales guide popping
   // up at someone mid-project reads as a company that does not know who they are.
+  // WhatsApp is the door when the business number is set; the site chat then
+  // only opens on an explicit "chat here" request, so visitors never see two
+  // bubbles. Without a number, the chat is the door as before.
+  const cfg = useSiteConfig();
+  const waPrimary = Boolean(cfg?.whatsapp);
   const hidden = pathname.startsWith("/portal") || pathname.startsWith("/admin");
 
   const [open, setOpen] = useState(false);
@@ -176,14 +182,23 @@ export function AssistantChat() {
     const onAsk = (e: Event) => {
       const text = String((e as CustomEvent).detail?.text || "").trim();
       if (!text) return;
+      // With a business number, "This is my problem" goes straight to WhatsApp
+      // with the problem already typed; the site chat is the fallback.
+      const wa = String(cfg?.whatsapp || "");
+      if (wa && !(e as CustomEvent).detail?.forceChat) {
+        window.open(`https://wa.me/${wa}?text=${encodeURIComponent(text)}`, "_blank", "noopener");
+        return;
+      }
       dismissTeaser();
       setOpen(true);
       window.setTimeout(() => { void send(text); }, 150);
     };
+    const onOpen = () => { dismissTeaser(); setOpen(true); };
     window.addEventListener("goluq:ask", onAsk);
-    return () => window.removeEventListener("goluq:ask", onAsk);
+    window.addEventListener("goluq:openchat", onOpen);
+    return () => { window.removeEventListener("goluq:ask", onAsk); window.removeEventListener("goluq:openchat", onOpen); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lang]);
+  }, [lang, cfg?.whatsapp]);
 
   // After every hook has run — bailing earlier would change the hook order
   // between routes, which React treats as a fatal error.
@@ -193,7 +208,7 @@ export function AssistantChat() {
     <>
       {/* The approach — a single line, dismissable, once per session. */}
       <AnimatePresence>
-        {teaser && !open && (
+        {teaser && !open && !waPrimary && (
           <motion.div
             initial={{ opacity: 0, y: 12, scale: 0.94 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -235,7 +250,7 @@ export function AssistantChat() {
         whileHover={{ scale: 1.06 }}
         whileTap={{ scale: 0.95 }}
         aria-label={t("chat.open")}
-        className="fixed z-50 grid h-14 w-14 place-items-center rounded-full text-ink shadow-neon"
+        className={`fixed z-50 grid h-14 w-14 place-items-center rounded-full text-ink shadow-neon ${waPrimary && !open ? "hidden" : ""}`}
         style={{
           background: "linear-gradient(135deg, rgb(var(--c-teal-glow)), #8b7cf6)",
           bottom: "max(1.25rem, env(safe-area-inset-bottom))",

@@ -27,6 +27,9 @@ export function SiteFooter({ className = "" }: { className?: string }) {
           <a href="/terms" className="hover:text-fg">
             {t("footer.terms")}
           </a>
+          <button type="button" onClick={() => window.dispatchEvent(new CustomEvent("goluq:openchat"))} className="hover:text-fg">
+            Chat on the website
+          </button>
           <a href="/portal" className="hover:text-fg">
             {t("footer.portal")}
           </a>

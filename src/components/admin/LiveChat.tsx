@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { usePoll } from "../../lib/usePoll";
 import {
   ArrowLeft, RefreshCw, Send, Radio, MessageSquare, Globe, Check, Bot, User,
 } from "lucide-react";
@@ -109,14 +110,10 @@ export function LiveChat({ initialId = null }: { initialId?: string | null }) {
     if (initialId) { setOpenChat(initialId); loadOne(initialId); }
   }, [initialId, loadOne]);
 
-  useEffect(() => {
-    loadList();
-    const iv = setInterval(() => {
-      loadList();
-      if (openChat) loadOne(openChat);
-    }, 5000);
-    return () => clearInterval(iv);
-  }, [loadList, loadOne, openChat]);
+  // The list refreshes every 10 s, the open thread every 4 s, and neither
+  // while the tab is hidden.
+  usePoll(() => { loadList(); }, 10000, [loadList]);
+  usePoll(() => { if (openChat) loadOne(openChat); }, 4000, [loadOne, openChat]);
 
   // Keep the newest message in view, the way every messaging app does.
   useEffect(() => {
@@ -177,9 +174,9 @@ export function LiveChat({ initialId = null }: { initialId?: string | null }) {
         </button>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[320px_1fr]">
+      <div className="grid gap-4 lg:h-[calc(100dvh-190px)] lg:min-h-[480px] lg:grid-cols-[320px_1fr]">
         {/* ── Conversation list. Hidden on a phone once one is open. ────── */}
-        <div className={`space-y-2 ${openChat ? "hidden lg:block" : "block"}`}>
+        <div className={`space-y-2 lg:h-full lg:overflow-y-auto lg:pr-1 ${openChat ? "hidden lg:block" : "block"}`}>
           {chats.length === 0 && <p className="text-sm text-muted">No conversations yet.</p>}
           {chats.map((c) => (
             <button
@@ -223,7 +220,7 @@ export function LiveChat({ initialId = null }: { initialId?: string | null }) {
               <p className="text-sm text-muted">Pick a conversation.</p>
             </div>
           ) : (
-            <div className="glass flex min-h-[70vh] flex-col overflow-hidden rounded-2xl lg:min-h-[560px]">
+            <div className="glass flex min-h-[70vh] flex-col overflow-hidden rounded-2xl lg:h-full lg:min-h-0">
               {/* Who, and how to get back to the list on a phone. */}
               <div className="flex items-center gap-2 border-b border-hairline/10 px-3 py-2.5">
                 <button

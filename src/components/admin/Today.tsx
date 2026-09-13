@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
+import { usePoll } from "../../lib/usePoll";
 import {
   MessageSquare, Globe, Radio, Users, CalendarClock, RefreshCw, ArrowRight, Bot, User,
 } from "lucide-react";
@@ -93,11 +94,7 @@ export function Today({ onOpenChat, onOpenLeads }: { onOpenChat: (id: string) =>
       setErr("Could not reach the server.");
     }
   }, []);
-  useEffect(() => {
-    load();
-    const iv = setInterval(() => { load(); setTick((t) => t + 1); }, 15000);
-    return () => clearInterval(iv);
-  }, [load]);
+  usePoll(() => { load(); setTick((t) => t + 1); }, 20000, [load]);
 
   if (err && !b) return <p className="text-danger">{err}</p>;
   if (!b) return <p className="text-muted">Loading…</p>;

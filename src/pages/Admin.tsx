@@ -49,7 +49,7 @@ export function Admin() {
     if (!authed) return;
     const poll = () => adminGet("/api/admin/chats").then((d) => setWaiting(d.waiting || 0)).catch(() => {});
     poll();
-    const iv = setInterval(poll, 15000);
+    const iv = setInterval(() => { if (document.visibilityState === "visible") poll(); }, 30000);
     return () => clearInterval(iv);
   }, [authed]);
 
