@@ -900,8 +900,25 @@ What they do well, and what we take:
 - The old "Marketing" tab (prompt → social card) is superseded for posts by
   the catalog cards and reels in Publish; it stays for one-off creatives.
 
+### Hardening, cockpit performance, WhatsApp-first (2026-09-13)
+- Owner review of the cockpit: Conversations scrolled as one page and the
+  whole cockpit felt slow. Fixed: two panes with their own scroll (desktop),
+  list every 10 s / open thread every 4 s / boards every 20–30 s, and no
+  polling at all while the tab is hidden (src/lib/usePoll.ts).
+- Homepage: WhatsApp is the only bubble when the business number is set;
+  "This is my problem" opens WhatsApp with the line pre-typed; the site chat
+  stays as the fallback ("Chat on the website" in the footer, or when no
+  number is configured).
+- Security: see docs/SECURITY.md. Done today on the VM: SSH password login
+  actually off (cloud-init had re-enabled it), nginx real client IP from
+  Cloudflare, firewall 80/443 only from Cloudflare ranges (origin no longer
+  reachable directly — all three domains are proxied), nightly SQLite
+  backups (14 kept), DB and .env 600. Owner tasks: Cloudflare Bot Fight Mode,
+  managed WAF, an /api rate rule, SSL Full (strict); off-box backup copy.
+
 ## 9. TO-DO (current)
 ### Owner
+- [ ] Cloudflare: Bot Fight Mode, Managed WAF ruleset, rate-limit rule for /api/*, SSL Full (strict) — docs/SECURITY.md.
 - [ ] LinkedIn page: fill every field from docs/LINKEDIN.md (year founded and
       registered address are yours to enter); start the daily outreach routine.
 - [ ] Razorpay: Settings → API keys → paste key id + secret in cockpit →

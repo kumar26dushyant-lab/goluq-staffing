@@ -282,3 +282,13 @@ daily outreach routine in §12 of that document.
 A 30–60 s phone video: who he is, what was built, what changed for him, in his
 own words, plus one line of written consent on WhatsApp ("You may use this
 video on goluq.com and social media"). Send both to Claude.
+
+## 9. Cloudflare protection (10 minutes)
+
+dash.cloudflare.com → goluq.com (repeat for sarathi-ai.com and nidaanpartner.com):
+1. Security → Bots → **Bot Fight Mode** → On.
+2. Security → WAF → Managed rules → **Cloudflare Managed Ruleset** → Deploy (free plan allows it).
+3. Security → WAF → Rate limiting rules → Create: if URI path starts with `/api/`,
+   more than 100 requests in 1 minute per IP → Block for 10 minutes.
+4. SSL/TLS → Overview → **Full (strict)**. Edge Certificates → **Always Use HTTPS** on.
+Nothing else; the origin already accepts traffic only from Cloudflare.
