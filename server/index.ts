@@ -33,6 +33,7 @@ import { onRequestPost as adminMarketing } from "../functions/api/admin/marketin
 import { onRequestGet as adminTestimonialsGet, onRequestPost as adminTestimonialsPost } from "../functions/api/admin/testimonials";
 import { onRequestGet as publicTestimonials } from "../functions/api/testimonials";
 import { onRequestPost as tgWebhook } from "../functions/api/tg/webhook";
+import { onRequestPost as tgPublicWebhook } from "../functions/api/tg/public";
 import { onRequestGet as tgCheckGet, onRequestPost as tgCheckPost } from "../functions/api/admin/tg-check";
 import { onRequestGet as adminToday } from "../functions/api/admin/today";
 import { onRequestPost as bookingsInbound } from "../functions/api/bookings/inbound";
@@ -281,6 +282,7 @@ app.get("/api/admin/payments", (c) => callFn(adminPaymentsGet as Handler, c.req.
 app.post("/api/admin/payments", (c) => callFn(adminPaymentsPost as Handler, c.req.raw));
 app.post("/api/razorpay/webhook", (c) => callFn(razorpayWebhook as Handler, c.req.raw));
 app.post("/api/dodo/webhook", (c) => callFn(dodoWebhook as Handler, c.req.raw));
+app.post("/api/tg/public", (c) => callFn(tgPublicWebhook as Handler, c.req.raw));
 app.post("/api/auth/otp", (c) => callFn(authOtp as Handler, c.req.raw));
 app.get("/api/auth/google", (c) => callFn(authGoogle as Handler, c.req.raw));
 app.get("/api/auth/google/callback", (c) => callFn(authGoogle as Handler, c.req.raw));

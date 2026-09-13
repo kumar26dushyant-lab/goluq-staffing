@@ -906,8 +906,8 @@ function SettingsPanel() {
       </div>
       )}
 
-      {tab === "wa" && <WhatsAppBusiness />}
-      {tab === "telegram" && <TelegramCockpit />}
+      {tab === "wa" && <><WhatsAppBusiness /><WhatsAppDetails /></>}
+      {tab === "telegram" && <><TelegramCockpit /><div className="mt-5"><CustomerTelegramBot /></div></>}
       {tab === "payments" && <PaymentsSetup />}
       {tab === "signin" && <SignInSetup />}
     </div>
@@ -1070,6 +1070,32 @@ function PaymentsSetup() {
  * code, so a stranger who finds the bot gets nothing. The token is written
  * here and never read back.
  */
+function CustomerTelegramBot() {
+  const [token, setToken] = useState("");
+  const [set, setSet] = useState(false);
+  const [username, setUsername] = useState("");
+  const [msg, setMsg] = useState("");
+  useEffect(() => { adminGet("/api/admin/settings").then((d) => { setSet(!!d.public_tg_bot_token_set); setUsername(d.public_tg_bot_username || ""); }); }, []);
+  const save = async () => {
+    setMsg("Connecting…");
+    const r = await adminPost("/api/admin/settings", { public_tg_bot_token: token });
+    setMsg(r.ok ? "Connected. The site's Telegram button now opens this bot." : r.error || "Failed");
+    if (r.ok) { setSet(true); setToken(""); adminGet("/api/admin/settings").then((d) => setUsername(d.public_tg_bot_username || "")); }
+  };
+  return (
+    <div className="glass space-y-4 rounded-2xl p-5">
+      <p className="text-base font-semibold text-fg">Customer bot (public)</p>
+      <p className="text-sm text-muted">
+        A second bot, for customers — the same guide that answers on WhatsApp and the site, for markets that live on Telegram. Create it with @BotFather,
+        paste the token once. Its username becomes the "Message on Telegram" link across the site. The cockpit bot above stays private.
+        {username && <> Connected as <span className="font-mono text-brand-luq">@{username}</span>.</>}
+      </p>
+      <input className={inputClass} type="password" value={token} onChange={(e) => setToken(e.target.value)} placeholder={set ? "Leave blank to keep the current token" : "123456:ABC… from @BotFather"} autoComplete="off" />
+      <div><Button onClick={save} disabled={!token}><ShieldCheck size={16} /> Save and connect</Button>{msg && <span className="ml-3 text-sm text-muted">{msg}</span>}</div>
+    </div>
+  );
+}
+
 function TelegramCockpit() {
   const [token, setToken] = useState("");
   const [st, setSt] = useState<any>(null);
@@ -1171,6 +1197,50 @@ function TelegramCockpit() {
  * this form shows whether each is set and leaves the box blank. Submitting an
  * empty box therefore means "leave it alone", never "erase it".
  */
+/**
+ * What a customer sees when they tap the business name in WhatsApp. The
+ * profile is public copy; the India business details are legal facts, so
+ * they are typed by the owner and sent as typed.
+ */
+function WhatsAppDetails() {
+  const [p, setP] = useState({ about: "Software, WhatsApp, voice and toll-free lines for growing businesses.", description: "GoLuQ.com Digital Consultancy builds the software a growing business runs on — CRM, billing, inventory, HR, dashboards — and the WhatsApp, voice and toll-free lines that connect it to customers. Fixed price, weeks not months, you own the code.", address: "Indore, Madhya Pradesh, India", email: "", website: "https://goluq.com", vertical: "PROF_SERVICES" });
+  const [c, setC] = useState({ entity_name: "GoLuQ.com Digital Consultancy", entity_type: "SOLE_PROPRIETORSHIP", is_registered: false, cc_phone: "8349504400", cc_email: "", cc_landline: "", go_name: "Dushyant Sharma", go_phone: "8349504400", go_email: "", go_landline: "" });
+  const [msg, setMsg] = useState("");
+  const send = async (action: "profile" | "compliance") => {
+    setMsg("Saving…");
+    const r = await adminPost("/api/admin/wa-check", action === "profile" ? { action, profile: p } : { action, compliance: c });
+    setMsg(r.ok ? `${action === "profile" ? "Profile" : "Business details"} saved at Meta. Force-close WhatsApp to see it.` : r.error || "Failed");
+  };
+  return (
+    <div className="glass mt-5 space-y-5 rounded-2xl p-5">
+      <p className="text-base font-semibold text-fg">Business profile (what customers see)</p>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <input className={inputClass} value={p.about} onChange={(e) => setP({ ...p, about: e.target.value })} placeholder="About (139 chars)" maxLength={139} />
+        <input className={inputClass} value={p.address} onChange={(e) => setP({ ...p, address: e.target.value })} placeholder="Address" />
+        <input className={inputClass} value={p.email} onChange={(e) => setP({ ...p, email: e.target.value })} placeholder="Public email (optional)" />
+        <input className={inputClass} value={p.website} onChange={(e) => setP({ ...p, website: e.target.value })} placeholder="Website" />
+        <textarea className={`${inputClass} sm:col-span-2`} rows={3} value={p.description} onChange={(e) => setP({ ...p, description: e.target.value })} placeholder="Description (512 chars)" maxLength={512} />
+      </div>
+      <div><Button size="md" onClick={() => send("profile")}><ShieldCheck size={16} /> Save profile</Button></div>
+
+      <p className="pt-3 text-base font-semibold text-fg">Business details for India (legal — type exactly what is true)</p>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <input className={inputClass} value={c.entity_name} onChange={(e) => setC({ ...c, entity_name: e.target.value })} placeholder="Legal name of business" />
+        <select className={inputClass} value={c.entity_type} onChange={(e) => setC({ ...c, entity_type: e.target.value })}>
+          {["SOLE_PROPRIETORSHIP", "PARTNERSHIP", "LIMITED_LIABILITY_PARTNERSHIP", "PRIVATE_COMPANY", "PUBLIC_COMPANY", "OTHER"].map((t) => <option key={t} value={t}>{t.replace(/_/g, " ").toLowerCase()}</option>)}
+        </select>
+        <label className="flex items-center gap-3 sm:col-span-2"><input type="checkbox" checked={c.is_registered} onChange={(e) => setC({ ...c, is_registered: e.target.checked })} className="h-5 w-5" /><span className="text-sm text-fg">The business is registered (GST / Udyam / MCA). Unticked shows "Not registered business", which is what it shows today.</span></label>
+        <input className={inputClass} value={c.cc_phone} onChange={(e) => setC({ ...c, cc_phone: e.target.value })} placeholder="Customer care mobile (10 digits)" />
+        <input className={inputClass} value={c.cc_email} onChange={(e) => setC({ ...c, cc_email: e.target.value })} placeholder="Customer care email" />
+        <input className={inputClass} value={c.go_name} onChange={(e) => setC({ ...c, go_name: e.target.value })} placeholder="Grievance officer name" />
+        <input className={inputClass} value={c.go_phone} onChange={(e) => setC({ ...c, go_phone: e.target.value })} placeholder="Grievance officer mobile" />
+        <input className={inputClass} value={c.go_email} onChange={(e) => setC({ ...c, go_email: e.target.value })} placeholder="Grievance officer email" />
+      </div>
+      <div><Button size="md" onClick={() => send("compliance")} disabled={!c.entity_name || !c.go_name}><ShieldCheck size={16} /> Save business details</Button>{msg && <span className="ml-3 text-sm text-muted">{msg}</span>}</div>
+    </div>
+  );
+}
+
 function WhatsAppBusiness() {
   const [phoneId, setPhoneId] = useState("");
   const [wabaId, setWabaId] = useState("");

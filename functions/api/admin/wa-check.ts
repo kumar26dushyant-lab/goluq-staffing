@@ -124,7 +124,49 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
     return Response.json({ ok: false, error: "WhatsApp is not configured yet." });
   }
   try {
-    const b = await request.json<{ to?: string; action?: string }>();
+    const b = await request.json<{ to?: string; action?: string; profile?: Record<string, unknown>; compliance?: Record<string, unknown> }>();
+
+    // What a customer sees under "Business details" in WhatsApp: the public
+    // profile (about, address, website) and, for India, the legal entity and
+    // customer-care contacts Meta requires. Both are plain fields on the
+    // phone number; both were "Not provided" until now.
+    if (b.action === "profile") {
+      const p = b.profile || {};
+      const clip = (v: unknown, n: number) => String(v ?? "").trim().slice(0, n);
+      const body: Record<string, unknown> = {
+        messaging_product: "whatsapp",
+        about: clip(p.about, 139) || undefined,
+        address: clip(p.address, 256) || undefined,
+        description: clip(p.description, 512) || undefined,
+        email: clip(p.email, 128) || undefined,
+        websites: [clip(p.website, 256) || "https://goluq.com"],
+        vertical: clip(p.vertical, 40) || "PROF_SERVICES",
+      };
+      const r = await fetch(`${GRAPH}/${cfg.phoneNumberId}/whatsapp_business_profile`, {
+        method: "POST", headers: { Authorization: `Bearer ${cfg.accessToken}`, "Content-Type": "application/json" }, body: JSON.stringify(body),
+      });
+      const j: any = await r.json().catch(() => ({}));
+      return Response.json(r.ok && !j.error ? { ok: true } : { ok: false, error: String(j?.error?.error_user_msg || j?.error?.message || `http_${r.status}`) });
+    }
+    if (b.action === "compliance") {
+      const c = b.compliance || {};
+      const clip = (v: unknown, n: number) => String(v ?? "").trim().slice(0, n);
+      const phoneOf = (v: unknown) => { const d = String(v ?? "").replace(/\D/g, ""); return d ? { country_code: "91", number: d.length === 12 && d.startsWith("91") ? d.slice(2) : d } : undefined; };
+      const body: Record<string, unknown> = {
+        messaging_product: "whatsapp",
+        entity_name: clip(c.entity_name, 200),
+        entity_type: clip(c.entity_type, 40) || "SOLE_PROPRIETORSHIP",
+        is_registered: c.is_registered === true || c.is_registered === "1",
+        customer_care_details: { email: clip(c.cc_email, 128) || undefined, phone: phoneOf(c.cc_phone), landline_number: phoneOf(c.cc_landline) },
+        grievance_officer_details: { name: clip(c.go_name, 120), email: clip(c.go_email, 128) || undefined, phone: phoneOf(c.go_phone), landline_number: phoneOf(c.go_landline) },
+      };
+      if (c.entity_type_custom) body.entity_type_custom = clip(c.entity_type_custom, 120);
+      const r = await fetch(`${GRAPH}/${cfg.phoneNumberId}/business_compliance_info`, {
+        method: "POST", headers: { Authorization: `Bearer ${cfg.accessToken}`, "Content-Type": "application/json" }, body: JSON.stringify(body),
+      });
+      const j: any = await r.json().catch(() => ({}));
+      return Response.json(r.ok && !j.error ? { ok: true } : { ok: false, error: String(j?.error?.error_user_msg || j?.error?.message || `http_${r.status}`) });
+    }
 
     // One click for the switch that is otherwise buried: linking the WhatsApp
     // account to this app is what makes inbound messages actually arrive.

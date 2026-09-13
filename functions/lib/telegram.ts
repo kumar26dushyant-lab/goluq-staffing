@@ -106,6 +106,24 @@ export async function tgSend(
   return { ok: true, messageId: Number(r.result?.message_id || 0) };
 }
 
+/** A picture (or a video) with an HTML caption and buttons — for post previews. */
+export async function tgSendMedia(
+  c: TgConfig,
+  chatId: string,
+  media: { photo?: string; video?: string },
+  captionHtml: string,
+  opts: { buttons?: TgButton[][] } = {}
+): Promise<TgResult> {
+  const payload: Record<string, unknown> = { chat_id: chatId, caption: captionHtml.slice(0, 1024), parse_mode: "HTML" };
+  if (media.video) payload.video = media.video; else payload.photo = media.photo;
+  if (opts.buttons?.length) {
+    payload.reply_markup = { inline_keyboard: opts.buttons.map((row) => row.map((b) => (b.url ? { text: b.text, url: b.url } : { text: b.text, callback_data: (b.data || "noop").slice(0, 64) }))) };
+  }
+  const r = await call(c, media.video ? "sendVideo" : "sendPhoto", payload);
+  if (!r.ok) return { ok: false, error: r.error || "send_failed" };
+  return { ok: true, messageId: Number(r.result?.message_id || 0) };
+}
+
 /** Acknowledge a button press; `text` shows as a small toast on the owner's phone. */
 export async function tgAnswerCallback(c: TgConfig, callbackId: string, text = ""): Promise<void> {
   await call(c, "answerCallbackQuery", { callback_query_id: callbackId, text: text.slice(0, 200) });

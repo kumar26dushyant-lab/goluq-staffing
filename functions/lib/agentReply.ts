@@ -1,6 +1,7 @@
 /// <reference types="@cloudflare/workers-types" />
 
 import { waConfig, waReady, waSendText, type WaEnv } from "./whatsapp";
+import { publicBot, publicSend } from "./tgPublic";
 
 /**
  * Send a reply AS THE OWNER into one conversation — from the cockpit or from
@@ -26,6 +27,12 @@ export async function sendAgentReply(
 ): Promise<ReplyResult> {
   const body = String(text ?? "").trim().slice(0, 2000);
   if (!body) return { ok: false, error: "empty" };
+
+  if (sessionId.startsWith("tg:")) {
+    const bot = await publicBot(db);
+    const r = await publicSend(bot, sessionId.slice(3), body);
+    if (!r.ok) return { ok: false, error: `Telegram: ${r.error || "not delivered"}` };
+  }
 
   const phone = waPhoneOf(sessionId);
   if (phone) {

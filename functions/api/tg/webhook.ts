@@ -1,5 +1,7 @@
 /// <reference types="@cloudflare/workers-types" />
 
+import { publish as publishPost } from "../admin/posts";
+import { getSetting } from "../../lib/settings";
 import { sendAgentReply } from "../../lib/agentReply";
 import {
   tgAnswerCallback, tgConfig, tgEscape, tgOutboxLookup, tgReady, tgSend, tgSetButtons, tgTryPair,
@@ -199,6 +201,21 @@ async function onButton(env: Env, cfg: TgConfig, q: any): Promise<void> {
     } else if (action === "drop") {
       await env.DB.prepare("UPDATE leads SET status = 'done', next_followup_at = NULL WHERE id = ?").bind(id).run();
       done = "🗑 Dropped";
+    }
+  } else if (kind === "post" && ref) {
+    const id = Number(ref);
+    if (action === "skip") {
+      await env.DB.prepare("UPDATE posts SET status = 'draft', updated_at = datetime('now') WHERE id = ? AND status <> 'published'").bind(id).run();
+      done = "⏭ Skipped — kept as a draft";
+    } else if (action === "approve") {
+      const connected = Boolean(await getSetting(env.DB, "fb_page_token"));
+      if (!connected) {
+        await env.DB.prepare("UPDATE posts SET status = 'approved', updated_at = datetime('now') WHERE id = ?").bind(id).run();
+        done = "✅ Approved — will post the moment the Page is connected";
+      } else {
+        const r = await publishPost(env as any, id);
+        done = r.ok ? "✅ Posted" : `⚠️ Failed: ${String(r.error || "").slice(0, 120)}`;
+      }
     }
   } else if (kind === "chat" && ref) {
     await chatAction(env, ref, action);

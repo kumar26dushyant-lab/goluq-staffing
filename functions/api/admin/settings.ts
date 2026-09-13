@@ -4,6 +4,7 @@ import { checkAdmin, unauthorized } from "../../lib/admin";
 import { getSetting, setSetting } from "../../lib/settings";
 import { saveRates } from "../../lib/affiliateRates";
 import { randomToken } from "../../lib/auth";
+import { publicConnect } from "../../lib/tgPublic";
 
 interface Env {
   DB: D1Database;
@@ -61,13 +62,16 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     dodo_brand_id: (await getSetting(env.DB, "dodo_brand_id")) ?? "",
     dodo_product_id: (await getSetting(env.DB, "dodo_product_id")) ?? "",
     dodo_test_mode: (await getSetting(env.DB, "dodo_test_mode")) ?? "0",
+    // Customer-facing Telegram bot (token write-only); username is the public link.
+    public_tg_bot_token_set: Boolean(await getSetting(env.DB, "public_tg_bot_token")),
+    public_tg_bot_username: (await getSetting(env.DB, "public_tg_bot_username")) ?? "",
   });
 };
 
 export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   if (!(await checkAdmin(request, env))) return unauthorized();
   try {
-    const b = await request.json<{ owner_whatsapp?: string; public_whatsapp?: string; followups_enabled?: boolean | string; bot_instructions?: string; chat_enabled?: boolean | string; announcement?: string; aff_rate?: number; aff_enh_months?: number; aff_typical_margin?: number; aff_min_payout?: number; aff_attribution_days?: number; owner_email?: string; booking_url?: string; public_telegram?: string; wa_phone_number_id?: string; wa_waba_id?: string; wa_verify_token?: string; wa_access_token?: string; wa_app_secret?: string; tg_bot_token?: string; razorpay_key_id?: string; razorpay_key_secret?: string; razorpay_webhook_secret?: string; call_paid_all?: boolean | string; wa_tpl_payment_link?: string; google_client_id?: string; google_client_secret?: string; wa_tpl_login_otp?: string; dodo_api_key?: string; dodo_webhook_secret?: string; dodo_brand_id?: string; dodo_product_id?: string; dodo_test_mode?: boolean | string }>();
+    const b = await request.json<{ owner_whatsapp?: string; public_whatsapp?: string; followups_enabled?: boolean | string; bot_instructions?: string; chat_enabled?: boolean | string; announcement?: string; aff_rate?: number; aff_enh_months?: number; aff_typical_margin?: number; aff_min_payout?: number; aff_attribution_days?: number; owner_email?: string; booking_url?: string; public_telegram?: string; wa_phone_number_id?: string; wa_waba_id?: string; wa_verify_token?: string; wa_access_token?: string; wa_app_secret?: string; tg_bot_token?: string; razorpay_key_id?: string; razorpay_key_secret?: string; razorpay_webhook_secret?: string; call_paid_all?: boolean | string; wa_tpl_payment_link?: string; google_client_id?: string; google_client_secret?: string; wa_tpl_login_otp?: string; dodo_api_key?: string; dodo_webhook_secret?: string; dodo_brand_id?: string; dodo_product_id?: string; dodo_test_mode?: boolean | string; public_tg_bot_token?: string }>();
     if (typeof b.owner_whatsapp === "string") {
       await setSetting(env.DB, "owner_whatsapp", b.owner_whatsapp.replace(/\D/g, ""));
     }
@@ -159,6 +163,12 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
     }
     if (typeof b.dodo_product_id === "string") await setSetting(env.DB, "dodo_product_id", b.dodo_product_id.trim().slice(0, 80));
     if (b.dodo_test_mode !== undefined) await setSetting(env.DB, "dodo_test_mode", b.dodo_test_mode === true || b.dodo_test_mode === "1" ? "1" : "0");
+    if (b.public_tg_bot_token) {
+      await setSetting(env.DB, "public_tg_bot_token", b.public_tg_bot_token.trim());
+      await setSetting(env.DB, "public_tg_webhook_secret", "");
+      const r = await publicConnect(env.DB);
+      if (!r.ok) return Response.json({ ok: false, error: `Customer bot: ${r.error}` });
+    }
     if (b.chat_enabled !== undefined) {
       const on = b.chat_enabled === true || b.chat_enabled === "1";
       await setSetting(env.DB, "chat_enabled", on ? "1" : "0");

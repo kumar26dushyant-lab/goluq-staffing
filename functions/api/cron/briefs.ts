@@ -2,7 +2,7 @@
 
 import { checkAdmin, unauthorized } from "../../lib/admin";
 import { geminiEnabled, geminiText, type GeminiEnv } from "../../lib/gemini";
-import { tgAlertOwner, tgEscape } from "../../lib/telegram";
+import { tgAlertOwner, tgEscape, tgSend, tgSendMedia, tgConfig, tgPaired } from "../../lib/telegram";
 import { issuePaymentLink, countryFromPhone, type PayEnv } from "../../lib/payments";
 import { publish as publishPost } from "../admin/posts";
 import { getSetting, setSetting } from "../../lib/settings";
@@ -193,18 +193,37 @@ async function weekly(env: Env) {
  * and tells the owner once per post whether it went out.
  */
 async function duePosts(env: Env) {
-  const pageToken = (await getSetting(env.DB, "fb_page_token")) || "";
-  if (!pageToken) return { ok: true, published: 0, waiting: "page not connected" };
+  // Nothing goes out unseen: a due post is previewed on Telegram with
+  // Post / Skip buttons and waits for the owner's tap (see tg/webhook).
   const rows = await env.DB.prepare(
-    `SELECT id, caption FROM posts WHERE status = 'scheduled' AND scheduled_at <= datetime('now') ORDER BY scheduled_at LIMIT 3`
-  ).all<{ id: number; caption: string }>();
-  let published = 0;
-  for (const p of rows.results ?? []) {
-    const r = await publishPost(env as any, p.id);
-    if (r.ok) published++;
-    await tgAlertOwner(env.DB, env, r.ok
-      ? `📣 <b>Posted</b> · ${tgEscape(p.caption.slice(0, 120))}`
-      : `⚠️ <b>Post failed</b> · ${tgEscape(p.caption.slice(0, 80))}\n${tgEscape(String(r.error || "").slice(0, 200))}`).catch(() => {});
+    `SELECT id, caption, image_url, video_url, channels FROM posts WHERE status = 'scheduled' AND scheduled_at <= datetime('now') ORDER BY scheduled_at LIMIT 3`
+  ).all<{ id: number; caption: string; image_url: string | null; video_url: string | null; channels: string }>();
+  const connected = Boolean(await getSetting(env.DB, "fb_page_token"));
+  const cfg = await tgConfig(env.DB, env);
+  // Posts approved while the Page was still disconnected go out now.
+  if (connected) {
+    const ok = await env.DB.prepare(`SELECT id, caption FROM posts WHERE status = 'approved' ORDER BY scheduled_at LIMIT 3`).all<{ id: number; caption: string }>();
+    for (const p of ok.results ?? []) {
+      const r = await publishPost(env as any, p.id);
+      await tgAlertOwner(env.DB, env, r.ok ? `📣 <b>Posted</b> · ${tgEscape(p.caption.slice(0, 120))}` : `⚠️ <b>Post failed</b> · ${tgEscape(String(r.error || "").slice(0, 200))}`).catch(() => {});
+    }
   }
-  return { ok: true, published };
+  let previewed = 0;
+  for (const p of rows.results ?? []) {
+    if (!tgPaired(cfg)) break;
+    const caption = [
+      `📣 <b>Post ready</b> · ${tgEscape(p.channels)}${connected ? "" : " · <i>Page not connected — copy and post by hand</i>"}`,
+      "",
+      tgEscape(p.caption.slice(0, 800)),
+    ].join("\n");
+    const buttons = [[{ text: connected ? "✅ Post now" : "✅ Post when connected", data: `post:approve:${p.id}` }, { text: "⏭ Skip", data: `post:skip:${p.id}` }]];
+    const r = p.video_url || p.image_url
+      ? await tgSendMedia(cfg, cfg.chatId, p.video_url ? { video: p.video_url } : { photo: p.image_url as string }, caption, { buttons })
+      : await tgSend(cfg, cfg.chatId, caption, { buttons });
+    if (r.ok) {
+      await env.DB.prepare("UPDATE posts SET status = 'awaiting', updated_at = datetime('now') WHERE id = ?").bind(p.id).run();
+      previewed++;
+    }
+  }
+  return { ok: true, previewed, connected };
 }
