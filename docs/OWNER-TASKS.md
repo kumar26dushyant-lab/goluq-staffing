@@ -3,6 +3,18 @@
 Written for Dushyant, or for a browser agent acting as Dushyant. Each task is
 independent; do them in this order because the first three unblock money.
 
+TODAY (13 Sep) for the 8 pm post: do task 4 (Pages use case + token → Connect)
+before 7 pm, and task 5 if Instagram should carry it too. At 19:45 the post
+preview lands on Telegram with Post/Skip; tap Post. If the Page is not
+connected by then, tap Post anyway — it publishes itself the moment Connect
+succeeds — or post the same caption and card by hand from the preview.
+
+Also today: Settings → WhatsApp Business API → "Business details for India":
+check the prefilled legal name, entity type and registered box, add the
+customer-care and grievance-officer emails, Save. And @BotFather → /revoke
+for @GoLuQ_client_bot, paste the new token in Settings → Telegram → Customer
+bot (the old one passed through a chat).
+
 Status board (tick as done):
 - [ ] 1  Razorpay secret + webhook (site approved; never regenerate)
 - [ ] 1b Dodo webhook secret + brand id + key rotation
@@ -12,7 +24,7 @@ Status board (tick as done):
 - [ ] 4  Meta app Pages use case + new token → Publish → Connect (this starts the 30-day post queue)
 - [ ] 5  Instagram professional account linked to the Page
 - [x] 6  LinkedIn page — done 2026-09-12 (post the first three items of docs/LINKEDIN.md §11; run §12 daily)
-- [ ] 7  Public Telegram channel → Settings
+- [x] 7  Customer Telegram bot connected (@GoLuQ_client_bot) — rotate its token
 - [ ] 8  Ashwin testimonial
 Never paste any secret into a chat, a document or a commit — only into the
 cockpit fields named below. The cockpit is https://goluq.com/admin.

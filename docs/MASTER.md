@@ -874,6 +874,32 @@ What they do well, and what we take:
   the owner on Telegram, and the owner moves it in Google Calendar; the
   bridge re-posts and the customer is told on WhatsApp.
 
+### Posting with approval, customer Telegram bot, WhatsApp details, badge in the footer (2026-09-13)
+- **Nothing posts unseen.** A due post is sent to the owner's Telegram as a
+  photo/video preview with "Post now" and "Skip" buttons and waits
+  (status `awaiting`). Post → published to Facebook/Instagram (or, while the
+  Page is not connected, marked `approved` and published automatically the
+  moment it is). Skip → back to draft. Tonight's first post: the WhatsApp
+  Office card at 20:00 IST (preview from 19:45); the rest daily at 10:30.
+- **Customer-facing Telegram bot** @GoLuQ_client_bot: the same guide, on
+  Telegram, replying in the customer's language (tested with Russian).
+  Threads are `tg:<chat>` in the cockpit; cockpit and owner-bot replies reach
+  the customer through it. Its username is now the site's Telegram link. The
+  token was pasted in chat once — rotate it in @BotFather (/revoke) and paste
+  the new one in Settings → Telegram → Customer bot.
+- **WhatsApp business details.** The public profile (about, description,
+  address, website, vertical) is set via the API from the cockpit — done. The
+  India business details (legal name, entity type, registered or not,
+  customer-care and grievance-officer contacts) are legal facts, so the
+  cockpit form under Settings → WhatsApp Business API is prefilled and the
+  owner submits it. WhatsApp desktop for Windows does not show catalogs for
+  Cloud API numbers — a WhatsApp limitation, not ours.
+- **Badge** now lives in the footer band of every Meta-platform card, both
+  languages, never touching the art; the model-made English cards get the
+  band repainted (badge-overlay.mjs), the engine cards render it.
+- The old "Marketing" tab (prompt → social card) is superseded for posts by
+  the catalog cards and reels in Publish; it stays for one-off creatives.
+
 ## 9. TO-DO (current)
 ### Owner
 - [ ] LinkedIn page: fill every field from docs/LINKEDIN.md (year founded and
