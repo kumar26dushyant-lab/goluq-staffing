@@ -928,6 +928,23 @@ What they do well, and what we take:
   conversations (search, unread, incremental load), one-screen Today, fewer
   sections, no glass effects in the cockpit.
 
+### Cockpit latency, measured in a real browser (2026-09-15)
+Probe (headless Edge from Indore, signed in): before the fix the cockpit
+main thread ran a ~300 ms long task every second on every screen — the
+homepage particle canvas (ParticleField) was mounted on all routes, including
+/admin — and /admin downloaded the 928 KB three.js scene (HoloBackground was
+global too). Both now mount only where they belong (particles: marketing
+pages; 3D: /demo). Hashed assets are immutable at the edge (were 4-hour
+MISSes), icons are one chunk instead of 30 one-KB files.
+What remains is geography: each API call from India to the Contabo origin in
+Europe costs 300–900 ms of round trip through Cloudflare, while the server
+itself answers in 3–55 ms. Moving the origin to Oracle Mumbai (owner's
+tenancy, Always Free A1) would cut that to ~30–60 ms — the strongest reason
+for the migration.
+- Telegram-first markets: public/catalog/telegram.jpg — QR card for
+  @GoLuQ_client_bot in EN/RU/AR/HI, for the Dubai friend's buyers and any
+  market where WhatsApp is not the official channel.
+
 ## 9. TO-DO (current)
 ### Owner
 - [ ] Cloudflare: Bot Fight Mode, Managed WAF ruleset, rate-limit rule for /api/*, SSL Full (strict) — docs/SECURITY.md.
