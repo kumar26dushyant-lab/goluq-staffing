@@ -89,6 +89,7 @@ export default defineConfig({
           react: ["react", "react-dom", "react-router-dom"],
           motion: ["framer-motion"],
           i18n: ["i18next", "react-i18next"],
+          icons: ["lucide-react"],
         },
       },
     },
