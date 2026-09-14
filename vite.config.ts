@@ -82,5 +82,15 @@ export default defineConfig({
     outDir: "dist",
     // Keep the initial bundle lean (audience is on mid-range Android over patchy networks).
     target: "es2020",
+    chunkSizeWarningLimit: 700,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          react: ["react", "react-dom", "react-router-dom"],
+          motion: ["framer-motion"],
+          i18n: ["i18next", "react-i18next"],
+        },
+      },
+    },
   },
 });

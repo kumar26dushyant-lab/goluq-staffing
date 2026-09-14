@@ -3,12 +3,15 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { captureRefFromUrl } from "./lib/refAttribution";
 import { trackPageview } from "./lib/track";
 import { fetchSiteConfig } from "./lib/siteConfig";
-import { StaffingApp } from "./pages/StaffingApp";
-import { PartnerLanding } from "./pages/PartnerLanding";
-import { PartnerDashboard } from "./pages/PartnerDashboard";
-import { PartnerReset } from "./pages/PartnerReset";
-import { About } from "./pages/About";
-import { Admin, AdminSetup } from "./pages/Admin";
+// Every page other than the story is its own chunk: the cockpit alone was
+// half of a 1 MB bundle that every visitor to the homepage downloaded.
+const StaffingApp = lazy(() => import("./pages/StaffingApp").then((m) => ({ default: m.StaffingApp })));
+const PartnerLanding = lazy(() => import("./pages/PartnerLanding").then((m) => ({ default: m.PartnerLanding })));
+const PartnerDashboard = lazy(() => import("./pages/PartnerDashboard").then((m) => ({ default: m.PartnerDashboard })));
+const PartnerReset = lazy(() => import("./pages/PartnerReset").then((m) => ({ default: m.PartnerReset })));
+const About = lazy(() => import("./pages/About").then((m) => ({ default: m.About })));
+const Admin = lazy(() => import("./pages/Admin").then((m) => ({ default: m.Admin })));
+const AdminSetup = lazy(() => import("./pages/Admin").then((m) => ({ default: m.AdminSetup })));
 import { AssistantChat } from "./components/AssistantChat";
 import { WhatsAppCta } from "./components/WhatsAppCta";
 
@@ -78,7 +81,7 @@ export default function App() {
       <Pageviews />
       <Routes>
         <Route path="/" element={<Suspense fallback={null}><StoryHome /></Suspense>} />
-        <Route path="/demo" element={<StaffingApp />} />
+        <Route path="/demo" element={<Suspense fallback={null}><StaffingApp /></Suspense>} />
         {/* Custom-build practice — a separate funnel from "/" on purpose. */}
         <Route
           path="/build"
@@ -133,12 +136,12 @@ export default function App() {
         <Route path="/thanks" element={<Suspense fallback={null}><Thanks /></Suspense>} />
         <Route path="/start" element={<Suspense fallback={null}><Start /></Suspense>} />
         <Route path="/solutions" element={<Suspense fallback={null}><Solutions /></Suspense>} />
-        <Route path="/about" element={<About />} />
-        <Route path="/partner" element={<PartnerLanding />} />
-        <Route path="/partner/dashboard" element={<PartnerDashboard />} />
-        <Route path="/partner/reset" element={<PartnerReset />} />
-        <Route path="/admin" element={<Admin />} />
-        <Route path="/admin/setup" element={<AdminSetup />} />
+        <Route path="/about" element={<Suspense fallback={null}><About /></Suspense>} />
+        <Route path="/partner" element={<Suspense fallback={null}><PartnerLanding /></Suspense>} />
+        <Route path="/partner/dashboard" element={<Suspense fallback={null}><PartnerDashboard /></Suspense>} />
+        <Route path="/partner/reset" element={<Suspense fallback={null}><PartnerReset /></Suspense>} />
+        <Route path="/admin" element={<Suspense fallback={null}><Admin /></Suspense>} />
+        <Route path="/admin/setup" element={<Suspense fallback={null}><AdminSetup /></Suspense>} />
         <Route path="*" element={<Suspense fallback={null}><StoryHome /></Suspense>} />
       </Routes>
       <AssistantChat />

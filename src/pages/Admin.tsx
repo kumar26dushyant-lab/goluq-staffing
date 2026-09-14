@@ -1,23 +1,23 @@
-import { Fragment, useCallback, useEffect, useState } from "react";
+import { lazy, Suspense, Fragment, useCallback, useEffect, useState } from "react";
 import {
   LayoutDashboard, Users, TrendingUp, MessageSquare, Settings as SettingsIcon,
   LogOut, Download, RefreshCw, ShieldCheck,
   BarChart3, ChevronDown, IndianRupee, Bot, Mail, FileText, Briefcase, Megaphone, Image as ImageIcon, Video,
 } from "lucide-react";
 import { Button } from "../components/ui/Button";
-import { Projects } from "../components/admin/Projects";
-import { Campaigns } from "../components/admin/Campaigns";
-import { Marketing } from "../components/admin/Marketing";
-import { LiveChat } from "../components/admin/LiveChat";
-import { Testimonials as TestimonialsPanel } from "../components/admin/Testimonials";
-import { Today } from "../components/admin/Today";
-import { Enquiries } from "../components/admin/Enquiries";
-import { Partners } from "../components/admin/Partners";
-import { EmailInbox } from "../components/admin/EmailInbox";
-import { Store } from "../components/admin/Store";
-import { Publish } from "../components/admin/Publish";
-import { Payments } from "../components/admin/Payments";
-import { Briefs } from "../components/admin/Briefs";
+const Projects = lazy(() => import("../components/admin/Projects").then((m) => ({ default: m.Projects })));
+const Campaigns = lazy(() => import("../components/admin/Campaigns").then((m) => ({ default: m.Campaigns })));
+const Marketing = lazy(() => import("../components/admin/Marketing").then((m) => ({ default: m.Marketing })));
+const LiveChat = lazy(() => import("../components/admin/LiveChat").then((m) => ({ default: m.LiveChat })));
+const TestimonialsPanel = lazy(() => import("../components/admin/Testimonials").then((m) => ({ default: m.Testimonials })));
+const Today = lazy(() => import("../components/admin/Today").then((m) => ({ default: m.Today })));
+const Enquiries = lazy(() => import("../components/admin/Enquiries").then((m) => ({ default: m.Enquiries })));
+const Partners = lazy(() => import("../components/admin/Partners").then((m) => ({ default: m.Partners })));
+const EmailInbox = lazy(() => import("../components/admin/EmailInbox").then((m) => ({ default: m.EmailInbox })));
+const Store = lazy(() => import("../components/admin/Store").then((m) => ({ default: m.Store })));
+const Publish = lazy(() => import("../components/admin/Publish").then((m) => ({ default: m.Publish })));
+const Payments = lazy(() => import("../components/admin/Payments").then((m) => ({ default: m.Payments })));
+const Briefs = lazy(() => import("../components/admin/Briefs").then((m) => ({ default: m.Briefs })));
 import { BrandMark } from "../components/BrandMark";
 import { useTranslation } from "react-i18next";
 import { inputClass } from "../lib/ui";
@@ -123,6 +123,7 @@ export function Admin() {
                 <p className="mt-0.5 text-sm text-muted">{SECTION_META[section].desc}</p>
               </div>
             </div>
+            <Suspense fallback={<p className="text-sm text-muted">Loading…</p>}>
             {section === "today" && <Today onOpenChat={openChat} onOpenLeads={() => setSection("leads")} />}
             {section === "leads" && <Enquiries />}
             {section === "chat" && <LiveChat initialId={chatId} />}
@@ -141,6 +142,7 @@ export function Admin() {
             {section === "briefs" && <Briefs />}
             {section === "testimonials" && <TestimonialsPanel />}
             {section === "settings" && <SettingsPanel />}
+            </Suspense>
           </main>
         </div>
       </div>
