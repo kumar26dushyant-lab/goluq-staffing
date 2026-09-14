@@ -457,6 +457,12 @@ for (const [route, file] of [
   app.get(route, (c) => c.html(readFileSync(join(DIST, file), "utf8")));
 }
 
+// Hashed build assets never change under the same name: a year at the edge
+// and in the browser. Without this Cloudflare kept missing on every chunk.
+app.use("/assets/*", async (c, next) => {
+  await next();
+  if (c.res.status === 200) c.res.headers.set("cache-control", "public, max-age=31536000, immutable");
+});
 app.use("/*", serveStatic({ root: "./dist" }));
 app.get("*", (c) => {
   // A request for a FILE that doesn't exist must 404, not fall through to the
