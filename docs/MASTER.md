@@ -916,6 +916,18 @@ What they do well, and what we take:
   backups (14 kept), DB and .env 600. Owner tasks: Cloudflare Bot Fight Mode,
   managed WAF, an /api rate rule, SSL Full (strict); off-box backup copy.
 
+### Bundle split (2026-09-14)
+- Measured before touching anything: every cockpit API answers in 3–55 ms
+  on the box (8 vCPU, 24 GB, load 0.5), so the slowness was the front end —
+  one 988 KB JavaScript bundle carrying the whole cockpit, downloaded by
+  every homepage visitor too. Now: homepage 296 KB + shared vendor chunks
+  (React 151, motion 113, i18n 58, all cached), cockpit 66 KB on demand,
+  each cockpit screen its own chunk, /demo's 3D scene (928 KB) only on /demo.
+- Cockpit redesign proposal (owner unhappy with the whole panel) is in the
+  chat of 2026-09-14 and, once agreed, becomes the next build: WhatsApp-Web
+  conversations (search, unread, incremental load), one-screen Today, fewer
+  sections, no glass effects in the cockpit.
+
 ## 9. TO-DO (current)
 ### Owner
 - [ ] Cloudflare: Bot Fight Mode, Managed WAF ruleset, rate-limit rule for /api/*, SSL Full (strict) — docs/SECURITY.md.
