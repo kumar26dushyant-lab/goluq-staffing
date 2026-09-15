@@ -972,8 +972,26 @@ for the migration.
 - Marketing tab retired from the nav. Next phases: Today as the only home,
   section consolidation, list pagination everywhere, no effects anywhere.
 
+### Partner model decided, markets, country preview (2026-09-15, later)
+- INCIDENT: the cockpit showed "Could not load" — 63 leftover headless Edge
+  probe processes on the owner's PC were polling /api/admin from his own IP
+  and exhausting the per-IP limit. Killed; polls now back off for a minute
+  on 429; admin limit raised to 900/min. Memory note written.
+- Partner model (owner's decision): orders → share of profit (20 %);
+  managed monthly plans → share of every payment while the customer stays
+  (10 %); upsells/cross-sells → higher share (25 %); public copy in
+  indicative ranges only, terms finalised on a 30-minute call; white-label
+  possible. Five-step playbook in the kit and FAQ. docs/PARTNERS.md.
+- Markets: NZ added (NZD). Verified per country for WhatsApp Office:
+  IN ₹50,000 · AE AED 5,299 · AU A$2,249 · NZ NZ$2,449 · GB £1,149 ·
+  US $1,450. `?c=XX` previews the site as another country.
+- docs/ORACLE-MIGRATION.md (owner console steps; SSH is Claude's) and
+  docs/MARKETING-FREE.md (free-first plan for UAE/AU/NZ and untapped
+  markets, partners and micro-influencers, cockpit mechanics to build).
+
 ## 9. TO-DO (current)
 ### Owner
+- [ ] Oracle: Part A of docs/ORACLE-MIGRATION.md (PAYG upgrade, VCN, A1 instance with the key) → send the IP.
 - [ ] Cloudflare: Bot Fight Mode, Managed WAF ruleset, rate-limit rule for /api/*, SSL Full (strict) — docs/SECURITY.md.
 - [ ] LinkedIn page: fill every field from docs/LINKEDIN.md (year founded and
       registered address are yours to enter); start the daily outreach routine.
@@ -996,9 +1014,11 @@ for the migration.
 - [ ] Ashwin testimonial video + written consent.
 - [ ] Public Telegram channel name → Settings.
 ### Build (mine, in order)
+- [ ] Per-market post queues in Publish (country + language + stamped links); Monday brief by door and country.
+- [ ] Influencer/outreach list in the cockpit (status, DM template, partner link).
+- [ ] Site languages beyond EN/HI (Arabic first for the Gulf) once ads run in those languages.
 - [ ] Cockpit rebuild phases 2–3: Today as the only home, section consolidation, paginated lists everywhere (phase 1 Conversations done 2026-09-15).
 - [ ] Partner reel EN/HI ("Open your GoLuQ partner office"); weekly brief line on doors (source per lead/thread).
-- [ ] Decide: do managed-plan monthly fees earn partners a share? (settings + accrual change if yes.)
 - [ ] Reel end-frames with the platform badge (12 reels); price-anchor card
       variants (abroad vs India price).
 - [ ] Partner (affiliate) campaign: cards + 15 s reels EN/HI — "start your
