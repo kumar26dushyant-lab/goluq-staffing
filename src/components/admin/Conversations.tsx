@@ -121,9 +121,9 @@ export function Conversations({ initialId = null }: { initialId?: string | null 
   const isWa = Boolean(open?.startsWith("wa:"));
 
   return (
-    <div className="grid gap-3 lg:h-[calc(100dvh-150px)] lg:min-h-[520px] lg:grid-cols-[340px_1fr]">
+    <div className="grid min-w-0 gap-3 lg:h-[calc(100dvh-150px)] lg:min-h-[520px] lg:grid-cols-[340px_1fr]">
       {/* ── List ─────────────────────────────────────────────────────── */}
-      <div className={`flex min-h-0 flex-col rounded-2xl border border-hairline/12 bg-panel/30 ${open ? "hidden lg:flex" : "flex"}`}>
+      <div className={`flex min-h-0 min-w-0 flex-col rounded-2xl border border-hairline/12 bg-panel/30 ${open ? "hidden lg:flex" : "flex"}`}>
         <div className="border-b border-hairline/10 p-2.5">
           <label className="flex items-center gap-2 rounded-xl bg-base px-3 py-2">
             <Search size={15} className="shrink-0 text-faint" />
@@ -162,7 +162,7 @@ export function Conversations({ initialId = null }: { initialId?: string | null 
       </div>
 
       {/* ── Thread ───────────────────────────────────────────────────── */}
-      <div className={`flex min-h-[70vh] flex-col rounded-2xl border border-hairline/12 bg-panel/30 lg:min-h-0 ${open ? "flex" : "hidden lg:flex"}`}>
+      <div className={`flex h-[calc(100dvh-240px)] min-h-[420px] min-w-0 flex-col overflow-hidden rounded-2xl border border-hairline/12 bg-panel/30 lg:h-auto lg:min-h-0 ${open ? "flex" : "hidden lg:flex"}`}>
         {!open ? (
           <div className="grid flex-1 place-items-center p-6 text-sm text-muted">Pick a conversation.</div>
         ) : (
@@ -202,7 +202,7 @@ export function Conversations({ initialId = null }: { initialId?: string | null 
                       <p className="my-1 text-center text-[11px] text-faint">{m.content.replace(/^\[|\]$/g, "")} · {timeOf(m.created_at)}</p>
                     ) : (
                       <div className={`flex ${mine ? "justify-end" : "justify-start"}`}>
-                        <div className={`max-w-[85%] rounded-2xl px-3 py-1.5 sm:max-w-[72%] ${m.role === "visitor" ? "rounded-tl-sm bg-base text-fg" : m.role === "agent" ? "rounded-tr-sm bg-brand-luq/20 text-fg" : "rounded-tr-sm border border-hairline/15 bg-panel/40 text-muted"}`}>
+                        <div className={`max-w-[85%] rounded-2xl px-3 py-1.5 sm:max-w-[72%] ${m.role === "visitor" ? "rounded-tl-sm bg-panel/80 text-fg ring-1 ring-hairline/10" : m.role === "agent" ? "rounded-tr-sm bg-brand-luq/20 text-fg" : "rounded-tr-sm border border-hairline/15 bg-panel/40 text-muted"}`}>
                           <p className="whitespace-pre-wrap break-words text-[15px] leading-relaxed">{m.content}</p>
                           <p className="mt-0.5 flex items-center justify-end gap-1 text-[10px] text-faint">{m.role === "guide" ? <Bot size={10} /> : m.role === "agent" ? <Check size={10} /> : <User size={10} />}{timeOf(m.created_at)}</p>
                         </div>

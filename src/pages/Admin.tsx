@@ -113,7 +113,7 @@ export function Admin() {
           )}
 
           <main className="mx-auto max-w-5xl overflow-x-hidden px-4 py-5 sm:px-6">
-            <div className="mb-5 flex items-end justify-between gap-3">
+            <div className={`mb-5 flex items-end justify-between gap-3 ${section === "chat" ? "hidden lg:flex" : ""}`}>
               <div>
                 <h1 className="font-display text-2xl font-bold text-fg">
                   {section === "today"
