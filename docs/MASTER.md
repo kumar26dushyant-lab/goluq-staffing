@@ -956,6 +956,22 @@ for the migration.
   working" band shows NidaanPartner.com, Sarathi-AI.com and EagleEye.work
   (marked prototype) with links.
 
+### Cockpit rebuild, phase 1 — Conversations (2026-09-15)
+- New src/components/admin/Conversations.tsx replaces LiveChat: two panes
+  with their own scroll (page never scrolls), search across name / number /
+  words, filter chips (All, Waiting, Unread, WhatsApp, Telegram, Web,
+  Closed), dense rows with initials, channel dot, time, last line and unread
+  count; thread with day separators, "earlier messages", system lines,
+  header showing source door, language, partner code, booked call and lead
+  status; composer with Send card (any Store item), Send calendar, Mark
+  handled, Guide on/off, Close/Reopen, open in WhatsApp. Polling fetches
+  only messages after the last id every 4 s, list every 10 s, nothing when
+  hidden. Phone: one pane at a time, full height.
+- API: /api/admin/chats pages (50) with `before`, searches with `q`, filters,
+  `after` for cheap polls; POST actions bot/close/reopen/handled/card/calendar.
+- Marketing tab retired from the nav. Next phases: Today as the only home,
+  section consolidation, list pagination everywhere, no effects anywhere.
+
 ## 9. TO-DO (current)
 ### Owner
 - [ ] Cloudflare: Bot Fight Mode, Managed WAF ruleset, rate-limit rule for /api/*, SSL Full (strict) — docs/SECURITY.md.
@@ -980,7 +996,7 @@ for the migration.
 - [ ] Ashwin testimonial video + written consent.
 - [ ] Public Telegram channel name → Settings.
 ### Build (mine, in order)
-- [ ] Cockpit rebuild (agreed 2026-09-15): Conversations like WhatsApp Web, Today as home, five sections, no effects.
+- [ ] Cockpit rebuild phases 2–3: Today as the only home, section consolidation, paginated lists everywhere (phase 1 Conversations done 2026-09-15).
 - [ ] Partner reel EN/HI ("Open your GoLuQ partner office"); weekly brief line on doors (source per lead/thread).
 - [ ] Decide: do managed-plan monthly fees earn partners a share? (settings + accrual change if yes.)
 - [ ] Reel end-frames with the platform badge (12 reels); price-anchor card
