@@ -247,7 +247,9 @@ app.use("/api/*", async (c, next) => {
   const write = c.req.method === "POST";
   if (write && (path === "/api/lead" || path === "/api/assistant" || path === "/api/affiliate/register" || path === "/api/affiliate/auth" || path === "/api/customer/auth")) max = 15;
   else if (path === "/api/chat") max = 240;
-  else if (path.startsWith("/api/admin/") || path.startsWith("/api/wa/") || path.startsWith("/api/tg/")) max = 300;
+  // The cockpit polls several screens; a browser plus a phone on one home
+  // connection must never trip this. Webhooks share the same generosity.
+  else if (path.startsWith("/api/admin/") || path.startsWith("/api/wa/") || path.startsWith("/api/tg/")) max = 900;
   if (rateLimited(ip, path, max, 60_000)) {
     return c.json({ ok: false, error: "rate_limited" }, 429);
   }

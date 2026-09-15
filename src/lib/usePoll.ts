@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { pollsPaused } from "./adminApi";
 
 /**
  * Run `fn` now and every `ms`, but only while the tab is visible. A cockpit
@@ -8,7 +9,8 @@ import { useEffect } from "react";
 export function usePoll(fn: () => void, ms: number, deps: unknown[] = []): void {
   useEffect(() => {
     let iv: number | null = null;
-    const start = () => { if (iv === null) { fn(); iv = window.setInterval(fn, ms); } };
+    const tick = () => { if (!pollsPaused()) fn(); };
+    const start = () => { if (iv === null) { tick(); iv = window.setInterval(tick, ms); } };
     const stop = () => { if (iv !== null) { window.clearInterval(iv); iv = null; } };
     const onVis = () => (document.visibilityState === "visible" ? start() : stop());
     onVis();

@@ -27,9 +27,19 @@ async function req(path: string, opts: RequestInit = {}) {
   });
 }
 
+/**
+ * When the server says "slow down" (429), every poll on the page backs off
+ * for a minute instead of hammering harder — the cockpit once showed
+ * "Could not load" for ten minutes because a stray tab kept polling.
+ */
+let pausedUntil = 0;
+export const pollsPaused = () => Date.now() < pausedUntil;
+
 export async function adminGet<T = any>(path: string): Promise<T> {
+  if (pollsPaused()) return { ok: false, error: "rate_limited" } as T;
   const r = await req(path);
   if (r.status === 401) throw new Error("unauthorized");
+  if (r.status === 429) { pausedUntil = Date.now() + 60_000; return { ok: false, error: "rate_limited" } as T; }
   return r.json();
 }
 export async function adminPost<T = any>(path: string, body: unknown): Promise<T> {

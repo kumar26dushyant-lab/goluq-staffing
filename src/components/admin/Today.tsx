@@ -89,7 +89,7 @@ export function Today({ onOpenChat, onOpenLeads }: { onOpenChat: (id: string) =>
   const load = useCallback(async () => {
     try {
       const d = await adminGet("/api/admin/today");
-      if (d.ok) { setB(d); setErr(""); } else setErr("Could not load.");
+      if (d.ok) { setB(d); setErr(""); } else setErr(d.error === "rate_limited" ? "Too many requests from this connection — pausing for a minute." : "Could not load.");
     } catch {
       setErr("Could not reach the server.");
     }
