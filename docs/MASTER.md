@@ -945,6 +945,17 @@ for the migration.
   @GoLuQ_client_bot in EN/RU/AR/HI, for the Dubai friend's buyers and any
   market where WhatsApp is not the official channel.
 
+### Partner programme, attribution doors, proof band (2026-09-15)
+- docs/PARTNERS.md: mechanics, attribution end to end, the kit, creatives,
+  outreach. Six partner cards EN/HI live; kit in the partner dashboard (link,
+  QR, WhatsApp deep link with code, ten cards, three scripts).
+- Doors are now traceable: WhatsApp click-to-chat text ("from Facebook",
+  "ref CODE"), Telegram `?start=src`, `?ref=` on the site → lead and brief
+  `ref_code`. Partner reel and weekly "which door worked" line: to do.
+- Homepage: particle canvas gone everywhere; a "already built, already
+  working" band shows NidaanPartner.com, Sarathi-AI.com and EagleEye.work
+  (marked prototype) with links.
+
 ## 9. TO-DO (current)
 ### Owner
 - [ ] Cloudflare: Bot Fight Mode, Managed WAF ruleset, rate-limit rule for /api/*, SSL Full (strict) — docs/SECURITY.md.
@@ -969,6 +980,9 @@ for the migration.
 - [ ] Ashwin testimonial video + written consent.
 - [ ] Public Telegram channel name → Settings.
 ### Build (mine, in order)
+- [ ] Cockpit rebuild (agreed 2026-09-15): Conversations like WhatsApp Web, Today as home, five sections, no effects.
+- [ ] Partner reel EN/HI ("Open your GoLuQ partner office"); weekly brief line on doors (source per lead/thread).
+- [ ] Decide: do managed-plan monthly fees earn partners a share? (settings + accrual change if yes.)
 - [ ] Reel end-frames with the platform badge (12 reels); price-anchor card
       variants (abroad vs India price).
 - [ ] Partner (affiliate) campaign: cards + 15 s reels EN/HI — "start your
