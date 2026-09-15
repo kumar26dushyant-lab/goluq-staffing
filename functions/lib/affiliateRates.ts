@@ -27,6 +27,10 @@ export interface AffiliateRates {
   typicalMargin: number;
   minPayoutInr: number;
   attributionDays: number;
+  /** Share of each MANAGED-PLAN payment (monthly), 0–1 — the partner keeps the relationship. */
+  managedRate: number;
+  /** Share of profit on enhancements and cross-sells, 0–1 — a bit above the first-order rate. */
+  upsellRate: number;
 }
 
 export const DEFAULT_RATES: AffiliateRates = {
@@ -35,6 +39,8 @@ export const DEFAULT_RATES: AffiliateRates = {
   typicalMargin: 0.4,
   minPayoutInr: 500,
   attributionDays: 90,
+  managedRate: 0.1,
+  upsellRate: 0.25,
 };
 
 const num = (v: string | null, fallback: number) => {
@@ -57,12 +63,16 @@ export async function getRates(db: D1Database): Promise<AffiliateRates> {
       getSetting(db, "aff_min_payout"),
       getSetting(db, "aff_attribution_days"),
     ]);
+    const managed = await getSetting(db, "aff_rate_managed");
+    const upsell = await getSetting(db, "aff_rate_upsell");
     return {
       rate: num(rate, num(legacy, DEFAULT_RATES.rate)),
       enhancementMonths: num(enh, DEFAULT_RATES.enhancementMonths),
       typicalMargin: num(margin, DEFAULT_RATES.typicalMargin),
       minPayoutInr: num(mp, DEFAULT_RATES.minPayoutInr),
       attributionDays: num(ad, DEFAULT_RATES.attributionDays),
+      managedRate: num(managed, DEFAULT_RATES.managedRate),
+      upsellRate: num(upsell, DEFAULT_RATES.upsellRate),
     };
   } catch {
     return DEFAULT_RATES;
@@ -74,6 +84,8 @@ export async function saveRates(db: D1Database, r: Partial<AffiliateRates>): Pro
   // a 300% commission.
   const frac = (n: number) => String(Math.min(1, Math.max(0, n)));
   if (r.rate !== undefined && Number.isFinite(r.rate)) await setSetting(db, "aff_rate", frac(r.rate));
+  if (r.managedRate !== undefined && Number.isFinite(r.managedRate)) await setSetting(db, "aff_rate_managed", frac(r.managedRate));
+  if (r.upsellRate !== undefined && Number.isFinite(r.upsellRate)) await setSetting(db, "aff_rate_upsell", frac(r.upsellRate));
   if (r.typicalMargin !== undefined && Number.isFinite(r.typicalMargin)) {
     await setSetting(db, "aff_typical_margin", frac(r.typicalMargin));
   }
@@ -88,8 +100,9 @@ export async function saveRates(db: D1Database, r: Partial<AffiliateRates>): Pro
   }
 }
 
-export type ProjectKind = "build" | "enhancement" | "maintenance";
-export const PROJECT_KINDS: ProjectKind[] = ["build", "enhancement", "maintenance"];
+export type ProjectKind = "build" | "enhancement" | "managed" | "maintenance";
+/** "maintenance" is the old name for a managed monthly plan; both earn the managed share. */
+export const PROJECT_KINDS: ProjectKind[] = ["build", "enhancement", "managed", "maintenance"];
 
 export interface CommissionInput {
   kind: ProjectKind;
@@ -115,7 +128,15 @@ export type CommissionVerdict =
  * is never paid on money that has not arrived.
  */
 export function commissionFor(rates: AffiliateRates, p: CommissionInput): CommissionVerdict {
-  if (p.kind === "maintenance") return { eligible: false, reason: "Maintenance is never commissioned." };
+  // Decided 2026-09-15: a managed monthly plan pays the partner a share of
+  // every payment for as long as the customer stays — that is the
+  // relationship they keep — and an enhancement or cross-sell pays a share a
+  // bit above the first order. Rates are cockpit settings; nothing is fixed
+  // in public copy, which speaks in indicative ranges.
+  if (p.kind === "managed" || p.kind === "maintenance") {
+    if (!(p.paymentInr > 0)) return { eligible: false, reason: "No payment amount." };
+    return { eligible: true, rate: rates.managedRate, amountInr: Math.round(rates.managedRate * p.paymentInr), profitShare: 1 };
+  }
   if (p.kind === "enhancement" && p.firstProjectAt) {
     const months =
       (Date.parse(p.projectAt.replace(" ", "T") + "Z") - Date.parse(p.firstProjectAt.replace(" ", "T") + "Z")) /
@@ -129,6 +150,7 @@ export function commissionFor(rates: AffiliateRates, p: CommissionInput): Commis
   const profit = Math.max(0, p.priceInr - Math.max(0, p.costInr));
   if (profit === 0) return { eligible: false, reason: "No profit on this project — nothing to share." };
   const share = Math.min(1, p.paymentInr / p.priceInr);
-  const amountInr = Math.round(rates.rate * profit * share);
-  return { eligible: true, rate: rates.rate, amountInr, profitShare: share };
+  const rate = p.kind === "enhancement" ? rates.upsellRate : rates.rate;
+  const amountInr = Math.round(rate * profit * share);
+  return { eligible: true, rate, amountInr, profitShare: share };
 }

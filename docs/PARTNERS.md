@@ -5,19 +5,28 @@ no staff, no tech. You know business owners; we build what they need and you
 earn on every order you introduce and on every enhancement they add for two
 years. Never a rate in public creatives; the live terms are on goluq.com/partner.
 
-## What a partner is paid (the model that exists in code)
-- A share of GoLuQ's **profit** on each project they introduced (price minus
-  delivery cost), credited as the customer pays, paid by UPI once approved
-  balance ≥ ₹500. Rate, enhancement window, typical margin, minimum payout
-  and attribution window are cockpit settings (`aff_*`), currently 20 %,
-  24 months, 40 %, ₹500, 90 days.
-- Indicative figures used on cards, derived from those settings: a ₹50,000
-  order at a 40 % margin → ₹4,000; a ₹1,50,000 order → ₹12,000. Cards say
-  "indicative" and point to the live terms.
-- Not in the model: a share of managed-plan (monthly) fees. The owner's
-  "recurring revenue" line is honoured through enhancements for two years.
-  If monthly plans should also earn, that is a settings + accrual change,
-  not a copy change — decide before promising it.
+## What a partner is paid (decided 2026-09-15, in code)
+- **Orders**: a share of GoLuQ's profit on each order they introduced (rate
+  `aff_rate`, 20 %), credited as the customer pays.
+- **Managed monthly plans**: a share of every payment from a managed customer
+  they introduced, for as long as the customer stays (`aff_rate_managed`,
+  10 %) — the relationship they keep.
+- **Upsells / cross-sells / enhancements**: a share of profit a bit above the
+  first-order rate (`aff_rate_upsell`, 25 %) within the enhancement window
+  (24 months).
+- Public copy speaks only in indicative ranges ("₹4,000–₹12,000 on
+  ₹50,000–₹1,50,000 orders", "monthly on managed customers", "more on
+  upsells") and says terms are finalised on a 30-minute call after
+  registration. White-label software and apps to sell under the partner's
+  own name: possible, discussed on that call.
+- Payout by UPI once approved balance ≥ ₹500; PAN collected at sign-up.
+
+## The five-step playbook (in the kit and the FAQ)
+1. Sign up. 2. Take the cards, reels and messages from the kit; post on
+social media and share in the network. 3. When a business shows interest,
+send only the requirement (never the client's details). 4. Book a 30-minute
+call with the GoLuQ team. 5. Finalise together; earn on the order, monthly
+on managed customers, more on upsells.
 
 ## How attribution works end to end
 1. Partner link `goluq.com/?ref=CODE` → stored 90 days in the browser

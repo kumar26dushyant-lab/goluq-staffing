@@ -21,7 +21,7 @@ interface Row {
   id: number; affiliate_code: string; partner: string | null; upi_id: string | null; customer: string | null; project: string | null;
   basis_inr: number | null; rate: number; amount_inr: number; status: string; created_at: string; note: string | null;
 }
-interface Terms { rate: number; enhancementMonths: number; typicalMargin: number; minPayoutInr: number; attributionDays: number }
+interface Terms { rate: number; enhancementMonths: number; typicalMargin: number; minPayoutInr: number; attributionDays: number; managedRate?: number; upsellRate?: number }
 
 const inr = (n: unknown) => `₹${Math.round(Number(n) || 0).toLocaleString("en-IN")}`;
 const day = (s: string) => String(s).slice(0, 10);
@@ -164,15 +164,15 @@ export function Partners() {
 }
 
 function TermsCard({ terms, onSaved }: { terms: Terms | null; onSaved: () => void }) {
-  const [t, setT] = useState({ rate: 20, enhancementMonths: 24, typicalMargin: 40, minPayoutInr: 500, attributionDays: 90 });
+  const [t, setT] = useState({ rate: 20, enhancementMonths: 24, typicalMargin: 40, minPayoutInr: 500, attributionDays: 90, managedRate: 10, upsellRate: 25 });
   const [saved, setSaved] = useState("");
   useEffect(() => {
-    if (terms) setT({ rate: Math.round(terms.rate * 100), enhancementMonths: terms.enhancementMonths, typicalMargin: Math.round(terms.typicalMargin * 100), minPayoutInr: terms.minPayoutInr, attributionDays: terms.attributionDays });
+    if (terms) setT({ rate: Math.round(terms.rate * 100), enhancementMonths: terms.enhancementMonths, typicalMargin: Math.round(terms.typicalMargin * 100), minPayoutInr: terms.minPayoutInr, attributionDays: terms.attributionDays, managedRate: Math.round((terms.managedRate ?? 0.1) * 100), upsellRate: Math.round((terms.upsellRate ?? 0.25) * 100) });
   }, [terms]);
   const save = async () => {
     setSaved("");
     const d = await adminPost("/api/admin/settings", {
-      aff_rate: t.rate / 100, aff_enh_months: t.enhancementMonths, aff_typical_margin: t.typicalMargin / 100,
+      aff_rate: t.rate / 100, aff_enh_months: t.enhancementMonths, aff_typical_margin: t.typicalMargin / 100, aff_rate_managed: t.managedRate / 100, aff_rate_upsell: t.upsellRate / 100,
       aff_min_payout: t.minPayoutInr, aff_attribution_days: t.attributionDays,
     });
     setSaved(d.ok ? "Saved. Live on the partner page and used for every new booking." : "Failed.");
@@ -195,11 +195,13 @@ function TermsCard({ terms, onSaved }: { terms: Terms | null; onSaved: () => voi
         <p className="text-sm text-muted">
           A partner earns <b className="text-fg">{t.rate}% of your profit</b> on each project they introduce — price minus your cost to
           deliver — booked when you record a payment in Projects. On a ₹1,00,000 build at a {t.typicalMargin}% margin that is about{" "}
-          <b className="text-fg">{inr(example)}</b>. Enhancements within {t.enhancementMonths} months earn the same; maintenance never does.
+          <b className="text-fg">{inr(example)}</b>. Enhancements and cross-sells within {t.enhancementMonths} months earn <b className="text-fg">{t.upsellRate}% of profit</b>; every managed-plan payment earns <b className="text-fg">{t.managedRate}%</b> of the payment for as long as the customer stays.
           Existing bookings keep the rate they were made at.
         </p>
         <div className="grid gap-4 sm:grid-cols-2">
           {F("Share of profit", "rate", "%", "The partner's cut of what you actually make.")}
+          {F("Managed-plan share", "managedRate", "%", "Of every monthly payment from a managed customer the partner introduced, for as long as they stay.")}
+          {F("Upsell / cross-sell share", "upsellRate", "%", "Of profit on enhancements and cross-sells within the window — a bit above the first-order share.")}
           {F("Enhancement window", "enhancementMonths", "months", "How long after the first project their customer's new work still earns.")}
           {F("Typical margin", "typicalMargin", "%", "Only for the public calculator's estimate. Real bookings use the real cost.")}
           {F("Minimum payout", "minPayoutInr", "₹", "Approved amounts below this carry forward.")}

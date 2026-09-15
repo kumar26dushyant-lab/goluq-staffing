@@ -107,6 +107,10 @@ export async function fetchSiteConfig(): Promise<SiteConfig> {
       // A visitor who has explicitly picked a country overrides geography.
       let picked = "";
       try {
+        // ?c=AE (or AU, NZ, GB, US, SA, IN) — for checking what a visitor in
+        // that country sees: prices, region wording, default language.
+        const c = (new URLSearchParams(window.location.search).get("c") || "").toUpperCase();
+        if (/^[A-Z]{2}$/.test(c)) localStorage.setItem("goluq_country", c);
         picked = localStorage.getItem("goluq_country") || "";
       } catch {
         /* private mode — geography still applies */

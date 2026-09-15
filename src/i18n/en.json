@@ -583,11 +583,11 @@
     "workforce": "Complete Digital Workforce"
   },
   "partner": {
-    "crossMention": "Know other business owners? Introduce them and earn {{rate}}% of GoLuQ's profit on every project they order.",
+    "crossMention": "Know other business owners? Open your GoLuQ partner office: introduce them, we build, you earn on every order — and monthly on the customers who stay.",
     "becomePartner": "Become a Partner",
     "backHome": "See what you'll be selling",
     "assistant": "Digital Partner Guide",
-    "intro": "Welcome! Want to earn from businesses you already know — without any tech skills? Introduce them to GoLuQ. When a project you introduced is delivered and paid for, you earn {{rate}}% of GoLuQ's profit on it. Enhancements they order later earn you the same. Want me to show you what a typical referral is worth?",
+    "intro": "Welcome! Want a second income from the businesses you already know — no tech skills, no stock, no staff? Open your GoLuQ partner office. On every order you introduce you earn a share of GoLuQ's profit (indicatively ₹4,000–₹12,000 on ₹50,000–₹1,50,000 orders), a monthly share on customers who take a managed plan, and a higher share on upsells. Exact terms are finalised on a 30-minute call after you register. Want me to show what a typical referral is worth?",
     "showMe": "Show me the earnings",
     "calc": {
       "title": "Your earnings calculator",
@@ -602,7 +602,7 @@
     "questions": {
       "earn": {
         "q": "How much can I earn?",
-        "a": "{{rate}}% of GoLuQ's profit on each project you introduce — the price minus what it cost us to deliver — paid as the customer pays. Example: a ₹1,00,000 project that cost ₹60,000 to deliver leaves ₹40,000 profit; your share is {{rate}}% of that ₹40,000. Enhancements they order later earn the same; ongoing support and maintenance do not."
+        "a": "Three ways, all indicative until we finalise on your call: (1) a share of GoLuQ's profit on each order you introduce — typically ₹4,000–₹12,000 on ₹50,000–₹1,50,000 orders; (2) a monthly share of every managed-plan payment from customers you brought, for as long as they stay; (3) a higher share on enhancements and cross-sells they order later. Partners can also order white-label software and apps to sell under their own name — ask on the call."
       },
       "paid": {
         "q": "When & how do I get paid?",
@@ -614,7 +614,7 @@
       },
       "find": {
         "q": "How do I find customers?",
-        "a": "People you already know — local shops, clinics, your WhatsApp groups, or a small Hindi YouTube channel."
+        "a": "Five steps: sign up → take the cards, reels and messages from your kit → post on your social media and share in your own network → when a business shows interest, send us only the requirement (not the client's details) → book a 30-minute call with the GoLuQ team and we finalise it together."
       },
       "fee": {
         "q": "Is there any joining fee?",
@@ -653,9 +653,9 @@
       "copied": "Copied!",
       "whatsapp": "Share on WhatsApp",
       "tipsTitle": "Quick start",
-      "tip1": "Share your link on WhatsApp today.",
-      "tip2": "Make one short Hindi video explaining it.",
-      "tip3": "Target 3 local businesses this week."
+      "tip1": "Share your link and one card on WhatsApp today.",
+      "tip2": "Post a card or reel from your kit on Facebook or Instagram.",
+      "tip3": "When a business shows interest, send us the requirement and book the call."
     },
     "dash": {
       "greeting": "Welcome back",
@@ -686,7 +686,7 @@
       "st_converted": "Paying customer",
       "st_done": "Closed",
       "st_opted_out": "Opted out",
-      "rateNote": "You earn {{rate}}% of GoLuQ's profit on every project you introduce, and the same on enhancements that customer orders within {{months}} months. Payouts start once your approved balance reaches {{min}}.",
+      "rateNote": "Indicative terms: a share of GoLuQ's profit on every order you introduce, a monthly share on managed-plan customers for as long as they stay, and a higher share on enhancements within {{months}} months. Final terms are agreed on your 30-minute call. Payouts start once your approved balance reaches {{min}}.",
       "project": "Project"
     },
     "login": {

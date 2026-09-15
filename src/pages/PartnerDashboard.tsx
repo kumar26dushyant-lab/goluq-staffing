@@ -60,7 +60,12 @@ function PartnerKit({ code, shareUrl, name }: { code: string; shareUrl: string; 
   return (
     <div className="glass mt-6 rounded-2xl p-5">
       <p className="font-display text-lg font-bold text-fg">{hi ? "आपका पार्टनर किट" : "Your partner kit"}</p>
-      <p className="mt-1 text-sm text-muted">{hi ? "चार कदम: लिंक शेयर करें → कार्ड फ़ॉरवर्ड करें → पूछताछ हम तक → ऑर्डर पर आपका हिस्सा। हर क्लिक 90 दिन आपके नाम।" : "Four steps: share your link → forward the cards → enquiries reach us → your share on every order. Every click is yours for 90 days."}</p>
+      <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm text-fg">
+        {(hi
+          ? ["साइन-अप हो गया — यह किट आपका है।", "नीचे के कार्ड, रील और संदेश अपने सोशल मीडिया पर डालिए और अपने नेटवर्क में भेजिए।", "कोई बिज़नेस रुचि दिखाए तो हमें सिर्फ़ ज़रूरत भेजिए — ग्राहक की जानकारी नहीं।", "GoLuQ टीम के साथ 30 मिनट की कॉल बुक कीजिए; हम मिलकर तय करते हैं।", "हर ऑर्डर पर हिस्सा, मैनेज्ड ग्राहकों पर हर महीने, अपसेल पर ज़्यादा — शर्तें कॉल पर तय। व्हाइट-लेबल सॉफ़्टवेयर भी संभव है।"]
+          : ["You are signed up — this kit is yours.", "Post the cards, reels and messages below on your social media and share them in your own network.", "When a business shows interest, send us only the requirement — not the client's details.", "Book a 30-minute call with the GoLuQ team; we finalise it together.", "A share on every order, monthly on managed customers, more on upsells — terms agreed on the call. White-label software under your own name is possible too."]
+        ).map((x, i) => <li key={i}>{x}</li>)}
+      </ol>
       <div className="mt-4 grid gap-4 sm:grid-cols-[180px_1fr]">
         <div className="rounded-2xl bg-white p-2">{qr && <img src={qr} alt="QR" className="w-full" />}</div>
         <div className="space-y-2 text-sm">

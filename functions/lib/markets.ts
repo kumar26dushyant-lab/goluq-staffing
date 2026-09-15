@@ -47,6 +47,7 @@ const EUR: Market = { currency: "EUR", locale: "en-IE", perInr: 1 / 96, band: 1,
 // render as a bare "$", which an Australian reads as US dollars — roughly double
 // the real price. en-US disambiguates them as A$, CA$ and SGD.
 const AUD: Market = { currency: "AUD", locale: "en-US", perInr: 1 / 57, band: 1, round: 50 };
+const NZD: Market = { currency: "NZD", locale: "en-NZ", perInr: 1 / 52, band: 1, round: 50 };
 const CAD: Market = { currency: "CAD", locale: "en-US", perInr: 1 / 63, band: 1, round: 50 };
 const SGD: Market = { currency: "SGD", locale: "en-US", perInr: 1 / 65, band: 1, round: 50 };
 /** Neighbouring markets, priced far closer to India than to the West. */
@@ -64,6 +65,7 @@ const BY_COUNTRY: Record<string, Market> = {
   SA: SAR,
   GB: GBP,
   AU: AUD,
+  NZ: NZD,
   CA: CAD,
   SG: SGD,
   // The rest of the Gulf bills comfortably in dirhams.

@@ -71,7 +71,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
 export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   if (!(await checkAdmin(request, env))) return unauthorized();
   try {
-    const b = await request.json<{ owner_whatsapp?: string; public_whatsapp?: string; followups_enabled?: boolean | string; bot_instructions?: string; chat_enabled?: boolean | string; announcement?: string; aff_rate?: number; aff_enh_months?: number; aff_typical_margin?: number; aff_min_payout?: number; aff_attribution_days?: number; owner_email?: string; booking_url?: string; public_telegram?: string; wa_phone_number_id?: string; wa_waba_id?: string; wa_verify_token?: string; wa_access_token?: string; wa_app_secret?: string; tg_bot_token?: string; razorpay_key_id?: string; razorpay_key_secret?: string; razorpay_webhook_secret?: string; call_paid_all?: boolean | string; wa_tpl_payment_link?: string; google_client_id?: string; google_client_secret?: string; wa_tpl_login_otp?: string; dodo_api_key?: string; dodo_webhook_secret?: string; dodo_brand_id?: string; dodo_product_id?: string; dodo_test_mode?: boolean | string; public_tg_bot_token?: string }>();
+    const b = await request.json<{ owner_whatsapp?: string; public_whatsapp?: string; followups_enabled?: boolean | string; bot_instructions?: string; chat_enabled?: boolean | string; announcement?: string; aff_rate?: number; aff_enh_months?: number; aff_typical_margin?: number; aff_min_payout?: number; aff_attribution_days?: number; aff_rate_managed?: number; aff_rate_upsell?: number; owner_email?: string; booking_url?: string; public_telegram?: string; wa_phone_number_id?: string; wa_waba_id?: string; wa_verify_token?: string; wa_access_token?: string; wa_app_secret?: string; tg_bot_token?: string; razorpay_key_id?: string; razorpay_key_secret?: string; razorpay_webhook_secret?: string; call_paid_all?: boolean | string; wa_tpl_payment_link?: string; google_client_id?: string; google_client_secret?: string; wa_tpl_login_otp?: string; dodo_api_key?: string; dodo_webhook_secret?: string; dodo_brand_id?: string; dodo_product_id?: string; dodo_test_mode?: boolean | string; public_tg_bot_token?: string }>();
     if (typeof b.owner_whatsapp === "string") {
       await setSetting(env.DB, "owner_whatsapp", b.owner_whatsapp.replace(/\D/g, ""));
     }
@@ -103,6 +103,8 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
       typicalMargin: b.aff_typical_margin !== undefined ? Number(b.aff_typical_margin) : undefined,
       minPayoutInr: b.aff_min_payout !== undefined ? Number(b.aff_min_payout) : undefined,
       attributionDays: b.aff_attribution_days !== undefined ? Number(b.aff_attribution_days) : undefined,
+      managedRate: b.aff_rate_managed !== undefined ? Number(b.aff_rate_managed) : undefined,
+      upsellRate: b.aff_rate_upsell !== undefined ? Number(b.aff_rate_upsell) : undefined,
     });
     if (typeof b.booking_url === "string") {
       const u = b.booking_url.trim().slice(0, 400);
