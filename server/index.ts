@@ -114,6 +114,9 @@ for (const sql of [
   `ALTER TABLE payments ADD COLUMN currency TEXT DEFAULT 'INR'`,
   `ALTER TABLE payments ADD COLUMN amount REAL`,
   `ALTER TABLE posts ADD COLUMN video_url TEXT`,
+  // Partner code named in a WhatsApp click-to-chat message.
+  `ALTER TABLE chat_sessions ADD COLUMN ref_code TEXT`,
+  `ALTER TABLE briefs ADD COLUMN ref_code TEXT`,
 ]) {
   try {
     sqlite.exec(sql);

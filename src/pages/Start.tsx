@@ -6,6 +6,7 @@ import { TopBar } from "../components/TopBar";
 import { SiteFooter } from "../components/SiteFooter";
 import { useSiteConfig } from "../lib/siteConfig";
 import { captureUtm, sessionId } from "../lib/track";
+import { getActiveRef } from "../lib/refAttribution";
 import { inputClass } from "../lib/ui";
 
 /**
@@ -163,7 +164,7 @@ export default function Start() {
     setBusy("submit"); setErr("");
     const utm = captureUtm() as any;
     const source = [utm.utmSource, utm.utmMedium, utm.utmCampaign].filter(Boolean).join("/") || document.referrer.replace(/^https?:\/\//, "").split("/")[0] || "";
-    const d = await api("/api/intake", { action: "submit", ctx: ctx(), history, brd, contact, source: source.slice(0, 200) + (sessionId() ? "" : "") });
+    const d = await api("/api/intake", { action: "submit", ctx: ctx(), history, brd, contact, source: source.slice(0, 200) + (sessionId() ? "" : ""), ref: getActiveRef() || "" });
     setBusy("");
     if (d.ok) { setBookingUrl(d.bookingUrl || cfg?.bookingUrl || ""); setBooked(d.booking || null); setStep("done"); try { sessionStorage.removeItem(DRAFT_KEY); } catch { /* fine */ } }
     else setErr(d.error === "need_name_phone" ? (lang === "hi" ? "नाम और WhatsApp नंबर ज़रूरी है।" : "Name and WhatsApp number are needed.") : t.draftFail);

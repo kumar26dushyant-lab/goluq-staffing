@@ -104,6 +104,24 @@ export function StoryHome() {
         <ProductsBand />
       </section>
 
+      {/* Already built, already running — the proof, in the owner's own products. */}
+      <section className="mx-auto max-w-6xl px-5 pb-16 sm:px-8 sm:pb-24" aria-labelledby="built-title">
+        <p className="font-mono text-sm uppercase tracking-[0.28em] text-brand-luq">{t("products.kicker")}</p>
+        <h2 id="built-title" className="mt-2 font-display text-2xl font-bold sm:text-4xl">{t("products.title")}</h2>
+        <div className="mt-6 grid gap-4 sm:grid-cols-3">
+          {([["nidaan", "https://nidaanpartner.com", "for_ca"], ["sarathi", "https://sarathi-ai.com", "dept_crm"], ["eagleeye", "https://eagleeye.work", "dept_dashboard"]] as const).map(([key, url, card]) => (
+            <a key={key} href={url} target="_blank" rel="noreferrer" className="group overflow-hidden rounded-3xl border border-hairline/15 bg-panel/40 transition hover:border-brand-luq/50">
+              <img src={`/catalog/${card}.jpg`} alt="" loading="lazy" className="aspect-[4/3] w-full object-cover object-top" />
+              <div className="p-5">
+                <p className="font-display text-xl font-bold text-fg">{t(`products.${key}.name`)}{key === "eagleeye" ? <span className="ml-2 rounded-full bg-brand-luq/15 px-2 py-0.5 text-xs font-semibold text-brand-luq">prototype</span> : null}</p>
+                <p className="mt-2 text-base text-muted">{t(`products.${key}.desc`)}</p>
+                <p className="mt-3 text-sm font-semibold text-brand-luq">{t("products.visit")} →</p>
+              </div>
+            </a>
+          ))}
+        </div>
+      </section>
+
       {/* Customer stories — the space is reserved even while the first video is being recorded. */}
       <section className="mx-auto max-w-6xl px-5 pb-16 sm:px-8 sm:pb-24" aria-labelledby="stories-title">
         <p className="font-mono text-sm uppercase tracking-[0.28em] text-brand-luq">{t("story.stories.kicker")}</p>

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import QRCode from "qrcode";
 import {
   MousePointerClick, Users, TrendingUp, Copy, Check, MessageCircle,
   LogOut, RefreshCw, Wallet,
@@ -28,6 +29,72 @@ const inr = (n: number) =>
  *
  * The legacy `?token=` link still works so existing partners aren't locked out.
  */
+/**
+ * The partner kit — everything a new partner needs on day one, in the
+ * dashboard: their link and QR, the cards to forward with the link already in
+ * the caption, message scripts for each channel, and the four steps. Nothing
+ * here states a commission rate; the live terms are one tap away.
+ */
+function PartnerKit({ code, shareUrl, name }: { code: string; shareUrl: string; name: string }) {
+  const { i18n } = useTranslation();
+  const hi = i18n.language.startsWith("hi");
+  const [qr, setQr] = useState("");
+  const [copiedKey, setCopiedKey] = useState("");
+  useEffect(() => { QRCode.toDataURL(shareUrl, { width: 320, margin: 1, color: { dark: "#0E1629", light: "#FFFFFF" } }).then(setQr).catch(() => {}); }, [shareUrl]);
+  const wa = `https://wa.me/918349504400?text=${encodeURIComponent(`Hi GoLuQ, ref ${code}`)}`;
+  const cards = [
+    ["whatsappOffice", "WhatsApp Office"], ["whatsappStore", "WhatsApp Store"], ["for_coaching", "For coaching institutes"], ["for_clinic", "For clinics"],
+    ["for_garment", "For garment wholesalers"], ["for_distributor", "For distributors"], ["dept_crm", "CRM & sales pipeline"], ["dept_billing", "Billing & GST"],
+    ["founder", "Meet the founder"], ["aff_office", "Become a partner"],
+  ];
+  const scripts = hi ? [
+    ["WhatsApp स्टेटस / ग्रुप", `${name} की ओर से: क्या आपका बिज़नेस फ़ोन पर अटका रहता है? GoLuQ.com सॉफ़्टवेयर, WhatsApp सिस्टम और टोल-फ़्री लाइन बनाता है — तय कीमत, हफ़्तों में। पहले लिखित प्लान, फिर कोटेशन: ${shareUrl}`],
+    ["Facebook / Instagram कैप्शन", `बिलिंग वाला छुट्टी पर है तो सब कुछ छुट्टी पर? GoLuQ.com काम को सिस्टम में लाता है — CRM, बिलिंग, इन्वेंटरी, WhatsApp। लिखित प्लान मुफ़्त: ${shareUrl}`],
+    ["सीधा मैसेज (दुकानदार / क्लिनिक)", `नमस्ते, आपकी दुकान/क्लिनिक के लिए एक चीज़ दिखानी है — पेमेंट रिमाइंडर, बुकिंग और ग्राहक फ़ॉलो-अप अपने आप, आपके WhatsApp नंबर से। 2 मिनट में देखिए: ${shareUrl}`],
+  ] : [
+    ["WhatsApp status / groups", `From ${name}: is your business stuck on the phone? GoLuQ.com builds the software, WhatsApp systems and toll-free lines a growing business runs on — fixed price, weeks not months. Written plan first, then a quote: ${shareUrl}`],
+    ["Facebook / Instagram caption", `When the billing man is on leave, is everything on leave? GoLuQ.com moves the work into a system — CRM, billing, inventory, WhatsApp. Free written plan: ${shareUrl}`],
+    ["Direct message (shop / clinic owner)", `Hi, one thing worth two minutes for your shop/clinic — payment reminders, bookings and customer follow-ups that run by themselves from your own WhatsApp number. Have a look: ${shareUrl}`],
+  ];
+  const copy = (k: string, v: string) => { navigator.clipboard?.writeText(v); setCopiedKey(k); setTimeout(() => setCopiedKey(""), 1500); };
+  return (
+    <div className="glass mt-6 rounded-2xl p-5">
+      <p className="font-display text-lg font-bold text-fg">{hi ? "आपका पार्टनर किट" : "Your partner kit"}</p>
+      <p className="mt-1 text-sm text-muted">{hi ? "चार कदम: लिंक शेयर करें → कार्ड फ़ॉरवर्ड करें → पूछताछ हम तक → ऑर्डर पर आपका हिस्सा। हर क्लिक 90 दिन आपके नाम।" : "Four steps: share your link → forward the cards → enquiries reach us → your share on every order. Every click is yours for 90 days."}</p>
+      <div className="mt-4 grid gap-4 sm:grid-cols-[180px_1fr]">
+        <div className="rounded-2xl bg-white p-2">{qr && <img src={qr} alt="QR" className="w-full" />}</div>
+        <div className="space-y-2 text-sm">
+          <p className="text-muted">{hi ? "आपका कोड" : "Your code"}: <b className="font-mono text-fg">{code}</b></p>
+          <p className="text-muted">{hi ? "WhatsApp पर सीधे भेजने के लिए (आपका कोड जुड़ा है)" : "Send someone straight to our WhatsApp (your code attached)"}:</p>
+          <p className="break-all font-mono text-xs text-brand-luq">{wa}</p>
+          <div className="flex flex-wrap gap-2 pt-1">
+            <Button size="md" variant="secondary" onClick={() => copy("wa", wa)}>{copiedKey === "wa" ? <Check size={16} /> : <Copy size={16} />} {hi ? "WhatsApp लिंक कॉपी" : "Copy WhatsApp link"}</Button>
+            {qr && <a href={qr} download={`goluq-partner-${code}.png`}><Button size="md" variant="secondary">QR PNG</Button></a>}
+          </div>
+        </div>
+      </div>
+      <p className="mt-5 font-semibold text-fg">{hi ? "कार्ड — दबाकर सेव करें, लिंक के साथ भेजें" : "Cards — save and forward with your link"}</p>
+      <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-5">
+        {cards.map(([id, label]) => (
+          <a key={id} href={`/catalog/${hi ? "hi/" : ""}${id}.jpg`} download className="overflow-hidden rounded-xl border border-hairline/15">
+            <img src={`/catalog/${hi ? "hi/" : ""}${id}.jpg`} alt={label} loading="lazy" className="aspect-square w-full object-cover" />
+            <p className="truncate px-2 py-1 text-xs text-muted">{label}</p>
+          </a>
+        ))}
+      </div>
+      <p className="mt-5 font-semibold text-fg">{hi ? "तैयार संदेश — कॉपी करके भेजें" : "Ready messages — copy and send"}</p>
+      <div className="mt-2 space-y-2">
+        {scripts.map(([k, v]) => (
+          <div key={k} className="rounded-xl border border-hairline/15 bg-panel/30 p-3">
+            <div className="flex items-center justify-between gap-2"><p className="text-xs font-semibold uppercase tracking-wide text-faint">{k}</p><button type="button" onClick={() => copy(k, v)} className="text-xs font-semibold text-brand-luq">{copiedKey === k ? (hi ? "कॉपी हो गया" : "Copied") : (hi ? "कॉपी" : "Copy")}</button></div>
+            <p className="mt-1 whitespace-pre-wrap text-sm text-fg">{v}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function PartnerDashboard() {
   const { t } = useTranslation();
   const legacy = new URLSearchParams(window.location.search).get("token") || "";
@@ -86,6 +153,8 @@ export function PartnerDashboard() {
           </a>
         </div>
       </div>
+
+      <PartnerKit code={a.code} shareUrl={a.shareUrl} name={a.name} />
 
       {/* Headline numbers */}
       <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">

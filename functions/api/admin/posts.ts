@@ -32,6 +32,15 @@ const HINDI_CARDS = new Set([
   "dept_allinone", "dept_operations", "dept_crm", "dept_billing", "dept_inventory", "dept_hr", "dept_training", "dept_vendors", "dept_support", "dept_field", "dept_dashboard",
 ]);
 
+/** Cards that are not Store products: the partner set and the Telegram QR. */
+const EXTRA_ASSETS = [
+  ...["aff_office", "aff_network", "aff_share", "aff_earn", "aff_steps", "aff_kit"].flatMap((id) => [
+    { label: `Partner · ${id.slice(4)}`, url: `https://goluq.com/catalog/${id}.jpg` },
+    { label: `Partner · ${id.slice(4)} · हिंदी`, url: `https://goluq.com/catalog/hi/${id}.jpg` },
+  ]),
+  { label: "Telegram QR · @GoLuQ_client_bot", url: "https://goluq.com/catalog/telegram.jpg" },
+];
+
 export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
   if (!(await checkAdmin(request, env))) return unauthorized();
   const posts = await env.DB.prepare(`SELECT * FROM posts ORDER BY id DESC LIMIT 100`).all();
@@ -50,11 +59,13 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
       igId: (await getSetting(env.DB, "ig_user_id")) || "",
       note: (await getSetting(env.DB, "fb_connect_note")) || "",
     },
-    assets: (products.results ?? []).flatMap((p: any) => [
+    assets: [
+      ...EXTRA_ASSETS,
+      ...(products.results ?? []).flatMap((p: any) => [
       { label: p.name, url: `https://goluq.com${p.image_path}` },
       // The Hindi edition of the same card, for India-facing posts.
       ...(HINDI_CARDS.has(p.retailer_id) ? [{ label: `${p.name} · हिंदी`, url: `https://goluq.com/catalog/hi/${p.retailer_id}.jpg` }] : []),
-    ]),
+    ])],
   });
 };
 

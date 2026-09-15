@@ -67,11 +67,12 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
     const company = String(c.company || "").trim().slice(0, 160);
     if (!name || phone.length < 11) return Response.json({ ok: false, error: "need_name_phone" }, { status: 400 });
     const source = String(b.source || "").slice(0, 200);
+    const ref = String(b.ref || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 12) || null;
 
     const ins = await env.DB.prepare(
-      `INSERT INTO briefs (customer_id, lang, business_type, departments, raw_text, history, brd, name, phone, email, company, source, status, created_at, updated_at)
-       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,'new',datetime('now'),datetime('now'))`
-    ).bind(me.id, ctx.lang, ctx.businessType, JSON.stringify(ctx.departments), ctx.text, JSON.stringify(history), JSON.stringify(brd), name, phone, email || null, company || null, source).run();
+      `INSERT INTO briefs (customer_id, lang, business_type, departments, raw_text, history, brd, name, phone, email, company, source, status, created_at, updated_at, ref_code)
+       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,'new',datetime('now'),datetime('now'),?)`
+    ).bind(me.id, ctx.lang, ctx.businessType, JSON.stringify(ctx.departments), ctx.text, JSON.stringify(history), JSON.stringify(brd), name, phone, email || null, company || null, source, ref).run();
     const id = Number((ins as any)?.meta?.last_row_id || 0);
 
     // The customer row learns the real number and name; the lead list gets a
@@ -80,9 +81,9 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
     await env.DB.prepare(`UPDATE customers SET name = ?, company = COALESCE(NULLIF(?, ''), company), email = COALESCE(email, ?)${taken ? "" : ", phone = ?"} WHERE id = ?`)
       .bind(...(taken ? [name, company, email || null, me.id] : [name, company, email || null, phone, me.id])).run();
     await env.DB.prepare(
-      `INSERT INTO leads (name, phone, email, message, industry, source, landing, created_at, status)
-       VALUES (?,?,?,?,?,?,?,datetime('now'),'engaged')`
-    ).bind(name, phone, email || null, `[Intake #${id}] ${brd.summary}`.slice(0, 2000), ctx.businessType, source || "intake", "/start").run().catch(() => {});
+      `INSERT INTO leads (name, phone, email, message, industry, source, landing, created_at, status, ref_code)
+       VALUES (?,?,?,?,?,?,?,datetime('now'),'engaged',?)`
+    ).bind(name, phone, email || null, `[Intake #${id}] ${brd.summary}`.slice(0, 2000), ctx.businessType, source || "intake", "/start", ref).run().catch(() => {});
 
     const bookingUrl = (await getSetting(env.DB, "booking_url")) || "";
     const hi = ctx.lang === "hi";
@@ -90,7 +91,7 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
     await tgAlertOwner(env.DB, env, [
       `📝 <b>New brief</b> · ${tgEscape(name)}${company ? ` · ${tgEscape(company)}` : ""}`,
       `${tgEscape(ctx.businessType || "business")} · ${tgEscape(ctx.departments.join(", ") || "—")}`,
-      `📱 ${tgEscape(phone)}${email ? ` · ✉️ ${tgEscape(email)}` : ""}`,
+      `📱 ${tgEscape(phone)}${email ? ` · ✉️ ${tgEscape(email)}` : ""}${ref ? ` · partner ${tgEscape(ref)}` : ""}`,
       "",
       `<b>${tgEscape(brd.title || "Plan")}</b>`,
       tgEscape(brd.summary.slice(0, 700)),

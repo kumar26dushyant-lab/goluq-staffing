@@ -221,6 +221,18 @@ async function handleMessage(env: Env, cfg: WaConfig, m: Inbound): Promise<void>
 
   await waMarkRead(cfg, m.id);
 
+  // Click-to-chat links carry their origin in the prefilled text: "…from
+  // Facebook", "…from the QR", "ref ABCD12" for a partner. Stamp it once, on
+  // a new thread, so every lead and order can be traced to the door it used.
+  if (isNew) {
+    const src = /\bfrom\s+(facebook|instagram|linkedin|youtube|qr|poster|telegram|google)\b/i.exec(m.text)?.[1]?.toLowerCase() || "";
+    const ref = /\bref[:\s]+([A-Z0-9]{4,12})\b/i.exec(m.text)?.[1]?.toUpperCase() || "";
+    if (src || ref) {
+      await db.prepare("UPDATE chat_sessions SET page = ?, ref_code = COALESCE(?, ref_code) WHERE id = ?")
+        .bind(src ? `whatsapp:${src}` : "whatsapp", ref || null, sid).run().catch(() => {});
+    }
+  }
+
   // A reply to a campaign is the whole point of having sent one.
   await markReplied(db, m.from);
 

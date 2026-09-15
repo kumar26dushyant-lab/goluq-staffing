@@ -53,7 +53,11 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
     return new Response("ok");
   }
 
-  if (text === "/start") {
+  // t.me/GoLuQ_client_bot?start=qr arrives as "/start qr": remember the source
+  // on the thread so the cockpit and the weekly brief can say which door worked.
+  const startSrc = /^\/start\s+([A-Za-z0-9_-]{1,32})/.exec(text)?.[1] || "";
+  if (startSrc) await db.prepare("UPDATE chat_sessions SET page = ? WHERE id = ?").bind(`telegram:${startSrc}`.slice(0, 60), sid).run();
+  if (text.startsWith("/start")) {
     const hello = lang === "hi"
       ? "नमस्ते! मैं GoLuQ.com की गाइड हूँ। बताइए आपका बिज़नेस क्या है और क्या अटकता है — सॉफ़्टवेयर, WhatsApp, कॉल या टोल-फ़्री लाइन — मैं सही चीज़ और कीमत बताऊँगी।"
       : "Hello! This is the GoLuQ.com guide. Tell me what business you run and what slows it down — software, WhatsApp, calls or a toll-free line — and I will point you to the right thing and its price. You can also write in your own language.";
