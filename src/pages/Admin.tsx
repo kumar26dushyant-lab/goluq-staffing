@@ -8,7 +8,7 @@ import { Button } from "../components/ui/Button";
 const Projects = lazy(() => import("../components/admin/Projects").then((m) => ({ default: m.Projects })));
 const Campaigns = lazy(() => import("../components/admin/Campaigns").then((m) => ({ default: m.Campaigns })));
 const Marketing = lazy(() => import("../components/admin/Marketing").then((m) => ({ default: m.Marketing })));
-const LiveChat = lazy(() => import("../components/admin/LiveChat").then((m) => ({ default: m.LiveChat })));
+const Conversations = lazy(() => import("../components/admin/Conversations").then((m) => ({ default: m.Conversations })));
 const TestimonialsPanel = lazy(() => import("../components/admin/Testimonials").then((m) => ({ default: m.Testimonials })));
 const Today = lazy(() => import("../components/admin/Today").then((m) => ({ default: m.Today })));
 const Enquiries = lazy(() => import("../components/admin/Enquiries").then((m) => ({ default: m.Enquiries })));
@@ -126,7 +126,7 @@ export function Admin() {
             <Suspense fallback={<p className="text-sm text-muted">Loading…</p>}>
             {section === "today" && <Today onOpenChat={openChat} onOpenLeads={() => setSection("leads")} />}
             {section === "leads" && <Enquiries />}
-            {section === "chat" && <LiveChat initialId={chatId} />}
+            {section === "chat" && <Conversations initialId={chatId} />}
             {section === "inbox" && <EmailInbox />}
             {section === "visitors" && <Visitors />}
             {section === "pricing" && <Pricing />}
@@ -170,7 +170,7 @@ export function Admin() {
 /** One line each: what the screen is for. Shown under the title on every screen. */
 const SECTION_META: Record<Section, { title: string; desc: string }> = {
   today: { title: "Today", desc: "Who is waiting, what came in, what is due." },
-  chat: { title: "Conversations", desc: "WhatsApp and website chats, together. Reply here or from Telegram." },
+  chat: { title: "Conversations", desc: "WhatsApp, Telegram and website, one inbox. Reply here or from Telegram." },
   briefs: { title: "Briefs", desc: "Plans written with prospects on goluq.com/start. Read, call, quote." },
   leads: { title: "Enquiries", desc: "Everyone who left a number. WhatsApp, call, and mark where it stands." },
   inbox: { title: "Email", desc: "Mail to the business address, answered as the domain." },
@@ -213,7 +213,6 @@ const GROUPS: { id: string; label: string; icon: typeof Users; sections: { id: S
     { id: "pricing", label: "Pricing & offers", icon: IndianRupee },
     { id: "campaigns", label: "Campaigns", icon: Megaphone },
     { id: "testimonials", label: "Testimonials", icon: Video },
-    { id: "marketing", label: "Marketing", icon: ImageIcon },
     { id: "visitors", label: "Visitors", icon: BarChart3 },
   ] },
   { id: "deliver", label: "Deliver", icon: Briefcase, sections: [
