@@ -6,15 +6,11 @@ import { lazy, Suspense } from "react";
 import { WelcomeSplash } from "./components/WelcomeSplash";
 import App from "./App";
 
-// The particle canvas and the 3D backdrop are marketing dressing. They used to
-// mount on every route — the cockpit spent ~300 ms of every second drawing
-// particles behind a table, and downloaded a 928 KB scene it never showed.
-// Now: the particles only on marketing pages, the 3D scene only on /demo,
-// neither on the cockpit, portal, partner or intake pages.
-const AuroraBackground = lazy(() => import("./components/AuroraBackground").then((m) => ({ default: m.AuroraBackground })));
+// The 3D backdrop is demo dressing and mounts only on /demo. The particle
+// canvas is gone for good (owner's call, 2026-09-15): it cost ~300 ms of every
+// second on every page and said nothing about the business.
 const HoloBackground = lazy(() => import("./components/holo/HoloBackground").then((m) => ({ default: m.HoloBackground })));
 const path = window.location.pathname;
-const plainRoute = /^\/(admin|portal|partner|start|solutions|thanks)/.test(path);
 const demoRoute = path.startsWith("/demo");
 import "./i18n";
 import "./index.css";
@@ -46,7 +42,6 @@ if ("serviceWorker" in navigator) {
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ThemeProvider>
-      {!plainRoute && <Suspense fallback={null}><AuroraBackground /></Suspense>}
       {demoRoute && <Suspense fallback={null}><HoloBackground /></Suspense>}
       <VoiceProvider>
         <WelcomeSplash />
