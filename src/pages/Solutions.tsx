@@ -2,7 +2,6 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ArrowRight } from "lucide-react";
 import { TopBar } from "../components/TopBar";
-import { SiteFooter } from "../components/SiteFooter";
 
 /**
  * /solutions — the three ways a buyer looks for us: by the seat they sit in,
@@ -69,7 +68,6 @@ export default function Solutions() {
           {INDUSTRY.map(([id, en, h, card]) => <Tile key={id} to={start(id)} title={hi ? h : en} img={`/catalog/${hi ? "hi/" : ""}${card}.jpg`} />)}
         </Section>
       </main>
-      <SiteFooter />
     </div>
   );
 }

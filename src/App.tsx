@@ -14,6 +14,7 @@ const Admin = lazy(() => import("./pages/Admin").then((m) => ({ default: m.Admin
 const AdminSetup = lazy(() => import("./pages/Admin").then((m) => ({ default: m.AdminSetup })));
 import { AssistantChat } from "./components/AssistantChat";
 import { WhatsAppCta } from "./components/WhatsAppCta";
+import { SiteFooter } from "./components/SiteFooter";
 
 // The custom-build practice is a separate, lower-traffic funnel — keep it out of
 // the initial bundle so "/" stays inside the BUILD_SPEC ~200KB gzip budget.
@@ -45,6 +46,16 @@ function VisitorWhatsApp() {
   const { pathname } = useLocation();
   if (pathname.startsWith("/admin") || pathname.startsWith("/partner") || pathname.startsWith("/portal")) return null;
   return <WhatsAppCta variant="fab" context={pathname.startsWith("/build") ? "build" : "general"} />;
+}
+
+/**
+ * One footer, every visitor-facing page — the cockpit, portal, partner
+ * dashboard, demo and payment return page carry their own chrome.
+ */
+function GlobalFooter() {
+  const { pathname } = useLocation();
+  if (/^\/(admin|portal|partner\/dashboard|partner\/reset|demo|thanks)/.test(pathname)) return null;
+  return <SiteFooter />;
 }
 
 /**
@@ -144,6 +155,7 @@ export default function App() {
         <Route path="/admin/setup" element={<Suspense fallback={null}><AdminSetup /></Suspense>} />
         <Route path="*" element={<Suspense fallback={null}><StoryHome /></Suspense>} />
       </Routes>
+      <GlobalFooter />
       <AssistantChat />
       {/* Sits above the chat launcher: the bot answers instantly, this reaches
           a human. Both are useful; they must not overlap. */}

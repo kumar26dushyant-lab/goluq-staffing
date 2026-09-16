@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ArrowRight, CalendarClock, Check, Mail, MessageCircle, Mic, Square, Loader2, Pencil } from "lucide-react";
 import { TopBar } from "../components/TopBar";
-import { SiteFooter } from "../components/SiteFooter";
 import { useSiteConfig } from "../lib/siteConfig";
 import { captureUtm, sessionId } from "../lib/track";
 import { getActiveRef } from "../lib/refAttribution";
@@ -260,7 +259,6 @@ export default function Start() {
           </Section>
         )}
       </main>
-      <SiteFooter />
     </div>
   );
 }

@@ -7,7 +7,6 @@ import { TopBar } from "../components/TopBar";
 import { StoryChapters } from "../components/story/StoryChapters";
 import { ProductsBand } from "../components/ProductsBand";
 import { Testimonials } from "../components/Testimonials";
-import { SiteFooter } from "../components/SiteFooter";
 import { useSiteConfig } from "../lib/siteConfig";
 import { useRegion } from "../lib/region";
 
@@ -165,8 +164,6 @@ export function StoryHome() {
           </div>
         </div>
       </section>
-
-      <SiteFooter />
     </div>
   );
 }

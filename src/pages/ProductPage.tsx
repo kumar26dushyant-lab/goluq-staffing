@@ -10,7 +10,6 @@ import { TopBar } from "../components/TopBar";
 import { Button } from "../components/ui/Button";
 import { WhatsAppCta } from "../components/WhatsAppCta";
 import { Testimonials } from "../components/Testimonials";
-import { SiteFooter } from "../components/SiteFooter";
 import { usePricing, useMoney, useSiteConfig } from "../lib/siteConfig";
 
 export type ProductId = "office" | "store";
@@ -270,8 +269,6 @@ export function ProductPage({ product }: { product: ProductId }) {
             </Link>
           </div>
         </section>
-
-        <SiteFooter />
       </main>
     </div>
   );
