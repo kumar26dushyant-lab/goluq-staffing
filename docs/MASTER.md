@@ -1004,6 +1004,24 @@ for the migration.
   cleared. The endless "Loading…" was the rate-limit pause; the thread now
   says why and retries.
 
+### Footer and brand unified; two new sections proposed (2026-09-17, later)
+- One company footer on every visitor page, mounted once in App: navy band,
+  brand gradient rule, wordmark with tagline, description, email, WhatsApp,
+  city, social pills, Solutions / Company / Legal columns. Never touches the
+  screen edge (own max-width container).
+- Brand: <BrandMark> now renders "GoLuQ.com" with the official gradients
+  and optional "Digital Consultancy" line; <BrandText> paints the same
+  gradients inside copy (About no longer shows a green/black variant).
+- Oracle crons disarmed until the flip (copy in /root/goluq-crontab.saved
+  on the Oracle box). Flip sequence agreed in chat: stop Contabo app → final
+  sync → "synced" → extension flips → "flipped" → verify → Oracle crons on,
+  Contabo crons off, Contabo app back as silent fallback.
+- Proposed (owner to confirm): "How we secure your data" section with a
+  60–90 s plain-language video per region and a written page; "Become the
+  CEO of your business" story page with regional chapters. Certification
+  claims (e.g. Security+) go on the site only once the owner confirms the
+  exact credential.
+
 ## 9. TO-DO (current)
 ### Owner
 - [ ] Oracle DNS flip (docs/ORACLE-MIGRATION.md Part C-1) — say "flipping now" first.
