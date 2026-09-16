@@ -55,6 +55,26 @@ Tenancy: sarathiaicom · region India West (Mumbai). Always Free A1 is
 6. Watch for a week (Telegram alerts, quality watch, posts). Then delete
    `/opt/goluq` from Contabo and its nginx site; Contabo keeps the other two.
 
+## Status 2026-09-17
+Part A done by the owner's extension (instance goluq-mumbai, 152.67.29.92,
+2 OCPU / 12 GB). Part B done: stack installed, hardened (key-only SSH,
+Cloudflare-only firewall, backups), app + database snapshot + uploads +
+certificates copied, built for arm64, service and crons live, TLS answering
+on the new box. Waiting for the DNS flip (Part C-1 below).
+
+## Part C-1 — the flip (owner / extension, 3 minutes, tell Claude first)
+Say "flipping now" in chat so the final database sync runs first (chats and
+orders keep landing on Contabo until the records change). Then at
+dash.cloudflare.com → goluq.com → DNS → Records:
+1. Edit the **A** record `goluq.com` → IPv4 `152.67.29.92`, Proxy status ON
+   (orange cloud) → Save.
+2. Edit the **A** record `www` → `152.67.29.92`, proxied → Save.
+3. If any **AAAA** record exists for goluq.com or www, delete it (the Oracle
+   box has no IPv6).
+4. Reply "flipped". Claude verifies, disables the goluq cron jobs on Contabo
+   so nothing sends twice, and keeps the Contabo copy as a silent fallback
+   for a week.
+
 ## Part C — after the move
 - Owner: nothing, except one Contabo snapshot before deletion.
 - Rollback at any point: flip the DNS records back; the Contabo copy stays

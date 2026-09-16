@@ -989,9 +989,25 @@ for the migration.
   docs/MARKETING-FREE.md (free-first plan for UAE/AU/NZ and untapped
   markets, partners and micro-influencers, cockpit mechanics to build).
 
+### Oracle Mumbai origin ready; company footer; positioning (2026-09-17)
+- Oracle: goluq-mumbai (152.67.29.92) built and serving goluq.com over TLS
+  with the copied certificate; DB snapshot, uploads, crons, hardening all in
+  place. DNS flip pending (docs/ORACLE-MIGRATION.md Part C-1). After the
+  flip: disable Contabo goluq crons, watch a week, then remove.
+- Footer rebuilt as a company footer: description, contact email, social
+  icons (LinkedIn and Facebook set; Instagram/YouTube appear when set in
+  Settings → Contact & alerts), Solutions / Company / Legal columns (privacy,
+  terms, refunds anchor). Positioning copy now "a small team of builders and
+  operators, founded and led by Dushyant Sharma" (about, homepage founder
+  block, founder card) — no invented names.
+- Conversations: the "1" was a real waiting flag left by my cancel-call test;
+  cleared. The endless "Loading…" was the rate-limit pause; the thread now
+  says why and retries.
+
 ## 9. TO-DO (current)
 ### Owner
-- [ ] Oracle: Part A of docs/ORACLE-MIGRATION.md (PAYG upgrade, VCN, A1 instance with the key) → send the IP.
+- [ ] Oracle DNS flip (docs/ORACLE-MIGRATION.md Part C-1) — say "flipping now" first.
+- [ ] Settings → Contact & alerts: Instagram and YouTube page URLs once created.
 - [ ] Cloudflare: Bot Fight Mode, Managed WAF ruleset, rate-limit rule for /api/*, SSL Full (strict) — docs/SECURITY.md.
 - [ ] LinkedIn page: fill every field from docs/LINKEDIN.md (year founded and
       registered address are yours to enter); start the daily outreach routine.
