@@ -78,6 +78,7 @@ export function SiteFooter({ className = "" }: { className?: string }) {
           ])}
           {col(hi ? "कंपनी" : "Company", [
             { to: "/about", label: hi ? "हमारे बारे में" : "About us" },
+            { to: "/security", label: hi ? "डेटा सुरक्षा" : "How we secure your data" },
             { to: "/start", label: hi ? "अपनी ज़रूरत बताइए" : "Tell us your need" },
             { to: "/partner", label: hi ? "पार्टनर बनें" : "Become a partner" },
             { href: "/portal", label: t("footer.portal") },

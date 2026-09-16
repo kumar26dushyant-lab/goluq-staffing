@@ -2095,7 +2095,18 @@
       "soon": "Video stories from customers arrive here as they are recorded."
     },
     "sub": "Software, WhatsApp, voice and toll-free lines, set up and run for you by one consultant. Six stories below; one of them is yours.",
-    "book": "Book a 30-minute call"
+    "book": "Book a 30-minute call",
+    "secure": {
+      "kicker": "How we secure your data",
+      "title": "Your customers stay yours. Your data stays yours.",
+      "one": "Your number, your customers",
+      "oneSub": "Chats run on the business WhatsApp number, not a salesman's phone.",
+      "two": "Only the people you name",
+      "twoSub": "Roles and logins you decide; every change recorded.",
+      "three": "Never sold, always yours",
+      "threeSub": "Encrypted, backed up nightly, exportable the day you ask.",
+      "cta": "See exactly what we do"
+    }
   },
   "solutions": {
     "nav": "Solutions"

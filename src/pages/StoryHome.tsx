@@ -131,6 +131,23 @@ export function StoryHome() {
         </div>
       </section>
 
+      {/* Trust, before the ask. */}
+      <section className="mx-auto max-w-6xl px-5 pb-16 sm:px-8 sm:pb-24">
+        <div className="rounded-3xl border border-brand-luq/25 bg-brand-luq/5 p-6 sm:p-8">
+          <p className="font-mono text-xs uppercase tracking-[0.28em] text-brand-luq">{t("story.secure.kicker")}</p>
+          <h2 className="mt-2 font-display text-2xl font-bold sm:text-3xl">{t("story.secure.title")}</h2>
+          <div className="mt-5 grid gap-4 sm:grid-cols-3">
+            {(["one", "two", "three"] as const).map((k) => (
+              <div key={k} className="rounded-2xl bg-[rgb(var(--c-base))]/70 p-4">
+                <p className="font-semibold text-fg">{t(`story.secure.${k}`)}</p>
+                <p className="mt-1 text-sm text-muted">{t(`story.secure.${k}Sub`)}</p>
+              </div>
+            ))}
+          </div>
+          <Link to="/security" className="mt-5 inline-flex items-center gap-2 rounded-full bg-fg px-5 py-3 text-base font-bold text-[rgb(var(--c-base))]">{t("story.secure.cta")}</Link>
+        </div>
+      </section>
+
       {/* The human behind it */}
       <section className="mx-auto max-w-6xl px-5 pb-20 sm:px-8 sm:pb-28">
         <div className="glass grid gap-6 overflow-hidden rounded-3xl sm:grid-cols-[260px_1fr] sm:items-center">

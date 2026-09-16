@@ -62,18 +62,26 @@ Cloudflare-only firewall, backups), app + database snapshot + uploads +
 certificates copied, built for arm64, service and crons live, TLS answering
 on the new box. Waiting for the DNS flip (Part C-1 below).
 
-## Part C-1 — the flip (owner / extension, 3 minutes, tell Claude first)
-Say "flipping now" in chat so the final database sync runs first (chats and
-orders keep landing on Contabo until the records change). Then at
-dash.cloudflare.com → goluq.com → DNS → Records:
+## Status 2026-09-17, later — SWITCHED
+Mumbai is the only live origin since 2026-09-17 00:20 CEST: the Contabo app
+is stopped and its goluq crons removed; Contabo's nginx forwards goluq.com
+to https://152.67.29.92 (Cloudflare's visitor IP passed through, trusted by
+Mumbai). Mumbai's crons are armed. Deploys now run on Mumbai:
+`ssh ubuntu@152.67.29.92 'sudo bash /opt/goluq/deploy/update.sh'`.
+The DNS flip below needs no coordination any more — it only removes the
+Europe hop (≈1 s → ≈0.3 s per request). Rollback for a week: start the
+Contabo app and restore /etc/nginx/sites-available/goluq.com.local-backup
+(Contabo's data would then be a day-old snapshot; Mumbai stays primary).
+
+## Part C-1 — the flip (owner / extension, any time now)
+At dash.cloudflare.com → goluq.com → DNS → Records:
 1. Edit the **A** record `goluq.com` → IPv4 `152.67.29.92`, Proxy status ON
    (orange cloud) → Save.
 2. Edit the **A** record `www` → `152.67.29.92`, proxied → Save.
 3. If any **AAAA** record exists for goluq.com or www, delete it (the Oracle
    box has no IPv6).
-4. Reply "flipped". Claude verifies, disables the goluq cron jobs on Contabo
-   so nothing sends twice, and keeps the Contabo copy as a silent fallback
-   for a week.
+4. Reply "flipped". Claude verifies latency dropped and that certbot on
+   Mumbai can renew.
 
 ## Part C — after the move
 - Owner: nothing, except one Contabo snapshot before deletion.

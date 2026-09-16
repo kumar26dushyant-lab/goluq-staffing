@@ -1022,9 +1022,22 @@ for the migration.
   claims (e.g. Security+) go on the site only once the owner confirms the
   exact credential.
 
+### Switched to Oracle Mumbai; security page (2026-09-17, later)
+- goluq.com now runs from Mumbai (see docs/ORACLE-MIGRATION.md status).
+  Contabo forwards until the owner's extension moves the two A records;
+  then the Europe hop disappears. Deploys target Mumbai.
+- goluq.com/security: three promises, eight things we actually do, video
+  slot, FAQ, WhatsApp question button; homepage trust band above the
+  founder block; footer link. Video scripts per region in
+  docs/SECURITY-VIDEO.md. No certification claimed until the owner names the
+  exact credential.
+- Next: the "Become the CEO of your business" story page with regional
+  chapters; the security reel (India first).
+
 ## 9. TO-DO (current)
 ### Owner
-- [ ] Oracle DNS flip (docs/ORACLE-MIGRATION.md Part C-1) — say "flipping now" first.
+- [ ] Oracle DNS flip (docs/ORACLE-MIGRATION.md Part C-1) — any time; no coordination needed.
+- [ ] Name the exact security credential (issuer + title) to show on /security, or none.
 - [ ] Settings → Contact & alerts: Instagram and YouTube page URLs once created.
 - [ ] Cloudflare: Bot Fight Mode, Managed WAF ruleset, rate-limit rule for /api/*, SSL Full (strict) — docs/SECURITY.md.
 - [ ] LinkedIn page: fill every field from docs/LINKEDIN.md (year founded and

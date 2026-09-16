@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Update GoLuQ on the VM (native systemd install): pull, rebuild, restart.
+#   Live box since 2026-09-17: Oracle Mumbai — ssh ubuntu@152.67.29.92 'sudo bash /opt/goluq/deploy/update.sh'
 #   cd /opt/goluq && bash deploy/update.sh
 set -e
 cd "$(dirname "$0")/.."
