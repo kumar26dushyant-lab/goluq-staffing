@@ -806,6 +806,7 @@ function SettingsPanel() {
   const [bookingUrl, setBookingUrl] = useState("");
   const [bookingSecret, setBookingSecret] = useState("");
   const [followups, setFollowups] = useState(true);
+  const [social, setSocial] = useState({ public_linkedin: "", public_facebook: "", public_instagram: "", public_youtube: "" });
   const [saved, setSaved] = useState("");
   const [tab, setTab] = useState<"general" | "telegram" | "wa" | "payments" | "signin">("general");
   // Saving before the current values have loaded would post empty strings and
@@ -821,6 +822,7 @@ function SettingsPanel() {
       setOwnerEmail(d.owner_email || "");
       setBookingUrl(d.booking_url || "");
       setBookingSecret(d.booking_secret || "");
+      setSocial({ public_linkedin: d.public_linkedin || "", public_facebook: d.public_facebook || "", public_instagram: d.public_instagram || "", public_youtube: d.public_youtube || "" });
       setFollowups(d.followups_enabled !== "0");
       setLoaded(true);
     });
@@ -829,7 +831,7 @@ function SettingsPanel() {
   const save = async () => {
     if (!loaded) return;
     setSaved("");
-    const d = await adminPost("/api/admin/settings", { owner_whatsapp: owner, owner_email: ownerEmail, public_whatsapp: publicWa, public_telegram: publicTg, booking_url: bookingUrl, followups_enabled: followups });
+    const d = await adminPost("/api/admin/settings", { owner_whatsapp: owner, owner_email: ownerEmail, public_whatsapp: publicWa, public_telegram: publicTg, booking_url: bookingUrl, followups_enabled: followups, ...social });
     setSaved(d.ok ? "Saved ✅" : "Failed");
   };
   const TABS = [["general", "Contact & alerts"], ["payments", "Payments"], ["signin", "Client sign-in"], ["telegram", "Telegram"], ["wa", "WhatsApp Business API"]] as const;
@@ -873,6 +875,14 @@ function SettingsPanel() {
           </span>
           <input className={inputClass} value={publicTg} onChange={(e) => setPublicTg(e.target.value)} placeholder="@goluq or https://t.me/goluq" />
         </label>
+        <div className="grid gap-3 sm:grid-cols-2">
+          {([["public_linkedin", "LinkedIn page"], ["public_facebook", "Facebook page"], ["public_instagram", "Instagram"], ["public_youtube", "YouTube"]] as const).map(([k, label]) => (
+            <label key={k} className="block">
+              <span className="mb-1.5 block text-base font-semibold text-fg">{label}</span>
+              <input className={inputClass} type="url" value={social[k]} onChange={(e) => setSocial({ ...social, [k]: e.target.value })} placeholder="https://…" />
+            </label>
+          ))}
+        </div>
         <label className="block">
           <span className="mb-1.5 block text-base font-semibold text-fg">Booking link (product pages)</span>
           <span className="mb-2 block text-sm text-muted">

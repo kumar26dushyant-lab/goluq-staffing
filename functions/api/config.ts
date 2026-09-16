@@ -87,6 +87,13 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     whatsapp: whatsapp || "",
     // Public Telegram channel or username, for markets that live on Telegram.
     telegram,
+    // Company pages for the footer; blank until the owner sets them.
+    social: {
+      linkedin: (await getSetting(env.DB, "public_linkedin")) || "",
+      facebook: (await getSetting(env.DB, "public_facebook")) || "",
+      instagram: (await getSetting(env.DB, "public_instagram")) || "",
+      youtube: (await getSetting(env.DB, "public_youtube")) || "",
+    },
     bookingUrl: bookingUrl || "",
     country,
     market: resolved,

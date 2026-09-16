@@ -59,6 +59,7 @@ export interface SiteConfig {
   bookingUrl: string;
   /** Which sign-in doors are open on /start. */
   auth?: { email: boolean; whatsapp: boolean; google: boolean };
+  social?: { linkedin: string; facebook: string; instagram: string; youtube: string };
   chatEnabled: boolean;
   announcement: string;
   pricing: LivePrice[];
@@ -139,6 +140,7 @@ export async function fetchSiteConfig(): Promise<SiteConfig> {
         bookingUrl: /^https:\/\//i.test(String(d?.bookingUrl || "")) ? String(d.bookingUrl) : "",
         chatEnabled: d?.chatEnabled !== false,
         auth: d?.auth ? { email: !!d.auth.email, whatsapp: !!d.auth.whatsapp, google: !!d.auth.google } : undefined,
+        social: { linkedin: String(d?.social?.linkedin || ""), facebook: String(d?.social?.facebook || ""), instagram: String(d?.social?.instagram || ""), youtube: String(d?.social?.youtube || "") },
         announcement: String(d?.announcement || ""),
         pricing,
         affiliate: d?.affiliate,

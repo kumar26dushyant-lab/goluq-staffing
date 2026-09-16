@@ -75,6 +75,7 @@ export function Conversations({ initialId = null }: { initialId?: string | null 
   const loadThread = useCallback(async (id: string) => {
     const d = await adminGet(`/api/admin/chats?id=${encodeURIComponent(id)}`);
     if (d.ok) { setThread(d); stickToBottom.current = true; }
+    else setErr(d.error === "rate_limited" ? "Too many requests from this connection — retrying in a minute." : d.error || "Could not load this conversation.");
   }, []);
   const loadEarlier = async () => {
     if (!thread || !open || !thread.messages.length) return;
@@ -190,7 +191,7 @@ export function Conversations({ initialId = null }: { initialId?: string | null 
 
             <div ref={scroller} onScroll={(e) => { const el = e.currentTarget; stickToBottom.current = el.scrollHeight - el.scrollTop - el.clientHeight < 40; }} className="min-h-0 flex-1 space-y-1.5 overflow-y-auto px-3 py-3">
               {thread?.hasMore && <button type="button" onClick={loadEarlier} className="mx-auto mb-2 flex items-center gap-1 rounded-full bg-base px-3 py-1 text-xs font-semibold text-muted"><ChevronUp size={14} /> Earlier messages</button>}
-              {!thread && <p className="text-sm text-muted">Loading…</p>}
+              {!thread && <p className="text-sm text-muted">{err || "Loading…"}</p>}
               {thread?.messages.map((m, i, all) => {
                 const mine = m.role !== "visitor";
                 const showDay = i === 0 || dayOf(m.created_at) !== dayOf(all[i - 1].created_at);
