@@ -138,10 +138,10 @@ export default function Security() {
             <video
               key={hi ? "hi" : "en"}
               controls playsInline preload="none"
-              poster={`/media/security-in-${hi ? "hi" : "en"}-poster.jpg`}
+              poster={`/media/security-in-${hi ? "hi" : "en"}-poster.jpg?v=2`}
               className="aspect-video w-full rounded-2xl border border-white/15 bg-black object-cover"
             >
-              <source src={`/media/security-in-${hi ? "hi" : "en"}.mp4`} type="video/mp4" />
+              <source src={`/media/security-in-${hi ? "hi" : "en"}.mp4?v=2`} type="video/mp4" />
             </video>
           </div>
         </section>

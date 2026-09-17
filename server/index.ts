@@ -47,7 +47,8 @@ import { onRequestGet as intakeGet, onRequestPost as intakePost } from "../funct
 import { onRequestGet as adminBriefsGet, onRequestPost as adminBriefsPost } from "../functions/api/admin/briefs";
 import { geminiImage } from "../functions/lib/gemini";
 import { checkAdmin } from "../functions/lib/admin";
-import { writeFileSync, existsSync, statSync, openSync, readSync, closeSync } from "node:fs";
+import { writeFileSync, existsSync, statSync } from "node:fs";
+import { open as fsOpen } from "node:fs/promises";
 import { extname, basename } from "node:path";
 import { randomBytes } from "node:crypto";
 import { onRequestGet as custAuthGet, onRequestPost as custAuthPost } from "../functions/api/customer/auth";
@@ -373,6 +374,42 @@ const MEDIA_TYPES: Record<string, string> = {
   ".mp4": "video/mp4", ".webm": "video/webm",
   ".jpg": "image/jpeg", ".png": "image/png", ".webp": "image/webp",
 };
+/**
+ * A file body streamed from disk, one megabyte at a time, as a web
+ * ReadableStream with its own cancel(): when a browser abandons a video the
+ * runtime calls cancel, the handle closes, nothing else is touched. (Wrapping
+ * createReadStream() in a Response crashed the whole process on abandoned
+ * downloads — "ReadableStream is already closed" in undici — which is why
+ * this is hand-rolled rather than Readable.toWeb().)
+ */
+function fileBody(file: string, start: number, end: number): ReadableStream<Uint8Array> {
+  const PIECE = 1024 * 1024;
+  let pos = start;
+  let fh: import("node:fs/promises").FileHandle | null = null;
+  let finished = false;
+  const finish = async () => { finished = true; const h = fh; fh = null; if (h) { try { await h.close(); } catch { /* closed */ } } };
+  return new ReadableStream<Uint8Array>({
+    async pull(controller) {
+      if (finished) return;
+      try {
+        if (!fh) fh = await fsOpen(file, "r");
+        const len = Math.min(PIECE, end - pos + 1);
+        if (len <= 0) { await finish(); controller.close(); return; }
+        const buf = Buffer.allocUnsafe(len);
+        const { bytesRead } = await fh.read(buf, 0, len, pos);
+        if (bytesRead <= 0) { await finish(); controller.close(); return; }
+        pos += bytesRead;
+        controller.enqueue(bytesRead === len ? buf : buf.subarray(0, bytesRead));
+        if (pos > end) { await finish(); controller.close(); }
+      } catch (e) {
+        await finish();
+        try { controller.error(e); } catch { /* already closed */ }
+      }
+    },
+    async cancel() { await finish(); },
+  });
+}
+
 app.get("/media/:name", (c) => {
   // basename() strips any path the URL tried to smuggle in.
   const name = basename(c.req.param("name"));
@@ -380,37 +417,26 @@ app.get("/media/:name", (c) => {
   const type = MEDIA_TYPES[extname(name).toLowerCase()];
   if (!type || !existsSync(file)) return c.notFound();
   const size = statSync(file).size;
-  // Range support so a phone can seek inside a video instead of reloading it.
-  //
-  // Served from a Buffer, not a Node stream. Wrapping createReadStream() in a
-  // Response crashed the whole process ("ReadableStream is already closed" in
-  // undici) whenever a browser abandoned a video mid-download — which the
-  // homepage reels made happen for every visitor. A buffered slice has no
-  // stream to close; the cap keeps a single request under 8 MB and a browser
-  // simply asks for the next slice.
-  const CHUNK = 8 * 1024 * 1024;
+  const common = { "content-type": type, "accept-ranges": "bytes", "cache-control": "public, max-age=31536000, immutable" };
+  // A plain request gets the whole file as a 200. It used to get a 206 with
+  // the first 8 MB, which Cloudflare cannot cache and forwarded verbatim to
+  // the browser — so every video stopped at the 8 MB mark (about 40 s of the
+  // security video) and a Range request for the rest still got bytes 0–8 MB.
+  // With a proper 200 the edge caches the object and answers ranges itself.
   const range = c.req.header("range");
-  const m = range ? /bytes=(\d*)-(\d*)/.exec(range) : null;
-  const wantStart = m && m[1] ? Number(m[1]) : 0;
-  const wantEnd = m && m[2] ? Math.min(Number(m[2]), size - 1) : size - 1;
-  if (m && (wantStart >= size || wantStart > wantEnd)) {
+  const m = range ? /^bytes=(\d*)-(\d*)$/.exec(range.trim()) : null;
+  if (!m || (!m[1] && !m[2])) {
+    return new Response(fileBody(file, 0, size - 1), { status: 200, headers: { ...common, "content-length": String(size) } });
+  }
+  // Range: "a-b", "a-" or "-n" (the last n bytes).
+  let start = m[1] ? Number(m[1]) : Math.max(0, size - Number(m[2]));
+  let end = m[1] && m[2] ? Math.min(Number(m[2]), size - 1) : size - 1;
+  if (!Number.isFinite(start) || !Number.isFinite(end) || start >= size || start > end) {
     return new Response(null, { status: 416, headers: { "content-range": `bytes */${size}` } });
   }
-  const partial = Boolean(m) || size > CHUNK;
-  const start = wantStart;
-  const end = Math.min(wantEnd, start + CHUNK - 1);
-  const buf = Buffer.alloc(end - start + 1);
-  const fd = openSync(file, "r");
-  try { readSync(fd, buf, 0, buf.length, start); } finally { closeSync(fd); }
-  return new Response(buf, {
-    status: partial ? 206 : 200,
-    headers: {
-      "content-type": type,
-      ...(partial ? { "content-range": `bytes ${start}-${end}/${size}` } : {}),
-      "accept-ranges": "bytes",
-      "content-length": String(buf.length),
-      "cache-control": "public, max-age=31536000, immutable",
-    },
+  return new Response(fileBody(file, start, end), {
+    status: 206,
+    headers: { ...common, "content-range": `bytes ${start}-${end}/${size}`, "content-length": String(end - start + 1) },
   });
 });
 app.get("/api/customer/auth", (c) => callFn(custAuthGet as Handler, c.req.raw));
