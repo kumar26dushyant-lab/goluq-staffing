@@ -22,11 +22,29 @@ type Chapter = { id: string; who: string; hook: string; before: string; after: s
 
 const REGION_LABEL: Record<Region, [string, string]> = { in: ["India", "भारत"], gulf: ["Gulf", "खाड़ी"], intl: ["Australia & NZ", "ऑस्ट्रेलिया और NZ"] };
 
+/** The three story videos (India cut first; Gulf and AU/NZ cuts follow). */
+const STORIES = [
+  { id: "coach", en: ["A coaching institute", "The 9 pm calls nobody answers: ₹75,000 a month walking to the competitor, and what the number gets back."], hi: ["एक कोचिंग इंस्टीट्यूट", "रात 9 बजे के फ़ोन जो कोई नहीं उठाता: हर महीने ₹75,000 प्रतिद्वंद्वी के पास, और नंबर क्या वापस लाता है।"] },
+  { id: "dist", en: ["An FMCG distributor", "Forty shops paying twenty days late on ₹10 lakh a month, and the ₹3 lakh that comes back when reminders send themselves."], hi: ["एक FMCG डिस्ट्रीब्यूटर", "₹10 लाख महीने पर चालीस दुकानें बीस दिन देर से, और वे ₹3 लाख जो रिमाइंडर अपने आप जाने पर वापस आते हैं।"] },
+  { id: "ca", en: ["A CA firm of four", "Clients drifting over late replies, invoices a month late, and the memory that stays with the firm."], hi: ["चार लोगों की CA फ़र्म", "देर से जवाब पर जाते क्लाइंट, महीना देर से इनवॉइस, और वह याददाश्त जो फ़र्म के पास रहती है।"] },
+] as const;
+/** Bump when a video is re-cut: the edge caches by URL. */
+const VID_V = "1";
+
 const COPY = {
   en: {
     kicker: "The story",
     title: "Become the CEO of your business.",
-    sub: "You started it to be free. Somewhere along the way it made you the phone, the ledger and the last one to leave. Here is what changes, one owner at a time.",
+    sub: "Three owners, ninety seconds each: what runs on their phone today, what it costs, and what changes in money, time and control once GoLuQ runs it.",
+    storiesTitle: "Three stories, ninety seconds each",
+    storiesNote: "The numbers are worked examples, not client results. Put in your own; the plan we write uses yours.",
+    example: "Worked example",
+    pillars: [
+      ["Money", "Enquiries answered at night, dues collected on time, invoices out the same day. Revenue you already earned, kept."],
+      ["Efficiency", "One screen for the whole business. Reminders, bookings and follow-ups send themselves; people do the work only people can do."],
+      ["Cost", "Fixed price, weeks not months, then a monthly plan that costs less than one salary. You own the code and the data."],
+    ],
+    more: "Short versions for your region",
     pick: "Read it for",
     before: "Before",
     after: "With GoLuQ",
@@ -46,7 +64,16 @@ const COPY = {
   hi: {
     kicker: "कहानी",
     title: "अपने बिज़नेस के CEO बनिए।",
-    sub: "आपने इसे आज़ाद होने के लिए शुरू किया था। कहीं रास्ते में यह आपको फ़ोन, बहीखाता और सबसे आख़िर में निकलने वाला बना गया। क्या बदलता है — एक-एक मालिक की कहानी में।",
+    sub: "तीन मालिक, नब्बे-नब्बे सेकंड: आज उनके फ़ोन पर क्या चलता है, उसकी क्या कीमत है, और GoLuQ के चलाने पर पैसे, समय और नियंत्रण में क्या बदलता है।",
+    storiesTitle: "तीन कहानियाँ, नब्बे-नब्बे सेकंड",
+    storiesNote: "आँकड़े उदाहरण हैं, किसी क्लाइंट के नतीजे नहीं। अपने आँकड़े डालिए; हमारा प्लान आपके आँकड़ों पर बनता है।",
+    example: "उदाहरण",
+    pillars: [
+      ["पैसा", "रात की पूछताछ का जवाब, समय पर वसूली, उसी दिन इनवॉइस। जो कमाई आपकी थी, वह आपके पास रही।"],
+      ["दक्षता", "पूरे बिज़नेस की एक स्क्रीन। रिमाइंडर, बुकिंग और फ़ॉलो-अप अपने आप; लोग सिर्फ़ वह काम करें जो लोग ही कर सकते हैं।"],
+      ["लागत", "तय कीमत, हफ़्तों में, फिर एक तनख़्वाह से कम का मासिक प्लान। कोड और डेटा आपके।"],
+    ],
+    more: "आपके क्षेत्र के छोटे संस्करण",
     pick: "किसके लिए पढ़ें",
     before: "पहले",
     after: "GoLuQ के साथ",
@@ -135,39 +162,79 @@ export default function CeoStory() {
         </h1>
         <p className="mt-3 max-w-2xl text-lg text-muted">{t.sub}</p>
 
-        <div className="mt-6 flex flex-wrap items-center gap-2">
-          <span className="text-sm font-semibold text-faint">{t.pick}</span>
-          {(["in", "gulf", "intl"] as Region[]).map((r) => (
-            <Link key={r} to={`/ceo?r=${r}`} replace
-              className={`rounded-full px-4 py-1.5 text-sm font-semibold transition ${r === region ? "bg-fg text-[rgb(var(--c-base))]" : "border border-hairline/30 text-muted hover:text-fg"}`}>
-              {REGION_LABEL[r][hi ? 1 : 0]}
-            </Link>
-          ))}
-        </div>
+        {/* The stories: one video each, poster until play, voice in the site language. */}
+        <section id="stories" className="mt-8 scroll-mt-24">
+          <h2 className="font-display text-2xl font-bold text-fg sm:text-3xl">{t.storiesTitle}</h2>
+          <p className="mt-1 text-sm text-muted">{t.storiesNote}</p>
+          <div className="mt-5 grid gap-5 lg:grid-cols-3">
+            {STORIES.map((st) => {
+              const [name, hook] = st[lang];
+              return (
+                <figure key={st.id} className="overflow-hidden rounded-2xl border border-hairline/15 bg-panel/40">
+                  <video key={`${st.id}-${lang}`} controls playsInline preload="none"
+                    poster={`/media/ceo-${st.id}-${lang}-poster.jpg?v=${VID_V}`}
+                    className="aspect-video w-full bg-black object-cover">
+                    <source src={`/media/ceo-${st.id}-${lang}.mp4?v=${VID_V}`} type="video/mp4" />
+                  </video>
+                  <figcaption className="p-4">
+                    <p className="text-xs font-bold uppercase tracking-wide text-brand-luq">{t.example}</p>
+                    <p className="mt-1 text-lg font-bold text-fg">{name}</p>
+                    <p className="mt-1 text-[15px] leading-snug text-muted">{hook}</p>
+                  </figcaption>
+                </figure>
+              );
+            })}
+          </div>
+        </section>
 
-        <div className="mt-10 space-y-14 sm:space-y-20">
-          {chapters.map((ch, i) => (
-            <article key={ch.id} id={`ch-${ch.id}`} className="scroll-mt-24">
-              <p className="inline-flex items-center gap-2 rounded-full bg-brand-luq/10 px-3 py-1 text-sm font-bold text-brand-luq">
-                <span className="font-mono">{String(i + 1).padStart(2, "0")}</span> · {ch.who}
-              </p>
-              <h2 className="mt-3 text-balance font-display text-2xl font-bold leading-tight text-fg sm:text-4xl">{ch.hook}</h2>
-              <div className="mt-5 grid gap-4 sm:grid-cols-2 sm:gap-6">
-                <Scene src={`/story/${ch.id}_before.webp?v=${V}`} label={t.before} line={ch.before} muted />
-                <Scene src={`/story/${ch.id}_after.webp?v=${V}`} label={t.after} line={ch.after} />
-              </div>
-              <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
-                <p className="text-base text-fg"><span className="font-bold text-brand-luq">{t.changed}:</span> {ch.changed}</p>
-                <span className="rounded-full border border-brand-luq/40 bg-brand-luq/10 px-3 py-1 text-sm font-semibold text-brand-luq">{ch.product}</span>
-                {ch.reel && (
-                  <a href={`/media/reel-${ch.id}-${lang}.mp4`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-sm font-semibold text-muted hover:text-fg">
-                    <Volume2 size={15} /> {t.watch}
-                  </a>
-                )}
-              </div>
-            </article>
+        <section className="mt-12 grid gap-4 sm:grid-cols-3">
+          {t.pillars.map(([h, p]) => (
+            <div key={h} className="rounded-2xl border border-hairline/15 bg-panel/30 p-5">
+              <p className="font-display text-xl font-bold text-fg">{h}</p>
+              <p className="mt-2 text-[15px] leading-relaxed text-muted">{p}</p>
+            </div>
           ))}
-        </div>
+        </section>
+
+        <details className="group mt-12">
+          <summary className="flex cursor-pointer list-none items-center gap-3 font-display text-2xl font-bold text-fg">
+            {t.more}
+            <span className="rounded-full border border-hairline/30 px-3 py-0.5 text-sm font-semibold text-muted group-open:hidden">+</span>
+            <span className="hidden rounded-full border border-hairline/30 px-3 py-0.5 text-sm font-semibold text-muted group-open:inline">−</span>
+          </summary>
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <span className="text-sm font-semibold text-faint">{t.pick}</span>
+            {(["in", "gulf", "intl"] as Region[]).map((r) => (
+              <Link key={r} to={`/ceo?r=${r}`} replace
+                className={`rounded-full px-4 py-1.5 text-sm font-semibold transition ${r === region ? "bg-fg text-[rgb(var(--c-base))]" : "border border-hairline/30 text-muted hover:text-fg"}`}>
+                {REGION_LABEL[r][hi ? 1 : 0]}
+              </Link>
+            ))}
+          </div>
+          <div className="mt-8 space-y-12">
+            {chapters.map((ch, i) => (
+              <article key={ch.id} id={`ch-${ch.id}`} className="scroll-mt-24">
+                <p className="inline-flex items-center gap-2 rounded-full bg-brand-luq/10 px-3 py-1 text-sm font-bold text-brand-luq">
+                  <span className="font-mono">{String(i + 1).padStart(2, "0")}</span> · {ch.who}
+                </p>
+                <h3 className="mt-3 text-balance font-display text-2xl font-bold leading-tight text-fg sm:text-3xl">{ch.hook}</h3>
+                <div className="mt-4 grid gap-4 sm:grid-cols-2 sm:gap-6">
+                  <Scene src={`/story/${ch.id}_before.webp?v=${V}`} label={t.before} line={ch.before} muted />
+                  <Scene src={`/story/${ch.id}_after.webp?v=${V}`} label={t.after} line={ch.after} />
+                </div>
+                <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+                  <p className="text-base text-fg"><span className="font-bold text-brand-luq">{t.changed}:</span> {ch.changed}</p>
+                  <span className="rounded-full border border-brand-luq/40 bg-brand-luq/10 px-3 py-1 text-sm font-semibold text-brand-luq">{ch.product}</span>
+                  {ch.reel && (
+                    <a href={`/media/reel-${ch.id}-${lang}.mp4`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-sm font-semibold text-muted hover:text-fg">
+                      <Volume2 size={15} /> {t.watch}
+                    </a>
+                  )}
+                </div>
+              </article>
+            ))}
+          </div>
+        </details>
 
         <section className="mt-16 rounded-3xl bg-[#0B1020] p-6 text-white sm:p-10">
           <h2 className="font-display text-2xl font-bold sm:text-3xl">{t.weekTitle}</h2>

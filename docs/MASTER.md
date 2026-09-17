@@ -1087,6 +1087,24 @@ for the migration.
   instagram_manage_messages and subscribes the webhook (OWNER-TASKS task 4).
 - Footer social icons in each platform's colour.
 
+### Story videos on /ceo (2026-09-17, later)
+- Owner's brief: the CEO page must be 2–3 full story videos (1–2 min), each
+  showing what an owner does today, what it costs, and what changes with
+  GoLuQ in money, efficiency and cost; the homepage reels later get the
+  same money theme at 30–40 s.
+- Made three India stories, EN + HI, ~75–85 s each, seven scenes + end
+  card: a coaching institute (Meera, the 9 pm calls), an FMCG distributor
+  (Suresh, forty shops paying late), a CA firm (Priya, filing week on
+  memory). Every figure is spoken as "suppose / say" and captioned
+  "worked example"; the end card says "The numbers are an example. Put in
+  your own." No client, no result claimed. Pipeline in scratchpad `ceo/`
+  (scenes.py with NOREF_IDS for scenes set elsewhere, lines.txt,
+  voices.sh, storyvideo.mjs); assets /media/ceo-{coach,dist,ca}-{en,hi}.mp4
+  + posters.
+- /ceo now leads with the three videos, then one Money / Efficiency / Cost
+  strip, then the regional chapters folded under "Short versions for your
+  region". Gulf and AU/NZ story videos: same pipeline, next.
+
 ## 9. TO-DO (current)
 ### Owner
 - [ ] Oracle: after a quiet week (by 2026-09-24) take a Contabo snapshot, then remove /opt/goluq and its nginx site there.
