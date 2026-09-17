@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ArrowLeft, Send, Search, Bot, Check, User, MessageSquare, Globe, Radio, CalendarClock, ImageIcon, XCircle, RotateCcw, ExternalLink, ChevronUp } from "lucide-react";
+import { ArrowLeft, Send, Search, Bot, Check, User, MessageSquare, Globe, Radio, CalendarClock, ImageIcon, XCircle, RotateCcw, ExternalLink, ChevronUp, Facebook, Instagram } from "lucide-react";
 import { usePoll } from "../../lib/usePoll";
 import { inputClass } from "../../lib/ui";
 import { adminGet, adminPost } from "../../lib/adminApi";
@@ -34,16 +34,16 @@ const agoOf = (s: string) => {
     if (m < 1) return "now"; if (m < 60) return `${m}m`; const h = Math.round(m / 60); if (h < 24) return `${h}h`; return `${Math.round(h / 24)}d`;
   } catch { return ""; }
 };
-const channelOf = (id: string) => (id.startsWith("wa:") ? "wa" : id.startsWith("tg:") ? "tg" : "web");
+const channelOf = (id: string) => (id.startsWith("wa:") ? "wa" : id.startsWith("tg:") ? "tg" : id.startsWith("fb:") ? "fb" : id.startsWith("ig:") ? "ig" : "web");
 const ChannelIcon = ({ id, size = 12 }: { id: string; size?: number }) => {
   const ch = channelOf(id);
-  return ch === "wa" ? <MessageSquare size={size} className="text-success" /> : ch === "tg" ? <Send size={size} className="text-brand-blue" /> : <Globe size={size} className="text-brand-luq" />;
+  return ch === "wa" ? <MessageSquare size={size} className="text-success" /> : ch === "tg" ? <Send size={size} className="text-brand-blue" /> : ch === "fb" ? <Facebook size={size} className="text-[#1877F2]" /> : ch === "ig" ? <Instagram size={size} className="text-[#DD2A7B]" /> : <Globe size={size} className="text-brand-luq" />;
 };
-const initials = (r: Row) => (r.visitor_name || "").split(" ").map((x) => x[0]).filter(Boolean).slice(0, 2).join("").toUpperCase() || (channelOf(r.id) === "wa" ? "W" : channelOf(r.id) === "tg" ? "T" : "V");
-const labelOf = (r: Row) => r.visitor_name || (r.visitor_phone ? `+${r.visitor_phone}` : channelOf(r.id) === "tg" ? "Telegram visitor" : "Website visitor");
+const initials = (r: Row) => (r.visitor_name || "").split(" ").map((x) => x[0]).filter(Boolean).slice(0, 2).join("").toUpperCase() || ({ wa: "W", tg: "T", fb: "F", ig: "I", web: "V" } as Record<string, string>)[channelOf(r.id)];
+const labelOf = (r: Row) => r.visitor_name || (r.visitor_phone ? `+${r.visitor_phone}` : ({ tg: "Telegram visitor", fb: "Messenger visitor", ig: "Instagram visitor" } as Record<string, string>)[channelOf(r.id)] || "Website visitor");
 const sourceOf = (page: string | null) => { const p = String(page || ""); const m = /^(whatsapp|telegram):(.+)$/.exec(p); return m ? `via ${m[2]}` : p && !["whatsapp", "telegram"].includes(p) ? `on ${p}` : ""; };
 
-const FILTERS: [string, string][] = [["", "All"], ["waiting", "Waiting"], ["unread", "Unread"], ["wa", "WhatsApp"], ["tg", "Telegram"], ["web", "Web"], ["closed", "Closed"]];
+const FILTERS: [string, string][] = [["", "All"], ["waiting", "Waiting"], ["unread", "Unread"], ["wa", "WhatsApp"], ["tg", "Telegram"], ["fb", "Messenger"], ["ig", "Instagram"], ["web", "Web"], ["closed", "Closed"]];
 
 export function Conversations({ initialId = null }: { initialId?: string | null }) {
   const [rows, setRows] = useState<Row[]>([]);
@@ -59,14 +59,23 @@ export function Conversations({ initialId = null }: { initialId?: string | null 
   const [cardPick, setCardPick] = useState("");
   const scroller = useRef<HTMLDivElement>(null);
   const stickToBottom = useRef(true);
+  // Every list request carries a sequence number; a response that is not the
+  // newest is dropped. Without this a slow "All" response could land after a
+  // faster "Waiting" one and put the old list back — the filter looked stuck.
+  const listSeq = useRef(0);
+  // The search box fires after a short pause, not on every keystroke.
+  const [qLive, setQLive] = useState("");
+  useEffect(() => { const t = window.setTimeout(() => setQ(qLive.trim()), 300); return () => window.clearTimeout(t); }, [qLive]);
 
   const loadList = useCallback(async (more = false) => {
     const params = new URLSearchParams();
-    if (q.trim()) params.set("q", q.trim());
+    if (q) params.set("q", q);
     if (filter) params.set("filter", filter);
     if (more && rows.length) params.set("before", rows[rows.length - 1].last_at || "");
+    const seq = ++listSeq.current;
     const d = await adminGet(`/api/admin/chats?${params.toString()}`);
-    if (!d.ok) return;
+    if (seq !== listSeq.current) return;
+    if (!d.ok) { if (d.error === "rate_limited") setErr("Too many requests from this connection — paused for a minute."); return; }
     setRows((prev) => (more ? [...prev, ...(d.chats || [])] : d.chats || []));
     setHasMoreRows(Boolean(d.hasMore));
     setWaiting(d.waiting || 0);
@@ -86,8 +95,11 @@ export function Conversations({ initialId = null }: { initialId?: string | null 
     if (!open || !thread) return;
     const last = thread.messages.length ? thread.messages[thread.messages.length - 1].id : 0;
     const d = await adminGet(`/api/admin/chats?id=${encodeURIComponent(open)}&after=${last}`);
-    if (d.ok && (d.messages?.length || d.session)) {
-      setThread((t) => (t ? { ...t, messages: d.messages?.length ? [...t.messages, ...d.messages] : t.messages, session: { ...t.session, ...(d.session || {}) } } : t));
+    if (!d.ok) return;
+    const cur = thread.session;
+    const sessionChanged = d.session && (["bot_off", "closed", "needs_human"] as const).some((k) => Number(d.session[k] ?? 0) !== Number(cur[k] ?? 0));
+    if (d.messages?.length || sessionChanged) {
+      setThread((t) => (t && t.session.id === cur.id ? { ...t, messages: d.messages?.length ? [...t.messages, ...d.messages] : t.messages, session: { ...t.session, ...(d.session || {}) } } : t));
       if (d.messages?.length) stickToBottom.current = true;
     }
   }, [open, thread]);
@@ -95,7 +107,7 @@ export function Conversations({ initialId = null }: { initialId?: string | null 
   useEffect(() => { loadList(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [q, filter]);
   useEffect(() => { if (initialId) { setOpen(initialId); loadThread(initialId); } }, [initialId, loadThread]);
   usePoll(() => { loadList(); }, 10000, [q, filter]);
-  usePoll(() => { pollThread(); }, 4000, [pollThread]);
+  usePoll(() => { pollThread(); }, 4000, [open]);
   useEffect(() => {
     if (stickToBottom.current && scroller.current) scroller.current.scrollTop = scroller.current.scrollHeight;
   }, [thread?.messages.length, open]);
@@ -128,7 +140,7 @@ export function Conversations({ initialId = null }: { initialId?: string | null 
         <div className="border-b border-hairline/10 p-2.5">
           <label className="flex items-center gap-2 rounded-xl bg-base px-3 py-2">
             <Search size={15} className="shrink-0 text-faint" />
-            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name, number, words…" className="w-full bg-transparent text-sm text-fg outline-none placeholder:text-faint" />
+            <input value={qLive} onChange={(e) => setQLive(e.target.value)} placeholder="Search name, number, words…" className="w-full bg-transparent text-sm text-fg outline-none placeholder:text-faint" />
           </label>
           <div className="mt-2 flex gap-1 overflow-x-auto pb-0.5">
             {FILTERS.map(([id, label]) => (

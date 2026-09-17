@@ -206,7 +206,7 @@ text as Marketing; if it says "generic", tell Claude and we add detail.
 
 ---
 
-## 4. Facebook posting — add the Pages use case and regenerate the token (10 minutes)
+## 4. Facebook posting and messaging — add the Pages use case and regenerate the token (10 minutes)
 
 Why: the cockpit's Publish tab can reach the Page but cannot post; the app
 lacks the Pages permissions.
@@ -215,8 +215,12 @@ lacks the Pages permissions.
    ("GoLuQ.com" app). Left menu → **Use cases** → **Add use case** (or
    "Customize") → choose **"Manage everything on your Page"** (Pages /
    Content). Add it. Inside it, under Permissions, make sure
-   `pages_manage_posts`, `pages_read_engagement`, `instagram_basic`,
-   `instagram_content_publish` are added (click "Add" beside each).
+   `pages_manage_posts`, `pages_read_engagement`, `pages_messaging`,
+   `instagram_basic`, `instagram_content_publish`,
+   `instagram_manage_messages` are added (click "Add" beside each). The two
+   messaging scopes put Facebook Messenger and Instagram Direct into the
+   cockpit's Conversations beside WhatsApp and Telegram, with the same guide
+   and the same Reply / Guide off / Close buttons on Telegram.
 2. https://business.facebook.com/settings → **Users → System users** →
    **goluq-api** → **Add assets** → Pages → tick "GoLuQ.com Digital
    Consultancy" → Full control (Manage) → Save. (Skip if already assigned.)
@@ -235,6 +239,14 @@ lacks the Pages permissions.
    user's token list.
 
 ---
+
+
+   Webhook for messages (once, after the token): developers.facebook.com →
+   the app → Webhooks. Under **Page** subscribe to `messages` and
+   `messaging_postbacks`; under **Instagram** subscribe to `messages`. Callback
+   URL and verify token are the ones WhatsApp already uses (same page). Then
+   send the Page a Messenger message and the Instagram account a DM: both
+   should appear in Conversations within seconds, answered by the guide.
 
 ## 5. Instagram professional account (10 minutes)
 

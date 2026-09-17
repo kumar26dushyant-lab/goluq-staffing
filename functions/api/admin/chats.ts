@@ -12,8 +12,8 @@ interface Env extends WaEnv {
 }
 
 /**
- * Owner side of conversations — WhatsApp, Telegram and website threads in
- * one inbox, shaped for a messaging app rather than a table:
+ * Owner side of conversations — WhatsApp, Telegram, Messenger, Instagram and
+ * website threads in one inbox, shaped for a messaging app rather than a table:
  *
  * GET ?q=&filter=&before=<last_at>&limit=      → inbox page (search, filter, paging)
  * GET ?id=<session>&before=<msgId>             → a page of the transcript, oldest page first on demand
@@ -70,7 +70,9 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
   else if (filter === "unread") where.push("s.unread_for_agent > 0");
   else if (filter === "wa") where.push("s.id LIKE 'wa:%'");
   else if (filter === "tg") where.push("s.id LIKE 'tg:%'");
-  else if (filter === "web") where.push("s.id NOT LIKE 'wa:%' AND s.id NOT LIKE 'tg:%'");
+  else if (filter === "fb") where.push("s.id LIKE 'fb:%'");
+  else if (filter === "ig") where.push("s.id LIKE 'ig:%'");
+  else if (filter === "web") where.push("s.id NOT LIKE 'wa:%' AND s.id NOT LIKE 'tg:%' AND s.id NOT LIKE 'fb:%' AND s.id NOT LIKE 'ig:%'");
   else if (filter === "closed") where.push("s.closed = 1");
   if (before) { where.push("s.last_at < ?"); binds.push(before); }
   const rows = await env.DB.prepare(

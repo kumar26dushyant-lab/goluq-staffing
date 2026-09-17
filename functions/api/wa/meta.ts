@@ -11,6 +11,7 @@ import {
 } from "../../lib/whatsapp";
 import { issuePaymentLink, callPriceInr } from "../../lib/payments";
 import { upcomingBooking, BOOKING_CHANGE, BOOKING_ASK } from "../../lib/bookings";
+import { handleMetaDms } from "../../lib/metaMessaging";
 
 interface Env extends ConciergeEnv, WaEnv, MailEnv, TgEnv {
   DB: D1Database;
@@ -165,6 +166,13 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   try {
     body = JSON.parse(raw);
   } catch {
+    return new Response("ok");
+  }
+
+  // Messenger and Instagram Direct arrive on this same hook (same app, same
+  // secret) as `page` / `instagram` objects; they never touch the WhatsApp path.
+  if (body?.object === "page" || body?.object === "instagram") {
+    await handleMetaDms(env, body);
     return new Response("ok");
   }
 

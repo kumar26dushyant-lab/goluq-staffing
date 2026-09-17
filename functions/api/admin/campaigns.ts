@@ -2,11 +2,11 @@
 
 import { checkAdmin, unauthorized } from "../../lib/admin";
 import { waHealth, insideSendingHours } from "../../lib/waHealth";
-import { tgAlertOwner } from "../../lib/telegram";
+import { tgAlertOwner, type TgEnv } from "../../lib/telegram";
 import { waConfig, waReady, type WaEnv } from "../../lib/whatsapp";
 import { WA_TEMPLATES, sendTemplate } from "../../lib/waTemplates";
 
-interface Env extends WaEnv {
+interface Env extends WaEnv, TgEnv {
   DB: D1Database;
   ADMIN_SECRET: string;
 }

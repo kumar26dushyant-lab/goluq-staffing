@@ -2,6 +2,7 @@
 
 import { waConfig, waReady, waSendText, type WaEnv } from "./whatsapp";
 import { publicBot, publicSend } from "./tgPublic";
+import { isMetaDm, metaDmSend } from "./metaMessaging";
 
 /**
  * Send a reply AS THE OWNER into one conversation — from the cockpit or from
@@ -32,6 +33,11 @@ export async function sendAgentReply(
     const bot = await publicBot(db);
     const r = await publicSend(bot, sessionId.slice(3), body);
     if (!r.ok) return { ok: false, error: `Telegram: ${r.error || "not delivered"}` };
+  }
+
+  if (isMetaDm(sessionId)) {
+    const r = await metaDmSend(db, sessionId, body);
+    if (!r.ok) return { ok: false, error: `${sessionId.startsWith("fb:") ? "Messenger" : "Instagram"}: ${r.error || "not delivered"}` };
   }
 
   const phone = waPhoneOf(sessionId);

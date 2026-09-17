@@ -1065,6 +1065,28 @@ for the migration.
   week (Monday brief, every day, evening), how it starts, /start. Footer →
   Company. All lines illustrative, no client named, no number claimed.
 
+### Fixes after the owner's review (2026-09-17, later)
+- Videos stopped at 40 s: /media answered a plain request with a 206 of
+  the first 8 MB, which Cloudflare cannot cache and forwarded as-is; a
+  Range request for the rest still got bytes 0–8 MB. Now a plain request
+  is a full 200 and any range is served exactly, both streamed from disk
+  through a hand-rolled ReadableStream with cancel() (no crash on abandoned
+  downloads). Video URLs carry ?v=2 to skip the edge's memory.
+- Cockpit request storm: usePoll restarted whenever its callback changed,
+  and the open-thread callback changed after every response (the response
+  always carried `session`), so an open conversation polled as fast as the
+  network allowed — 429s, "Could not load", filters that would not move.
+  usePoll keeps the latest callback in a ref and restarts only on real deps;
+  the thread poll updates state only when messages or bot_off/closed/
+  needs_human changed; list responses carry a sequence number so a slow
+  older response cannot overwrite a newer filter; search is debounced.
+- One inbox: Facebook Messenger and Instagram Direct threads (`fb:`, `ig:`)
+  arrive on the same Meta webhook (functions/lib/metaMessaging.ts), get the
+  same guide, the same Telegram buttons, cockpit filters and replies through
+  the Page token. Live once the owner adds pages_messaging and
+  instagram_manage_messages and subscribes the webhook (OWNER-TASKS task 4).
+- Footer social icons in each platform's colour.
+
 ## 9. TO-DO (current)
 ### Owner
 - [ ] Oracle: after a quiet week (by 2026-09-24) take a Contabo snapshot, then remove /opt/goluq and its nginx site there.

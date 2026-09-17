@@ -17,14 +17,16 @@ export function SiteFooter({ className = "" }: { className?: string }) {
   const cfg = useSiteConfig();
   const year = new Date().getFullYear();
   const s = cfg?.social;
+  // Each platform in its own colour: the icons are the one place on the page
+  // where a splash of foreign colour is right, because people scan for them.
   const socials = [
-    s?.linkedin ? { href: s.linkedin, label: "LinkedIn", Icon: Linkedin } : null,
-    s?.facebook ? { href: s.facebook, label: "Facebook", Icon: Facebook } : null,
-    s?.instagram ? { href: s.instagram, label: "Instagram", Icon: Instagram } : null,
-    s?.youtube ? { href: s.youtube, label: "YouTube", Icon: Youtube } : null,
-    cfg?.whatsapp ? { href: `https://wa.me/${cfg.whatsapp}`, label: "WhatsApp", Icon: MessageCircle } : null,
-    cfg?.telegram ? { href: `https://t.me/${cfg.telegram}`, label: "Telegram", Icon: Send } : null,
-  ].filter(Boolean) as { href: string; label: string; Icon: typeof Linkedin }[];
+    s?.linkedin ? { href: s.linkedin, label: "LinkedIn", Icon: Linkedin, bg: "#0A66C2" } : null,
+    s?.facebook ? { href: s.facebook, label: "Facebook", Icon: Facebook, bg: "#1877F2" } : null,
+    s?.instagram ? { href: s.instagram, label: "Instagram", Icon: Instagram, bg: "linear-gradient(45deg,#F58529,#DD2A7B 55%,#8134AF)" } : null,
+    s?.youtube ? { href: s.youtube, label: "YouTube", Icon: Youtube, bg: "#FF0033" } : null,
+    cfg?.whatsapp ? { href: `https://wa.me/${cfg.whatsapp}`, label: "WhatsApp", Icon: MessageCircle, bg: "#25D366" } : null,
+    cfg?.telegram ? { href: `https://t.me/${cfg.telegram}`, label: "Telegram", Icon: Send, bg: "#2AABEE" } : null,
+  ].filter(Boolean) as { href: string; label: string; Icon: typeof Linkedin; bg: string }[];
 
   const col = (title: string, items: { to?: string; href?: string; label: string }[]) => (
     <div>
@@ -60,10 +62,11 @@ export function SiteFooter({ className = "" }: { className?: string }) {
             </div>
             {socials.length > 0 && (
               <div className="mt-6 flex flex-wrap gap-2.5">
-                {socials.map(({ href, label, Icon }) => (
+                {socials.map(({ href, label, Icon, bg }) => (
                   <a key={label} href={href} target="_blank" rel="noreferrer" aria-label={label} title={label}
-                    className="grid h-10 w-10 place-items-center rounded-full border border-white/15 bg-white/5 text-white/80 transition hover:border-[#22D3EE] hover:bg-[#22D3EE]/15 hover:text-white">
-                    <Icon size={17} />
+                    style={{ background: bg }}
+                    className="grid h-11 w-11 place-items-center rounded-full text-white shadow-lg shadow-black/30 ring-2 ring-white/10 transition hover:-translate-y-0.5 hover:ring-white/40">
+                    <Icon size={19} strokeWidth={2.2} />
                   </a>
                 ))}
               </div>
