@@ -102,6 +102,16 @@ export async function waSendText(c: WaConfig, to: string, text: string): Promise
   });
 }
 
+/** A picture with a caption, by public URL (Meta fetches it). */
+export async function waSendImage(c: WaConfig, to: string, imageUrl: string, caption: string): Promise<WaResult> {
+  if (!waReady(c)) return { ok: false, error: "whatsapp_not_configured" };
+  return graph(c, {
+    to: waNormalize(to),
+    type: "image",
+    image: { link: imageUrl, caption: String(caption).slice(0, 1024) },
+  });
+}
+
 /** An approved template — the only thing that reaches someone outside 24 hours. */
 export async function waSendTemplate(
   c: WaConfig,

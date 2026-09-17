@@ -4,7 +4,7 @@ import { checkAdmin } from "../../lib/admin";
 import { sendAgentReply } from "../../lib/agentReply";
 import { getSetting } from "../../lib/settings";
 import { upcomingBooking } from "../../lib/bookings";
-import { waConfig, waReady, waSendProduct, waSendCtaUrl, type WaEnv } from "../../lib/whatsapp";
+import { waConfig, waReady, waSendProduct, waSendCtaUrl, waSendImage, type WaEnv } from "../../lib/whatsapp";
 
 interface Env extends WaEnv {
   DB: D1Database;
@@ -25,6 +25,19 @@ interface Env extends WaEnv {
  * touch it, so a thread left open in another tab still counts as read.
  */
 const PAGE = 50;
+const ORIGIN = "https://goluq.com";
+/** Partner-programme cards (public/catalog/aff_*.jpg, Hindi under hi/), sent as images. */
+const PARTNER_CARDS = [
+  { id: "aff_office", name: "Partner — open your GoLuQ partner office" },
+  { id: "aff_earn", name: "Partner — how you earn" },
+  { id: "aff_steps", name: "Partner — five steps to the first order" },
+  { id: "aff_kit", name: "Partner — the kit you get" },
+  { id: "aff_network", name: "Partner — your network is the asset" },
+  { id: "aff_share", name: "Partner — share the work, share the reward" },
+];
+const partnerCaption = (lang: string | null | undefined) => lang === "hi"
+  ? "GoLuQ.com पार्टनर प्रोग्राम: आप बिज़नेस मालिकों को जानते हैं, हम उनका सॉफ़्टवेयर और WhatsApp सिस्टम बनाते-चलाते हैं; हर ऑर्डर पर और मैनेज्ड ग्राहकों पर हर महीने आपकी कमाई। किट आज ही, शर्तें 30 मिनट की कॉल पर। साइन-अप: https://goluq.com/partner"
+  : "GoLuQ.com partner programme: you know business owners, we build and run their software and WhatsApp systems; you earn on every order you introduce and monthly on managed customers. Kit today, terms on a 30-minute call. Sign up: https://goluq.com/partner";
 const clip = (v: string | null, n: number) => (v || "").slice(0, n);
 
 export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
@@ -54,7 +67,10 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
       ? await env.DB.prepare(`SELECT id, name, status, industry, ref_code FROM leads WHERE phone LIKE ? ORDER BY id DESC LIMIT 1`).bind(`%${String(phone).replace(/\D/g, "").slice(-10)}`).first()
       : null;
     const cards = await env.DB.prepare(`SELECT retailer_id, name FROM products WHERE tenant='goluq' AND live=1 ORDER BY sort_order, id`).all();
-    return Response.json({ ok: true, session, messages: list, hasMore, booking, lead, cards: cards.results ?? [], bookingUrl: (await getSetting(env.DB, "booking_url")) || "" });
+    // The partner cards are not catalogue items (Meta wants a price on every
+    // product), so they go out as pictures with a caption; same dropdown.
+    const all = [...(cards.results ?? []), ...PARTNER_CARDS.map((c) => ({ retailer_id: c.id, name: c.name }))];
+    return Response.json({ ok: true, session, messages: list, hasMore, booking, lead, cards: all, bookingUrl: (await getSetting(env.DB, "booking_url")) || "" });
   }
 
   const q = clip(url.searchParams.get("q"), 80).trim();
@@ -126,7 +142,14 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
       if (!waReady(cfg)) return Response.json({ ok: false, error: "WhatsApp is not configured." });
       const to = id.slice(3);
       let r: { ok: boolean; error?: string }; let note = "";
-      if (action === "card") {
+      if (action === "card" && String(b.retailerId || "").startsWith("aff_")) {
+        const rid = String(b.retailerId || "").slice(0, 60);
+        if (!PARTNER_CARDS.some((c) => c.id === rid)) return Response.json({ ok: false, error: "Unknown partner card." });
+        const sess = await env.DB.prepare(`SELECT lang FROM chat_sessions WHERE id = ?`).bind(id).first<{ lang: string | null }>();
+        const hiCard = sess?.lang === "hi";
+        r = await waSendImage(cfg, to, `${ORIGIN}/catalog/${hiCard ? "hi/" : ""}${rid}.jpg`, String(b.text || "").trim() || partnerCaption(sess?.lang));
+        note = `[Sent partner card: ${rid}]`;
+      } else if (action === "card") {
         const rid = String(b.retailerId || "").slice(0, 60);
         const catalog = (await getSetting(env.DB, "wa_catalog_id")) || "";
         if (!rid || !catalog) return Response.json({ ok: false, error: "Pick a card; the catalog must be connected." });

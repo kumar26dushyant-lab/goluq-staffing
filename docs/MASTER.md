@@ -1111,10 +1111,12 @@ for the migration.
   posting is twice a day: the normal post in the morning (05:00 UTC =
   10:30 IST as before) and a partner post after 8 pm IST when people are
   free (20:15 IST = 14:45 UTC).
-- Store: product `partner` ("Become a GoLuQ.com partner", price 0, sort
-  1 after the founder; aff_office card, Hindi edition + earn/steps/kit as
-  extra pictures, url goluq.com/partner). Synced to the Meta catalogue;
-  shows in the "Send card" dropdown.
+- Partner cards in the cockpit: Meta refuses a catalogue item without a
+  price ("The parameter price is required"), so the partner offer is not
+  a Store product. Instead the six aff_* cards sit at the end of the
+  "Send card" dropdown (functions/api/admin/chats.ts PARTNER_CARDS) and go
+  out as a WhatsApp image with a caption and the sign-up link (Hindi card
+  when the thread is Hindi) via the new waSendImage.
 - Queue: 30 evening partner posts (EN/HI alternating, six aff cards
   rotating, link goluq.com/partner?utm_campaign=partner) inserted for
   2026-09-18 → 2026-10-17 at 14:45 UTC; each waits for the Telegram
