@@ -170,7 +170,7 @@ export function Admin() {
 /** One line each: what the screen is for. Shown under the title on every screen. */
 const SECTION_META: Record<Section, { title: string; desc: string }> = {
   today: { title: "Today", desc: "Who is waiting, what came in, what is due." },
-  chat: { title: "Conversations", desc: "WhatsApp, Telegram and website, one inbox. Reply here or from Telegram." },
+  chat: { title: "Conversations", desc: "WhatsApp, Telegram, Messenger, Instagram and website, one inbox. Reply here or from Telegram." },
   briefs: { title: "Briefs", desc: "Plans written with prospects on goluq.com/start. Read, call, quote." },
   leads: { title: "Enquiries", desc: "Everyone who left a number. WhatsApp, call, and mark where it stands." },
   inbox: { title: "Email", desc: "Mail to the business address, answered as the domain." },

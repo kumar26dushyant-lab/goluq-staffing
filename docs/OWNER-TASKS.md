@@ -21,7 +21,7 @@ Status board (tick as done):
 - [ ] 1c Google sign-in OAuth client
 - [ ] 2  Calendar bridge script
 - [ ] 3  WhatsApp templates: appointment_confirmed, appointment_reminder, payment_link (EN+HI), login_otp (EN+HI)
-- [ ] 4  Meta app Pages use case + new token → Publish → Connect (this starts the 30-day post queue)
+- [ ] 4  Meta app Pages use case + new token → Publish → Connect (this starts the post queue: one normal post at 10:30 IST and one partner post at 20:15 IST every day, each after your Telegram tap)
 - [ ] 5  Instagram professional account linked to the Page
 - [x] 6  LinkedIn page — done 2026-09-12 (post the first three items of docs/LINKEDIN.md §11; run §12 daily)
 - [x] 7  Customer Telegram bot connected (@GoLuQ_client_bot) — rotate its token

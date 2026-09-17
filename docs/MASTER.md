@@ -1105,6 +1105,23 @@ for the migration.
   strip, then the regional chapters folded under "Short versions for your
   region". Gulf and AU/NZ story videos: same pipeline, next.
 
+### Partners in the inbox and two posts a day (2026-09-17, later)
+- Owner: partners bring business, so the Store's card list (and the
+  cockpit's "Send card") must carry the partner offer, and from 2026-09-18
+  posting is twice a day: the normal post in the morning (05:00 UTC =
+  10:30 IST as before) and a partner post after 8 pm IST when people are
+  free (20:15 IST = 14:45 UTC).
+- Store: product `partner` ("Become a GoLuQ.com partner", price 0, sort
+  1 after the founder; aff_office card, Hindi edition + earn/steps/kit as
+  extra pictures, url goluq.com/partner). Synced to the Meta catalogue;
+  shows in the "Send card" dropdown.
+- Queue: 30 evening partner posts (EN/HI alternating, six aff cards
+  rotating, link goluq.com/partner?utm_campaign=partner) inserted for
+  2026-09-18 → 2026-10-17 at 14:45 UTC; each waits for the Telegram
+  Post/Skip tap. No percentage in any caption.
+- Guide: knows the partner programme (no figures; kit, 30-minute call,
+  white-label possible, sign-up link) for "how do I earn / bring clients".
+
 ## 9. TO-DO (current)
 ### Owner
 - [ ] Oracle: after a quiet week (by 2026-09-24) take a Contabo snapshot, then remove /opt/goluq and its nginx site there.
