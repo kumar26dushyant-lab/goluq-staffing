@@ -1034,6 +1034,23 @@ for the migration.
 - Next: the "Become the CEO of your business" story page with regional
   chapters; the security reel (India first).
 
+### Security video, India cut (2026-09-17, later)
+- Made with the reel pipeline: six 16:9 scenes from the image model (the
+  same owner and salesman throughout; scene 1 is the reference image for
+  the rest), one voice segment per scene (EN and HI), captions rendered from
+  HTML (the three promises word for word), an end card with a Telegram QR
+  (`?start=secvideo` attributes it). Scripts in the session scratchpad
+  `sec/` (secscenes.py, lines.txt, voices.sh, secvideo.mjs); assets copied
+  to /opt/goluq/data/uploads on Mumbai and served as
+  /media/security-in-{en,hi}.mp4 (+ -poster.jpg). Runs ~64 s, not two
+  minutes: the lines read faster than the script's timings, and a tighter
+  cut holds better. The page copy says "one minute".
+- /security plays the cut matching the site language (poster, controls,
+  nothing loads until play); the homepage trust band gained "Watch the
+  one-minute video" → /security#video.
+- Gulf and AU/NZ cuts: same pipeline, only the scene prompts, currency
+  and voice lines change (docs/SECURITY-VIDEO.md "Regional swaps").
+
 ## 9. TO-DO (current)
 ### Owner
 - [ ] Oracle: after a quiet week (by 2026-09-24) take a Contabo snapshot, then remove /opt/goluq and its nginx site there.

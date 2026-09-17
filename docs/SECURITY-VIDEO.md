@@ -51,3 +51,19 @@ the Telegram bot, goluq.com/security.
 - No certification names unless the owner confirms the exact credential.
 - No numbers about clients we do not have; the story is illustrative.
 - The three captions are the three promises on the page, word for word.
+
+## Made: India cut (2026-09-17)
+- `/media/security-in-en.mp4` and `/media/security-in-hi.mp4`, 1920×1080,
+  ~64 s each, with `-poster.jpg` frames. Embedded on goluq.com/security
+  (language picks the cut) and linked from the homepage trust band.
+- Pipeline (session scratchpad `sec/`): `secscenes.py` (six 16:9 scenes,
+  scene 1 as the reference for the same people), `lines.txt` + `voices.sh`
+  (Gemini TTS, voice Charon, one segment per scene, EN and HI),
+  `secvideo.mjs` (captions from HTML via headless Edge, push-in/pull-out per
+  scene, cross-fades, voice aligned per scene, end card with Telegram QR).
+- Voice lines: "banks" was dropped from scene 4 (the page FAQ keeps that
+  comparison; the video states only what we do). The brand is spoken as
+  "Go Look dot com" so the TTS says it right.
+- Reuse for the Gulf and AU/NZ cuts: change the scene prompts (trader,
+  currency, morning), the lines, and the end-card language; keep the
+  captions as the page's promises in that language.

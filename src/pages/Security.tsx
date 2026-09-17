@@ -1,4 +1,5 @@
-import { Link } from "react-router-dom";
+import { useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ShieldCheck, Lock, KeyRound, EyeOff, Server, Download, MessageCircle, PlayCircle } from "lucide-react";
 import { TopBar } from "../components/TopBar";
@@ -34,8 +35,8 @@ const C = {
       ["Your customers' consent respected", "Marketing goes only to people who opted in, at sensible hours, and stops the moment someone says stop. That protects your WhatsApp number's standing with Meta."],
       ["Built to be handed over", "You own the code and the data. If you ever move on, you take both."],
     ],
-    videoTitle: "In two minutes, in your language",
-    videoSub: "A short story of one owner and one customer, made for your region. Coming to this page first for India, then the Gulf, Australia and New Zealand.",
+    videoTitle: "One minute, in your language",
+    videoSub: "One owner, one salesman, forty buyers. The three promises above, told as a story. This is the India cut; the Gulf, Australia and New Zealand cuts follow.",
     faqTitle: "Questions owners ask",
     faq: [
       ["Where is my data stored?", "On a server in Mumbai, India, behind Cloudflare. For customers outside India who need it elsewhere, we agree the location before the build."],
@@ -66,8 +67,8 @@ const C = {
       ["ग्राहकों की सहमति का सम्मान", "मार्केटिंग सिर्फ़ उन्हें जिन्होंने हाँ कहा, सही समय पर, और STOP कहते ही बंद। इससे Meta के पास आपके WhatsApp नंबर की साख बनी रहती है।"],
       ["सौंपने के लिए बना", "कोड और डेटा आपके हैं। कभी आगे बढ़ें तो दोनों साथ ले जाइए।"],
     ],
-    videoTitle: "दो मिनट में, आपकी भाषा में",
-    videoSub: "एक मालिक और एक ग्राहक की छोटी कहानी, आपके क्षेत्र के लिए बनी। पहले भारत, फिर खाड़ी, ऑस्ट्रेलिया और न्यूज़ीलैंड।",
+    videoTitle: "एक मिनट, आपकी भाषा में",
+    videoSub: "एक मालिक, एक सेल्समैन, चालीस खरीदार। ऊपर के तीन वादे, एक कहानी में। यह भारत का कट है; खाड़ी, ऑस्ट्रेलिया और न्यूज़ीलैंड के कट आगे आएँगे।",
     faqTitle: "मालिक जो सवाल पूछते हैं",
     faq: [
       ["मेरा डेटा कहाँ रहता है?", "मुंबई, भारत के सर्वर पर, Cloudflare के पीछे। भारत के बाहर के ग्राहकों को कहीं और चाहिए तो निर्माण से पहले जगह तय करते हैं।"],
@@ -83,8 +84,12 @@ const ICONS = [Lock, KeyRound, ShieldCheck, EyeOff, Server, Download, MessageCir
 
 export default function Security() {
   const { i18n } = useTranslation();
-  const t = C[i18n.language.startsWith("hi") ? "hi" : "en"];
+  const hi = i18n.language.startsWith("hi");
+  const t = C[hi ? "hi" : "en"];
   const cfg = useSiteConfig();
+  // The homepage links straight to the video; the page is lazy, so scroll once it exists.
+  const { hash } = useLocation();
+  useEffect(() => { if (hash === "#video") document.getElementById("video")?.scrollIntoView({ behavior: "smooth", block: "start" }); }, [hash]);
   return (
     <div className="min-h-dvh">
       <TopBar showBack={false} onBack={() => {}} />
@@ -121,13 +126,23 @@ export default function Security() {
           </div>
         </section>
 
-        <section className="mt-14 rounded-3xl bg-[#0B1020] p-6 text-white sm:p-10">
-          <div className="grid items-center gap-6 md:grid-cols-[1fr_320px]">
+        <section id="video" className="mt-14 scroll-mt-24 rounded-3xl bg-[#0B1020] p-6 text-white sm:p-10">
+          <div className="grid items-center gap-6 md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
             <div>
               <h2 className="font-display text-2xl font-bold sm:text-3xl">{t.videoTitle}</h2>
               <p className="mt-2 text-base text-white/70">{t.videoSub}</p>
+              <p className="mt-4 flex items-center gap-2 text-sm text-white/55"><PlayCircle size={16} /> {hi ? "आवाज़ हिंदी में · अंग्रेज़ी कट भाषा बदलने पर" : "Voice in English · Hindi cut when you switch language"}</p>
             </div>
-            <div className="grid aspect-video place-items-center rounded-2xl border border-white/15 bg-white/5 text-white/60"><PlayCircle size={40} /></div>
+            {/* The India cut, made with the same pipeline as the homepage reels; the
+                language of the site picks the voice. Nothing loads until play. */}
+            <video
+              key={hi ? "hi" : "en"}
+              controls playsInline preload="none"
+              poster={`/media/security-in-${hi ? "hi" : "en"}-poster.jpg`}
+              className="aspect-video w-full rounded-2xl border border-white/15 bg-black object-cover"
+            >
+              <source src={`/media/security-in-${hi ? "hi" : "en"}.mp4`} type="video/mp4" />
+            </video>
           </div>
         </section>
 

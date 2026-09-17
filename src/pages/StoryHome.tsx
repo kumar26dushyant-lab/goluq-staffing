@@ -144,7 +144,10 @@ export function StoryHome() {
               </div>
             ))}
           </div>
-          <Link to="/security" className="mt-5 inline-flex items-center gap-2 rounded-full bg-fg px-5 py-3 text-base font-bold text-[rgb(var(--c-base))]">{t("story.secure.cta")}</Link>
+          <div className="mt-5 flex flex-wrap items-center gap-3">
+            <Link to="/security" className="inline-flex items-center gap-2 rounded-full bg-fg px-5 py-3 text-base font-bold text-[rgb(var(--c-base))]">{t("story.secure.cta")}</Link>
+            <Link to="/security#video" className="inline-flex items-center gap-2 rounded-full border border-hairline/30 px-5 py-3 text-base font-semibold text-fg">{t("story.secure.watch")}</Link>
+          </div>
         </div>
       </section>
 
