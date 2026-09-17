@@ -73,7 +73,13 @@ Europe hop (≈1 s → ≈0.3 s per request). Rollback for a week: start the
 Contabo app and restore /etc/nginx/sites-available/goluq.com.local-backup
 (Contabo's data would then be a day-old snapshot; Mumbai stays primary).
 
-## Part C-1 — the flip (owner / extension, any time now)
+## DNS FLIPPED 2026-09-17 (owner, by hand)
+goluq.com and www → 152.67.29.92, proxied. Verified: Mumbai's log shows
+visitors arriving straight from Cloudflare, Contabo's forwarder is silent,
+edge round trip ~0.5 s (was ~1.1 s via Europe). Watch period: one week; then
+Contabo snapshot and removal of /opt/goluq + its nginx site there.
+
+## Part C-1 — the flip (done)
 At dash.cloudflare.com → goluq.com → DNS → Records:
 1. Edit the **A** record `goluq.com` → IPv4 `152.67.29.92`, Proxy status ON
    (orange cloud) → Save.

@@ -1036,8 +1036,7 @@ for the migration.
 
 ## 9. TO-DO (current)
 ### Owner
-- [ ] Oracle DNS flip (docs/ORACLE-MIGRATION.md Part C-1) — any time; no coordination needed.
-- [ ] Name the exact security credential (issuer + title) to show on /security, or none.
+- [ ] Oracle: after a quiet week (by 2026-09-24) take a Contabo snapshot, then remove /opt/goluq and its nginx site there.
 - [ ] Settings → Contact & alerts: Instagram and YouTube page URLs once created.
 - [ ] Cloudflare: Bot Fight Mode, Managed WAF ruleset, rate-limit rule for /api/*, SSL Full (strict) — docs/SECURITY.md.
 - [ ] LinkedIn page: fill every field from docs/LINKEDIN.md (year founded and
