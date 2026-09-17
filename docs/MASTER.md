@@ -1051,6 +1051,20 @@ for the migration.
 - Gulf and AU/NZ cuts: same pipeline, only the scene prompts, currency
   and voice lines change (docs/SECURITY-VIDEO.md "Regional swaps").
 
+### "Become the CEO of your business" story page (2026-09-17, later)
+- goluq.com/ceo: one owner per chapter, before and after, a hook, "what
+  changed", the product, and for the India chapters a link to the reel.
+  Three regional sets picked from the visitor's country (`?r=in|gulf|intl`
+  to check): India reuses the six homepage story scenes; the Gulf (a Deira
+  textile trader: three countries on one salesman's phone, chasing dirhams
+  on a Sunday, Dubai and Sharjah on one screen) and Australia / NZ (a
+  plumbing-supplies distributor: the best rep moves across town, quotes from
+  the ute at six, Friday paperwork) got twelve new scenes from the image
+  model (scratchpad `sec/ceoscenes.py`; WebP under public/story). CIS and
+  the Gulf show the Telegram door next to WhatsApp. Closing block: a CEO's
+  week (Monday brief, every day, evening), how it starts, /start. Footer →
+  Company. All lines illustrative, no client named, no number claimed.
+
 ## 9. TO-DO (current)
 ### Owner
 - [ ] Oracle: after a quiet week (by 2026-09-24) take a Contabo snapshot, then remove /opt/goluq and its nginx site there.
