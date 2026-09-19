@@ -1227,6 +1227,7 @@ for the migration.
 
 ## 9. TO-DO (current)
 ### Claude (next session)
+- [ ] Accent (decided 2026-09-19): English voice in Indian English for India AND the Gulf by default (Gulf audience is largely Indian traders); international English for AU/NZ/UK/US/EU; Hindi one tap away everywhere. Samples first (current model with an accent instruction, Google en-IN voice, current voice for comparison), owner picks, then re-render ~140 English lines and re-assemble every English cut, preview and portrait. File naming plan: `<id>-en.mp4` stays the international cut, `<id>-enin.mp4` is Indian English; the player picks by country (IN + Gulf → enin) and `?c=XX` previews it.
 - [ ] aioshort Hindi: render the last voice line (aioshort4-hi) once the Gemini TTS quota resets, re-assemble aioshort-hi (specvideo, preview, specportrait), replace the English stand-ins on the server (aioshort-hi.mp4, -poster, preview-aioshort-hi, aioshort-hi-916).
 - [ ] Gulf and AU/NZ cuts of the security overview and the theme shorts (Arabic captions for the Gulf).
 - [ ] Phone pass on /build (fold calculator and FAQ by default) and a real-device check on iPhone Safari and Android Chrome.

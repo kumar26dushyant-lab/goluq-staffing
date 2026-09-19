@@ -21,6 +21,7 @@ Status board (tick as done):
 - [ ] 1c Google sign-in OAuth client
 - [ ] 2  Calendar bridge script
 - [ ] 3  WhatsApp templates: appointment_confirmed, appointment_reminder, payment_link (EN+HI), login_otp (EN+HI)
+- [ ] 4b Google Cloud text-to-speech key (10 minutes) → Indian English and better Hindi voices for every film. Steps: console.cloud.google.com → New project "goluq-voice" → APIs & Services → Enable "Cloud Text-to-Speech API" → Credentials → Create credentials → API key → Edit key → restrict to "Cloud Text-to-Speech API" → paste the key in chat; it is stored write-only in the server's environment and rotated afterwards. Free allowance: 1 million characters a month for the natural voices, more than every film we make.
 - [ ] 4  Meta app Pages use case + new token → Publish → Connect (this starts the post queue: one normal post at 10:30 IST and one partner post at 20:15 IST every day, each after your Telegram tap)
 - [ ] 5  Instagram professional account linked to the Page
 - [x] 6  LinkedIn page — done 2026-09-12 (post the first three items of docs/LINKEDIN.md §11; run §12 daily)
