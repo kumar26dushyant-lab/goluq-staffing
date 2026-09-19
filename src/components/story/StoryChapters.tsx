@@ -81,7 +81,7 @@ function Reel({ id, inView, near, eager, className = "" }: { id: ChapterId; inVi
         ref={ref}
         src={load ? preview : undefined}
         poster={`/story/${id}_before.webp?v=${STORY_V}`}
-        className="absolute inset-0 h-full w-full object-cover"
+        className="absolute inset-0 h-full w-full object-cover object-[center_72%] lg:object-center"
         muted
         loop
         playsInline
@@ -217,7 +217,7 @@ function Chapter({ id, index, region, onEnter }: { id: ChapterId; index: number;
     >
       {/* Phone: the reel on top, words below it — never on top of the film. */}
       <div className="flex min-h-[100svh] flex-col lg:hidden">
-        <div className="relative h-[62svh] shrink-0">
+        <div className="relative h-[68svh] shrink-0">
           <Reel id={id} inView={inView} eager={index === 0} near={near} className="absolute inset-0" />
           {/* A soft fade into the caption panel, so the join reads as one card. */}
           <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#0B1020] to-transparent" aria-hidden="true" />
