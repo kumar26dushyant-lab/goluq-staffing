@@ -182,12 +182,12 @@ export function BuildPractice({ region }: { region: Region }) {
             note={i18n.language.startsWith("hi") ? "तीन फ़िल्में; आँकड़े उदाहरण हैं। कीमत हमेशा लिखकर, काम से पहले।" : "Three films; the figures are worked examples. The price is always in writing, before work starts."}
             films={i18n.language.startsWith("hi") ? [
               { media: "house", title: "किराए का फ़्लैट, या अपना घर?", sub: "किराए का सॉफ़्टवेयर किराए का फ़्लैट है। 40 सेकंड।", len: "0:40" },
-              { media: "pharm", title: "हमेशा किराया, या एक बार अपना?", sub: "छह मेडिकल स्टोर, हर साल रिन्यूअल इनवॉइस, और सॉफ़्टवेयर की एक लाइन भी उनकी नहीं।", len: "1:35" },
-              { media: "aiostory", title: "छह किराए, या एक जो आपका हो", sub: "छह सॉफ़्टवेयर जो आपस में बात नहीं करते, और एक सिस्टम जो कंपनी के लिए बना।", len: "1:35" },
+              { media: "pharm", title: "हमेशा किराया, या एक बार अपना?", sub: "छह मेडिकल स्टोर, हर साल रिन्यूअल इनवॉइस, और सॉफ़्टवेयर की एक लाइन भी उनकी नहीं।", len: "1:31" },
+              { media: "aiostory", title: "छह किराए, या एक जो आपका हो", sub: "छह सॉफ़्टवेयर जो आपस में बात नहीं करते, और एक सिस्टम जो कंपनी के लिए बना।", len: "1:39" },
             ] : [
-              { media: "house", title: "Rent a flat, or build your house?", sub: "Rented software is a rented flat. 40 seconds.", len: "0:40" },
-              { media: "pharm", title: "Rent forever, or own once?", sub: "Six medical stores, a renewal invoice every year, and not one line of the software his.", len: "1:35" },
-              { media: "aiostory", title: "Six rents, or one that is yours", sub: "Six software that do not talk to each other, and one system built for the company.", len: "1:35" },
+              { media: "house", title: "Rent a flat, or build your house?", sub: "Rented software is a rented flat. 43 seconds.", len: "0:43" },
+              { media: "pharm", title: "Rent forever, or own once?", sub: "Six medical stores, a renewal invoice every year, and not one line of the software his.", len: "1:34" },
+              { media: "aiostory", title: "Six rents, or one that is yours", sub: "Six software that do not talk to each other, and one system built for the company.", len: "1:43" },
             ]}
           />
           <div className="mt-5 grid grid-cols-3 gap-3 sm:grid-cols-6">

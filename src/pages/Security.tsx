@@ -166,7 +166,7 @@ export default function Security() {
         </section>
 
         <section className="mt-14 rounded-3xl bg-[#0B1020] p-6 sm:p-10">
-          <FilmGrid dark heading={t.explainTitle} note={t.explainNote} films={(["where", "signed", "roles"] as const).map((m, i) => ({ media: m, title: t.explain[i][0], sub: t.explain[i][1], len: "1:10" }))} />
+          <FilmGrid dark heading={t.explainTitle} note={t.explainNote} films={(["where", "signed", "roles"] as const).map((m, i) => ({ media: m, title: t.explain[i][0], sub: t.explain[i][1], len: ["1:14", "1:18", "1:17"][i] }))} />
           <div className="mt-6 grid grid-cols-3 gap-3">
             {(["sec_where", "sec_signed", "sec_roles"] as const).map((c) => (
               <a key={c} href={`/catalog/${hi ? "hi/" : ""}${c}.jpg`} target="_blank" rel="noreferrer" className="overflow-hidden rounded-xl border border-white/10"><img src={`/catalog/${hi ? "hi/" : ""}${c}.jpg`} alt="" loading="lazy" className="w-full" /></a>

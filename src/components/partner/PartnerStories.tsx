@@ -21,8 +21,8 @@ export function PartnerStories() {
   const [lang, setLang] = useVideoLang();
   const [id, setId] = useState<Id>("five");
   const T = {
-    five: hi ? ["अपना बिज़नेस, ज़ीरो निवेश, पाँच कदम", "डेढ़ सौ दुकानें फ़रहान पर भरोसा करती हैं। यह भरोसा एक बिज़नेस है। 38 सेकंड।"] : ["Your own business, zero investment, five steps", "A hundred and fifty shops trust Farhan. That trust is a business. 38 seconds."],
-    boss: hi ? ["जिस दिन कविता अपनी बॉस बनीं", "फ़ोन में दो सौ दुकानदार, कोई ऑफ़िस नहीं। प्लेबुक, और एक बाज़ार जो उनका है। 95 सेकंड।"] : ["The day Kavita became her own boss", "Two hundred shopkeepers on her phone, no office. The playbook, and a market that is hers. 95 seconds."],
+    five: hi ? ["अपना बिज़नेस, ज़ीरो निवेश, पाँच कदम", "डेढ़ सौ दुकानें फ़रहान पर भरोसा करती हैं। यह भरोसा एक बिज़नेस है। 58 सेकंड।"] : ["Your own business, zero investment, five steps", "A hundred and fifty shops trust Farhan. That trust is a business. 58 seconds."],
+    boss: hi ? ["जिस दिन कविता अपनी बॉस बनीं", "फ़ोन में दो सौ दुकानदार, कोई ऑफ़िस नहीं। प्लेबुक, और एक बाज़ार जो उनका है। दो मिनट से कम।"] : ["The day Kavita became her own boss", "Two hundred shopkeepers on her phone, no office. The playbook, and a market that is hers. Under two minutes."],
     adv: hi ? ["एक सलाहकार जो पार्टनर बना", "रोहन बीस मालिकों को हफ़्ते में मिलता है। उसने मिलवाया; अब हर ऑर्डर और हर महीने उसकी कमाई।"] : ["An advisor who partners", "Rohan sees twenty owners a week. He introduced; now he earns on every order and every month."],
     cap: hi ? ["एक CA फ़र्म जो पार्टनर बनी", "अंजलि के 150 क्लाइंट वही सवाल पूछते थे। अब उनकी फ़र्म के पास जवाब है, और एक दूसरी आमदनी।"] : ["A CA firm that partners", "Anjali's 150 clients kept asking the same question. Now her firm has the answer, and a second income."],
   };
@@ -32,7 +32,7 @@ export function PartnerStories() {
       <video key={`${id}-${lang}`} controls playsInline preload="none" poster={`/media/${MEDIA[id]}-${lang}-poster.jpg?v=${V}`} className="aspect-video w-full bg-black">
         <source src={`/media/${MEDIA[id]}-${lang}.mp4?v=${V}`} type="video/mp4" />
       </video>
-      <div className="grid gap-2 p-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-2 p-4 sm:grid-cols-2">
         {STORIES.map((s) => (
           <button key={s} type="button" onClick={() => setId(s)}
             className={`flex items-start gap-3 rounded-2xl border p-3 text-left transition ${s === id ? "border-[#22D3EE]/70 bg-white/10" : "border-white/10 bg-white/5 hover:bg-white/10"}`}>

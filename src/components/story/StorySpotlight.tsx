@@ -18,9 +18,9 @@ import { ArrowRight, MessageCircle, PenLine, Play, Volume2 } from "lucide-react"
  * person asks for it: the montage is ~150 KB, the film only on play.
  */
 const STORIES = [
-  { id: "house", len: "0:40" },
-  { id: "aioshort", len: "0:40" },
-  { id: "five", len: "0:38" },
+  { id: "house", len: "0:43" },
+  { id: "aioshort", len: "0:42" },
+  { id: "five", len: "0:58" },
 ] as const;
 type StoryId = (typeof STORIES)[number]["id"];
 /** Bump when a film is re-cut: the edge caches by URL. */
