@@ -4,6 +4,8 @@ import { useTranslation } from "react-i18next";
 import { ShieldCheck, Lock, KeyRound, EyeOff, Server, Download, MessageCircle, PlayCircle } from "lucide-react";
 import { TopBar } from "../components/TopBar";
 import { useSiteConfig } from "../lib/siteConfig";
+import { useVideoLang } from "../lib/videoLang";
+import { VideoLangToggle } from "../components/VideoLangToggle";
 
 /**
  * /security — "How we secure your data", in the words a shop owner uses.
@@ -87,6 +89,8 @@ export default function Security() {
   const hi = i18n.language.startsWith("hi");
   const t = C[hi ? "hi" : "en"];
   const cfg = useSiteConfig();
+  const [vlang, setVlang] = useVideoLang();
+  const vhi = vlang === "hi";
   // The homepage links straight to the video; the page is lazy, so scroll once it exists.
   const { hash } = useLocation();
   useEffect(() => { if (hash === "#video") document.getElementById("video")?.scrollIntoView({ behavior: "smooth", block: "start" }); }, [hash]);
@@ -131,17 +135,17 @@ export default function Security() {
             <div>
               <h2 className="font-display text-2xl font-bold sm:text-3xl">{t.videoTitle}</h2>
               <p className="mt-2 text-base text-white/70">{t.videoSub}</p>
-              <p className="mt-4 flex items-center gap-2 text-sm text-white/55"><PlayCircle size={16} /> {hi ? "आवाज़ हिंदी में · अंग्रेज़ी कट भाषा बदलने पर" : "Voice in English · Hindi cut when you switch language"}</p>
+              <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-white/55"><span className="inline-flex items-center gap-2"><PlayCircle size={16} /> {vhi ? "आवाज़ हिंदी में" : "Voice in English"}</span><VideoLangToggle lang={vlang} onChange={setVlang} /></div>
             </div>
             {/* The India cut, made with the same pipeline as the homepage reels; the
                 language of the site picks the voice. Nothing loads until play. */}
             <video
-              key={hi ? "hi" : "en"}
+              key={vlang}
               controls playsInline preload="none"
-              poster={`/media/security-in-${hi ? "hi" : "en"}-poster.jpg?v=2`}
+              poster={`/media/security-in-${vlang}-poster.jpg?v=2`}
               className="aspect-video w-full rounded-2xl border border-white/15 bg-black object-cover"
             >
-              <source src={`/media/security-in-${hi ? "hi" : "en"}.mp4?v=2`} type="video/mp4" />
+              <source src={`/media/security-in-${vlang}.mp4?v=2`} type="video/mp4" />
             </video>
           </div>
         </section>

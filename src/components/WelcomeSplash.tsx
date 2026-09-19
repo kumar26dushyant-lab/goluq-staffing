@@ -21,8 +21,9 @@ const HARD_STOP_MS = 25000;
  * The first few seconds: the mark in Latin and Devanagari with the roman
  * pronunciation, so a visitor learns how to say the name before anything else.
  *
- * Language follows the visitor — India gets Hindi (page and voice), everyone
- * else English — unless they have already chosen a language, which always wins.
+ * Language: a stored choice always wins. Without one, the browser language
+ * picks the default and the splash asks outright (हिंदी / English), because
+ * an Indian visitor may read either and a film in the wrong one is skipped.
  *
  * TIMING MODEL: one deadline (`closeAt`) that may only ever move FORWARD, read
  * by one ticker. An earlier version scheduled several independent `setTimeout`
@@ -43,6 +44,17 @@ export function WelcomeSplash() {
   const [open, setOpen] = useState(false);
   const [speaking, setSpeaking] = useState(false);
   const [needsTap, setNeedsTap] = useState(false);
+  // First visit with no stored language: ask, instead of guessing from the
+  // country. An English-reading Indian visitor is as common as a Hindi one,
+  // and a film in the wrong language is a film nobody finishes.
+  const [askLang, setAskLang] = useState(false);
+  const chooseLang = async (l: "en" | "hi") => {
+    setAskLang(false);
+    try { localStorage.setItem(LANG_KEY, l); } catch { /* storage blocked */ }
+    if (!i18n.language.startsWith(l)) await i18n.changeLanguage(l);
+    // The tap is also the gesture browsers want before audio.
+    if (supported && !muted) speakNow(); else { closeAt.current = 0; closeIn(1200); }
+  };
   const started = useRef(false);
   const closeAt = useRef(0);
 
@@ -104,16 +116,25 @@ export function WelcomeSplash() {
     }, 150);
 
     (async () => {
-      // Resolve the language BEFORE speaking, so the greeting is never in the
-      // wrong one. A stored preference always wins over geography.
-      try {
-        const cfg = await fetchSiteConfig();
-        if (!localStorage.getItem(LANG_KEY) && cfg.country) {
-          const want = cfg.country === "IN" ? "hi" : "en";
+      // A stored preference always wins. Without one, the browser's own
+      // language is the best hint (en-IN reads English, hi reads Hindi); the
+      // splash then asks outright and waits a little longer for the answer.
+      let stored = "";
+      try { stored = localStorage.getItem(LANG_KEY) || ""; } catch { /* storage blocked */ }
+      if (!stored) {
+        try {
+          const nav = (navigator.languages || [navigator.language]).map((x) => String(x || "").toLowerCase());
+          const want = nav.some((x) => x.startsWith("hi")) ? "hi" : "en";
           if (!i18n.language.startsWith(want)) await i18n.changeLanguage(want);
+          try { localStorage.removeItem(LANG_KEY); } catch { /* the detector caches; a real choice is recorded on tap */ }
+          void fetchSiteConfig().catch(() => null);
+        } catch {
+          /* keep whatever the detector picked */
         }
-      } catch {
-        /* keep whatever the detector picked */
+        if (cancelled) return;
+        setAskLang(true);
+        closeIn(14000);
+        return;
       }
       if (cancelled) return;
 
@@ -205,6 +226,28 @@ export function WelcomeSplash() {
             >
               {t("welcome.tagline")}
             </motion.p>
+
+            {askLang && (
+              <motion.div
+                initial={reduced ? false : { opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.7, duration: 0.5 }}
+                className="mt-7 w-full"
+              >
+                <p className="text-sm font-semibold text-muted">अपनी भाषा चुनिए · Choose your language</p>
+                <div className="mt-3 grid grid-cols-2 gap-3">
+                  <button type="button" onClick={() => chooseLang("hi")}
+                    className={`min-h-[3.5rem] rounded-2xl border-2 font-deva text-xl font-bold transition ${i18n.language.startsWith("hi") ? "border-brand-luq bg-brand-luq/10 text-fg" : "border-hairline/30 text-fg hover:border-brand-luq/60"}`}>
+                    हिंदी
+                  </button>
+                  <button type="button" onClick={() => chooseLang("en")}
+                    className={`min-h-[3.5rem] rounded-2xl border-2 font-display text-xl font-bold transition ${!i18n.language.startsWith("hi") ? "border-brand-luq bg-brand-luq/10 text-fg" : "border-hairline/30 text-fg hover:border-brand-luq/60"}`}>
+                    English
+                  </button>
+                </div>
+                <p className="mt-2 text-xs text-faint">हर वीडियो और कार्ड इसी भाषा में · Every film and card in this language</p>
+              </motion.div>
+            )}
 
             {/* Read-along, so the words and the voice arrive together. */}
             <div className="mt-7 flex min-h-[5rem] w-full items-center justify-center">

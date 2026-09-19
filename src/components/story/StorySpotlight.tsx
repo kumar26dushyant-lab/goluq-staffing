@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useSiteConfig } from "../../lib/siteConfig";
+import { useVideoLang } from "../../lib/videoLang";
+import { VideoLangToggle } from "../VideoLangToggle";
 import { useTranslation } from "react-i18next";
 import { ArrowRight, MessageCircle, PenLine, Play, Volume2 } from "lucide-react";
 
@@ -19,8 +21,8 @@ type StoryId = (typeof STORIES)[number];
 const V = "1";
 
 export function StorySpotlight() {
-  const { t, i18n } = useTranslation();
-  const lang = i18n.language.startsWith("hi") ? "hi" : "en";
+  const { t } = useTranslation();
+  const [lang, setLang] = useVideoLang();
   const [story, setStory] = useState<StoryId>("coach");
   const [playing, setPlaying] = useState(false);
   const ref = useRef<HTMLVideoElement>(null);
@@ -75,6 +77,7 @@ export function StorySpotlight() {
                 <span className="absolute left-4 top-4 rounded-full bg-black/55 px-3 py-1 text-xs font-bold uppercase tracking-wide text-[#22D3EE] backdrop-blur">{t("story.spot.example")}</span>
               </button>
             )}
+            <VideoLangToggle lang={lang} onChange={setLang} className="absolute right-4 top-4 z-10" />
           </div>
           <div className="flex flex-1 flex-col justify-between gap-4 bg-gradient-to-b from-[#0F1730] to-[#0B1020] p-5 sm:p-6">
             <div className="grid gap-3 sm:grid-cols-3">

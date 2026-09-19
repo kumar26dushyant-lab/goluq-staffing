@@ -5,6 +5,8 @@ import { TopBar } from "../components/TopBar";
 import { useSiteConfig } from "../lib/siteConfig";
 import { useRegion } from "../lib/region";
 import { BrandText } from "../components/BrandText";
+import { useVideoLang } from "../lib/videoLang";
+import { VideoLangToggle } from "../components/VideoLangToggle";
 
 /**
  * /ceo — "Become the CEO of your business", the story page.
@@ -145,6 +147,7 @@ export default function CeoStory() {
   const hi = i18n.language.startsWith("hi");
   const lang = hi ? "hi" : "en";
   const t = COPY[lang];
+  const [vlang, setVlang] = useVideoLang();
   const cfg = useSiteConfig();
   // useLocation makes the region pills re-render the page on `?r=` changes.
   const { search } = useLocation();
@@ -166,17 +169,20 @@ export default function CeoStory() {
 
         {/* The stories: one video each, poster until play, voice in the site language. */}
         <section id="stories" className="mt-8 scroll-mt-24">
-          <h2 className="font-display text-2xl font-bold text-fg sm:text-3xl">{t.storiesTitle}</h2>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="font-display text-2xl font-bold text-fg sm:text-3xl">{t.storiesTitle}</h2>
+            <VideoLangToggle lang={vlang} onChange={setVlang} dark={false} />
+          </div>
           <p className="mt-1 text-sm text-muted">{t.storiesNote}</p>
           <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {STORIES.map((st) => {
               const [name, hook] = st[lang];
               return (
                 <figure key={st.id} className="overflow-hidden rounded-2xl border border-hairline/15 bg-panel/40">
-                  <video key={`${st.id}-${lang}`} controls playsInline preload="none"
-                    poster={`/media/ceo-${st.id}-${lang}-poster.jpg?v=${VID_V}`}
+                  <video key={`${st.id}-${vlang}`} controls playsInline preload="none"
+                    poster={`/media/ceo-${st.id}-${vlang}-poster.jpg?v=${VID_V}`}
                     className="aspect-video w-full bg-black object-cover">
-                    <source src={`/media/ceo-${st.id}-${lang}.mp4?v=${VID_V}`} type="video/mp4" />
+                    <source src={`/media/ceo-${st.id}-${vlang}.mp4?v=${VID_V}`} type="video/mp4" />
                   </video>
                   <figcaption className="p-4">
                     <p className="text-xs font-bold uppercase tracking-wide text-brand-luq">{"partner" in st && st.partner ? (hi ? "पार्टनर की कहानी · उदाहरण" : "Partner story · worked example") : t.example}</p>

@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Play } from "lucide-react";
+import { useVideoLang } from "../../lib/videoLang";
+import { VideoLangToggle } from "../VideoLangToggle";
 
 /**
  * The two partner story films on the partner page: an advisor who opens a
@@ -15,14 +17,15 @@ const V = "1";
 export function PartnerStories() {
   const { i18n } = useTranslation();
   const hi = i18n.language.startsWith("hi");
-  const lang = hi ? "hi" : "en";
+  const [lang, setLang] = useVideoLang();
   const [id, setId] = useState<Id>("adv");
   const T = {
     adv: hi ? ["एक सलाहकार जो पार्टनर बना", "रोहन बीस मालिकों को हफ़्ते में मिलता है। उसने मिलवाया; अब हर ऑर्डर और हर महीने उसकी कमाई।"] : ["An advisor who partners", "Rohan sees twenty owners a week. He introduced; now he earns on every order and every month."],
     cap: hi ? ["एक CA फ़र्म जो पार्टनर बनी", "अंजलि के 150 क्लाइंट वही सवाल पूछते थे। अब उनकी फ़र्म के पास जवाब है, और एक दूसरी आमदनी।"] : ["A CA firm that partners", "Anjali's 150 clients kept asking the same question. Now her firm has the answer, and a second income."],
   };
   return (
-    <section className="mt-6 overflow-hidden rounded-3xl bg-[#0B1020] text-white ring-1 ring-white/10">
+    <section className="relative mt-6 overflow-hidden rounded-3xl bg-[#0B1020] text-white ring-1 ring-white/10">
+      <VideoLangToggle lang={lang} onChange={setLang} className="absolute right-3 top-3 z-10" />
       <video key={`${id}-${lang}`} controls playsInline preload="none" poster={`/media/ceo-${id}-${lang}-poster.jpg?v=${V}`} className="aspect-video w-full bg-black">
         <source src={`/media/ceo-${id}-${lang}.mp4?v=${V}`} type="video/mp4" />
       </video>
