@@ -7,7 +7,6 @@ import { TopBar } from "../components/TopBar";
 import { StoryChapters } from "../components/story/StoryChapters";
 import { StorySpotlight } from "../components/story/StorySpotlight";
 import { ProductsBand } from "../components/ProductsBand";
-import { Testimonials } from "../components/Testimonials";
 import { useSiteConfig } from "../lib/siteConfig";
 import { useRegion } from "../lib/region";
 
@@ -19,7 +18,7 @@ import { useRegion } from "../lib/region";
  * who bought (stories), meet the person (founder), act.
  */
 export function StoryHome() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const reduced = useReducedMotion();
   const cfg = useSiteConfig();
   const wa = cfg?.whatsapp || "";
@@ -125,13 +124,24 @@ export function StoryHome() {
         </div>
       </section>
 
-      {/* Customer stories — the space is reserved even while the first video is being recorded. */}
-      <section className="mx-auto max-w-6xl px-5 pb-16 sm:px-8 sm:pb-24" aria-labelledby="stories-title">
-        <p className="font-mono text-sm uppercase tracking-[0.28em] text-brand-luq">{t("story.stories.kicker")}</p>
-        <h2 id="stories-title" className="mt-2 font-display text-2xl font-bold sm:text-4xl">{t("story.stories.title")}</h2>
-        <Testimonials className="mt-6" />
-        <div className="mt-6 flex items-center gap-3 rounded-2xl border border-dashed border-hairline/25 p-5 text-sm text-muted">
-          <Video size={18} className="shrink-0 text-brand-luq" /> {t("story.stories.soon")}
+      {/* The ninety-second stories live on /ceo; here, one row of doors to them. */}
+      <section className="mx-auto max-w-6xl px-5 pb-16 sm:px-8 sm:pb-24" aria-labelledby="ceo-strip-title">
+        <div className="overflow-hidden rounded-3xl bg-[#0B1020] text-white ring-1 ring-white/10">
+          <div className="grid gap-6 p-6 sm:p-8 lg:grid-cols-[1fr_1.2fr] lg:items-center">
+            <div>
+              <p className="font-mono text-xs uppercase tracking-[0.28em] text-[#22D3EE]">{t("story.ceoStrip.kicker")}</p>
+              <h2 id="ceo-strip-title" className="mt-2 font-display text-2xl font-bold sm:text-3xl">{t("story.ceoStrip.title")}</h2>
+              <p className="mt-2 text-[15px] leading-relaxed text-white/70">{t("story.ceoStrip.sub")}</p>
+              <Link to="/ceo" className="mt-5 inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-base font-bold text-[#0B1020] transition hover:bg-[#22D3EE]"><Video size={18} /> {t("story.ceoStrip.cta")}</Link>
+            </div>
+            <div className="grid grid-cols-3 gap-2 sm:gap-3">
+              {(["coach", "dist", "adv"] as const).map((id) => (
+                <Link key={id} to="/ceo" className="group overflow-hidden rounded-2xl border border-white/10">
+                  <img src={`/media/ceo-${id}-${i18n.language.startsWith("hi") ? "hi" : "en"}-poster.jpg?v=1`} alt="" loading="lazy" className="aspect-video w-full object-cover transition group-hover:scale-105" />
+                </Link>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
@@ -152,6 +162,21 @@ export function StoryHome() {
             <Link to="/security" className="inline-flex items-center gap-2 rounded-full bg-fg px-5 py-3 text-base font-bold text-[rgb(var(--c-base))]">{t("story.secure.cta")}</Link>
             <Link to="/security#video" className="inline-flex items-center gap-2 rounded-full border border-hairline/30 px-5 py-3 text-base font-semibold text-fg">{t("story.secure.watch")}</Link>
           </div>
+        </div>
+      </section>
+
+      {/* Partners: the other door, for people who know owners. */}
+      <section className="mx-auto max-w-6xl px-5 pb-16 sm:px-8 sm:pb-24">
+        <div className="grid gap-6 rounded-3xl border border-hairline/15 bg-panel/40 p-6 sm:p-8 lg:grid-cols-[1.2fr_1fr] lg:items-center">
+          <div>
+            <p className="font-mono text-xs uppercase tracking-[0.28em] text-brand-luq">{t("story.partnerStrip.kicker")}</p>
+            <h2 className="mt-2 font-display text-2xl font-bold sm:text-3xl">{t("story.partnerStrip.title")}</h2>
+            <p className="mt-2 text-[15px] leading-relaxed text-muted">{t("story.partnerStrip.sub")}</p>
+            <Link to="/partner" className="mt-5 inline-flex items-center gap-2 rounded-full bg-fg px-5 py-3 text-base font-bold text-[rgb(var(--c-base))]">{t("story.partnerStrip.cta")}</Link>
+          </div>
+          <Link to="/partner" className="group overflow-hidden rounded-2xl border border-hairline/15">
+            <img src={`/catalog/${i18n.language.startsWith("hi") ? "hi/" : ""}aff_boss.jpg`} alt="" loading="lazy" className="w-full object-cover transition group-hover:scale-[1.02]" />
+          </Link>
         </div>
       </section>
 

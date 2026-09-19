@@ -6,6 +6,7 @@ import { TopBar } from "../components/TopBar";
 import { useSiteConfig } from "../lib/siteConfig";
 import { useVideoLang } from "../lib/videoLang";
 import { VideoLangToggle } from "../components/VideoLangToggle";
+import { FilmGrid } from "../components/FilmGrid";
 
 /**
  * /security — "How we secure your data", in the words a shop owner uses.
@@ -38,7 +39,14 @@ const C = {
       ["Built to be handed over", "You own the code and the data. If you ever move on, you take both."],
     ],
     videoTitle: "One minute, in your language",
-    videoSub: "One owner, one salesman, forty buyers. The three promises above, told as a story. This is the India cut; the Gulf, Australia and New Zealand cuts follow.",
+    videoSub: "One owner, one salesman, forty buyers. The three promises above, told as a story.",
+    explainTitle: "Bring your technical friend",
+    explainNote: "Three short answers to the questions an engineer, an auditor or a hospital IT head will ask. Every claim in them is written on this page and in the code.",
+    explain: [
+      ["Where your data lives and who can reach it", "One server in Mumbai behind Cloudflare, closed to everyone else; encrypted connections; nightly backups; keys never in code."],
+      ["Every message is signed", "WhatsApp, Telegram, Razorpay and Dodo notices are signature-checked before the system acts; one-time login codes; limits at the door and inside."],
+      ["Your people, your roles, your exit", "A login and role per person, every change stamped, marketing only to opt-ins, and a clean exit with your data and code."],
+    ],
     faqTitle: "Questions owners ask",
     faq: [
       ["Where is my data stored?", "On a server in Mumbai, India, behind Cloudflare. For customers outside India who need it elsewhere, we agree the location before the build."],
@@ -70,7 +78,14 @@ const C = {
       ["सौंपने के लिए बना", "कोड और डेटा आपके हैं। कभी आगे बढ़ें तो दोनों साथ ले जाइए।"],
     ],
     videoTitle: "एक मिनट, आपकी भाषा में",
-    videoSub: "एक मालिक, एक सेल्समैन, चालीस खरीदार। ऊपर के तीन वादे, एक कहानी में। यह भारत का कट है; खाड़ी, ऑस्ट्रेलिया और न्यूज़ीलैंड के कट आगे आएँगे।",
+    videoSub: "एक मालिक, एक सेल्समैन, चालीस खरीदार। ऊपर के तीन वादे, एक कहानी में।",
+    explainTitle: "अपने टेक्निकल दोस्त को साथ लाइए",
+    explainNote: "तीन छोटे जवाब उन सवालों के जो एक इंजीनियर, ऑडिटर या अस्पताल का IT हेड पूछेगा। इनका हर दावा इस पेज पर और कोड में लिखा है।",
+    explain: [
+      ["आपका डेटा कहाँ रहता है और कौन पहुँच सकता है", "मुंबई में एक सर्वर Cloudflare के पीछे, बाक़ी सबके लिए बंद; एन्क्रिप्टेड कनेक्शन; हर रात बैकअप; कुंजियाँ कोड में कभी नहीं।"],
+      ["हर मैसेज पर हस्ताक्षर", "WhatsApp, Telegram, Razorpay और Dodo की सूचनाएँ सिस्टम के कुछ करने से पहले जाँची जाती हैं; वन-टाइम लॉगिन कोड; दरवाज़े और अंदर, दोनों जगह सीमा।"],
+      ["आपके लोग, आपकी भूमिकाएँ, आपका रास्ता", "हर व्यक्ति का लॉगिन और भूमिका, हर बदलाव पर मुहर, मार्केटिंग सिर्फ़ हाँ कहने वालों को, और डेटा-कोड के साथ साफ़ रास्ता।"],
+    ],
     faqTitle: "मालिक जो सवाल पूछते हैं",
     faq: [
       ["मेरा डेटा कहाँ रहता है?", "मुंबई, भारत के सर्वर पर, Cloudflare के पीछे। भारत के बाहर के ग्राहकों को कहीं और चाहिए तो निर्माण से पहले जगह तय करते हैं।"],
@@ -147,6 +162,15 @@ export default function Security() {
             >
               <source src={`/media/security-in-${vlang}.mp4?v=2`} type="video/mp4" />
             </video>
+          </div>
+        </section>
+
+        <section className="mt-14 rounded-3xl bg-[#0B1020] p-6 sm:p-10">
+          <FilmGrid dark heading={t.explainTitle} note={t.explainNote} films={(["where", "signed", "roles"] as const).map((m, i) => ({ media: m, title: t.explain[i][0], sub: t.explain[i][1], len: "1:10" }))} />
+          <div className="mt-6 grid grid-cols-3 gap-3">
+            {(["sec_where", "sec_signed", "sec_roles"] as const).map((c) => (
+              <a key={c} href={`/catalog/${hi ? "hi/" : ""}${c}.jpg`} target="_blank" rel="noreferrer" className="overflow-hidden rounded-xl border border-white/10"><img src={`/catalog/${hi ? "hi/" : ""}${c}.jpg`} alt="" loading="lazy" className="w-full" /></a>
+            ))}
           </div>
         </section>
 

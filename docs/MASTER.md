@@ -1153,6 +1153,51 @@ for the migration.
   and 09-27/28 became the partner films. All still wait for the Telegram
   tap.
 
+### Four themes, language first, one story once (2026-09-19, later)
+- Owner's brief: the hero's blank column (fixed: the story's numbers and
+  two actions under the film); four marketing themes that hit FOMO and
+  virality (own-not-rent with the house analogy, become-your-own-boss with
+  the playbook, cybersecurity trust for the technical grilling, all-in-one
+  against six rented tools); then: walk every page, arrange by visitor
+  journey, show films in the visitor's language, never the same story
+  twice on a page; phones and tablets must be right.
+- Creative pass: a workflow drafted the theme specs (JSON in scratchpad
+  `themes/*.json`: films with scene prompts, EN/HI lines, captions, end
+  cards, cards, posts) with truth/psychology/voice reviewers; the session
+  usage limit cut the revise rounds short, so I reviewed the four specs by
+  hand, renamed characters so no two films share a name or trade (Sunil,
+  Ritu, Sunita, Pooja, Anil; furniture instead of tiles, stationery instead
+  of pharma) and wrote the security spec's claims against docs/SECURITY.md
+  and the code (sources listed in the spec's notes; encrypted disks are NOT
+  voiced because SECURITY.md does not record them).
+- Spec-driven pipeline (`themes/`): specscenes.py (scenes + card heroes),
+  specvoices.py, specvideo.mjs (any scene count, per-film end card and QR),
+  specportrait.mjs, spec2cards.mjs → hi/theme.mjs (hicard.mjs renders
+  THEME cards). Films: house (0:40), pharm, aioshort (0:40; Hindi waits on
+  one TTS line, quota), aiostory, five (0:38), boss, where, signed, roles.
+  Twelve cards: own_house/cost/yours, aio_one/six/order, sec_where/signed/
+  roles, aff_boss/playbook/yourway (public/catalog + hi/, masters under
+  marketing/catalog-cards/themes).
+- Language: the splash now ASKS हिंदी/English on the first visit with the
+  browser language pre-selected (the country no longer forces Hindi);
+  `useVideoLang` + `VideoLangToggle` let every player switch the film's
+  language without changing the page, and the choice holds site-wide until
+  the page language changes.
+- Placement (docs: the "GoLuQ Visitor Journey" artifact): home spotlight =
+  the three theme shorts with the story's numbers under the film; industry
+  reels below (different stories); a CEO-stories strip (posters → /ceo) and
+  a partner strip (aff_boss card → /partner); the empty customer-stories
+  block removed. /ceo = eight stories (five owners, three partners). /build
+  = house + pharm + aiostory films and six cards above the proof. /security
+  = overview + three explainers + three cards. /partner = five-step short
+  first, then Kavita, the advisor, the CA firm; kit has fifteen partner
+  cards. Wording: "AI-powered workflows" → "workflows that run themselves";
+  "the chatbot" → "the replies".
+- Screenshot audits: full-page captures hide anything behind a
+  whileInView animation (blank areas on /services, /about were artifacts);
+  the sweep also left 226 headless Edge processes and pinned the CPU —
+  run pageshot one page at a time and kill the tree after each.
+
 ## 9. TO-DO (current)
 ### Owner
 - [ ] Oracle: after a quiet week (by 2026-09-24) take a Contabo snapshot, then remove /opt/goluq and its nginx site there.

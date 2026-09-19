@@ -34,9 +34,13 @@ const HINDI_CARDS = new Set([
 
 /** Cards that are not Store products: the partner set and the Telegram QR. */
 const EXTRA_ASSETS = [
-  ...["aff_office", "aff_network", "aff_share", "aff_earn", "aff_steps", "aff_kit", "aff_who", "aff_income", "aff_whitelabel", "aff_first", "aff_payout", "aff_nowork"].flatMap((id) => [
+  ...["aff_office", "aff_network", "aff_share", "aff_earn", "aff_steps", "aff_kit", "aff_who", "aff_income", "aff_whitelabel", "aff_first", "aff_payout", "aff_nowork", "aff_boss", "aff_playbook", "aff_yourway"].flatMap((id) => [
     { label: `Partner · ${id.slice(4)}`, url: `https://goluq.com/catalog/${id}.jpg` },
     { label: `Partner · ${id.slice(4)} · हिंदी`, url: `https://goluq.com/catalog/hi/${id}.jpg` },
+  ]),
+  ...["own_house", "own_cost", "own_yours", "aio_one", "aio_six", "aio_order", "sec_where", "sec_signed", "sec_roles"].flatMap((id) => [
+    { label: `Theme · ${id}`, url: `https://goluq.com/catalog/${id}.jpg` },
+    { label: `Theme · ${id} · हिंदी`, url: `https://goluq.com/catalog/hi/${id}.jpg` },
   ]),
   { label: "Telegram QR · @GoLuQ_client_bot", url: "https://goluq.com/catalog/telegram.jpg" },
 ];
@@ -47,11 +51,18 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
   const products = await env.DB.prepare(`SELECT retailer_id, name, image_path FROM products WHERE tenant='goluq' AND live=1 AND image_path IS NOT NULL ORDER BY sort_order, id`).all();
   const REELS = ["coaching", "distributor", "ca", "garment", "claims", "ceo"];
   const STORIES: [string, string][] = [["coach", "CEO story · coaching institute"], ["dist", "CEO story · FMCG distributor"], ["ca", "CEO story · CA firm"], ["adv", "Partner story · the advisor"], ["cap", "Partner story · the CA firm"]];
+  const THEMES: [string, string][] = [["house", "Own, don't rent · the rented flat (40 s)"], ["pharm", "Own, don't rent · six medical stores"], ["aioshort", "All-in-one · six software, one call (40 s)"], ["aiostory", "All-in-one · six rents or one that is yours"], ["five", "Partner · your own business, five steps (38 s)"], ["boss", "Partner · the day Kavita became her own boss"], ["where", "Security · where your data lives"], ["signed", "Security · every message is signed"], ["roles", "Security · your people, your roles, your exit"]];
   return Response.json({
     ok: true,
     posts: posts.results ?? [],
     videos: [
       // The ninety-second stories: portrait cut for feeds and Reels, wide cut for the site.
+      ...THEMES.flatMap(([id, label]) => [
+        { label: `${label} · English · 9:16`, url: `https://goluq.com/media/${id}-en-916.mp4` },
+        { label: `${label} · हिंदी · 9:16`, url: `https://goluq.com/media/${id}-hi-916.mp4` },
+        { label: `${label} · English · 16:9`, url: `https://goluq.com/media/${id}-en.mp4` },
+        { label: `${label} · हिंदी · 16:9`, url: `https://goluq.com/media/${id}-hi.mp4` },
+      ]),
       ...STORIES.flatMap(([id, label]) => [
         { label: `${label} · English · 9:16`, url: `https://goluq.com/media/ceo-${id}-en-916.mp4` },
         { label: `${label} · हिंदी · 9:16`, url: `https://goluq.com/media/ceo-${id}-hi-916.mp4` },

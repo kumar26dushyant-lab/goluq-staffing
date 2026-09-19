@@ -40,6 +40,9 @@ const PARTNER_CARDS = [
   { id: "aff_first", name: "Partner — the easiest first introduction" },
   { id: "aff_payout", name: "Partner — paid simply, shown clearly" },
   { id: "aff_nowork", name: "Partner — what a partner never does" },
+  { id: "aff_boss", name: "Partner — become your own boss" },
+  { id: "aff_playbook", name: "Partner — the playbook, step by step" },
+  { id: "aff_yourway", name: "Partner — bring clients your own way" },
 ];
 const partnerCaption = (lang: string | null | undefined) => lang === "hi"
   ? "GoLuQ.com पार्टनर प्रोग्राम: आप बिज़नेस मालिकों को जानते हैं, हम उनका सॉफ़्टवेयर और WhatsApp सिस्टम बनाते-चलाते हैं; हर ऑर्डर पर और मैनेज्ड ग्राहकों पर हर महीने आपकी कमाई। किट आज ही, शर्तें 30 मिनट की कॉल पर। साइन-अप: https://goluq.com/partner"

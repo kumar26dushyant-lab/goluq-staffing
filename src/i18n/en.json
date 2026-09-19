@@ -477,7 +477,7 @@
     "capSub": "Think of GoLuQ as your complete digital arm — from a local Indore business automating customer follow-ups to a US enterprise needing a multi-tenant platform built from scratch.",
     "caps": [
       "Software Products & Web Applications",
-      "AI-Powered Workflows & Automation",
+      "Workflows and follow-ups that run themselves",
       "Multi-Tenant Enterprise Platforms",
       "CRM, Marketing & Sales Tech Stacks",
       "Digital Workforce & Virtual Employees",
@@ -1588,7 +1588,7 @@
           "Several people answering one number without sharing a phone",
           "Order updates, reminders and confirmations sent automatically"
         ],
-        "build": "We build the flows themselves — the chatbot, the booking, the follow-up — not just the connection."
+        "build": "We build the flows themselves — the replies, the booking, the follow-up — not just the connection."
       },
       "voiceCampaign": {
         "name": "Voice Campaigns (Press-1, Bulk, DTMF)",
@@ -1974,9 +1974,15 @@
   },
   "story": {
     "spot": {
-      "kicker": "Ninety-second stories",
-      "title": "Become the CEO of your business",
-      "sub": "Three owners and two partners. What runs on their phone today, what it costs, and what changes in money, time and control once GoLuQ runs it.",
+      "kicker": "Forty seconds each",
+      "title": "Rent less. Own more.",
+      "sub": "Software that is yours, one system for every department, and a business you can start with zero investment. Three short films; the ninety-second stories are one tap away.",
+      "house": "Rent a flat, or build your house?",
+      "houseHook": "Rented software is a rented flat",
+      "aioshort": "Six software. Six invoices. One call.",
+      "aioshortHook": "One system for every department, yours",
+      "five": "Your own business, zero investment",
+      "fiveHook": "Five steps to the first order",
       "watch": "Watch with sound",
       "playing": "Playing",
       "all": "All stories and the partner page",
@@ -1999,7 +2005,10 @@
         "dist": ["Forty shops pay 20 days late on ₹10 lakh a month", "₹3 lakh+ of his own money back in the business", "Less than one salary a month"],
         "ca": ["₹1.5 lakh a year gone, invoices a month late", "Paid weeks sooner, ₹75,000 a year kept", "Less than a junior's salary a month"],
         "adv": ["Twenty recommendations a week that earn nothing", "₹4,000–₹12,000 per order introduced, plus monthly", "Free to join; exact terms on a 30-minute call"],
-        "cap": ["Evenings comparing vendors for other people, unpaid", "A share per order, plus monthly: a second income", "Free to join; her name on the software is possible"]
+        "cap": ["Evenings comparing vendors for other people, unpaid", "A share per order, plus monthly: a second income", "Free to join; her name on the software is possible"],
+        "house": ["Say ₹10,000 a month for rented software: ₹6 lakh in five years, nothing yours", "Your own copy, built for how you work: the code and the data are yours", "One fixed price in writing; run for you for less than one salary a month"],
+        "aioshort": ["Say six tools at ₹3,000 each: ₹18,000 a month, ₹2 lakh+ a year, forever", "One system for every department on one login, built for your business", "One fixed price in writing; no per-user fees, no yearly rent"],
+        "five": ["A network that already asks you for advice, and no office", "Sign up free, kit the same day, introduce, earn on every order and monthly", "Zero investment; exact terms agreed on a 30-minute call"]
       },
       "ask": "Tell us your need",
       "wa": "Ask on WhatsApp"
@@ -2124,6 +2133,18 @@
       "kicker": "Customer stories",
       "title": "In their own words",
       "soon": "Video stories from customers arrive here as they are recorded."
+    },
+    "ceoStrip": {
+      "kicker": "Ninety-second stories",
+      "title": "Become the CEO of your business",
+      "sub": "Three owners and three partners, one story each: what runs on their phone today, what it costs, and what changes once GoLuQ runs it.",
+      "cta": "Watch the stories"
+    },
+    "partnerStrip": {
+      "kicker": "Know business owners?",
+      "title": "Open your GoLuQ partner office",
+      "sub": "Zero investment, no stock, no staff, no tech. You introduce; we build and run; you earn on every order and monthly on managed customers. Free to join.",
+      "cta": "See how partners earn"
     },
     "sub": "Software, WhatsApp, voice and toll-free lines, set up and run for you by a small team led by Dushyant. Six stories below; one of them is yours.",
     "book": "Book a 30-minute call",

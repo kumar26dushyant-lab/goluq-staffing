@@ -25,6 +25,7 @@ import { ProductsShowcase } from "../components/ProductsShowcase";
 import { RentVsOwn } from "../components/build/RentVsOwn";
 import { BuildEnquiryForm } from "../components/build/BuildEnquiryForm";
 import { WhatsAppCta } from "../components/WhatsAppCta";
+import { FilmGrid } from "../components/FilmGrid";
 import { LINKEDIN_URL } from "./About";
 import type { Region } from "../content/buildPricing";
 
@@ -48,7 +49,7 @@ type QA = { q: string; a: string };
  */
 export function BuildPractice({ region }: { region: Region }) {
   const ns = region === "in" ? "buildIn" : "buildGlobal";
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const reduced = useReducedMotion();
 
@@ -173,6 +174,28 @@ export function BuildPractice({ region }: { region: Region }) {
             <RentVsOwnTeaser ns={ns} />
           </div>
         </section>
+
+        {/* ── 1b · The films: own, don't rent · all-in-one ──────────── */}
+        <div className="mt-10">
+          <FilmGrid
+            heading={i18n.language.startsWith("hi") ? "किराए का सॉफ़्टवेयर, या अपना?" : "Rented software, or your own?"}
+            note={i18n.language.startsWith("hi") ? "तीन फ़िल्में; आँकड़े उदाहरण हैं। कीमत हमेशा लिखकर, काम से पहले।" : "Three films; the figures are worked examples. The price is always in writing, before work starts."}
+            films={i18n.language.startsWith("hi") ? [
+              { media: "house", title: "किराए का फ़्लैट, या अपना घर?", sub: "किराए का सॉफ़्टवेयर किराए का फ़्लैट है। 40 सेकंड।", len: "0:40" },
+              { media: "pharm", title: "हमेशा किराया, या एक बार अपना?", sub: "छह मेडिकल स्टोर, हर साल रिन्यूअल इनवॉइस, और सॉफ़्टवेयर की एक लाइन भी उनकी नहीं।", len: "1:35" },
+              { media: "aiostory", title: "छह किराए, या एक जो आपका हो", sub: "छह सॉफ़्टवेयर जो आपस में बात नहीं करते, और एक सिस्टम जो कंपनी के लिए बना।", len: "1:35" },
+            ] : [
+              { media: "house", title: "Rent a flat, or build your house?", sub: "Rented software is a rented flat. 40 seconds.", len: "0:40" },
+              { media: "pharm", title: "Rent forever, or own once?", sub: "Six medical stores, a renewal invoice every year, and not one line of the software his.", len: "1:35" },
+              { media: "aiostory", title: "Six rents, or one that is yours", sub: "Six software that do not talk to each other, and one system built for the company.", len: "1:35" },
+            ]}
+          />
+          <div className="mt-5 grid grid-cols-3 gap-3 sm:grid-cols-6">
+            {(["own_house", "own_cost", "own_yours", "aio_one", "aio_six", "aio_order"] as const).map((c) => (
+              <a key={c} href={`/catalog/${i18n.language.startsWith("hi") ? "hi/" : ""}${c}.jpg`} target="_blank" rel="noreferrer" className="overflow-hidden rounded-xl border border-hairline/15"><img src={`/catalog/${i18n.language.startsWith("hi") ? "hi/" : ""}${c}.jpg`} alt="" loading="lazy" className="w-full" /></a>
+            ))}
+          </div>
+        </div>
 
         {/* ── 2 · Proof, before any pitch ───────────────────────────── */}
         <div id="proof" className="scroll-mt-24">

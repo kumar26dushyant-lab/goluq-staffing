@@ -26,11 +26,14 @@ const REGION_LABEL: Record<Region, [string, string]> = { in: ["India", "भा�
 
 /** The three story videos (India cut first; Gulf and AU/NZ cuts follow). */
 const STORIES = [
-  { id: "coach", en: ["A coaching institute", "The 9 pm calls nobody answers: ₹75,000 a month walking to the competitor, and what the number gets back."], hi: ["एक कोचिंग इंस्टीट्यूट", "रात 9 बजे के फ़ोन जो कोई नहीं उठाता: हर महीने ₹75,000 प्रतिद्वंद्वी के पास, और नंबर क्या वापस लाता है।"] },
-  { id: "dist", en: ["An FMCG distributor", "Forty shops paying twenty days late on ₹10 lakh a month, and the ₹3 lakh that comes back when reminders send themselves."], hi: ["एक FMCG डिस्ट्रीब्यूटर", "₹10 लाख महीने पर चालीस दुकानें बीस दिन देर से, और वे ₹3 लाख जो रिमाइंडर अपने आप जाने पर वापस आते हैं।"] },
-  { id: "ca", en: ["A CA firm of four", "Clients drifting over late replies, invoices a month late, and the memory that stays with the firm."], hi: ["चार लोगों की CA फ़र्म", "देर से जवाब पर जाते क्लाइंट, महीना देर से इनवॉइस, और वह याददाश्त जो फ़र्म के पास रहती है।"] },
-  { id: "adv", partner: true, en: ["An advisor who partners", "Twenty owners a week already ask him who builds this. He opens a partner office and earns on every order, and every month."], hi: ["एक सलाहकार जो पार्टनर बना", "हफ़्ते में बीस मालिक पहले से पूछते थे कि यह कौन बनाता है। उसने पार्टनर ऑफ़िस खोला; हर ऑर्डर और हर महीने कमाई।"] },
-  { id: "cap", partner: true, en: ["A CA firm that partners", "Her 150 clients kept asking the same question. Now the firm has the answer, her name can go on the software, and a second income arrives monthly."], hi: ["एक CA फ़र्म जो पार्टनर बनी", "150 क्लाइंट वही सवाल पूछते थे। अब फ़र्म के पास जवाब है, सॉफ़्टवेयर पर उनका नाम हो सकता है, और दूसरी आमदनी हर महीने।"] },
+  { id: "coach", media: "ceo-coach", en: ["A coaching institute", "The 9 pm calls nobody answers: ₹75,000 a month walking to the competitor, and what the number gets back."], hi: ["एक कोचिंग इंस्टीट्यूट", "रात 9 बजे के फ़ोन जो कोई नहीं उठाता: हर महीने ₹75,000 प्रतिद्वंद्वी के पास, और नंबर क्या वापस लाता है।"] },
+  { id: "dist", media: "ceo-dist", en: ["An FMCG distributor", "Forty shops paying twenty days late on ₹10 lakh a month, and the ₹3 lakh that comes back when reminders send themselves."], hi: ["एक FMCG डिस्ट्रीब्यूटर", "₹10 लाख महीने पर चालीस दुकानें बीस दिन देर से, और वे ₹3 लाख जो रिमाइंडर अपने आप जाने पर वापस आते हैं।"] },
+  { id: "ca", media: "ceo-ca", en: ["A CA firm of four", "Clients drifting over late replies, invoices a month late, and the memory that stays with the firm."], hi: ["चार लोगों की CA फ़र्म", "देर से जवाब पर जाते क्लाइंट, महीना देर से इनवॉइस, और वह याददाश्त जो फ़र्म के पास रहती है।"] },
+  { id: "adv", media: "ceo-adv", partner: true, en: ["An advisor who partners", "Twenty owners a week already ask him who builds this. He opens a partner office and earns on every order, and every month."], hi: ["एक सलाहकार जो पार्टनर बना", "हफ़्ते में बीस मालिक पहले से पूछते थे कि यह कौन बनाता है। उसने पार्टनर ऑफ़िस खोला; हर ऑर्डर और हर महीने कमाई।"] },
+  { id: "cap", media: "ceo-cap", partner: true, en: ["A CA firm that partners", "Her 150 clients kept asking the same question. Now the firm has the answer, her name can go on the software, and a second income arrives monthly."], hi: ["एक CA फ़र्म जो पार्टनर बनी", "150 क्लाइंट वही सवाल पूछते थे। अब फ़र्म के पास जवाब है, सॉफ़्टवेयर पर उनका नाम हो सकता है, और दूसरी आमदनी हर महीने।"] },
+  { id: "pharm", media: "pharm", en: ["Rent forever, or own once?", "Six medical stores, one renewal invoice a year, and not one line of the software his. The house analogy, and the ₹1.8 lakh a year that stays."], hi: ["हमेशा किराया, या एक बार अपना?", "छह मेडिकल स्टोर, हर साल एक रिन्यूअल इनवॉइस, और सॉफ़्टवेयर की एक लाइन भी उनकी नहीं। घर वाली मिसाल, और साल के ₹1.8 लाख जो बचते हैं।"] },
+  { id: "aiostory", media: "aiostory", en: ["Six rents, or one that is yours", "A pharma distributor on six software that do not talk to each other, and the one system built for his company that he owns."], hi: ["छह किराए, या एक जो आपका हो", "छह ऐसे सॉफ़्टवेयर पर चलता एक फ़ार्मा डिस्ट्रीब्यूटर जो आपस में बात नहीं करते, और वह एक सिस्टम जो उनकी कंपनी के लिए बना और उनका है।"] },
+  { id: "boss", media: "boss", partner: true, en: ["The day Kavita became her own boss", "Two hundred shopkeepers on her phone and no office, until one evening. The five-step playbook, and a market that is hers."], hi: ["जिस दिन कविता अपनी बॉस बनीं", "फ़ोन में दो सौ दुकानदार और कोई ऑफ़िस नहीं, एक शाम तक। पाँच कदम की प्लेबुक, और एक बाज़ार जो उनका है।"] },
 ] as const;
 /** Bump when a video is re-cut: the edge caches by URL. */
 const VID_V = "1";
@@ -39,8 +42,8 @@ const COPY = {
   en: {
     kicker: "The story",
     title: "Become the CEO of your business.",
-    sub: "Three owners and two partners, ninety seconds each: what runs on their phone today, what it costs, and what changes in money, time and control once GoLuQ runs it.",
-    storiesTitle: "Five stories, ninety seconds each",
+    sub: "Five owners and three partners, ninety seconds each: what runs on their phone today, what it costs, and what changes in money, time and control once GoLuQ runs it.",
+    storiesTitle: "Eight stories, ninety seconds each",
     storiesNote: "The numbers are worked examples, not client results. Put in your own; the plan we write uses yours.",
     example: "Worked example",
     pillars: [
@@ -68,8 +71,8 @@ const COPY = {
   hi: {
     kicker: "कहानी",
     title: "अपने बिज़नेस के CEO बनिए।",
-    sub: "तीन मालिक और दो पार्टनर, नब्बे-नब्बे सेकंड: आज उनके फ़ोन पर क्या चलता है, उसकी क्या कीमत है, और GoLuQ के चलाने पर पैसे, समय और नियंत्रण में क्या बदलता है।",
-    storiesTitle: "पाँच कहानियाँ, नब्बे-नब्बे सेकंड",
+    sub: "पाँच मालिक और तीन पार्टनर, नब्बे-नब्बे सेकंड: आज उनके फ़ोन पर क्या चलता है, उसकी क्या कीमत है, और GoLuQ के चलाने पर पैसे, समय और नियंत्रण में क्या बदलता है।",
+    storiesTitle: "आठ कहानियाँ, नब्बे-नब्बे सेकंड",
     storiesNote: "आँकड़े उदाहरण हैं, किसी क्लाइंट के नतीजे नहीं। अपने आँकड़े डालिए; हमारा प्लान आपके आँकड़ों पर बनता है।",
     example: "उदाहरण",
     pillars: [
@@ -180,9 +183,9 @@ export default function CeoStory() {
               return (
                 <figure key={st.id} className="overflow-hidden rounded-2xl border border-hairline/15 bg-panel/40">
                   <video key={`${st.id}-${vlang}`} controls playsInline preload="none"
-                    poster={`/media/ceo-${st.id}-${vlang}-poster.jpg?v=${VID_V}`}
+                    poster={`/media/${st.media}-${vlang}-poster.jpg?v=${VID_V}`}
                     className="aspect-video w-full bg-black object-cover">
-                    <source src={`/media/ceo-${st.id}-${vlang}.mp4?v=${VID_V}`} type="video/mp4" />
+                    <source src={`/media/${st.media}-${vlang}.mp4?v=${VID_V}`} type="video/mp4" />
                   </video>
                   <figcaption className="p-4">
                     <p className="text-xs font-bold uppercase tracking-wide text-brand-luq">{"partner" in st && st.partner ? (hi ? "पार्टनर की कहानी · उदाहरण" : "Partner story · worked example") : t.example}</p>
