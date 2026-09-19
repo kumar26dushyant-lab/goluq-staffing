@@ -149,12 +149,12 @@ function Chapter({ id, index, region, onEnter }: { id: ChapterId; index: number;
     }
   };
 
-  const words = (dark: boolean) => (
+  const words = (dark: boolean, compact = false) => (
     <div className={dark ? "text-white" : "text-fg"}>
       <p className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-bold sm:text-base ${dark ? "bg-black/45 text-brand-luq backdrop-blur" : "bg-brand-luq/10 text-brand-luq"}`}>
         <span className="font-mono">{String(index + 1).padStart(2, "0")}</span> · {line("who")}
       </p>
-      <div className="mt-2 min-h-0 sm:min-h-[12rem] lg:min-h-[14rem]">
+      <div className={compact ? "hidden" : "mt-2 min-h-0 sm:min-h-[12rem] lg:min-h-[14rem]"}>
         <AnimatePresence mode="wait" initial={false}>
           <motion.p
             key={after ? "after" : "before"}
@@ -217,7 +217,7 @@ function Chapter({ id, index, region, onEnter }: { id: ChapterId; index: number;
     >
       {/* Phone: the reel on top, words below it — never on top of the film. */}
       <div className="flex min-h-[100svh] flex-col lg:hidden">
-        <div className="relative h-[52svh] shrink-0">
+        <div className="relative h-[62svh] shrink-0">
           <Reel id={id} inView={inView} eager={index === 0} near={near} className="absolute inset-0" />
           {/* A soft fade into the caption panel, so the join reads as one card. */}
           <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#0B1020] to-transparent" aria-hidden="true" />
@@ -227,7 +227,7 @@ function Chapter({ id, index, region, onEnter }: { id: ChapterId; index: number;
             </motion.div>
           )}
         </div>
-        <div className="flex flex-1 flex-col justify-center bg-[#0B1020] px-5 pb-6 pr-20 pt-3 sm:px-8">{words(true)}</div>
+        <div className="flex flex-1 flex-col justify-center bg-[#0B1020] px-5 pb-6 pr-20 pt-3 sm:px-8">{words(true, true)}</div>
       </div>
 
       {/* Desk: the reel, phone-shaped, beside the words. */}
