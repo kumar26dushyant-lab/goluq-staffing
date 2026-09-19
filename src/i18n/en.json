@@ -1990,7 +1990,19 @@
       "adv": "An advisor who partners",
       "advHook": "An office without a lease",
       "cap": "A CA firm that partners",
-      "capHook": "She introduced. That was the work."
+      "capHook": "She introduced. That was the work.",
+      "today": "Today",
+      "withGoluq": "With GoLuQ",
+      "runsFor": "It costs",
+      "facts": {
+        "coach": ["Three admissions a month walk to the competitor: ₹75,000", "Two of the three caught: ₹50,000 a month back", "Less than one counsellor's salary a month"],
+        "dist": ["Forty shops pay 20 days late on ₹10 lakh a month", "₹3 lakh+ of his own money back in the business", "Less than one salary a month"],
+        "ca": ["₹1.5 lakh a year gone, invoices a month late", "Paid weeks sooner, ₹75,000 a year kept", "Less than a junior's salary a month"],
+        "adv": ["Twenty recommendations a week that earn nothing", "₹4,000–₹12,000 per order introduced, plus monthly", "Free to join; exact terms on a 30-minute call"],
+        "cap": ["Evenings comparing vendors for other people, unpaid", "A share per order, plus monthly: a second income", "Free to join; her name on the software is possible"]
+      },
+      "ask": "Tell us your need",
+      "wa": "Ask on WhatsApp"
     },
     "kicker": "Businesses like yours already run this way.",
     "title": "Why not yours?",
