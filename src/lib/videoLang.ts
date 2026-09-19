@@ -1,5 +1,27 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useSiteConfig } from "./siteConfig";
+
+/**
+ * Accent. English comes in two voices: Indian English for India and the
+ * Gulf (where most of the owners we reach are Indian traders), and
+ * international English elsewhere. Chosen by the visitor's country, never
+ * asked. A film only switches to the Indian cut once that cut exists on
+ * the server (ACCENT_READY), so nothing 404s while the re-render runs.
+ */
+const INDIAN_ACCENT = new Set(["IN", "AE", "SA", "QA", "KW", "OM", "BH", "JO"]);
+/** Media stems whose Indian-English cut (`<stem>-enin.mp4`) has been uploaded. */
+const ACCENT_READY = new Set<string>([]);
+
+export type FilmSuffix = "hi" | "en" | "enin";
+export function accentFor(country: string | undefined | null): "in" | "intl" {
+  return INDIAN_ACCENT.has(String(country || "").toUpperCase()) ? "in" : "intl";
+}
+/** The suffix for one film: Hindi, Indian English if ready and wanted, else international English. */
+export function filmSuffix(stem: string, lang: VideoLang, accent: "in" | "intl"): FilmSuffix {
+  if (lang === "hi") return "hi";
+  return accent === "in" && ACCENT_READY.has(stem) ? "enin" : "en";
+}
 
 /**
  * The language a visitor wants to HEAR, which is not always the language
@@ -49,4 +71,12 @@ export function useVideoLang(): [VideoLang, (l: VideoLang) => void, VideoLang] {
   }, []);
 
   return [lang, setLang, site];
+}
+
+/** The film language plus the suffix picker, for players. */
+export function useFilm(): { lang: VideoLang; setLang: (l: VideoLang) => void; sfx: (stem: string) => FilmSuffix } {
+  const [lang, setLang] = useVideoLang();
+  const cfg = useSiteConfig();
+  const accent = accentFor(cfg?.country);
+  return { lang, setLang, sfx: (stem) => filmSuffix(stem, lang, accent) };
 }

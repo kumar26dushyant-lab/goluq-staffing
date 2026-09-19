@@ -1,4 +1,4 @@
-import { useVideoLang } from "../lib/videoLang";
+import { useFilm } from "../lib/videoLang";
 import { VideoLangToggle } from "./VideoLangToggle";
 
 /**
@@ -9,7 +9,7 @@ import { VideoLangToggle } from "./VideoLangToggle";
 export type Film = { media: string; title: string; sub?: string; len?: string; tag?: string };
 
 export function FilmGrid({ films, heading, note, dark = false, cols = 3, v = "1" }: { films: Film[]; heading?: string; note?: string; dark?: boolean; cols?: 2 | 3; v?: string }) {
-  const [lang, setLang] = useVideoLang();
+  const { lang, setLang, sfx } = useFilm();
   return (
     <section className={dark ? "text-white" : ""}>
       {(heading || note) && (
@@ -25,8 +25,8 @@ export function FilmGrid({ films, heading, note, dark = false, cols = 3, v = "1"
         {films.map((f) => (
           <figure key={f.media} className={`overflow-hidden rounded-2xl border ${dark ? "border-white/12 bg-white/5" : "border-hairline/15 bg-panel/40"}`}>
             <div className="relative">
-              <video key={`${f.media}-${lang}`} controls playsInline preload="none" poster={`/media/${f.media}-${lang}-poster.jpg?v=${v}`} className="aspect-video w-full bg-black">
-                <source src={`/media/${f.media}-${lang}.mp4?v=${v}`} type="video/mp4" />
+              <video key={`${f.media}-${sfx(f.media)}`} controls playsInline preload="none" poster={`/media/${f.media}-${sfx(f.media)}-poster.jpg?v=${v}`} className="aspect-video w-full bg-black">
+                <source src={`/media/${f.media}-${sfx(f.media)}.mp4?v=${v}`} type="video/mp4" />
               </video>
               {f.len && <span className="pointer-events-none absolute right-2 top-2 rounded-full bg-black/60 px-2 py-0.5 text-xs font-bold text-white">{f.len}</span>}
             </div>

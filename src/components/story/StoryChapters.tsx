@@ -4,7 +4,7 @@ import { ArrowRight, ChevronDown, Share2, Volume2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useMoney, usePricing } from "../../lib/siteConfig";
 import { useRegion, type Region } from "../../lib/region";
-import { useVideoLang } from "../../lib/videoLang";
+import { useFilm } from "../../lib/videoLang";
 
 /**
  * The homepage as a story: six chapters, one screen each.
@@ -57,7 +57,8 @@ export function StoryChapters() {
 function Reel({ id, inView, near, eager, className = "" }: { id: ChapterId; inView: boolean; near: boolean; eager: boolean; className?: string }) {
   const { t } = useTranslation();
   const ref = useRef<HTMLVideoElement>(null);
-  const [lang] = useVideoLang();
+  const { sfx } = useFilm();
+  const lang = sfx(`reel-${id}`);
   const preview = `/media/preview-${id}-${lang}.mp4`;
   const full = `/media/reel-${id}-${lang}.mp4`;
   const load = eager || near;

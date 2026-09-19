@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useSiteConfig } from "../../lib/siteConfig";
-import { useVideoLang } from "../../lib/videoLang";
+import { useFilm } from "../../lib/videoLang";
 import { VideoLangToggle } from "../VideoLangToggle";
 import { useTranslation } from "react-i18next";
 import { ArrowRight, MessageCircle, PenLine, Play, Volume2 } from "lucide-react";
@@ -28,7 +28,7 @@ const V = "1";
 
 export function StorySpotlight() {
   const { t } = useTranslation();
-  const [lang, setLang] = useVideoLang();
+  const { lang, setLang, sfx } = useFilm();
   const [story, setStory] = useState<StoryId>("house");
   const cur = STORIES.find((x) => x.id === story) || STORIES[0];
   const [playing, setPlaying] = useState(false);
@@ -47,8 +47,9 @@ export function StorySpotlight() {
     else { v.muted = true; v.play().catch(() => { /* poster stays */ }); }
   }, [playing, story, lang]);
 
-  const src = playing ? `/media/${story}-${lang}.mp4?v=${V}` : `/media/preview-${story}-${lang}.mp4?v=${V}`;
-  const poster = `/media/${story}-${lang}-poster.jpg?v=${V}`;
+  const s = sfx(story);
+  const src = playing ? `/media/${story}-${s}.mp4?v=${V}` : `/media/preview-${story}-${s}.mp4?v=${V}`;
+  const poster = `/media/${story}-${s}-poster.jpg?v=${V}`;
 
   return (
     <section aria-labelledby="spot-title" className="mx-auto max-w-6xl px-5 pb-10 sm:px-8 lg:pb-14">
@@ -59,7 +60,7 @@ export function StorySpotlight() {
           <div className="relative">
             <video
               ref={ref}
-              key={`${story}-${lang}-${playing ? "full" : "loop"}`}
+              key={`${story}-${s}-${playing ? "full" : "loop"}`}
               poster={poster}
               playsInline
               loop={!playing}
@@ -120,7 +121,7 @@ export function StorySpotlight() {
                   onClick={() => setStory(id)}
                   className={`flex items-center gap-3 rounded-2xl border p-2 text-left transition ${id === story ? "border-[#22D3EE]/70 bg-white/10" : "border-white/10 bg-white/5 hover:bg-white/10"}`}
                 >
-                  <span className="relative shrink-0"><img src={`/media/${id}-${lang}-poster.jpg?v=${V}`} alt="" loading="lazy" className="h-12 w-20 rounded-lg object-cover" /><span className="absolute bottom-0.5 right-0.5 rounded bg-black/70 px-1 text-[10px] font-bold">{len}</span></span>
+                  <span className="relative shrink-0"><img src={`/media/${id}-${sfx(id)}-poster.jpg?v=${V}`} alt="" loading="lazy" className="h-12 w-20 rounded-lg object-cover" /><span className="absolute bottom-0.5 right-0.5 rounded bg-black/70 px-1 text-[10px] font-bold">{len}</span></span>
                   <span className="min-w-0">
                     <span className="block truncate text-[15px] font-bold">{t(`story.spot.${id}`)}</span>
                     <span className="block truncate text-sm text-white/65">{t(`story.spot.${id}Hook`)}</span>

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Play } from "lucide-react";
-import { useVideoLang } from "../../lib/videoLang";
+import { useFilm } from "../../lib/videoLang";
 import { VideoLangToggle } from "../VideoLangToggle";
 
 /**
@@ -18,7 +18,7 @@ const V = "1";
 export function PartnerStories() {
   const { i18n } = useTranslation();
   const hi = i18n.language.startsWith("hi");
-  const [lang, setLang] = useVideoLang();
+  const { lang, setLang, sfx } = useFilm();
   const [id, setId] = useState<Id>("five");
   const T = {
     five: hi ? ["अपना बिज़नेस, ज़ीरो निवेश, पाँच कदम", "डेढ़ सौ दुकानें फ़रहान पर भरोसा करती हैं। यह भरोसा एक बिज़नेस है। 58 सेकंड।"] : ["Your own business, zero investment, five steps", "A hundred and fifty shops trust Farhan. That trust is a business. 58 seconds."],
@@ -29,8 +29,8 @@ export function PartnerStories() {
   return (
     <section className="relative mt-6 overflow-hidden rounded-3xl bg-[#0B1020] text-white ring-1 ring-white/10">
       <VideoLangToggle lang={lang} onChange={setLang} className="absolute right-3 top-3 z-10" />
-      <video key={`${id}-${lang}`} controls playsInline preload="none" poster={`/media/${MEDIA[id]}-${lang}-poster.jpg?v=${V}`} className="aspect-video w-full bg-black">
-        <source src={`/media/${MEDIA[id]}-${lang}.mp4?v=${V}`} type="video/mp4" />
+      <video key={`${id}-${sfx(MEDIA[id])}`} controls playsInline preload="none" poster={`/media/${MEDIA[id]}-${sfx(MEDIA[id])}-poster.jpg?v=${V}`} className="aspect-video w-full bg-black">
+        <source src={`/media/${MEDIA[id]}-${sfx(MEDIA[id])}.mp4?v=${V}`} type="video/mp4" />
       </video>
       <div className="grid gap-2 p-4 sm:grid-cols-2">
         {STORIES.map((s) => (

@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { ShieldCheck, Lock, KeyRound, EyeOff, Server, Download, MessageCircle, PlayCircle } from "lucide-react";
 import { TopBar } from "../components/TopBar";
 import { useSiteConfig } from "../lib/siteConfig";
-import { useVideoLang } from "../lib/videoLang";
+import { useFilm } from "../lib/videoLang";
 import { VideoLangToggle } from "../components/VideoLangToggle";
 import { FilmGrid } from "../components/FilmGrid";
 
@@ -104,8 +104,9 @@ export default function Security() {
   const hi = i18n.language.startsWith("hi");
   const t = C[hi ? "hi" : "en"];
   const cfg = useSiteConfig();
-  const [vlang, setVlang] = useVideoLang();
+  const { lang: vlang, setLang: setVlang, sfx } = useFilm();
   const vhi = vlang === "hi";
+  const ov = sfx("security-in");
   // The homepage links straight to the video; the page is lazy, so scroll once it exists.
   const { hash } = useLocation();
   useEffect(() => { if (hash === "#video") document.getElementById("video")?.scrollIntoView({ behavior: "smooth", block: "start" }); }, [hash]);
@@ -155,12 +156,12 @@ export default function Security() {
             {/* The India cut, made with the same pipeline as the homepage reels; the
                 language of the site picks the voice. Nothing loads until play. */}
             <video
-              key={vlang}
+              key={ov}
               controls playsInline preload="none"
-              poster={`/media/security-in-${vlang}-poster.jpg?v=2`}
+              poster={`/media/security-in-${ov}-poster.jpg?v=2`}
               className="aspect-video w-full rounded-2xl border border-white/15 bg-black object-cover"
             >
-              <source src={`/media/security-in-${vlang}.mp4?v=2`} type="video/mp4" />
+              <source src={`/media/security-in-${ov}.mp4?v=2`} type="video/mp4" />
             </video>
           </div>
         </section>

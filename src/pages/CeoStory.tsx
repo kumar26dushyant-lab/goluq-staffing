@@ -5,7 +5,7 @@ import { TopBar } from "../components/TopBar";
 import { useSiteConfig } from "../lib/siteConfig";
 import { useRegion } from "../lib/region";
 import { BrandText } from "../components/BrandText";
-import { useVideoLang } from "../lib/videoLang";
+import { useFilm } from "../lib/videoLang";
 import { VideoLangToggle } from "../components/VideoLangToggle";
 
 /**
@@ -150,7 +150,7 @@ export default function CeoStory() {
   const hi = i18n.language.startsWith("hi");
   const lang = hi ? "hi" : "en";
   const t = COPY[lang];
-  const [vlang, setVlang] = useVideoLang();
+  const { lang: vlang, setLang: setVlang, sfx } = useFilm();
   const cfg = useSiteConfig();
   // useLocation makes the region pills re-render the page on `?r=` changes.
   const { search } = useLocation();
@@ -182,10 +182,10 @@ export default function CeoStory() {
               const [name, hook] = st[lang];
               return (
                 <figure key={st.id} className="overflow-hidden rounded-2xl border border-hairline/15 bg-panel/40">
-                  <video key={`${st.id}-${vlang}`} controls playsInline preload="none"
-                    poster={`/media/${st.media}-${vlang}-poster.jpg?v=${VID_V}`}
+                  <video key={`${st.id}-${sfx(st.media)}`} controls playsInline preload="none"
+                    poster={`/media/${st.media}-${sfx(st.media)}-poster.jpg?v=${VID_V}`}
                     className="aspect-video w-full bg-black object-cover">
-                    <source src={`/media/${st.media}-${vlang}.mp4?v=${VID_V}`} type="video/mp4" />
+                    <source src={`/media/${st.media}-${sfx(st.media)}.mp4?v=${VID_V}`} type="video/mp4" />
                   </video>
                   <figcaption className="p-4">
                     <p className="text-xs font-bold uppercase tracking-wide text-brand-luq">{"partner" in st && st.partner ? (hi ? "पार्टनर की कहानी · उदाहरण" : "Partner story · worked example") : t.example}</p>
