@@ -1218,6 +1218,12 @@ for the migration.
 - Theme films' portrait cuts render in the background; the calendar's
   video URLs point at them (aioshort Hindi posts the English cut until the
   TTS quota allows the last line).
+- Footer Instagram now https://www.instagram.com/goluq.official/ (setting
+  public_instagram; the earlier goluq.dushyant handle was a personal page).
+  Checked every footer icon target: Instagram 200, LinkedIn company page
+  (login wall for logged-out clients, normal), Facebook profile.php URL
+  (400 for bots, opens in a browser; a vanity URL would be cleaner), wa.me
+  and t.me 200.
 
 ## 9. TO-DO (current)
 ### Owner
