@@ -1198,6 +1198,27 @@ for the migration.
   the sweep also left 226 headless Edge processes and pinned the CPU —
   run pageshot one page at a time and kill the tree after each.
 
+### Posting calendar as a rhythm; founder profile; footer links (2026-09-19, later)
+- Footer links opened the next page at its footer: no scroll-to-top on route
+  change. `ScrollToTop` in App.tsx now scrolls to the top on every pathname
+  change (hash links excepted).
+- Founder copy (About, /build architect block, home team block) rewritten
+  as the problem-solver a visitor will actually talk to: Spryance India (US
+  healthcare) and RAKBANK Dubai added before Genpact; functions he has run
+  named; "bring the problem in your own words; a written plan and a price
+  before work starts, or a straight no". No invented titles.
+- Posting calendar (scratchpad gen-calendar.py → calendar.sql/.md): six
+  weeks from 2026-09-20, two posts a day, one job per weekday for owners
+  (Money Mon, Own Tue, All-in-one Wed, Your-business Thu, Trust Fri, World
+  Sat in English, Team Sun), evenings rotate the partner films and all 15
+  partner cards; one EN and one HI post every day; films at most three
+  mornings a week; assets rotate so nothing repeats inside its cycle.
+  Applied by deleting every still-scheduled row and inserting 84. Captions
+  reuse the earlier queue, the theme specs, and a table for the new cards.
+- Theme films' portrait cuts render in the background; the calendar's
+  video URLs point at them (aioshort Hindi posts the English cut until the
+  TTS quota allows the last line).
+
 ## 9. TO-DO (current)
 ### Owner
 - [ ] Oracle: after a quiet week (by 2026-09-24) take a Contabo snapshot, then remove /opt/goluq and its nginx site there.
