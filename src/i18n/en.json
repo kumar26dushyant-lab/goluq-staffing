@@ -1,6 +1,6 @@
 {
   "common": {
-    "partner": "Become a Partner · Earn {{rate}}% of our profit",
+    "partner": "Become a Partner · earn on every order",
     "back": "Back",
     "english": "English",
     "hindi": "हिन्दी",
@@ -592,7 +592,7 @@
     "calc": {
       "title": "Your earnings calculator",
       "refsLabel": "Projects you bring in a year",
-      "caveat": "An estimate. Your share is {{rate}}% of GoLuQ's profit on the project — the price minus what it cost us to deliver — and this calculator assumes a typical {{margin}}% margin. Paid once the customer has paid us. Enhancements ordered within {{months}} months earn the same share; ongoing support does not.",
+      "caveat": "An estimate, not an offer. Your share is a portion of GoLuQ's profit on the project — the price minus what it cost us to deliver — and this calculator assumes a typical margin. The exact share is agreed on a 30-minute call after you register. Paid once the customer has paid us. Enhancements ordered within {{months}} months earn a share too, and managed monthly plans pay every month.",
       "perMonth": "/mo",
       "ask": "Shall I guide you to register? It takes 2 minutes.",
       "projectLabel": "What kind of project would you introduce?",
@@ -1976,7 +1976,7 @@
     "spot": {
       "kicker": "Ninety-second stories",
       "title": "Become the CEO of your business",
-      "sub": "Three owners. What runs on their phone today, what it costs, and what changes in money, time and control once GoLuQ runs it.",
+      "sub": "Three owners and two partners. What runs on their phone today, what it costs, and what changes in money, time and control once GoLuQ runs it.",
       "watch": "Watch with sound",
       "playing": "Playing",
       "all": "All stories and the partner page",
