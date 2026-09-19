@@ -45,7 +45,9 @@ function PartnerKit({ code, shareUrl, name }: { code: string; shareUrl: string; 
   const cards = [
     ["whatsappOffice", "WhatsApp Office"], ["whatsappStore", "WhatsApp Store"], ["for_coaching", "For coaching institutes"], ["for_clinic", "For clinics"],
     ["for_garment", "For garment wholesalers"], ["for_distributor", "For distributors"], ["dept_crm", "CRM & sales pipeline"], ["dept_billing", "Billing & GST"],
-    ["founder", "Meet the founder"], ["aff_office", "Become a partner"],
+    ["founder", "Meet the founder"],
+    ["aff_office", "Become a partner"], ["aff_network", "Your network is the business"], ["aff_share", "Share, that is the job"], ["aff_earn", "What a partner earns"], ["aff_steps", "Steps to the first order"], ["aff_kit", "Your partner kit"],
+    ["aff_who", "Who makes a good partner"], ["aff_income", "One introduction, two incomes"], ["aff_whitelabel", "Your name on the software"], ["aff_first", "The easiest first introduction"], ["aff_payout", "Paid simply"], ["aff_nowork", "What a partner never does"],
   ];
   const scripts = hi ? [
     ["WhatsApp स्टेटस / ग्रुप", `${name} की ओर से: क्या आपका बिज़नेस फ़ोन पर अटका रहता है? GoLuQ.com सॉफ़्टवेयर, WhatsApp सिस्टम और टोल-फ़्री लाइन बनाता है — तय कीमत, हफ़्तों में। पहले लिखित प्लान, फिर कोटेशन: ${shareUrl}`],

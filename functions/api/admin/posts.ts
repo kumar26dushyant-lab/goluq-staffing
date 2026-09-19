@@ -34,7 +34,7 @@ const HINDI_CARDS = new Set([
 
 /** Cards that are not Store products: the partner set and the Telegram QR. */
 const EXTRA_ASSETS = [
-  ...["aff_office", "aff_network", "aff_share", "aff_earn", "aff_steps", "aff_kit"].flatMap((id) => [
+  ...["aff_office", "aff_network", "aff_share", "aff_earn", "aff_steps", "aff_kit", "aff_who", "aff_income", "aff_whitelabel", "aff_first", "aff_payout", "aff_nowork"].flatMap((id) => [
     { label: `Partner · ${id.slice(4)}`, url: `https://goluq.com/catalog/${id}.jpg` },
     { label: `Partner · ${id.slice(4)} · हिंदी`, url: `https://goluq.com/catalog/hi/${id}.jpg` },
   ]),
@@ -46,13 +46,23 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
   const posts = await env.DB.prepare(`SELECT * FROM posts ORDER BY id DESC LIMIT 100`).all();
   const products = await env.DB.prepare(`SELECT retailer_id, name, image_path FROM products WHERE tenant='goluq' AND live=1 AND image_path IS NOT NULL ORDER BY sort_order, id`).all();
   const REELS = ["coaching", "distributor", "ca", "garment", "claims", "ceo"];
+  const STORIES: [string, string][] = [["coach", "CEO story · coaching institute"], ["dist", "CEO story · FMCG distributor"], ["ca", "CEO story · CA firm"], ["adv", "Partner story · the advisor"], ["cap", "Partner story · the CA firm"]];
   return Response.json({
     ok: true,
     posts: posts.results ?? [],
-    videos: REELS.flatMap((r) => [
-      { label: `Reel · ${r} · English`, url: `https://goluq.com/media/reel-${r}-en.mp4` },
-      { label: `Reel · ${r} · हिंदी`, url: `https://goluq.com/media/reel-${r}-hi.mp4` },
-    ]),
+    videos: [
+      // The ninety-second stories: portrait cut for feeds and Reels, wide cut for the site.
+      ...STORIES.flatMap(([id, label]) => [
+        { label: `${label} · English · 9:16`, url: `https://goluq.com/media/ceo-${id}-en-916.mp4` },
+        { label: `${label} · हिंदी · 9:16`, url: `https://goluq.com/media/ceo-${id}-hi-916.mp4` },
+        { label: `${label} · English · 16:9`, url: `https://goluq.com/media/ceo-${id}-en.mp4` },
+        { label: `${label} · हिंदी · 16:9`, url: `https://goluq.com/media/ceo-${id}-hi.mp4` },
+      ]),
+      ...REELS.flatMap((r) => [
+        { label: `Reel · ${r} · English`, url: `https://goluq.com/media/reel-${r}-en.mp4` },
+        { label: `Reel · ${r} · हिंदी`, url: `https://goluq.com/media/reel-${r}-hi.mp4` },
+      ]),
+    ],
     connection: {
       pageId: (await getSetting(env.DB, "fb_page_id")) || "",
       pageName: (await getSetting(env.DB, "fb_page_name")) || "",

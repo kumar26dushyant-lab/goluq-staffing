@@ -27,6 +27,8 @@ const STORIES = [
   { id: "coach", en: ["A coaching institute", "The 9 pm calls nobody answers: ₹75,000 a month walking to the competitor, and what the number gets back."], hi: ["एक कोचिंग इंस्टीट्यूट", "रात 9 बजे के फ़ोन जो कोई नहीं उठाता: हर महीने ₹75,000 प्रतिद्वंद्वी के पास, और नंबर क्या वापस लाता है।"] },
   { id: "dist", en: ["An FMCG distributor", "Forty shops paying twenty days late on ₹10 lakh a month, and the ₹3 lakh that comes back when reminders send themselves."], hi: ["एक FMCG डिस्ट्रीब्यूटर", "₹10 लाख महीने पर चालीस दुकानें बीस दिन देर से, और वे ₹3 लाख जो रिमाइंडर अपने आप जाने पर वापस आते हैं।"] },
   { id: "ca", en: ["A CA firm of four", "Clients drifting over late replies, invoices a month late, and the memory that stays with the firm."], hi: ["चार लोगों की CA फ़र्म", "देर से जवाब पर जाते क्लाइंट, महीना देर से इनवॉइस, और वह याददाश्त जो फ़र्म के पास रहती है।"] },
+  { id: "adv", partner: true, en: ["An advisor who partners", "Twenty owners a week already ask him who builds this. He opens a partner office and earns on every order, and every month."], hi: ["एक सलाहकार जो पार्टनर बना", "हफ़्ते में बीस मालिक पहले से पूछते थे कि यह कौन बनाता है। उसने पार्टनर ऑफ़िस खोला; हर ऑर्डर और हर महीने कमाई।"] },
+  { id: "cap", partner: true, en: ["A CA firm that partners", "Her 150 clients kept asking the same question. Now the firm has the answer, her name can go on the software, and a second income arrives monthly."], hi: ["एक CA फ़र्म जो पार्टनर बनी", "150 क्लाइंट वही सवाल पूछते थे। अब फ़र्म के पास जवाब है, सॉफ़्टवेयर पर उनका नाम हो सकता है, और दूसरी आमदनी हर महीने।"] },
 ] as const;
 /** Bump when a video is re-cut: the edge caches by URL. */
 const VID_V = "1";
@@ -35,8 +37,8 @@ const COPY = {
   en: {
     kicker: "The story",
     title: "Become the CEO of your business.",
-    sub: "Three owners, ninety seconds each: what runs on their phone today, what it costs, and what changes in money, time and control once GoLuQ runs it.",
-    storiesTitle: "Three stories, ninety seconds each",
+    sub: "Three owners and two partners, ninety seconds each: what runs on their phone today, what it costs, and what changes in money, time and control once GoLuQ runs it.",
+    storiesTitle: "Five stories, ninety seconds each",
     storiesNote: "The numbers are worked examples, not client results. Put in your own; the plan we write uses yours.",
     example: "Worked example",
     pillars: [
@@ -64,8 +66,8 @@ const COPY = {
   hi: {
     kicker: "कहानी",
     title: "अपने बिज़नेस के CEO बनिए।",
-    sub: "तीन मालिक, नब्बे-नब्बे सेकंड: आज उनके फ़ोन पर क्या चलता है, उसकी क्या कीमत है, और GoLuQ के चलाने पर पैसे, समय और नियंत्रण में क्या बदलता है।",
-    storiesTitle: "तीन कहानियाँ, नब्बे-नब्बे सेकंड",
+    sub: "तीन मालिक और दो पार्टनर, नब्बे-नब्बे सेकंड: आज उनके फ़ोन पर क्या चलता है, उसकी क्या कीमत है, और GoLuQ के चलाने पर पैसे, समय और नियंत्रण में क्या बदलता है।",
+    storiesTitle: "पाँच कहानियाँ, नब्बे-नब्बे सेकंड",
     storiesNote: "आँकड़े उदाहरण हैं, किसी क्लाइंट के नतीजे नहीं। अपने आँकड़े डालिए; हमारा प्लान आपके आँकड़ों पर बनता है।",
     example: "उदाहरण",
     pillars: [
@@ -166,7 +168,7 @@ export default function CeoStory() {
         <section id="stories" className="mt-8 scroll-mt-24">
           <h2 className="font-display text-2xl font-bold text-fg sm:text-3xl">{t.storiesTitle}</h2>
           <p className="mt-1 text-sm text-muted">{t.storiesNote}</p>
-          <div className="mt-5 grid gap-5 lg:grid-cols-3">
+          <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {STORIES.map((st) => {
               const [name, hook] = st[lang];
               return (
@@ -177,7 +179,7 @@ export default function CeoStory() {
                     <source src={`/media/ceo-${st.id}-${lang}.mp4?v=${VID_V}`} type="video/mp4" />
                   </video>
                   <figcaption className="p-4">
-                    <p className="text-xs font-bold uppercase tracking-wide text-brand-luq">{t.example}</p>
+                    <p className="text-xs font-bold uppercase tracking-wide text-brand-luq">{"partner" in st && st.partner ? (hi ? "पार्टनर की कहानी · उदाहरण" : "Partner story · worked example") : t.example}</p>
                     <p className="mt-1 text-lg font-bold text-fg">{name}</p>
                     <p className="mt-1 text-[15px] leading-snug text-muted">{hook}</p>
                   </figcaption>

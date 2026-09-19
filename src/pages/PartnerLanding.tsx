@@ -9,6 +9,7 @@ import { Button } from "../components/ui/Button";
 import { EarningsCalculator } from "../components/partner/EarningsCalculator";
 import { QuestionChips } from "../components/partner/QuestionChips";
 import { AffiliateRegisterForm } from "../components/partner/AffiliateRegisterForm";
+import { PartnerStories } from "../components/partner/PartnerStories";
 import { NudgeBubble } from "../components/NudgeBubble";
 import type { AffiliateRegisterResult } from "../lib/affiliate";
 import { usePartnerRate } from "../lib/partnerRate";
@@ -34,6 +35,7 @@ export function PartnerLanding() {
       <main className="mx-auto w-full max-w-3xl px-5 pb-28 pt-2 sm:px-8">
         {/* Bot guide (always present, auto-speaks) */}
         <StageAssistant line={t("partner.intro", { rate })} />
+        {step === "intro" && <PartnerStories />}
 
         <AnimatePresence mode="wait">
           {/* INTRO → reveal calculator */}

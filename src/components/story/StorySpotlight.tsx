@@ -12,7 +12,7 @@ import { ArrowRight, Play, Volume2 } from "lucide-react";
  * its voice-over. Thumbnails switch the story. Nothing heavy loads until a
  * person asks for it: the montage is ~150 KB, the film only on play.
  */
-const STORIES = ["coach", "dist", "ca"] as const;
+const STORIES = ["coach", "dist", "ca", "adv", "cap"] as const;
 type StoryId = (typeof STORIES)[number];
 /** Bump when a film is re-cut: the edge caches by URL. */
 const V = "1";
@@ -79,7 +79,7 @@ export function StorySpotlight() {
               <h2 id="spot-title" className="mt-2 font-display text-2xl font-bold leading-tight sm:text-3xl">{t("story.spot.title")}</h2>
               <p className="mt-2 text-[15px] leading-relaxed text-white/70">{t("story.spot.sub")}</p>
             </div>
-            <div className="mt-5 grid gap-2">
+            <div className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
               {STORIES.map((id) => (
                 <button
                   key={id}

@@ -1124,6 +1124,35 @@ for the migration.
 - Guide: knows the partner programme (no figures; kit, 30-minute call,
   white-label possible, sign-up link) for "how do I earn / bring clients".
 
+### Stories everywhere (2026-09-19)
+- Owner: the CEO films must be the eye-catcher, not a footer link; partner
+  films in the same theme; more partner cards on every surface; the films
+  posted to Facebook/Instagram in the users' languages.
+- Homepage: `StorySpotlight` under the headline — a silent 16 s montage of
+  the chosen story loops (preview-ceo-<id>-<lang>.mp4, ~150 KB), one tap
+  plays the full film with sound, five thumbnails switch (three CEO, two
+  partner), link to /ceo. Hero subtitle now says "a small team led by
+  Dushyant" (was "one consultant").
+- Partner films, India cut, EN + HI, ~80–90 s: `adv` (Rohan, an insurance
+  advisor who opens a partner office; worked example with the public
+  indicative range, no percentage) and `cap` (Anjali, a CA firm that
+  partners; white-label line). End card: "Open your partner office. Free
+  to join." with a QR to goluq.com/partner. Scenes `ceo/pscenes.py`, lines
+  `plines.txt`, same assembler with partner captions/end card.
+- Portrait cuts (`ceo/portrait.mjs`): 1080×1920, the film full-width over a
+  blurred copy, title and CTA below — `/media/ceo-<id>-<lang>-916.mp4`.
+  These are what the queue posts; the 16:9 cuts stay on the site.
+- Twelve partner cards now (six new: who, income, whitelabel, first,
+  payout, nowork; heroes from `ceo/pheroes.py`, cards from hi/hicard.mjs)
+  in public/catalog + hi/, the partner kit (12), the cockpit "Send card"
+  list, and the posting asset picker.
+- /ceo lists five stories; /partner opens with the two partner films; the
+  posting video picker lists every story in 9:16 and 16:9.
+- Queue: six CEO film posts took the morning slot 2026-09-20 → 25 (the
+  card posts moved six days later); four evening card posts on 09-20/21
+  and 09-27/28 became the partner films. All still wait for the Telegram
+  tap.
+
 ## 9. TO-DO (current)
 ### Owner
 - [ ] Oracle: after a quiet week (by 2026-09-24) take a Contabo snapshot, then remove /opt/goluq and its nginx site there.
