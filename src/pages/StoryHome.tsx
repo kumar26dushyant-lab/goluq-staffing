@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { TopBar } from "../components/TopBar";
 import { StoryChapters } from "../components/story/StoryChapters";
+import { StorySpotlight } from "../components/story/StorySpotlight";
 import { ProductsBand } from "../components/ProductsBand";
 import { Testimonials } from "../components/Testimonials";
 import { useSiteConfig } from "../lib/siteConfig";
@@ -96,6 +97,9 @@ export function StoryHome() {
           )}
         </motion.div>
       </section>
+
+      {/* The eye-catcher: the ninety-second stories, before the chapters. */}
+      <StorySpotlight />
 
       <StoryChapters />
 

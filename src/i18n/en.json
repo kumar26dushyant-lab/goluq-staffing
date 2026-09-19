@@ -1973,6 +1973,25 @@
     "cta": "See how it works"
   },
   "story": {
+    "spot": {
+      "kicker": "Ninety-second stories",
+      "title": "Become the CEO of your business",
+      "sub": "Three owners. What runs on their phone today, what it costs, and what changes in money, time and control once GoLuQ runs it.",
+      "watch": "Watch with sound",
+      "playing": "Playing",
+      "all": "All stories and the partner page",
+      "example": "Worked example",
+      "coach": "A coaching institute",
+      "coachHook": "The 9 pm calls nobody answers",
+      "dist": "An FMCG distributor",
+      "distHook": "Forty shops paying twenty days late",
+      "ca": "A CA firm of four",
+      "caHook": "Filing week that runs on memory",
+      "adv": "An advisor who partners",
+      "advHook": "An office without a lease",
+      "cap": "A CA firm that partners",
+      "capHook": "She introduced. That was the work."
+    },
     "kicker": "Businesses like yours already run this way.",
     "title": "Why not yours?",
     "hint": "Scroll",
