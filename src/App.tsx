@@ -80,6 +80,21 @@ function Pageviews() {
  * "/partner" affiliate bot, "/partner/dashboard" token dashboard. SPA fallback
  * handled by public/_redirects on Cloudflare.
  */
+/**
+ * A route change starts at the top of the new page. Without this a footer
+ * link rendered the next page at the same scroll offset, so the visitor saw
+ * another footer and thought nothing had happened. Hash links keep their
+ * own scrolling (the pages handle those).
+ */
+function ScrollToTop() {
+  const { pathname, hash } = useLocation();
+  useEffect(() => {
+    if (hash) return;
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, [pathname, hash]);
+  return null;
+}
+
 export default function App() {
   // Capture affiliate ?ref= once on first load (last-click, 90-day), any route.
   useEffect(() => {
@@ -91,6 +106,7 @@ export default function App() {
 
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Pageviews />
       <Routes>
         <Route path="/" element={<Suspense fallback={null}><StoryHome /></Suspense>} />
