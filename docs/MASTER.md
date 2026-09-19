@@ -1226,6 +1226,10 @@ for the migration.
   and t.me 200.
 
 ## 9. TO-DO (current)
+### Claude (next session)
+- [ ] aioshort Hindi: render the last voice line (aioshort4-hi) once the Gemini TTS quota resets, re-assemble aioshort-hi (specvideo, preview, specportrait), replace the English stand-ins on the server (aioshort-hi.mp4, -poster, preview-aioshort-hi, aioshort-hi-916).
+- [ ] Gulf and AU/NZ cuts of the security overview and the theme shorts (Arabic captions for the Gulf).
+- [ ] Phone pass on /build (fold calculator and FAQ by default) and a real-device check on iPhone Safari and Android Chrome.
 ### Owner
 - [ ] Oracle: after a quiet week (by 2026-09-24) take a Contabo snapshot, then remove /opt/goluq and its nginx site there.
 - [ ] Settings → Contact & alerts: Instagram and YouTube page URLs once created.
