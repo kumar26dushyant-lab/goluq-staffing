@@ -424,7 +424,7 @@ app.get("/oauth/youtube", async (c) => {
   const redirect = "https://goluq.com/oauth/youtube";
   const code = c.req.query("code");
   if (!code) {
-    const q = new URLSearchParams({ client_id: id, redirect_uri: redirect, response_type: "code", scope: "https://www.googleapis.com/auth/youtube.upload https://www.googleapis.com/auth/youtube", access_type: "offline", prompt: "consent", include_granted_scopes: "true" });
+    const q = new URLSearchParams({ client_id: id, redirect_uri: redirect, response_type: "code", scope: "https://www.googleapis.com/auth/youtube.upload https://www.googleapis.com/auth/youtube.force-ssl", access_type: "offline", prompt: "consent", include_granted_scopes: "true" });
     return c.redirect(`https://accounts.google.com/o/oauth2/v2/auth?${q.toString()}`);
   }
   const r = await fetch("https://oauth2.googleapis.com/token", { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ client_id: id, client_secret: secret, code, grant_type: "authorization_code", redirect_uri: redirect }) });
