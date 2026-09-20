@@ -1226,6 +1226,30 @@ for the migration.
   and t.me 200.
 
 ## 9. TO-DO (current)
+### Indian English voice, YouTube, Google project (2026-09-20)
+- Voice: Google Cloud Text-to-Speech en-IN-Neural2-B (male; keeps one
+  narrator across languages) replaces the neutral-American voice for
+  India and the Gulf. `enin/gvoice.py` on the server speaks every English
+  line (98) from the theme specs, ceo/lines + plines, sec/lines and
+  reel/lines; the assemblers accept lang `enin` (English words, Indian
+  voice files); outputs `<stem>-enin.mp4` + `-enin-916`. ACCENT_READY in
+  videoLang.ts lists the stems that exist; international visitors keep
+  `-en`. Hindi refresh with hi-IN voices: optional, not done.
+- YouTube: web OAuth client + /oauth/youtube on the server (scopes
+  youtube.upload + youtube.force-ssl); token at /opt/goluq/yt-token.json;
+  /usr/local/bin/yt-upload uploads six a day at 00:30 UTC from
+  /opt/goluq/deploy/yt-library.json (68 items, 39 Shorts, playlists per
+  theme and language); state in /opt/goluq/yt-state.json. Thumbnails wait
+  for the channel's phone verification; quota increase blocked until the
+  billing account is upgraded (owner's call).
+- Google project goluq-voice (nifty-structure-509210-c2): TTS key,
+  backups bucket goluq-backups-mum (create-only SA, 45-day lifecycle),
+  nightly off-site copy in /usr/local/bin/goluq-backup. Oracle account
+  upgraded to Pay As You Go (free tier kept, no idle reclaim).
+- Secrets pasted in chat today (TTS key, two OAuth clients, SA JSON) live
+  only in /opt/goluq/.env and /opt/goluq/*.json (600); rotate after the
+  voice run and the uploads settle.
+
 ### Claude (next session)
 - [ ] Accent (decided 2026-09-19): English voice in Indian English for India AND the Gulf by default (Gulf audience is largely Indian traders); international English for AU/NZ/UK/US/EU; Hindi one tap away everywhere. Samples first (current model with an accent instruction, Google en-IN voice, current voice for comparison), owner picks, then re-render ~140 English lines and re-assemble every English cut, preview and portrait. File naming plan: `<id>-en.mp4` stays the international cut, `<id>-enin.mp4` is Indian English; the player picks by country (IN + Gulf → enin) and `?c=XX` previews it.
 - [ ] aioshort Hindi: render the last voice line (aioshort4-hi) once the Gemini TTS quota resets, re-assemble aioshort-hi (specvideo, preview, specportrait), replace the English stand-ins on the server (aioshort-hi.mp4, -poster, preview-aioshort-hi, aioshort-hi-916).

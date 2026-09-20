@@ -11,7 +11,7 @@ import { useSiteConfig } from "./siteConfig";
  */
 const INDIAN_ACCENT = new Set(["IN", "AE", "SA", "QA", "KW", "OM", "BH", "JO"]);
 /** Media stems whose Indian-English cut (`<stem>-enin.mp4`) has been uploaded. */
-const ACCENT_READY = new Set<string>([]);
+const ACCENT_READY = new Set<string>(["house", "aioshort", "five", "pharm", "aiostory", "boss", "where", "signed", "roles", "ceo-coach", "ceo-dist", "ceo-ca", "ceo-adv", "ceo-cap", "security-in", "reel-coaching", "reel-distributor", "reel-ca", "reel-garment", "reel-claims", "reel-ceo"]);
 
 export type FilmSuffix = "hi" | "en" | "enin";
 export function accentFor(country: string | undefined | null): "in" | "intl" {
