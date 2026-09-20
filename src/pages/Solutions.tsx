@@ -69,10 +69,10 @@ export default function Solutions() {
           <h2 className="font-display text-2xl font-bold text-fg">{hi ? "शहर के हिसाब से" : "By city"}</h2>
           <p className="mt-1 text-sm text-muted">{hi ? "हर बिज़नेस के लिए, हर शहर में एक पेज: कार्ड, कहानी, कीमत और प्लान।" : "One page per business and city: the card, the story, the price and the plan."}</p>
           <div className="mt-3 flex flex-wrap gap-2">
-            {forPages.cities.map((c) => <Link key={c.slug} to={`/for/coaching-institutes/${c.slug}`} className="rounded-full border border-hairline/25 px-3 py-1.5 text-sm text-muted hover:text-fg">{hi ? c.hi : c.en}</Link>)}
+            {forPages.cities.map((c: { slug: string; en: string; hi: string }) => <Link key={c.slug} to={`/for/coaching-institutes/${c.slug}`} className="rounded-full border border-hairline/25 px-3 py-1.5 text-sm text-muted hover:text-fg">{hi ? c.hi : c.en}</Link>)}
           </div>
           <div className="mt-3 flex flex-wrap gap-2">
-            {forPages.industries.map((x) => <Link key={x.slug} to={`/for/${x.slug}`} className="rounded-full bg-brand-luq/10 px-3 py-1.5 text-sm font-semibold text-brand-luq">{hi ? x.hi.name : x.en.name}</Link>)}
+            {forPages.industries.map((x: { slug: string; en: { name: string }; hi: { name: string } }) => <Link key={x.slug} to={`/for/${x.slug}`} className="rounded-full bg-brand-luq/10 px-3 py-1.5 text-sm font-semibold text-brand-luq">{hi ? x.hi.name : x.en.name}</Link>)}
           </div>
         </section>
         <Section title={hi ? "इंडस्ट्री" : "By industry"}>
