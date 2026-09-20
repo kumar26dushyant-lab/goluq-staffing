@@ -97,6 +97,20 @@ function ScrollToTop() {
 
 export default function App() {
   // Capture affiliate ?ref= once on first load (last-click, 90-day), any route.
+  // One film at a time. When a film with sound starts anywhere on the page,
+  // every other <video> pauses (the silent previews included). A silent
+  // preview starting on its own never interrupts anything: only a video
+  // the visitor can hear counts as the new one.
+  useEffect(() => {
+    const onPlay = (e: Event) => {
+      const v = e.target as HTMLVideoElement | null;
+      if (!v || v.tagName !== "VIDEO" || v.muted) return;
+      document.querySelectorAll("video").forEach((o) => { if (o !== v && !o.paused) o.pause(); });
+    };
+    document.addEventListener("play", onPlay, true);
+    return () => document.removeEventListener("play", onPlay, true);
+  }, []);
+
   useEffect(() => {
     captureRefFromUrl();
     // Pull site config on every route, not just ones that render prices — the
