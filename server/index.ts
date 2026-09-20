@@ -1,4 +1,5 @@
 import "dotenv/config";
+import forPages from "../src/data/forPages.json";
 import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { Hono } from "hono";
@@ -518,6 +519,17 @@ app.use("/assets/*", async (c, next) => {
   await next();
   if (c.res.status === 200) c.res.headers.set("cache-control", "public, max-age=31536000, immutable");
 });
+// Search engines: every public route, including the city-and-industry pages.
+app.get("/sitemap.xml", (c) => {
+  const fixed = ["/", "/solutions", "/whatsapp-office", "/whatsapp-store", "/services", "/build", "/about", "/security", "/ceo", "/partner", "/start"];
+  const urls = [...fixed];
+  for (const ind of forPages.industries) { urls.push(`/for/${ind.slug}`); for (const city of forPages.cities) urls.push(`/for/${ind.slug}/${city.slug}`); }
+  const today = new Date().toISOString().slice(0, 10);
+  const lines = urls.map((u) => `  <url><loc>https://goluq.com${u}</loc><lastmod>${today}</lastmod><changefreq>${u.startsWith("/for/") ? "monthly" : "weekly"}</changefreq><priority>${u === "/" ? "1.0" : u.startsWith("/for/") ? "0.6" : "0.8"}</priority></url>`);
+  const body = ['<?xml version="1.0" encoding="UTF-8"?>', '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">', ...lines, "</urlset>", ""].join("\n");
+  return c.body(body, 200, { "content-type": "application/xml; charset=utf-8", "cache-control": "public, max-age=3600" });
+});
+app.get("/robots.txt", (c) => c.text(["User-agent: *", "Allow: /", "Disallow: /admin", "Disallow: /portal", "Disallow: /api/", "Sitemap: https://goluq.com/sitemap.xml", ""].join("\n")));
 app.use("/*", serveStatic({ root: "./dist" }));
 app.get("*", (c) => {
   // A request for a FILE that doesn't exist must 404, not fall through to the
