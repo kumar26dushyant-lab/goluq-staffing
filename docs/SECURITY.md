@@ -69,3 +69,12 @@ nidaanpartner.com) proxied by Cloudflare. SQLite on disk, secrets in
   who hit what; `fail2ban-client status sshd` for SSH attempts.
 - Rotate: WhatsApp token (Business Settings → System users), Telegram bots
   (@BotFather /revoke), Razorpay/Dodo keys, admin secret (`.env`).
+
+## Off-site backups (2026-09-20)
+Every nightly `.db.gz` is also uploaded to the Cloud Storage bucket
+`goluq-backups-mum` (asia-south1, uniform access, public access
+prevention, 45-day lifecycle delete) by `/usr/local/bin/gcs-upload`, using
+the service account `backup-writer` which holds only Storage Object
+Creator: it can add objects, never list, read or delete them, so a stolen
+server key cannot erase history. Key at /opt/goluq/gcs-backup.json (600,
+root), outside the repo. The server keeps 14 local copies.
