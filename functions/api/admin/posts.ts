@@ -178,6 +178,8 @@ async function connect(env: Env) {
 export async function publish(env: Env, id: number) {
   const post = await env.DB.prepare(`SELECT * FROM posts WHERE id = ?`).bind(id).first<any>();
   if (!post) return { ok: false, error: "Post not found." };
+  // A second tap on the same Telegram button must not post twice.
+  if (post.status === "published") return { ok: true, status: "published", fbId: post.fb_post_id, igPostId: post.ig_post_id, error: undefined, already: true };
   const pageId = (await getSetting(env.DB, "fb_page_id")) || "";
   const pageToken = (await getSetting(env.DB, "fb_page_token")) || "";
   const igId = (await getSetting(env.DB, "ig_user_id")) || "";

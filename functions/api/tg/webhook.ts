@@ -214,7 +214,7 @@ async function onButton(env: Env, cfg: TgConfig, q: any): Promise<void> {
         done = "✅ Approved — will post the moment the Page is connected";
       } else {
         const r = await publishPost(env as any, id);
-        done = r.ok ? "✅ Posted" : `⚠️ Failed: ${String(r.error || "").slice(0, 120)}`;
+        done = r.ok ? ((r as { already?: boolean }).already ? "✅ Already posted" : "✅ Posted to Facebook and Instagram") : `⚠️ Failed: ${String(r.error || "").slice(0, 120)}`;
       }
     }
   } else if (kind === "chat" && ref) {
