@@ -108,8 +108,21 @@ export default function App() {
       if (!v || v.tagName !== "VIDEO" || v.muted) return;
       document.querySelectorAll("video").forEach((o) => { if (o !== v && !o.paused) o.pause(); });
     };
+    // When a film in a row ends, the next film in that row plays, until the
+    // visitor stops or picks one. The hero spotlight runs its own chain.
+    const onEnded = (e: Event) => {
+      const v = e.target as HTMLVideoElement | null;
+      if (!v || v.tagName !== "VIDEO" || !v.dataset.seq) return;
+      const list = Array.from(document.querySelectorAll<HTMLVideoElement>(`video[data-seq="${v.dataset.seq}"]`));
+      const next = list[list.indexOf(v) + 1];
+      if (!next) return;
+      next.muted = false;
+      next.scrollIntoView({ block: "center", behavior: "smooth" });
+      next.play().catch(() => { /* the browser may want another tap */ });
+    };
     document.addEventListener("play", onPlay, true);
-    return () => document.removeEventListener("play", onPlay, true);
+    document.addEventListener("ended", onEnded, true);
+    return () => { document.removeEventListener("play", onPlay, true); document.removeEventListener("ended", onEnded, true); };
   }, []);
 
   useEffect(() => {

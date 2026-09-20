@@ -25,7 +25,7 @@ export function FilmGrid({ films, heading, note, dark = false, cols = 3, v = "1"
         {films.map((f) => (
           <figure key={f.media} className={`overflow-hidden rounded-2xl border ${dark ? "border-white/12 bg-white/5" : "border-hairline/15 bg-panel/40"}`}>
             <div className="relative">
-              <video key={`${f.media}-${sfx(f.media)}`} controls playsInline preload="none" poster={`/media/${f.media}-${sfx(f.media)}-poster.jpg?v=${v}`} className="aspect-video w-full bg-black">
+              <video key={`${f.media}-${sfx(f.media)}`} data-seq="grid" controls playsInline preload="none" poster={`/media/${f.media}-${sfx(f.media)}-poster.jpg?v=${v}`} className="aspect-video w-full bg-black">
                 <source src={`/media/${f.media}-${sfx(f.media)}.mp4?v=${v}`} type="video/mp4" />
               </video>
               {f.len && <span className="pointer-events-none absolute right-2 top-2 rounded-full bg-black/60 px-2 py-0.5 text-xs font-bold text-white">{f.len}</span>}

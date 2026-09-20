@@ -182,7 +182,7 @@ export default function CeoStory() {
               const [name, hook] = st[lang];
               return (
                 <figure key={st.id} className="overflow-hidden rounded-2xl border border-hairline/15 bg-panel/40">
-                  <video key={`${st.id}-${sfx(st.media)}`} controls playsInline preload="none"
+                  <video key={`${st.id}-${sfx(st.media)}`} data-seq="ceo" controls playsInline preload="none"
                     poster={`/media/${st.media}-${sfx(st.media)}-poster.jpg?v=${VID_V}`}
                     className="aspect-video w-full bg-black object-cover">
                     <source src={`/media/${st.media}-${sfx(st.media)}.mp4?v=${VID_V}`} type="video/mp4" />

@@ -33,12 +33,25 @@ export function StorySpotlight() {
   const cur = STORIES.find((x) => x.id === story) || STORIES[0];
   const [playing, setPlaying] = useState(false);
   const ref = useRef<HTMLVideoElement>(null);
+  // Set when the story changes because a film ended or the visitor picked
+  // another while one was playing: the next one keeps playing with sound.
+  const keepPlaying = useRef(false);
+  const pick = (id: StoryId) => { if (playing) keepPlaying.current = true; setStory(id); };
+  const advance = () => {
+    const i = STORIES.findIndex((x) => x.id === story);
+    const next = STORIES[(i + 1) % STORIES.length].id;
+    keepPlaying.current = true;
+    setStory(next);
+  };
   const cfg = useSiteConfig();
   const facts = t(`story.spot.facts.${story}`, { returnObjects: true }) as unknown;
   const [today, after, cost] = Array.isArray(facts) ? (facts as string[]) : ["", "", ""];
 
   // Switching story or language goes back to the silent loop.
-  useEffect(() => { setPlaying(false); }, [story, lang]);
+  useEffect(() => {
+    if (keepPlaying.current) { keepPlaying.current = false; return; }
+    setPlaying(false);
+  }, [story, lang]);
   useEffect(() => {
     const v = ref.current;
     if (!v) return;
@@ -66,7 +79,7 @@ export function StorySpotlight() {
               loop={!playing}
               controls={playing}
               preload={playing ? "auto" : "metadata"}
-              onEnded={() => setPlaying(false)}
+              onEnded={() => { if (playing) advance(); }}
               className="aspect-video w-full object-cover"
             >
               <source src={src} type="video/mp4" />
@@ -118,7 +131,7 @@ export function StorySpotlight() {
                 <button
                   key={id}
                   type="button"
-                  onClick={() => setStory(id)}
+                  onClick={() => pick(id)}
                   className={`flex items-center gap-3 rounded-2xl border p-2 text-left transition ${id === story ? "border-[#22D3EE]/70 bg-white/10" : "border-white/10 bg-white/5 hover:bg-white/10"}`}
                 >
                   <span className="relative shrink-0"><img src={`/media/${id}-${sfx(id)}-poster.jpg?v=${V}`} alt="" loading="lazy" className="h-12 w-20 rounded-lg object-cover" /><span className="absolute bottom-0.5 right-0.5 rounded bg-black/70 px-1 text-[10px] font-bold">{len}</span></span>
