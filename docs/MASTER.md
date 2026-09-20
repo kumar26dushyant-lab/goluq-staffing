@@ -1250,6 +1250,22 @@ for the migration.
   only in /opt/goluq/.env and /opt/goluq/*.json (600); rotate after the
   voice run and the uploads settle.
 
+### Live 2026-09-20 evening
+- Indian-English voice live: 21 stems (9 theme films, 5 stories, the
+  security overview, 6 reels) in `-enin` cuts + portraits + posters;
+  previews reuse the silent English montages. Calendar and the YouTube
+  library point English posts at the enin cuts. Reel scenes rebuilt from
+  public/story/*.webp (the PNG scene folder was empty locally).
+- 156 city×industry pages at /for/<industry>/<city> (+12 industry pages),
+  data in src/data/forPages.json (tracked with `git add -f`; the data/
+  ignore rule hides it), sitemap.xml (167 URLs) and robots.txt served by
+  the server, linked from /solutions. Search Console submission is owner
+  task 5; Google Business Profile 6; directories 7.
+- Marketing roadmap: docs/MARKETING-ROADMAP.md (artifact "GoLuQ Client
+  Roadmap"). Facebook Page is connected: posts publish to FB + IG on the
+  Telegram tap; a second tap can no longer double-post (one duplicate FB
+  post deleted; the duplicate IG reel needs manual deletion).
+
 ### Claude (next session)
 - [ ] Accent (decided 2026-09-19): English voice in Indian English for India AND the Gulf by default (Gulf audience is largely Indian traders); international English for AU/NZ/UK/US/EU; Hindi one tap away everywhere. Samples first (current model with an accent instruction, Google en-IN voice, current voice for comparison), owner picks, then re-render ~140 English lines and re-assemble every English cut, preview and portrait. File naming plan: `<id>-en.mp4` stays the international cut, `<id>-enin.mp4` is Indian English; the player picks by country (IN + Gulf → enin) and `?c=XX` previews it.
 - [ ] aioshort Hindi: render the last voice line (aioshort4-hi) once the Gemini TTS quota resets, re-assemble aioshort-hi (specvideo, preview, specportrait), replace the English stand-ins on the server (aioshort-hi.mp4, -poster, preview-aioshort-hi, aioshort-hi-916).
