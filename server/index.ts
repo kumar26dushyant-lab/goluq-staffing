@@ -410,6 +410,30 @@ function fileBody(file: string, start: number, end: number): ReadableStream<Uint
   });
 }
 
+/**
+ * YouTube sign-in for the upload script, finished on our own domain.
+ * GET /oauth/youtube sends the owner to Google; Google comes back here with
+ * a code; the code is exchanged at once and the tokens are written next to
+ * the data directory, root-readable only, never to the repo or the site.
+ * Only the accounts listed as test users on the Google project can finish
+ * this flow, which is why the page carries no secret of its own.
+ */
+app.get("/oauth/youtube", async (c) => {
+  const id = process.env.YT_WEB_CLIENT_ID || "", secret = process.env.YT_WEB_CLIENT_SECRET || "";
+  if (!id || !secret) return c.text("YouTube client not configured", 500);
+  const redirect = "https://goluq.com/oauth/youtube";
+  const code = c.req.query("code");
+  if (!code) {
+    const q = new URLSearchParams({ client_id: id, redirect_uri: redirect, response_type: "code", scope: "https://www.googleapis.com/auth/youtube.upload https://www.googleapis.com/auth/youtube", access_type: "offline", prompt: "consent", include_granted_scopes: "true" });
+    return c.redirect(`https://accounts.google.com/o/oauth2/v2/auth?${q.toString()}`);
+  }
+  const r = await fetch("https://oauth2.googleapis.com/token", { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ client_id: id, client_secret: secret, code, grant_type: "authorization_code", redirect_uri: redirect }) });
+  const tok = (await r.json().catch(() => ({}))) as Record<string, unknown>;
+  if (!tok.refresh_token) return c.html(`<p style="font:16px system-ui;padding:40px">Sign-in did not complete (${String(tok.error_description || tok.error || r.status)}). Open <a href="/oauth/youtube">/oauth/youtube</a> and try again.</p>`, 400);
+  writeFileSync(join(ROOT, "yt-token.json"), JSON.stringify({ ...tok, obtained_at: new Date().toISOString() }), { mode: 0o600 });
+  return c.html(`<p style="font:18px system-ui;padding:40px">YouTube connected for the upload script. You can close this tab.</p>`);
+});
+
 app.get("/media/:name", (c) => {
   // basename() strips any path the URL tried to smuggle in.
   const name = basename(c.req.param("name"));
