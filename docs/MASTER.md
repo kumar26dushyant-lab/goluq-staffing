@@ -1267,10 +1267,14 @@ for the migration.
   post deleted; the duplicate IG reel needs manual deletion).
 
 ### Claude (next session)
-- [ ] Accent (decided 2026-09-19): English voice in Indian English for India AND the Gulf by default (Gulf audience is largely Indian traders); international English for AU/NZ/UK/US/EU; Hindi one tap away everywhere. Samples first (current model with an accent instruction, Google en-IN voice, current voice for comparison), owner picks, then re-render ~140 English lines and re-assemble every English cut, preview and portrait. File naming plan: `<id>-en.mp4` stays the international cut, `<id>-enin.mp4` is Indian English; the player picks by country (IN + Gulf → enin) and `?c=XX` previews it.
-- [ ] aioshort Hindi: render the last voice line (aioshort4-hi) once the Gemini TTS quota resets, re-assemble aioshort-hi (specvideo, preview, specportrait), replace the English stand-ins on the server (aioshort-hi.mp4, -poster, preview-aioshort-hi, aioshort-hi-916).
-- [ ] Gulf and AU/NZ cuts of the security overview and the theme shorts (Arabic captions for the Gulf).
-- [ ] Phone pass on /build (fold calculator and FAQ by default) and a real-device check on iPhone Safari and Android Chrome.
+- [ ] aioshort Hindi: last voice line (TTS quota, or Google hi-IN), re-assemble, replace the English stand-ins (aioshort-hi, preview, 916).
+- [ ] YouTube: repair pass for thumbnails once the channel is phone-verified; watch the daily batch log (/var/log/yt-upload.log); when the quota is raised, run the rest in one go; card slideshows as Shorts (20 s, card + one line, Indian voice).
+- [ ] Hindi voice refresh with Google hi-IN (optional; owner to decide after hearing the English cuts).
+- [ ] Gulf and AU/NZ cuts of the theme shorts and the security overview (Arabic captions for the Gulf), international English voice.
+- [ ] Phone pass: /build (fold the calculator and the FAQ), real-device check on iPhone Safari and Android Chrome.
+- [ ] Weekly: read Visitors/Leads by source; report in the Monday brief which door brought what; adjust the calendar.
+- [ ] Rotate secrets with the owner (C6).
+
 ### Owner
 - [ ] Oracle: after a quiet week (by 2026-09-24) take a Contabo snapshot, then remove /opt/goluq and its nginx site there.
 - [ ] Settings → Contact & alerts: Instagram and YouTube page URLs once created.

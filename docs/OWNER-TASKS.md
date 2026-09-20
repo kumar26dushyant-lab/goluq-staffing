@@ -1,37 +1,36 @@
-# Owner tasks — step by step (updated 2026-09-12, evening)
+# Owner tasks — the list for tomorrow (updated 2026-09-21)
 
-Written for Dushyant, or for a browser agent acting as Dushyant. Each task is
-independent; do them in this order because the first three unblock money.
+Written for Dushyant, or for the browser extension acting as Dushyant.
+Ordered by what brings clients soonest. Detailed steps for each numbered
+item are in the sections below; the roadmap is docs/MARKETING-ROADMAP.md.
 
-TODAY (13 Sep) for the 8 pm post: do task 4 (Pages use case + token → Connect)
-before 7 pm, and task 5 if Instagram should carry it too. At 19:45 the post
-preview lands on Telegram with Post/Skip; tap Post. If the Page is not
-connected by then, tap Post anyway — it publishes itself the moment Connect
-succeeds — or post the same caption and card by hand from the preview.
+## A · Every working day (about 40 minutes)
+- [ ] A1 Ten warm WhatsApp messages from your own phone to people who fit a target (partners: CAs, advisors, association secretaries, group admins; owners: coaching, distributors, clinics, CA firms). Kit scripts, one personal line each. Log replies in the cockpit as leads.
+- [ ] A2 Telegram: tap Post on the two previews (10:30 and 20:15 IST). One tap each; a second tap now answers "Already posted".
+- [ ] A3 LinkedIn: one post (Mon/Wed/Fri) from the calendar, or twenty targeted connection requests with a one-line note, no pitch.
+- [ ] A4 Reply to leads and partner sign-ups the same day.
 
-Also today: Settings → WhatsApp Business API → "Business details for India":
-check the prefilled legal name, entity type and registered box, add the
-customer-care and grievance-officer emails, Save. And @BotFather → /revoke
-for @GoLuQ_client_bot, paste the new token in Settings → Telegram → Customer
-bot (the old one passed through a chat).
+## B · This week, once (extension can do all of these)
+- [ ] B1 Google Business Profile (task 6 below). Biggest free lever for "software company in Indore".
+- [ ] B2 Google Search Console: add goluq.com, verify by DNS TXT, submit https://goluq.com/sitemap.xml (task 5 below).
+- [ ] B3 Free directories: JustDial, Sulekha, IndiaMART, Clutch, GoodFirms (task 7 below).
+- [ ] B4 YouTube phone verification at youtube.com/verify (channel account), so thumbnails attach.
+- [ ] B5 Instagram: delete one of the two identical "अपना बिज़नेस, ज़ीरो निवेश, पाँच कदम" reels from 20 September (the API cannot delete).
+- [ ] B6 Twenty-partner drive in Indore: your list of CAs, insurance advisors, market-association secretaries, group admins; send the five-step film and goluq.com/partner.
+- [ ] B7 Facebook and WhatsApp groups: post one film a week in two Indore business groups, as a story, not an advert.
+- [ ] B8 Optional: upgrade the Google billing account from trial to paid so the YouTube quota can be raised (uploads run six a day until then).
 
-Status board (tick as done):
-- [ ] 1  Razorpay secret + webhook (site approved; never regenerate)
-- [ ] 1b Dodo webhook secret + brand id + key rotation
-- [ ] 1c Google sign-in OAuth client
-- [ ] 2  Calendar bridge script
-- [ ] 3  WhatsApp templates: appointment_confirmed, appointment_reminder, payment_link (EN+HI), login_otp (EN+HI)
-- [ ] 5  Google Search Console (5 minutes): search.google.com/search-console → Add property → Domain `goluq.com` → verify by the DNS TXT record it shows (Cloudflare DNS → add TXT on the root) → Sitemaps → submit `https://goluq.com/sitemap.xml` (167 pages).
-- [ ] 6  Google Business Profile (20 minutes): business.google.com → Add business "GoLuQ.com Digital Consultancy" → category Software company → service area Madhya Pradesh (or the Indore address) → phone +91 83495 04400 → website https://goluq.com → hours → Services: WhatsApp Office, WhatsApp Store, Custom software, Toll-free and virtual numbers → photos: the twelve cards from goluq.com/catalog → first post: the rented-flat film link. Verify by the method offered (video or postcard).
-- [ ] 7  Free directories (30 minutes, same text and images): JustDial, Sulekha, IndiaMART (service provider), Clutch, GoodFirms. Description: "A small team in Indore that builds and runs the software, WhatsApp systems and phone lines a growing business depends on. Fixed price in writing, weeks not months, you own the code."
-- [ ] 4d YouTube, two small follow-ups: (1) open https://goluq.com/oauth/youtube once more and press Allow — the first sign-in granted only "upload", and playlists need the fuller permission; (2) verify the channel's phone at https://www.youtube.com/verify so the films can carry their poster as the thumbnail (YouTube refuses custom thumbnails on unverified channels). Uploads continue at six a day meanwhile; playlists and thumbnails are filled in by the same script afterwards.
-- [x] 4c YouTube uploads by script (client created 2026-09-20; script live, six a day) (same Google Cloud project, 10 minutes): APIs & Services → Library → enable "YouTube Data API v3" → Credentials → Create credentials → OAuth client ID (configure the consent screen first: External, app name GoLuQ, your email, add yourself as a test user) → Application type "Desktop app" → download the client JSON and paste its client_id and client_secret in chat. I then send a one-time Google sign-in link; sign in with the account that owns @goluq.official and paste back the code. Default quota allows about six uploads a day; ask for a quota increase in the same console (Quotas → YouTube Data API → request 100,000) so the whole library (films, shorts, reels, card slideshows) goes up in one run.
-- [x] 4b Google Cloud text-to-speech key (done 2026-09-20) (10 minutes) → Indian English and better Hindi voices for every film. Steps: console.cloud.google.com → New project "goluq-voice" → APIs & Services → Enable "Cloud Text-to-Speech API" → Credentials → Create credentials → API key → Edit key → restrict to "Cloud Text-to-Speech API" → paste the key in chat; it is stored write-only in the server's environment and rotated afterwards. Free allowance: 1 million characters a month for the natural voices, more than every film we make.
-- [x] 4  Meta app Pages use case + token → Connected (posts publish to Facebook and Instagram since 2026-09-19) (this starts the post queue: one normal post at 10:30 IST and one partner post at 20:15 IST every day, each after your Telegram tap)
-- [ ] 5  Instagram professional account linked to the Page
-- [x] 6  LinkedIn page — done 2026-09-12 (post the first three items of docs/LINKEDIN.md §11; run §12 daily)
-- [x] 7  Customer Telegram bot connected (@GoLuQ_client_bot) — rotate its token
-- [ ] 8  Ashwin testimonial
+## C · Money and login plumbing (unchanged, still open)
+- [ ] C1 Razorpay secret + webhook (task 1; never regenerate keys).
+- [ ] C2 Dodo webhook secret + brand id + key rotation (task 1b).
+- [ ] C3 Google sign-in OAuth client for the client login (task 1c).
+- [ ] C4 Calendar bridge script (task 2).
+- [ ] C5 WhatsApp templates: appointment_confirmed, appointment_reminder, payment_link, login_otp (task 3).
+- [ ] C6 Rotate the tokens that passed through chat: @GoLuQ_client_bot, the Dodo key, and (after the voice run settles) the Google TTS key and the two OAuth clients.
+- [ ] C7 Ashwin testimonial, when convenient (task 8).
+
+Done: Meta Pages use case and token (posts publish to Facebook and Instagram), Instagram linked to the Page, LinkedIn page, customer Telegram bot, Cloudflare protection, Oracle Pay As You Go, Google project with the voice key, YouTube upload client with playlist permission, off-site backups.
+
 Never paste any secret into a chat, a document or a commit — only into the
 cockpit fields named below. The cockpit is https://goluq.com/admin.
 
