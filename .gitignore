@@ -26,3 +26,5 @@ Business plan/
 
 # Marketing masters (large binaries; hosted copies live under public/)
 marketing/
+# Added by code-review-graph
+.code-review-graph/
