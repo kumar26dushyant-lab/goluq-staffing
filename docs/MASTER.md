@@ -1225,6 +1225,23 @@ for the migration.
   (400 for bots, opens in a browser; a vanity URL would be cleaner), wa.me
   and t.me 200.
 
+### Claude Code helpers installed on the owner's PC (2026-09-22)
+Four zips from Downloads/skills were checked before anything was installed.
+- superpowers (already in, v6.4.1) and ui-ux-pro-max (v2.13.0, seven design
+  skills: design, design-system, ui-styling, brand, banner-design, slides):
+  Claude Code plugins, user scope, no hooks, no network calls on their own.
+- geo-seo-claude: fifteen `geo-*` skills plus five review agents copied to
+  ~/.claude/skills/geo and ~/.claude/agents. Its scripts run on Python 3.12
+  (`py -3.12`); fetch_page.py tested against goluq.com. Use for the SEO/GEO
+  work in MARKETING-ROADMAP (llms.txt, schema, citability, crawler access).
+- code-review-graph: skipped. Safe, but it adds a hook after every
+  Write/Edit/Bash and needs a Python package; not worth the drag here.
+- remotion-main.zip: not a plugin (the Remotion monorepo, 757 MB); ignore.
+Both plugins came from the downloaded folders, so they do not update by
+themselves; a newer zip has to be re-added the same way. The Python 3.13
+launcher at Programs/Python/Python313/python.exe is a 43-byte text file
+(someone saved a script over it); 3.12 and 3.14 are fine via `py`.
+
 ## 9. TO-DO (current)
 ### Indian English voice, YouTube, Google project (2026-09-20)
 - Voice: Google Cloud Text-to-Speech en-IN-Neural2-B (male; keeps one
