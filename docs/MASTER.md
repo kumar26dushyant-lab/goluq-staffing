@@ -1242,6 +1242,22 @@ themselves; a newer zip has to be re-added the same way. The Python 3.13
 launcher at Programs/Python/Python313/python.exe is a 43-byte text file
 (someone saved a script over it); 3.12 and 3.14 are fine via `py`.
 
+### Rules files, code-review-graph, Python repair, Remotion (2026-09-22)
+- Security rules adopted as instructions: user-wide in
+  ~/.claude/CLAUDE.md (every project), project rules in CLAUDE.md here.
+  Trimmed from the owner's "Secure Vibe Coding" text: Zod made optional,
+  DEFENSE comments dropped, honesty and secret-handling rules added.
+- code-review-graph installed for this repo (MCP server, hooks, four
+  skills, pre-commit check). First build: 211 files, 1,255 nodes.
+- Python: the per-user 3.13 was overwritten by a practice script on
+  2025-05-06 (AppData installs are user-writable). Reinstalled 3.13
+  machine-wide under Program Files, dead PATH entries removed, practice
+  files moved to Documents/python-practice. 3.12 and 3.14 remain per-user.
+- Remotion adopted for films-from-code in video/: CardShort composition,
+  partner-en and partner-hi rendered (15 s, 1080×1920). Next: shorts for
+  every theme, then captions, then city-page clips.
+- docs/TOOLS.md explains how to use all of the above in plain words.
+
 ## 9. TO-DO (current)
 ### Indian English voice, YouTube, Google project (2026-09-20)
 - Voice: Google Cloud Text-to-Speech en-IN-Neural2-B (male; keeps one

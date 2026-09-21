@@ -1,3 +1,41 @@
+# GoLuQ.com
+
+The website, cockpit (admin), WhatsApp/Telegram guide and marketing machine
+of GoLuQ.com Digital Consultancy, Indore. Vite + React + TypeScript +
+Tailwind, i18next (en/hi), Hono on Node 20 with SQLite, deployed on Oracle
+Mumbai behind Cloudflare with `sudo bash /opt/goluq/deploy/update.sh`.
+The running log and to-do live in docs/MASTER.md; owner tasks in
+docs/OWNER-TASKS.md. Read the relevant docs/ file before touching an area.
+
+## Rules that are specific to this project
+- Brand: "GoLuQ" is written GO + LuQ; the promise is "own, not rent". Never
+  say AI, bot, chatbot or assistant in customer-facing copy: it is "the
+  replies", "the guide", "workflows that run themselves".
+- Honesty: no invented clients, testimonials, figures or certifications.
+  Every worked number is framed "suppose" or "say" and captioned "worked
+  example". Prices are never hardcoded; they come from live pricing.
+- Partner programme: never a percentage or an earnings promise in public
+  creatives. Only "a share of every order, monthly on managed customers,
+  exact terms on a 30-minute call".
+- Secrets (Meta, Telegram, Razorpay, Dodo, Google, YouTube): write-only in
+  the cockpit or /opt/goluq/.env, never read back, never committed, rotated
+  after being pasted in chat. `Business plan/` and `marketing/` stay out of
+  git. `src/data/` is hidden by a gitignore rule; use `git add -f`.
+- WhatsApp: opt-out honoured, seven-day cap per number, sends only 09:00 to
+  21:00 IST and only when the number health is GREEN.
+- Server: Contabo and Oracle host other sites too (nidaanpartner.com).
+  Change only /opt/goluq and its nginx block. Never press "Regenerate" on
+  Razorpay keys.
+- Local machine: never `taskkill /F /IM msedge.exe` (it closes the owner's
+  browser); kill only processes whose command line matches
+  `headless|edge-probe|_edge`. Never loop the screenshot script over many
+  pages. Use `py -3.12` or `py -3.13` for Python.
+- Media: films are `<stem>-<en|hi|enin>.mp4` under /media with `-916`
+  portrait cuts and `-poster.jpg`; Indian-English voice is the default for
+  India and the Gulf, US/UK English elsewhere.
+- Video generation lives in video/ (Remotion). Card shorts and captions are
+  rendered from code there; scene images and voices stay as they are.
+
 <!-- code-review-graph MCP tools -->
 ## MCP Tools: code-review-graph
 
