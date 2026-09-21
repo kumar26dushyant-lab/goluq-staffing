@@ -24,6 +24,7 @@ const Solutions = lazy(() => import("./pages/Solutions"));
 const Security = lazy(() => import("./pages/Security"));
 const CeoStory = lazy(() => import("./pages/CeoStory"));
 const ForPage = lazy(() => import("./pages/ForPage"));
+const Sample = lazy(() => import("./pages/Sample"));
 const StoryHome = lazy(() => import("./pages/StoryHome").then((m) => ({ default: m.StoryHome })));
 const Services = lazy(() =>
   import("./pages/Services").then((m) => ({ default: m.Services }))
@@ -197,6 +198,7 @@ export default function App() {
         <Route path="/ceo" element={<Suspense fallback={null}><CeoStory /></Suspense>} />
         <Route path="/for/:industry" element={<Suspense fallback={null}><ForPage /></Suspense>} />
         <Route path="/for/:industry/:city" element={<Suspense fallback={null}><ForPage /></Suspense>} />
+        <Route path="/sample" element={<Suspense fallback={null}><Sample /></Suspense>} />
         <Route path="/about" element={<Suspense fallback={null}><About /></Suspense>} />
         <Route path="/partner" element={<Suspense fallback={null}><PartnerLanding /></Suspense>} />
         <Route path="/partner/dashboard" element={<Suspense fallback={null}><PartnerDashboard /></Suspense>} />

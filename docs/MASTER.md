@@ -1258,6 +1258,25 @@ launcher at Programs/Python/Python313/python.exe is a 43-byte text file
   every theme, then captions, then city-page clips.
 - docs/TOOLS.md explains how to use all of the above in plain words.
 
+### Sample page, original story film, GEO audit (2026-09-22, later)
+- /sample: the all-in-one theme rebuilt phone-first with the ui-ux-pro-max
+  guidance (one idea per screen, 44px targets, comparison as stacked cards,
+  reduced-motion respected, live prices, worked-example labels). Not
+  linked, noindex, Disallow in robots. Design draft for the owner to judge
+  on a phone before anything moves to the live pages.
+- video/: RentStory, the first original story (20 s, 9:16): hook, rent
+  counter that climbs while the months tick, "and nothing is yours", the
+  turn, the ask. EN and HI rendered to video/out. No voice yet; add a
+  Google TTS line per scene next.
+- docs/GEO-AUDIT.md: score 24/100. Root cause: the SPA serves an empty
+  shell, so every fetcher that does not run JavaScript sees one page with
+  ten words. Fixes in order: per-route title/description/canonical from
+  the server, JSON-LD (Organization, LocalBusiness, Person, FAQPage,
+  VideoObject), /llms.txt route (draft in the report), seed each route's
+  text inside #root server-side, fix og:image, real sitemap lastmod.
+  Founder name mismatch to settle: "Dushyant Sharma" on site, "Dushyant
+  Kumar" in git.
+
 ## 9. TO-DO (current)
 ### Indian English voice, YouTube, Google project (2026-09-20)
 - Voice: Google Cloud Text-to-Speech en-IN-Neural2-B (male; keeps one
@@ -1300,6 +1319,11 @@ launcher at Programs/Python/Python313/python.exe is a 43-byte text file
   post deleted; the duplicate IG reel needs manual deletion).
 
 ### Claude (next session)
+- GEO fixes from docs/GEO-AUDIT.md, in order: server-side title/description/
+  canonical per route; JSON-LD in index.html; /llms.txt; seed route text in
+  #root; og:image; sitemap lastmod. Then re-run "/geo audit goluq.com".
+- Voice for RentStory (Google TTS en-IN, hi-IN), then RentStory cuts for
+  each theme (own, all-in-one, partner, security) and a CardShort per theme.
 - [ ] aioshort Hindi: last voice line (TTS quota, or Google hi-IN), re-assemble, replace the English stand-ins (aioshort-hi, preview, 916).
 - [ ] YouTube: repair pass for thumbnails once the channel is phone-verified; watch the daily batch log (/var/log/yt-upload.log); when the quota is raised, run the rest in one go; card slideshows as Shorts (20 s, card + one line, Indian voice).
 - [ ] Hindi voice refresh with Google hi-IN (optional; owner to decide after hearing the English cuts).

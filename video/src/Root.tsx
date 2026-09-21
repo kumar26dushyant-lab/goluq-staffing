@@ -1,5 +1,7 @@
 import { Composition } from "remotion";
 import { CardShort, CardShortProps, FPS, HEIGHT, WIDTH } from "./CardShort";
+import { RentStory, RentStoryProps, RENT_DURATION } from "./RentStory";
+import rentEn from "../props/rent-en.json";
 
 /**
  * Compositions are rendered by id:
@@ -15,6 +17,16 @@ const partnerEn: CardShortProps = {
 
 export function RemotionRoot() {
   return (
+    <>
+    <Composition
+      id="RentStory"
+      component={RentStory}
+      width={WIDTH}
+      height={HEIGHT}
+      fps={FPS}
+      durationInFrames={RENT_DURATION}
+      defaultProps={rentEn as RentStoryProps}
+    />
     <Composition
       id="CardShort"
       component={CardShort}
@@ -25,5 +37,6 @@ export function RemotionRoot() {
       defaultProps={partnerEn}
       calculateMetadata={({ props }) => ({ durationInFrames: Math.round(props.cards.length * props.secondsPerCard * FPS) })}
     />
+    </>
   );
 }

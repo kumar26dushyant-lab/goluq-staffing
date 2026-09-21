@@ -1,0 +1,17 @@
+{
+  "before": "story/ceo_before.webp",
+  "after": "story/ceo_after.webp",
+  "monthly": 10000,
+  "years": 5,
+  "currency": "₹",
+  "words": {
+    "hook": "हर महीने आप सॉफ़्टवेयर का किराया देते हैं।",
+    "say": "कहिए ₹10,000 महीना।",
+    "months": "महीने",
+    "landing": "और आपका कुछ नहीं।",
+    "turn": "एक बार अपना बनाइए।",
+    "turnSub": "आपके काम के हिसाब से बना। कोड और डेटा आपका। तय कीमत, लिखकर।",
+    "example": "उदाहरण",
+    "cta": "WhatsApp पर पूछिए · goluq.com"
+  }
+}
