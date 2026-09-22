@@ -531,6 +531,9 @@ app.get("/sitemap.xml", (c) => {
   return c.body(body, 200, { "content-type": "application/xml; charset=utf-8", "cache-control": "public, max-age=3600" });
 });
 app.get("/robots.txt", (c) => c.text(["User-agent: *", "Allow: /", "Disallow: /admin", "Disallow: /portal", "Disallow: /api/", "Disallow: /sample", "Sitemap: https://goluq.com/sitemap.xml", ""].join("\n")));
+// The static middleware would answer "/" with dist/index.html as a file, so
+// the homepage gets its words here, before it.
+app.get("/", (c) => c.html(renderShell(indexHtml, "/")));
 app.use("/*", serveStatic({ root: "./dist" }));
 app.get("*", (c) => {
   // A request for a FILE that doesn't exist must 404, not fall through to the
