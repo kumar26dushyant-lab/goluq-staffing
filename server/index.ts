@@ -1,5 +1,6 @@
 import "dotenv/config";
 import forPages from "../src/data/forPages.json";
+import { renderShell } from "./seo";
 import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { Hono } from "hono";
@@ -540,7 +541,9 @@ app.get("*", (c) => {
   if (/\.[a-z0-9]{2,5}$/i.test(path) && !path.endsWith(".html")) {
     return c.notFound();
   }
-  return c.html(indexHtml);
+  // The route's own title, description, canonical and first paragraph, so
+  // fetchers that do not run JavaScript still read a real page.
+  return c.html(renderShell(indexHtml, path));
 });
 
 // ── Built-in daily follow-up scheduler (no external cron needed) ────────────

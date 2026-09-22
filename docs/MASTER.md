@@ -1277,6 +1277,24 @@ launcher at Programs/Python/Python313/python.exe is a 43-byte text file
   Founder name mismatch to settle: "Dushyant Sharma" on site, "Dushyant
   Kumar" in git.
 
+### Found by machines: per-route pages, schema, llms.txt, share card (2026-09-23)
+- server/seo.ts: every public route now answers with its own title,
+  description, canonical, og:url and a seeded h1 + first paragraph inside
+  #root (React replaces it on mount). Fixed pages by hand, the 156 /for
+  pages from forPages.json. Unknown routes get the shell untouched.
+- index.html: stale head copy (old prices, "Digital Employees") replaced;
+  JSON-LD graph for Organization/LocalBusiness, founder Person, WebSite; no
+  street address on purpose. og:image now a real 1200×630 card rendered
+  from video/src/OgImage.tsx into public/og-image.png.
+- public/llms.txt served at /llms.txt.
+- docs/EXTENSION-STEPS.md: the week's browser jobs written for the Claude
+  extension (Business Profile, Search Console + Bing, share-preview check,
+  YouTube verify, six directories, Instagram duplicate, three LinkedIn
+  posts, groups) plus the four things only the owner can do.
+- Deploy pending from the owner's PowerShell (the classifier blocks
+  production deploys from here). After deploy: re-run the GEO audit and
+  compare with 24/100.
+
 ## 9. TO-DO (current)
 ### Indian English voice, YouTube, Google project (2026-09-20)
 - Voice: Google Cloud Text-to-Speech en-IN-Neural2-B (male; keeps one

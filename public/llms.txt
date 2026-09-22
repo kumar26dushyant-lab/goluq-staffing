@@ -1,0 +1,49 @@
+# GoLuQ
+
+> GoLuQ.com Digital Consultancy is a small software team in Indore, India, founded and led by Dushyant Sharma. GoLuQ builds WhatsApp-based office and store systems, custom business software, owner dashboards and workflow automations for small and mid-sized businesses in India, the Gulf, Australia and New Zealand, at a fixed price agreed in writing, delivered in weeks, then run for a monthly fee. The customer owns the code, the data and the WhatsApp number.
+
+GoLuQ works in English and Hindi. Prices are shown live on the site for the visitor's region and confirmed in writing before any work starts. All numbers in the story pages are worked examples, not client results.
+
+## Key pages
+
+- [Home](https://goluq.com/): the story chapters, live product prices, the founder and how to start
+- [Become the CEO of your business](https://goluq.com/ceo): eight ninety-second owner stories (coaching institute, FMCG distributor, CA firm, pharmacy chain, partners, rent-or-own software) with worked numbers
+- [Solutions](https://goluq.com/solutions): what GoLuQ builds, by role, business type, industry and city
+- [The WhatsApp Office](https://goluq.com/whatsapp-office): every customer conversation on one business number, staff run it from their phones, follow-ups and appointments handle themselves; live in 21 days
+- [The WhatsApp Store](https://goluq.com/whatsapp-store): catalogue inside WhatsApp and Telegram, one upload reaches every customer, orders arrive as data
+- [Security](https://goluq.com/security): where customer data is kept, who can see it, encryption, nightly backups, export on request
+- [About](https://goluq.com/about): founder Dushyant Sharma, twenty-plus years in US healthcare operations, banking in Dubai, Genpact, DXC, Hexaware and EdCast
+- [Partner programme](https://goluq.com/partner): free to join, no tech skills; partners introduce business owners and earn a share of every order plus a monthly share on managed customers
+- [Start](https://goluq.com/start): describe the need in your own words; GoLuQ replies with a written plan and a fixed price
+
+## Industry and city pages
+
+One page per industry per city, twelve industries and twelve cities (Indore, Bhopal, Ujjain, Dewas, Jabalpur, Gwalior, Pune, Surat, Ahmedabad, Jaipur, Nagpur, Raipur). Pattern: https://goluq.com/for/<industry>/<city>
+
+- [Software for coaching institutes](https://goluq.com/for/coaching-institutes)
+- [Software for coaching institutes in Indore](https://goluq.com/for/coaching-institutes/indore)
+- [Full list in the sitemap](https://goluq.com/sitemap.xml)
+
+## Products already built and running
+
+- [NidaanPartner.com](https://nidaanpartner.com): insurance claim dispute firm; intake, documents and four offices on one screen
+- [Sarathi-AI.com](https://sarathi-ai.com): voice-first CRM for financial advisors on WhatsApp and Telegram
+- [EagleEye.work](https://eagleeye.work): decision intelligence for teams (prototype)
+
+## Contact
+
+- Email: dushyant@goluq.com
+- WhatsApp: +91 83495 04400
+- Location: Indore, Madhya Pradesh, India
+- YouTube: https://www.youtube.com/@goluq.official
+- Instagram: https://www.instagram.com/goluq.official/
+
+## Policies
+
+- [Privacy](https://goluq.com/privacy)
+- [Terms](https://goluq.com/terms)
+
+## Optional
+
+- [Build with GoLuQ](https://goluq.com/build)
+- [Services](https://goluq.com/services)

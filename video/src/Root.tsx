@@ -2,6 +2,7 @@ import { Composition } from "remotion";
 import { CardShort, CardShortProps, FPS, HEIGHT, WIDTH } from "./CardShort";
 import { RentStory, RentStoryProps, RENT_DURATION } from "./RentStory";
 import rentEn from "../props/rent-en.json";
+import { OgImage } from "./OgImage";
 
 /**
  * Compositions are rendered by id:
@@ -18,6 +19,7 @@ const partnerEn: CardShortProps = {
 export function RemotionRoot() {
   return (
     <>
+    <Composition id="OgImage" component={OgImage} width={1200} height={630} fps={1} durationInFrames={1} />
     <Composition
       id="RentStory"
       component={RentStory}
