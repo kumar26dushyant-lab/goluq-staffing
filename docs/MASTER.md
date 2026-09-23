@@ -1382,7 +1382,7 @@ frame by frame from the live server:
   #root; og:image; sitemap lastmod. Then re-run "/geo audit goluq.com".
 - Voice for RentStory (Google TTS en-IN, hi-IN), then RentStory cuts for
   each theme (own, all-in-one, partner, security) and a CardShort per theme.
-- [ ] aioshort Hindi: last voice line (TTS quota, or Google hi-IN), re-assemble, replace the English stand-ins (aioshort-hi, preview, 916).
+- [x] aioshort Hindi: done 2026-09-24 with Google hi-IN (film, preview, 916, posters).
 - [ ] YouTube: repair pass for thumbnails once the channel is phone-verified; watch the daily batch log (/var/log/yt-upload.log); when the quota is raised, run the rest in one go; card slideshows as Shorts (20 s, card + one line, Indian voice).
 - [ ] Hindi voice refresh with Google hi-IN (optional; owner to decide after hearing the English cuts).
 - [ ] Gulf and AU/NZ cuts of the theme shorts and the security overview (Arabic captions for the Gulf), international English voice.
