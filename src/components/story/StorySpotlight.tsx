@@ -24,7 +24,7 @@ const STORIES = [
 ] as const;
 type StoryId = (typeof STORIES)[number]["id"];
 /** Bump when a film is re-cut: the edge caches by URL. */
-const V = "2";
+const V = "3";
 
 export function StorySpotlight() {
   const { t } = useTranslation();

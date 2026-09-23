@@ -13,7 +13,7 @@ import { VideoLangToggle } from "../VideoLangToggle";
 const STORIES = ["five", "boss", "adv", "cap"] as const;
 type Id = (typeof STORIES)[number];
 const MEDIA: Record<Id, string> = { five: "five", boss: "boss", adv: "ceo-adv", cap: "ceo-cap" };
-const V = "2";
+const V = "3";
 
 export function PartnerStories() {
   const { i18n } = useTranslation();

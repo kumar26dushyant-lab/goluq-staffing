@@ -137,7 +137,7 @@ export function StoryHome() {
             <div className="grid grid-cols-3 gap-2 sm:gap-3">
               {(["coach", "dist", "adv"] as const).map((id) => (
                 <Link key={id} to="/ceo" className="group overflow-hidden rounded-2xl border border-white/10">
-                  <img src={`/media/ceo-${id}-${i18n.language.startsWith("hi") ? "hi" : "en"}-poster.jpg?v=2`} alt="" loading="lazy" className="aspect-video w-full object-cover transition group-hover:scale-105" />
+                  <img src={`/media/ceo-${id}-${i18n.language.startsWith("hi") ? "hi" : "en"}-poster.jpg?v=3`} alt="" loading="lazy" className="aspect-video w-full object-cover transition group-hover:scale-105" />
                 </Link>
               ))}
             </div>

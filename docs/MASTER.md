@@ -1319,6 +1319,22 @@ frame by frame from the live server:
   now points at the titled posters. The six Hindi reels already on YouTube
   are the old cut: replace after verification.
 
+### One film at a time, the all-in-one short in Hindi, where the media lives (2026-09-24)
+- Playback rule tightened in App.tsx: a film with sound pauses every other
+  video, and while it plays a silent preview that scrolls into view stays
+  still instead of starting beside it. Latest tap wins. Applies to every
+  page, language and region because it is one document-level listener.
+- Audio fingerprints of all 15 stems × 3 cuts: only aioshort-hi carried
+  the English audio (its Hindi cut was a placeholder from the Gemini quota
+  day). Four Hindi lines made with Google hi-IN-Neural2-B (hvoice.py on
+  the server), film, portrait cut, preview loop and titled posters
+  rebuilt and uploaded; media versions bumped to 3.
+- The media never lived in the repo. Published files are on the server at
+  /opt/goluq/data/uploads (served at /media). Sources and build scripts
+  were in the session scratchpad under AppData\Local\Temp; both are now
+  mirrored in C:\Goluq-media (site-media/ and pipeline/, README inside),
+  outside git. Remotion work is in C:\Goluq.com\video.
+
 ## 9. TO-DO (current)
 ### Indian English voice, YouTube, Google project (2026-09-20)
 - Voice: Google Cloud Text-to-Speech en-IN-Neural2-B (male; keeps one

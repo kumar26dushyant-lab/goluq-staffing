@@ -8,7 +8,7 @@ import { VideoLangToggle } from "./VideoLangToggle";
  */
 export type Film = { media: string; title: string; sub?: string; len?: string; tag?: string };
 
-export function FilmGrid({ films, heading, note, dark = false, cols = 3, v = "2" }: { films: Film[]; heading?: string; note?: string; dark?: boolean; cols?: 2 | 3; v?: string }) {
+export function FilmGrid({ films, heading, note, dark = false, cols = 3, v = "3" }: { films: Film[]; heading?: string; note?: string; dark?: boolean; cols?: 2 | 3; v?: string }) {
   const { lang, setLang, sfx } = useFilm();
   return (
     <section className={dark ? "text-white" : ""}>

@@ -60,7 +60,7 @@ function Reel({ id, inView, near, eager, className = "" }: { id: ChapterId; inVi
   const { sfx } = useFilm();
   const lang = sfx(`reel-${id}`);
   const preview = `/media/preview-${id}-${lang}.mp4`;
-  const full = `/media/reel-${id}-${lang}.mp4?v=2`;
+  const full = `/media/reel-${id}-${lang}.mp4?v=3`;
   const load = eager || near;
 
   useEffect(() => {

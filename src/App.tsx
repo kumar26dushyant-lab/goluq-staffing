@@ -99,15 +99,22 @@ function ScrollToTop() {
 
 export default function App() {
   // Capture affiliate ?ref= once on first load (last-click, 90-day), any route.
-  // One film at a time. When a film with sound starts anywhere on the page,
-  // every other <video> pauses (the silent previews included). A silent
-  // preview starting on its own never interrupts anything: only a video
-  // the visitor can hear counts as the new one.
+  // One film at a time, on every page and in every language. When a film
+  // with sound starts anywhere on the page, every other <video> pauses, the
+  // silent previews included. And while a film with sound is playing, a
+  // silent preview that scrolls into view stays still instead of starting
+  // beside it: only the film the visitor chose moves. A silent preview
+  // starting on its own never interrupts anything.
   useEffect(() => {
     const onPlay = (e: Event) => {
       const v = e.target as HTMLVideoElement | null;
-      if (!v || v.tagName !== "VIDEO" || v.muted) return;
-      document.querySelectorAll("video").forEach((o) => { if (o !== v && !o.paused) o.pause(); });
+      if (!v || v.tagName !== "VIDEO") return;
+      const others = Array.from(document.querySelectorAll("video")).filter((o) => o !== v);
+      if (v.muted) {
+        if (others.some((o) => !o.paused && !o.muted)) v.pause();
+        return;
+      }
+      others.forEach((o) => { if (!o.paused) o.pause(); });
     };
     // When a film in a row ends, the next film in that row plays, until the
     // visitor stops or picks one. The hero spotlight runs its own chain.

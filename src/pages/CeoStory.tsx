@@ -36,7 +36,7 @@ const STORIES = [
   { id: "boss", media: "boss", partner: true, en: ["The day Kavita became her own boss", "Two hundred shopkeepers on her phone and no office, until one evening. The five-step playbook, and a market that is hers."], hi: ["जिस दिन कविता अपनी बॉस बनीं", "फ़ोन में दो सौ दुकानदार और कोई ऑफ़िस नहीं, एक शाम तक। पाँच कदम की प्लेबुक, और एक बाज़ार जो उनका है।"] },
 ] as const;
 /** Bump when a video is re-cut: the edge caches by URL. */
-const VID_V = "2";
+const VID_V = "3";
 
 const COPY = {
   en: {
@@ -237,7 +237,7 @@ export default function CeoStory() {
                   <p className="text-base text-fg"><span className="font-bold text-brand-luq">{t.changed}:</span> {ch.changed}</p>
                   <span className="rounded-full border border-brand-luq/40 bg-brand-luq/10 px-3 py-1 text-sm font-semibold text-brand-luq">{ch.product}</span>
                   {ch.reel && (
-                    <a href={`/media/reel-${ch.id}-${lang}.mp4?v=2`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-sm font-semibold text-muted hover:text-fg">
+                    <a href={`/media/reel-${ch.id}-${lang}.mp4?v=3`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-sm font-semibold text-muted hover:text-fg">
                       <Volume2 size={15} /> {t.watch}
                     </a>
                   )}
