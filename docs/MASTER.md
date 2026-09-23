@@ -1295,6 +1295,30 @@ launcher at Programs/Python/Python313/python.exe is a 43-byte text file
   production deploys from here). After deploy: re-run the GEO audit and
   compare with 24/100.
 
+### Hindi on screen: what was true, what was fixed (2026-09-24)
+Owner reported Hindi films with English thumbnails and captions. Checked
+frame by frame from the live server:
+- Long films, portrait cuts and the silent preview loops: captions were
+  already Hindi in the Hindi cuts. No change.
+- The six chapter reels (reel-*): Hindi captions, but the end card was
+  one English HTML card for every language. Rebuilt all eighteen (hi, en,
+  enin) with the card in the film's language and the current line
+  ("Software your business owns. Built in weeks, run for you."); voices
+  recovered from the published files. Uploaded; site URLs carry ?v=2.
+- Thumbnails: every poster was the frame at one second, before any
+  caption, so Hindi and English posters were the same wordless picture
+  with only the Latin brand pill. That is what read as "English". New
+  posters from video/src/Poster.tsx: the frame, the title in the film's
+  language, a kicker, and a हिंदी / English pill. Portrait posters already
+  carried their title band, so they get the pill only. Rendered by
+  video/posters.mjs from the YouTube library titles; ?v=2 everywhere.
+- Cards: the Hindi set covers every card the site and the queue use.
+  All 44 Hindi posts in the queue use Hindi cards and Hindi cuts.
+- YouTube titles and descriptions were already Hindi for Hindi cuts.
+  Thumbnails still wait on phone verification; the library's poster field
+  now points at the titled posters. The six Hindi reels already on YouTube
+  are the old cut: replace after verification.
+
 ## 9. TO-DO (current)
 ### Indian English voice, YouTube, Google project (2026-09-20)
 - Voice: Google Cloud Text-to-Speech en-IN-Neural2-B (male; keeps one
