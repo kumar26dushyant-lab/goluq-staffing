@@ -44,7 +44,9 @@ for (const stem of STEMS) {
       const props = { image: `https://goluq.com/media/${name}.jpg`, title: title(stem, lang), lang, kicker: KICKER[L][kind(stem)] };
       const pf = resolve("out/props", `${name}.json`);
       writeFileSync(pf, JSON.stringify(props));
-      execFileSync("npx", ["remotion", "still", "src/index.ts", portrait ? "Poster916" : "Poster169", out, `--props=${pf}`, "--image-format=jpeg", "--jpeg-quality=88", "--log=error"], { stdio: "inherit", shell: true });
+      // A pre-built bundle (npx remotion bundle src/index.ts --out-dir out/bundle) makes each still a few seconds instead of twenty.
+      const entry = existsSync("out/bundle/index.html") ? "out/bundle" : "src/index.ts";
+      execFileSync("npx", ["remotion", "still", entry, portrait ? "Poster916" : "Poster169", out, `--props=${pf}`, "--image-format=jpeg", "--jpeg-quality=88", "--log=error"], { stdio: "inherit", shell: true });
       n++;
       console.log("poster", name);
     }
