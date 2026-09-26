@@ -1335,6 +1335,22 @@ frame by frame from the live server:
   mirrored in C:\Goluq-media (site-media/ and pipeline/, README inside),
   outside git. Remotion work is in C:\Goluq.com\video.
 
+### The public doors get a checkpoint (2026-09-26)
+Owner asked that the customer Telegram bot and every other public channel
+be safe against contaminated files and scammers. Audit found: webhook
+secrets and the Meta signature were already checked; no channel ever
+downloaded files; but non-text messages were fed to the guide as empty or
+placeholder text, scam text reached the guide, floods had no cap, links
+were forwarded live to the owner's phone, and the guide could echo a link
+a customer smuggled in. New functions/lib/safety.ts, used by
+api/tg/public.ts, api/wa/meta.ts and lib/metaMessaging.ts: attachment
+refusal with a written-text ask, scam signals with a fixed reply and an
+owner warning, per-thread flood cap (15/10 min, 80/day), link defanging in
+owner alerts, an outbound guard on the guide's replies (own domains only,
+never a code request), a SAFETY block in the persona, fail-closed webhook
+secrets, and magic-byte checks on cockpit uploads. 21 unit checks pass.
+Details in docs/SECURITY.md.
+
 ## 9. TO-DO (current)
 ### Indian English voice, YouTube, Google project (2026-09-20)
 - Voice: Google Cloud Text-to-Speech en-IN-Neural2-B (male; keeps one

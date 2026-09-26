@@ -3,6 +3,7 @@
 import { conciergeReply, type ConciergeEnv, type ConciergeMsg } from "./concierge";
 import { getSetting } from "./settings";
 import { tgAlertOwner, tgEscape, type TgButton, type TgEnv } from "./telegram";
+import { attachmentNote, attachmentReply, defangLinks, floodReply, floodState, scamReply, scamSignals, type AttachmentKind } from "./safety";
 
 /**
  * Facebook Messenger and Instagram Direct, in the same inbox as WhatsApp,
@@ -32,7 +33,11 @@ interface InboundDm {
   from: string;
   text: string;
   pageId: string;
+  /** Set when the message was a file or picture. Never downloaded. */
+  attachment?: AttachmentKind;
 }
+
+const META_ATTACHMENTS: Record<string, AttachmentKind> = { image: "image", file: "document", audio: "audio", video: "video", location: "location", template: "other", fallback: "other" };
 
 export const isMetaDm = (sessionId: string): boolean => sessionId.startsWith("fb:") || sessionId.startsWith("ig:");
 
@@ -48,10 +53,15 @@ export function parseMetaDms(body: any): InboundDm[] {
       const from = String(ev?.sender?.id || "");
       const mid = String(m.mid || "");
       if (!from || !mid) continue;
-      // Attachments arrive without text; the guide still needs something to answer.
-      const text = String(m.text || "").trim() || (Array.isArray(m.attachments) && m.attachments.length ? `[${m.attachments[0]?.type || "attachment"}]` : "");
+      // Attachments are noted by kind only; the file is never fetched.
+      let text = String(m.text || "").trim();
+      let attachment: AttachmentKind | undefined;
+      if (!text && Array.isArray(m.attachments) && m.attachments.length) {
+        attachment = META_ATTACHMENTS[String(m.attachments[0]?.type || "")] || "other";
+        text = `[attachment: ${attachment}]`;
+      }
       if (!text) continue;
-      out.push({ channel, mid, from, text: text.slice(0, 4000), pageId: String(entry?.id || "") });
+      out.push({ channel, mid, from, text: text.slice(0, 4000), pageId: String(entry?.id || ""), ...(attachment ? { attachment } : {}) });
     }
   }
   return out;
@@ -133,19 +143,43 @@ async function handleOne(env: MetaMsgEnv, dm: InboundDm): Promise<void> {
   await db.prepare(`INSERT INTO chat_messages (session_id, role, content, created_at) VALUES (?, 'visitor', ?, datetime('now'))`).bind(sid, dm.text).run();
 
   const label = dm.channel === "fb" ? "Messenger" : "Instagram";
+  const icon = dm.channel === "fb" ? "📘" : "📸";
+  const alert = (lines: string[]) => tgAlertOwner(db, env, lines.join("\n"), { buttons: ownerButtons(sid), kind: "chat", ref: sid }).catch(() => {});
+  const say = async (text: string) => {
+    const sent = await metaDmSend(db, sid, text);
+    if (sent.ok) await db.prepare(`INSERT INTO chat_messages (session_id, role, content, created_at) VALUES (?, 'guide', ?, datetime('now'))`).bind(sid, text.slice(0, 2000)).run();
+    return sent.ok;
+  };
+
+  // The checkpoint (lib/safety): a file is never opened or forwarded, a
+  // scam-shaped message never reaches the guide, a flood is answered once.
+  if (dm.attachment) {
+    await say(attachmentReply(lang, dm.attachment));
+    await alert([`${icon} <b>${label}</b> · ${tgEscape(name || dm.from)} sent a ${dm.attachment}`, "", `⚠️ ${tgEscape(attachmentNote(dm.attachment))}`]);
+    return;
+  }
   if (isNew) {
-    await tgAlertOwner(db, env, [
-      `${dm.channel === "fb" ? "📘" : "📸"} <b>New ${label} conversation</b> · ${tgEscape(name || dm.from)}`,
-      `<i>${tgEscape(dm.text.slice(0, 400))}</i>`,
-    ].join("\n"), { buttons: ownerButtons(sid), kind: "chat", ref: sid });
+    await alert([`${icon} <b>New ${label} conversation</b> · ${tgEscape(name || dm.from)}`, `<i>${tgEscape(defangLinks(dm.text.slice(0, 400)))}</i>`]);
   } else if (prior?.bot_off) {
-    await tgAlertOwner(db, env, [
-      `${dm.channel === "fb" ? "📘" : "📸"} <b>${tgEscape(name || dm.from)}</b> (${label}, guide off)`,
-      `<i>${tgEscape(dm.text.slice(0, 400))}</i>`,
-    ].join("\n"), { buttons: ownerButtons(sid), kind: "chat", ref: sid });
+    await alert([`${icon} <b>${tgEscape(name || dm.from)}</b> (${label}, guide off)`, `<i>${tgEscape(defangLinks(dm.text.slice(0, 400)))}</i>`]);
     return;
   }
   if (prior?.bot_off) return;
+  const scam = scamSignals(dm.text);
+  if (scam.length) {
+    await say(scamReply(lang));
+    await db.prepare("UPDATE chat_sessions SET needs_human = 1 WHERE id = ?").bind(sid).run();
+    await alert([`🚩 <b>Possible scam on ${label}</b> · ${tgEscape(name || dm.from)}`, `Signals: ${tgEscape(scam.join("; "))}`, "", `<i>${tgEscape(defangLinks(dm.text.slice(0, 500)))}</i>`, "", "Links above are defanged. Do not open anything they sent."]);
+    return;
+  }
+  const flood = await floodState(db, sid);
+  if (flood !== "no") {
+    if (flood === "first") {
+      await say(floodReply(lang));
+      await alert([`🌊 <b>${label} flood</b> · ${tgEscape(name || dm.from)}`, "Too many messages in a short time; the guide is paused on this thread until it calms down."]);
+    }
+    return;
+  }
 
   const history = await db.prepare("SELECT role, content FROM chat_messages WHERE session_id = ? ORDER BY id DESC LIMIT 10").bind(sid).all<{ role: string; content: string }>();
   const msgs: ConciergeMsg[] = (history.results || []).reverse().map((r) => ({ role: r.role === "visitor" ? "user" : "assistant", content: r.content }));
@@ -159,12 +193,7 @@ async function handleOne(env: MetaMsgEnv, dm: InboundDm): Promise<void> {
       (bookingUrl ? ` or a 30-minute call at ${bookingUrl}` : "") +
       ", or WhatsApp +91 83495 04400 for cards and a catalogue.",
   });
-  const sent = await metaDmSend(db, sid, reply);
-  if (sent.ok) {
-    await db.prepare(`INSERT INTO chat_messages (session_id, role, content, created_at) VALUES (?, 'guide', ?, datetime('now'))`).bind(sid, reply.slice(0, 2000)).run();
-  } else {
-    console.log("meta dm reply not sent:", sent.error);
-  }
+  if (!(await say(reply))) console.log("meta dm reply not sent");
 }
 
 function ownerButtons(sid: string): TgButton[][] {

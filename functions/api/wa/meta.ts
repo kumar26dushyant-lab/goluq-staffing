@@ -12,6 +12,7 @@ import {
 import { issuePaymentLink, callPriceInr } from "../../lib/payments";
 import { upcomingBooking, BOOKING_CHANGE, BOOKING_ASK } from "../../lib/bookings";
 import { handleMetaDms } from "../../lib/metaMessaging";
+import { attachmentNote, attachmentReply, defangLinks, floodReply, floodState, scamReply, scamSignals, type AttachmentKind } from "../../lib/safety";
 
 interface Env extends ConciergeEnv, WaEnv, MailEnv, TgEnv {
   DB: D1Database;
@@ -45,7 +46,11 @@ interface Inbound {
   name: string;
   /** Set when the customer sent a cart from the catalogue. */
   order?: { retailerId: string; qty: number }[];
+  /** Set when the message was a file, picture, voice note or the like. Never downloaded. */
+  attachment?: AttachmentKind;
 }
+
+const WA_ATTACHMENTS: Record<string, AttachmentKind> = { image: "image", document: "document", audio: "audio", video: "video", sticker: "sticker", location: "location", contacts: "contact", unsupported: "other" };
 
 /** Pull the text messages out of a Meta webhook payload; ignore everything else. */
 function parseInbound(body: any): Inbound[] {
@@ -75,7 +80,10 @@ function parseInbound(body: any): Inbound[] {
           }));
           text = "Cart: " + (order || []).map((o) => `${o.retailerId} ×${o.qty}`).join(", ") + (m.order.text ? ` — ${m.order.text}` : "");
         }
-        out.push({ id: m.id, from: String(m.from), text: String(text), name: nameOf(m.from), ...(order ? { order } : {}) });
+        // Media is noted by kind only; the file itself is never fetched.
+        const attachment = !text && WA_ATTACHMENTS[String(m?.type || "")] ? WA_ATTACHMENTS[String(m.type)] : undefined;
+        if (attachment) text = `[attachment: ${attachment}]`;
+        out.push({ id: m.id, from: String(m.from), text: String(text), name: nameOf(m.from), ...(order ? { order } : {}), ...(attachment ? { attachment } : {}) });
       }
     }
   }
@@ -156,11 +164,11 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   const cfg = await waConfig(env.DB, env);
 
   // Anyone who learned this URL could otherwise make the guide talk to strangers
-  // on our bill. Once an app secret is set, an unsigned request is refused.
-  if (cfg.appSecret) {
-    const ok = await waVerifySignature(cfg, raw, request.headers.get("x-hub-signature-256"));
-    if (!ok) return new Response("bad signature", { status: 403 });
-  }
+  // on our bill. No app secret means nothing can be verified, so nothing is
+  // accepted: the secret is set in the cockpit before the webhook goes live.
+  if (!cfg.appSecret) return new Response("not configured", { status: 403 });
+  const ok = await waVerifySignature(cfg, raw, request.headers.get("x-hub-signature-256"));
+  if (!ok) return new Response("bad signature", { status: 403 });
 
   let body: any = {};
   try {
@@ -243,6 +251,37 @@ async function handleMessage(env: Env, cfg: WaConfig, m: Inbound): Promise<void>
 
   // A reply to a campaign is the whole point of having sent one.
   await markReplied(db, m.from);
+
+  // ── The checkpoint (lib/safety): files, scams, floods ─────────────────────
+  // A file is never opened or forwarded: the sender is asked to write it, the
+  // owner is told. A scam-shaped message gets a fixed answer, not the guide.
+  // A flood is answered once and then ignored until it calms down.
+  if (m.attachment) {
+    const text = attachmentReply(lang, m.attachment);
+    const sent = await waSendText(cfg, m.from, text);
+    if (sent.ok) await db.prepare(`INSERT INTO chat_messages (session_id, role, content, created_at) VALUES (?, 'guide', ?, datetime('now'))`).bind(sid, text).run();
+    await tgPush(env, m, sid, { why: `sent a ${m.attachment}`, reply: text, note: attachmentNote(m.attachment) });
+    return;
+  }
+  const scam = scamSignals(m.text);
+  if (scam.length) {
+    const text = scamReply(lang);
+    const sent = await waSendText(cfg, m.from, text);
+    if (sent.ok) await db.prepare(`INSERT INTO chat_messages (session_id, role, content, created_at) VALUES (?, 'guide', ?, datetime('now'))`).bind(sid, text).run();
+    await db.prepare("UPDATE chat_sessions SET needs_human = 1 WHERE id = ?").bind(sid).run();
+    await tgPush(env, m, sid, { why: "possible scam", reply: text, note: `Signals: ${scam.join("; ")}. Links are defanged above; open nothing they sent.` });
+    return;
+  }
+  const flood = await floodState(db, sid);
+  if (flood !== "no") {
+    if (flood === "first") {
+      const text = floodReply(lang);
+      const sent = await waSendText(cfg, m.from, text);
+      if (sent.ok) await db.prepare(`INSERT INTO chat_messages (session_id, role, content, created_at) VALUES (?, 'guide', ?, datetime('now'))`).bind(sid, text).run();
+      await tgPush(env, m, sid, { why: "flooding", reply: text, note: "Too many messages in a short time; the guide is paused on this thread until it calms down." });
+    }
+    return;
+  }
 
   // A call already in the diary changes what every other reply should say:
   // no fresh calendar, and a change request goes to the owner, not the guide.
@@ -590,7 +629,8 @@ async function tgPush(
   const head = `💬 <b>WhatsApp</b> · ${tgEscape(m.name || "Unknown")} · +${tgEscape(m.from)}`;
   const lines = [head];
   if (o.why) lines.push(`🔔 ${tgEscape(o.why)}`);
-  lines.push("", `<i>${tgEscape(m.text.slice(0, 1200))}</i>`);
+  // Links a stranger sent are defanged before they reach the owner's phone.
+  lines.push("", `<i>${tgEscape(defangLinks(m.text.slice(0, 1200)))}</i>`);
   if (o.reply) lines.push("", `↩︎ <b>Guide:</b> ${tgEscape(o.reply.slice(0, 1200))}`);
   if (o.note) lines.push("", `⚠️ ${tgEscape(o.note)}`);
   lines.push("", "<i>Reply to this message to answer them.</i>");

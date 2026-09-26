@@ -78,3 +78,43 @@ the service account `backup-writer` which holds only Storage Object
 Creator: it can add objects, never list, read or delete them, so a stolen
 server key cannot erase history. Key at /opt/goluq/gcs-backup.json (600,
 root), outside the repo. The server keeps 14 local copies.
+
+## The public doors: Telegram bot, WhatsApp, Messenger, Instagram
+
+Strangers talk to the guide through four doors. Every message passes the
+checkpoint in `functions/lib/safety.ts` before anything else happens.
+
+- **Authenticity.** Both Telegram webhooks refuse any update without the
+  secret token registered at setWebhook. The Meta webhook refuses any
+  request whose HMAC-SHA256 signature does not match the app secret, and
+  refuses everything if no secret is configured (fail closed).
+- **Files.** No attachment is ever downloaded, opened or forwarded, on any
+  channel. The transcript records only `[attachment: image]` and the like.
+  The sender is asked to write what it is about or to reach the owner on
+  WhatsApp; the owner's alert says a file arrived and was not opened.
+- **Scams.** Messages that ask for an OTP or code, dangle a prize or an
+  advance fee, threaten an account, push crypto or "guaranteed returns",
+  name an executable or archive, use a link shortener, a raw-IP or a
+  lookalike domain, or ask for remote access get one fixed answer ("GoLuQ
+  never asks for OTPs, passwords, cards or fees in chat, and never opens
+  links or files") and never reach the guide. The thread is flagged for a
+  person and the owner is warned with the reasons.
+- **Floods.** More than 15 messages in ten minutes or 80 in a day on one
+  thread: one "please pause, a person will reply", then silence until it
+  calms down. Messages are still stored and visible in the cockpit.
+- **Links to the owner.** Anything forwarded to the owner's phone has its
+  links defanged (`hxxps://bad[.]example`), so a tap cannot open them.
+- **The guide's own words.** The persona treats customer text as
+  information, never instructions; never asks for codes, passwords or
+  cards; never opens or vouches for links. Its replies are checked on the
+  way out: any link off our own domains (goluq.com, wa.me, the booking
+  link, our product sites) is replaced, and a reply that asks for a code is
+  replaced by the fixed safety line.
+- **Uploads.** The cockpit's upload endpoint is admin-only, limits size,
+  and checks the file's first bytes against its declared type (JPEG, PNG,
+  WebP, MP4, WebM only) before saving under a random name.
+
+What this does not do: it does not scan file contents, because it never
+fetches files. If a real customer must send a document, the owner asks for
+it by email, where the mail provider scans it, and opens it on a machine
+with an up-to-date scanner, not on the phone.

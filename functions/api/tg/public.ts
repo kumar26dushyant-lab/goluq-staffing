@@ -4,6 +4,7 @@ import { conciergeReply, type ConciergeEnv, type ConciergeMsg } from "../../lib/
 import { getSetting } from "../../lib/settings";
 import { tgAlertOwner, tgEscape, type TgEnv } from "../../lib/telegram";
 import { publicBot, publicSend } from "../../lib/tgPublic";
+import { attachmentNote, attachmentReply, defangLinks, floodReply, floodState, scamReply, scamSignals, type AttachmentKind } from "../../lib/safety";
 
 interface Env extends ConciergeEnv, TgEnv {
   DB: D1Database;
@@ -18,19 +19,27 @@ interface Env extends ConciergeEnv, TgEnv {
  * Threads are stored as `tg:<chat_id>` beside the others, so the cockpit
  * shows them and a reply from the cockpit or from the owner's bot reaches
  * the customer through this bot (see lib/agentReply).
+ *
+ * Strangers talk to this bot, so it goes through lib/safety first: files
+ * are never opened or forwarded, scam-shaped messages get a fixed answer
+ * instead of the guide, floods are answered once, and every line that
+ * reaches the owner's phone has its links defanged.
  */
 export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   const bot = await publicBot(env.DB);
   if (!bot.token) return new Response("ok");
-  if (bot.secret && request.headers.get("x-telegram-bot-api-secret-token") !== bot.secret) {
+  // The secret is set when the bot is connected; without it nothing is trusted.
+  if (!bot.secret || request.headers.get("x-telegram-bot-api-secret-token") !== bot.secret) {
     return new Response("forbidden", { status: 403 });
   }
   let u: any = {};
   try { u = await request.json(); } catch { return new Response("ok"); }
   const msg = u?.message;
   const chatId = String(msg?.chat?.id || "");
-  const text = String(msg?.text || "").trim();
-  if (!chatId || !text) return new Response("ok");
+  if (!chatId) return new Response("ok");
+  const attachment = attachmentKind(msg);
+  const text = String(msg?.text || "").trim() || (attachment ? `[attachment: ${attachment}]` : "");
+  if (!text) return new Response("ok");
 
   const db = env.DB;
   const sid = `tg:${chatId}`;
@@ -39,6 +48,7 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   const isNew = !prior;
   const lang = /[ऀ-ॿ]/.test(text) ? "hi" : prior?.lang === "hi" && !/[a-zA-Z]{4,}/.test(text) ? "hi" : "en";
   const script = /[Ѐ-ӿ]/.test(text) ? "Russian (Cyrillic)" : /[؀-ۿ]/.test(text) ? "Arabic or Persian" : "";
+  const who = `${tgEscape(name || chatId)}${msg?.from?.username ? ` (@${tgEscape(msg.from.username)})` : ""}`;
 
   await db.prepare(
     `INSERT INTO chat_sessions (id, created_at, last_at, page, lang, visitor_name)
@@ -48,8 +58,44 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   ).bind(sid, lang, name || null).run();
   await db.prepare(`INSERT INTO chat_messages (session_id, role, content, created_at) VALUES (?, 'visitor', ?, datetime('now'))`).bind(sid, text.slice(0, 2000)).run();
 
+  const say = async (reply: string) => {
+    const sent = await publicSend(bot, chatId, reply);
+    if (sent.ok) await db.prepare(`INSERT INTO chat_messages (session_id, role, content, created_at) VALUES (?, 'guide', ?, datetime('now'))`).bind(sid, reply.slice(0, 2000)).run();
+    return sent.ok;
+  };
+  const alert = (lines: string[], extra: Record<string, unknown> = {}) =>
+    tgAlertOwner(db, env, lines.join("\n"), { kind: "chat", ref: sid, buttons: [[{ text: "Guide off", data: `chat:off:${sid}` }, { text: "Close", data: `chat:close:${sid}` }]], ...extra }).catch(() => {});
+
+  // A file, a picture, a voice note: not opened, not forwarded, not fed to
+  // the guide. The sender is asked to write it; the owner is told.
+  if (attachment) {
+    await say(attachmentReply(lang, attachment));
+    await alert([`✈️ <b>Telegram</b> · ${who} sent a ${attachment}`, "", `⚠️ ${tgEscape(attachmentNote(attachment))}`]);
+    return new Response("ok");
+  }
+
   if (prior?.closed || prior?.bot_off) {
-    if (prior?.bot_off) await tgAlertOwner(db, env, `✈️ <b>Telegram</b> · ${tgEscape(name || chatId)} (you are handling this)\n<i>${tgEscape(text.slice(0, 500))}</i>`, { kind: "chat", ref: sid }).catch(() => {});
+    if (prior?.bot_off) await alert([`✈️ <b>Telegram</b> · ${who} (you are handling this)`, `<i>${tgEscape(defangLinks(text.slice(0, 500)))}</i>`]);
+    return new Response("ok");
+  }
+
+  // Scam-shaped messages get one fixed answer and a flag; the guide never
+  // sees them, so nothing in them can steer it.
+  const scam = scamSignals(text);
+  if (scam.length) {
+    await say(scamReply(lang));
+    await db.prepare("UPDATE chat_sessions SET needs_human = 1 WHERE id = ?").bind(sid).run();
+    await alert([`🚩 <b>Possible scam on Telegram</b> · ${who}`, `Signals: ${tgEscape(scam.join("; "))}`, "", `<i>${tgEscape(defangLinks(text.slice(0, 500)))}</i>`, "", "Links above are defanged. Do not open anything they sent."]);
+    return new Response("ok");
+  }
+
+  // One person cannot run the guide in a loop.
+  const flood = await floodState(db, sid);
+  if (flood !== "no") {
+    if (flood === "first") {
+      await say(floodReply(lang));
+      await alert([`🌊 <b>Telegram flood</b> · ${who}`, "Too many messages in a short time; the guide is paused on this thread until it calms down."]);
+    }
     return new Response("ok");
   }
 
@@ -61,8 +107,7 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
     const hello = lang === "hi"
       ? "नमस्ते! मैं GoLuQ.com की गाइड हूँ। बताइए आपका बिज़नेस क्या है और क्या अटकता है — सॉफ़्टवेयर, WhatsApp, कॉल या टोल-फ़्री लाइन — मैं सही चीज़ और कीमत बताऊँगी।"
       : "Hello! This is the GoLuQ.com guide. Tell me what business you run and what slows it down — software, WhatsApp, calls or a toll-free line — and I will point you to the right thing and its price. You can also write in your own language.";
-    await publicSend(bot, chatId, hello);
-    await db.prepare(`INSERT INTO chat_messages (session_id, role, content, created_at) VALUES (?, 'guide', ?, datetime('now'))`).bind(sid, hello).run();
+    await say(hello);
     return new Response("ok");
   }
 
@@ -80,19 +125,30 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
       (bookingUrl ? ` or a 30-minute call at ${bookingUrl}` : "") +
       ". Telegram customers are often outside India: quote in their currency as listed, and mention WhatsApp Store works with Telegram for markets where WhatsApp is restricted.",
   });
-  const sent = await publicSend(bot, chatId, reply);
-  if (sent.ok) {
-    await db.prepare(`INSERT INTO chat_messages (session_id, role, content, created_at) VALUES (?, 'guide', ?, datetime('now'))`).bind(sid, reply.slice(0, 2000)).run();
-  }
+  await say(reply);
   if (isNew) {
-    await tgAlertOwner(db, env, [
-      `✈️ <b>New Telegram conversation</b> · ${tgEscape(name || chatId)}${msg?.from?.username ? ` (@${tgEscape(msg.from.username)})` : ""}`,
-      `<i>${tgEscape(text.slice(0, 400))}</i>`,
+    await alert([
+      `✈️ <b>New Telegram conversation</b> · ${who}`,
+      `<i>${tgEscape(defangLinks(text.slice(0, 400)))}</i>`,
       "",
       `<b>Guide:</b> ${tgEscape(reply.slice(0, 400))}`,
       "",
       "Reply to this message to answer them yourself.",
-    ].join("\n"), { kind: "chat", ref: sid, buttons: [[{ text: "Guide off", data: `chat:off:${sid}` }, { text: "Close", data: `chat:close:${sid}` }]] }).catch(() => {});
+    ]);
   }
   return new Response("ok");
 };
+
+/** What kind of non-text message Telegram delivered, or null for plain text. */
+function attachmentKind(msg: any): AttachmentKind | null {
+  if (!msg || typeof msg !== "object") return null;
+  if (msg.document) return "document";
+  if (msg.photo) return "image";
+  if (msg.audio || msg.voice) return "audio";
+  if (msg.video || msg.video_note || msg.animation) return "video";
+  if (msg.sticker) return "sticker";
+  if (msg.location || msg.venue) return "location";
+  if (msg.contact) return "contact";
+  if (msg.poll || msg.dice || msg.game || msg.invoice) return "other";
+  return null;
+}

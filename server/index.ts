@@ -313,6 +313,17 @@ const UPLOAD_TYPES: Record<string, string> = {
   "image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp",
 };
 
+/** The extension the file's own magic bytes say it deserves, or "" for anything else. */
+function sniffExt(b: Buffer): string {
+  if (b.length < 12) return "";
+  if (b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff) return ".jpg";
+  if (b.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) return ".png";
+  if (b.subarray(0, 4).toString("latin1") === "RIFF" && b.subarray(8, 12).toString("latin1") === "WEBP") return ".webp";
+  if (b.subarray(4, 8).toString("latin1") === "ftyp") return ".mp4";
+  if (b[0] === 0x1a && b[1] === 0x45 && b[2] === 0xdf && b[3] === 0xa3) return ".webm";
+  return "";
+}
+
 app.post("/api/admin/upload", async (c) => {
   if (!(await checkAdmin(c.req.raw, env as { DB: unknown; ADMIN_SECRET?: string }))) {
     return c.json({ ok: false, error: "unauthorised" }, 401);
@@ -323,8 +334,11 @@ app.post("/api/admin/upload", async (c) => {
   const ext = UPLOAD_TYPES[file.type];
   if (!ext) return c.json({ ok: false, error: "Only MP4/WebM video or JPG/PNG/WebP images." }, 400);
   if (file.size > UPLOAD_MAX) return c.json({ ok: false, error: "Keep it under 200 MB." }, 400);
+  const bytes = Buffer.from(await file.arrayBuffer());
+  // The declared type is the browser's word; the first bytes are the file's.
+  if (sniffExt(bytes) !== ext) return c.json({ ok: false, error: "That file is not what its type says it is." }, 400);
   const name = randomBytes(12).toString("hex") + ext;
-  writeFileSync(join(UPLOAD_DIR, name), Buffer.from(await file.arrayBuffer()));
+  writeFileSync(join(UPLOAD_DIR, name), bytes);
   return c.json({ ok: true, path: "/media/" + name });
 });
 
